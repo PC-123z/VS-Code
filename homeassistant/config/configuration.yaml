@@ -73,6 +73,7 @@ switch:
     name: "Office PC"
     mac: "04:7c:16:70:bf:d0"
     host: "192.168.70.200"
+    
 
 input_boolean:
   volvo_trigger:
