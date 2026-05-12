@@ -73,7 +73,10 @@ switch:
     name: "Office PC"
     mac: "04:7c:16:70:bf:d0"
     host: "192.168.70.200"
-    
+  - platform: wake_on_lan
+    name: "Biggest Server"
+    mac: "b4:2e:99:a7:a4:71"
+    host: "192.168.35.4"
 
 input_boolean:
   volvo_trigger:
