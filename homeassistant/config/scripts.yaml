@@ -1,0 +1,767 @@
+script_start_volvo_xc60:
+  alias: 'Script: Start Volvo XC60'
+  description: Start climatization with immediate Alexa feedback, announce via Sonos
+    Piper, activate scenes. Main wrapper script that triggers core routine in background.
+  icon: mdi:car
+  sequence:
+  - alias: Set Volvo start active (immediate Alexa feedback)
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.volvo_start_active
+    continue_on_error: true
+  - alias: Run Volvo climatization sequence in background
+    action: script.turn_on
+    target:
+      entity_id: script.script_volvo_start_core
+    data: {}
+    continue_on_error: true
+  mode: single
+good_morning_routine:
+  alias: 'Script: Good Morning Routine'
+  description: Staged sunrise wake-up with immediate Alexa feedback, occupancy-driven
+    music tail, and 30-min hard cap. Main wrapper that triggers core routine in background.
+  icon: mdi:alarm-check
+  sequence:
+  - alias: Mark routine as active (immediate Alexa feedback)
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.good_morning_active
+    continue_on_error: true
+  - alias: Run Good Morning sequence in background
+    action: script.turn_on
+    target:
+      entity_id: script.script_good_morning_routine_core
+    data: {}
+    continue_on_error: true
+  mode: single
+script_volvo_start_core:
+  alias: 'Script: Volvo Start Core'
+  description: Core climatization routine - starts car, activates scenes, announces
+    via Sonos, sends notifications. Runs in background after main script provides
+    Alexa feedback.
+  icon: mdi:car
+  sequence:
+  - alias: Press climatization button
+    action: button.press
+    target:
+      entity_id: button.volvo_xc60_start_climatization
+  - alias: Activate initial scene (Malibu Pink)
+    action: hue.activate_scene
+    target:
+      entity_id: scene.hallway_malibu_pink
+    data:
+      transition: 10
+  - alias: Announce departure via Big Bedroom Sonos
+    action: tts.speak
+    target:
+      entity_id: tts.piper
+    data:
+      message: XC60 will be ready to depart in 5 minutes
+      cache: true
+      media_player_entity_id: media_player.bedroom_2
+    continue_on_error: true
+  - alias: Announce departure via Kitchen Sonos
+    action: tts.speak
+    target:
+      entity_id: tts.piper
+    data:
+      message: XC60 will be ready to depart in 5 minutes
+      cache: true
+      media_player_entity_id: media_player.kitchen
+    continue_on_error: true
+  - alias: Send iPhone notification
+    action: notify.mobile_app_pc_iphone
+    data:
+      message: XC60 will be Ready to Depart in 5 Minutes
+      title: Volvo XC60
+  - alias: Wait 4 minutes
+    delay:
+      minutes: 4
+  - alias: Activate final scene (Energize)
+    action: hue.activate_scene
+    target:
+      entity_id: scene.hallway_energize
+    data:
+      transition: 60
+  - alias: Announce ready via Big Bedroom Sonos
+    action: tts.speak
+    target:
+      entity_id: tts.piper
+    data:
+      message: XC60 is ready to depart
+      cache: true
+      media_player_entity_id: media_player.bedroom_2
+    continue_on_error: true
+  - alias: Announce ready via Kitchen Sonos
+    action: tts.speak
+    target:
+      entity_id: tts.piper
+    data:
+      message: XC60 is ready to depart
+      cache: true
+      media_player_entity_id: media_player.kitchen
+    continue_on_error: true
+  - alias: Send final iPhone notification
+    action: notify.mobile_app_pc_iphone
+    data:
+      message: XC60 is Ready to Depart
+      title: XC60 is Ready to Depart
+  - alias: Clear Volvo start active flag
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.volvo_start_active
+  mode: single
+script_good_morning_routine_core:
+  alias: 'Script: Good Morning Routine Core'
+  description: Core sunrise routine - 3-min light ramp, music playlist, occupancy-driven
+    tail, Adaptive Lighting restoration. Runs in background after main script provides
+    Alexa feedback.
+  icon: mdi:alarm-check
+  sequence:
+  - alias: Turn off all sleep modes
+    action: switch.turn_off
+    target:
+      entity_id:
+      - switch.al_sleep_mode_bathroom
+      - switch.al_sleep_mode_bathroom_main
+      - switch.al_sleep_mode_big_bedroom
+      - switch.al_sleep_mode_dining_room_bottom
+      - switch.al_sleep_mode_dining_room_top
+      - switch.al_sleep_mode_hallway
+      - switch.al_sleep_mode_kitchen
+      - switch.al_sleep_mode_kitchen_main
+      - switch.al_sleep_mode_living_room
+      - switch.adaptive_lighting_sleep_mode_office
+  - alias: Turn off bedroom AL switches and clear manual control
+    action: switch.turn_off
+    target:
+      entity_id:
+      - switch.al_big_bedroom
+      - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_color_big_bedroom_al
+      - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_brightness_big_bedroom_al
+  - action: adaptive_lighting.set_manual_control
+    data:
+      entity_id: switch.al_big_bedroom
+      lights:
+      - light.bedroom_ceiling_1
+      - light.bedroom_ceiling_2
+      - light.bedroom_lamp_1
+      - light.bedroom_lamp_2
+      manual_control: false
+  - alias: Stage 1 - Nanoleaf Morning Sky effect at 5%
+    action: light.turn_on
+    target:
+      entity_id: light.nano_sand_dune
+    data:
+      effect: Morning Sky
+      brightness_pct: 5
+      transition: 1
+  - alias: Run all sunrise stages in parallel
+    parallel:
+    - sequence:
+      - alias: Nanoleaf ramps to 100% over 3 minutes
+        repeat:
+          count: 20
+          sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.nano_sand_dune
+            data:
+              brightness_pct: '{{ [5 + (repeat.index * 4.75), 100] | min | round(0)
+                }}'
+              transition: 3
+          - delay:
+              seconds: 9
+    - sequence:
+      - alias: Wait 15 seconds then bring in ceiling lights
+        delay:
+          seconds: 15
+      - alias: Ceiling lights start at 1% warm white
+        action: light.turn_on
+        target:
+          entity_id:
+          - light.bedroom_ceiling_1
+          - light.bedroom_ceiling_2
+        data:
+          color_temp_kelvin: 2700
+          brightness_pct: 1
+          transition: 3
+      - alias: Ceiling lights fade to 70% over ~2:45
+        repeat:
+          count: 16
+          sequence:
+          - action: light.turn_on
+            target:
+              entity_id:
+              - light.bedroom_ceiling_1
+              - light.bedroom_ceiling_2
+            data:
+              brightness_pct: '{{ [1 + (repeat.index * 4.3), 70] | min | round(0)
+                }}'
+              color_temp_kelvin: 2700
+              transition: 3
+          - delay:
+              seconds: 10
+    - sequence:
+      - alias: Wait 30 seconds then bring in lamps, cut fans, start music
+        delay:
+          seconds: 30
+      - alias: Cut bedroom fans
+        action: fan.turn_off
+        target:
+          entity_id:
+          - fan.air_circulator
+          - fan.big_bedroom_fan
+          - fan.bedroom_purifier
+      - alias: Lamps start at 1% warm white
+        action: light.turn_on
+        target:
+          entity_id:
+          - light.bedroom_lamp_1
+          - light.bedroom_lamp_2
+        data:
+          color_temp_kelvin: 2700
+          brightness_pct: 1
+          transition: 3
+      - alias: Lamps fade to 94% over ~2:30
+        repeat:
+          count: 14
+          sequence:
+          - action: light.turn_on
+            target:
+              entity_id:
+              - light.bedroom_lamp_1
+              - light.bedroom_lamp_2
+            data:
+              brightness_pct: '{{ [1 + (repeat.index * 6.6), 94] | min | round(0)
+                }}'
+              color_temp_kelvin: 2700
+              transition: 3
+          - delay:
+              seconds: 10
+    - sequence:
+      - alias: Wait 30 seconds (sync with lamp start)
+        delay:
+          seconds: 30
+      - action: media_player.volume_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          volume_level: 0.05
+      - alias: Play morning playlist via Music Assistant
+        continue_on_error: true
+        action: music_assistant.play_media
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
+          media_type: playlist
+      - alias: Wait 10 seconds then check if music is playing
+        delay:
+          seconds: 10
+      - if:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: media_player.bedroom_2
+            state: idle
+          - condition: state
+            entity_id: media_player.bedroom_2
+            state: 'off'
+        then:
+        - alias: TTS good morning announcement (music failed)
+          action: tts.speak
+          target:
+            entity_id: tts.piper
+          data:
+            cache: true
+            media_player_entity_id: media_player.bedroom_2
+            message: 'Good morning! Today is {{ now().strftime(''%A, %B %-d'') }}.
+              The current conditions are {{ states(''weather.forecast_home_2'') }},
+              with a temperature of {{ state_attr(''weather.forecast_home_2'', ''temperature'')
+              }} degrees. Have a great day!
+
+              '
+        else:
+        - alias: Ramp volume to 0.20 over ~2.5 minutes
+          repeat:
+            count: 8
+            sequence:
+            - delay:
+                seconds: 18
+            - action: media_player.volume_set
+              target:
+                entity_id: media_player.bedroom_2
+              data:
+                volume_level: '{{ [0.05 + (repeat.index * 0.019), 0.20] | min | round(3)
+                  }}'
+        - alias: Wait for bedroom occupancy before announcement
+          wait_for_trigger:
+          - trigger: state
+            entity_id: binary_sensor.big_bedroom_sensor_group
+            to: 'on'
+          timeout:
+            minutes: 60
+        - alias: Check if occupancy wait timed out
+          if:
+          - condition: template
+            value_template: '{{ wait.completed == false }}'
+          then:
+          - action: media_player.media_stop
+            target:
+              entity_id: media_player.bedroom_2
+          - continue_on_error: true
+            action: media_player.unjoin
+            target:
+              entity_id: media_player.bathroom_2
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.good_morning_active
+          - stop: Occupancy wait timed out - routine complete
+        - alias: Pause music for announcement
+          action: media_player.media_pause
+          target:
+            entity_id: media_player.bedroom_2
+        - alias: TTS good morning announcement
+          action: tts.speak
+          target:
+            entity_id: tts.piper
+          data:
+            cache: true
+            media_player_entity_id: media_player.bedroom_2
+            message: 'Good morning! Today is {{ now().strftime(''%A, %B %-d'') }}.
+              The current conditions are {{ states(''weather.forecast_home_2'') }},
+              with a temperature of {{ state_attr(''weather.forecast_home_2'', ''temperature'')
+              }} degrees. Have a great day!
+
+              '
+        - alias: Short pause for TTS to finish then resume
+          delay:
+            seconds: 2
+        - alias: Resume music
+          action: media_player.media_play
+          target:
+            entity_id: media_player.bedroom_2
+        - alias: Occupancy-driven music loop using Sensor Group
+          repeat:
+            while:
+            - condition: state
+              entity_id: input_boolean.good_morning_active
+              state: 'on'
+            sequence:
+            - if:
+              - condition: state
+                entity_id: binary_sensor.big_bedroom_sensor_group
+                state: 'on'
+              then:
+              - action: media_player.volume_set
+                target:
+                  entity_id: media_player.bedroom_2
+                data:
+                  volume_level: 0.2
+              - delay:
+                  seconds: 30
+              else:
+              - alias: Wait 15 min to confirm room is truly clear
+                wait_for_trigger:
+                - trigger: state
+                  entity_id: binary_sensor.big_bedroom_sensor_group
+                  to: 'on'
+                timeout:
+                  minutes: 15
+                continue_on_timeout: true
+              - if:
+                - condition: template
+                  value_template: '{{ wait.completed == true }}'
+                then:
+                - action: media_player.volume_set
+                  target:
+                    entity_id: media_player.bedroom_2
+                  data:
+                    volume_level: 0.2
+                else:
+                - alias: Ramp volume down over 2 minutes
+                  repeat:
+                    count: 8
+                    sequence:
+                    - action: media_player.volume_set
+                      target:
+                        entity_id: media_player.bedroom_2
+                      data:
+                        volume_level: '{{ [0.20 - (repeat.index * 0.019), 0.05] |
+                          max | round(3) }}'
+                    - delay:
+                        seconds: 15
+                - action: media_player.media_stop
+                  target:
+                    entity_id: media_player.bedroom_2
+                - continue_on_error: true
+                  action: media_player.unjoin
+                  target:
+                    entity_id: media_player.bathroom_2
+                - action: input_boolean.turn_off
+                  target:
+                    entity_id: input_boolean.good_morning_active
+                - stop: Room cleared for 15 minutes - routine complete
+    - sequence:
+      - alias: Wait 5 minutes then restore AL
+        delay:
+          minutes: 5
+      - action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.al_big_bedroom
+          lights:
+          - light.bedroom_ceiling_1
+          - light.bedroom_ceiling_2
+          - light.bedroom_lamp_1
+          - light.bedroom_lamp_2
+          manual_control: false
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.al_big_bedroom
+          - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_color_big_bedroom_al
+          - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_brightness_big_bedroom_al
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.bedroom_scene_mode
+        data:
+          option: al
+      - action: adaptive_lighting.apply
+        continue_on_error: true
+        data:
+          entity_id: switch.al_big_bedroom
+          lights:
+          - light.bedroom_ceiling_1
+          - light.bedroom_ceiling_2
+          - light.bedroom_lamp_1
+          - light.bedroom_lamp_2
+          transition: 30
+          adapt_color: true
+          adapt_brightness: true
+          prefer_rgb_color: true
+      - alias: Re-enable Big Bedroom motion automation
+        action: automation.turn_on
+        target:
+          entity_id: automation.big_bedroom_smart_motion_presence
+      - alias: Only trigger Nanoleaf if occupancy detected
+        if:
+        - condition: state
+          entity_id: binary_sensor.big_bedroom_sensor_group
+          state: 'on'
+        then:
+        - action: select.select_option
+          target:
+            entity_id: select.nanoleaf_dynamic_scenes
+          data:
+            option: Cocoa Beach
+        - action: light.turn_on
+          target:
+            entity_id: light.nano_sand_dune
+          data:
+            brightness_pct: 80
+            transition: 5
+    - sequence:
+      - alias: 30-minute hard cap timer
+        delay:
+          minutes: 30
+      - continue_on_error: true
+        action: media_player.media_stop
+        target:
+          entity_id: media_player.bedroom_2
+      - continue_on_error: true
+        action: media_player.unjoin
+        target:
+          entity_id: media_player.bathroom_2
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.good_morning_active
+  mode: single
+goodbye_routine_main:
+  alias: Goodbye Routine - Main
+  sequence:
+  - action: script.goodbye_routine_immediate_actions
+    data: {}
+  - action: script.goodbye_routine_motion_tracking
+    data: {}
+  - action: script.goodbye_routine_all_clear_arm_and_power_off
+    data: {}
+  mode: single
+  icon: mdi:logout
+  description: ''
+goodbye_routine_immediate_actions:
+  alias: Goodbye Routine - Immediate Actions
+  sequence:
+  - target:
+      entity_id:
+      - fan.air_circulator
+      - fan.bedroom_purifier
+      - fan.big_bedroom_fan
+      - fan.kitchen_purifier
+      - fan.living_room_fan
+      - fan.simpleconnect_fan_94df19_hunter_fan
+      - fan.bedroom2_fan
+    action: fan.turn_off
+  - target:
+      entity_id:
+      - media_player.living_room_tv_2
+      - media_player.bedroom_tv_2
+    action: media_player.turn_off
+  - data:
+      with_group: true
+    target:
+      entity_id:
+      - media_player.bathroom
+      - media_player.kitchen
+      - media_player.bedroom
+      - media_player.office
+    action: sonos.snapshot
+  - target:
+      entity_id:
+      - media_player.bathroom
+      - media_player.kitchen
+      - media_player.bedroom
+      - media_player.office
+    action: media_player.media_stop
+  - target:
+      entity_id:
+      - light.galaxy_projector
+      - light.kitchen_main_lights
+      - light.kitchen_1_color
+      - light.kitchen_2_color
+      - light.dining_room_bottom
+      - light.dining_room_top
+      - light.ribbon
+      - light.fluttershy
+      - light.nano_sand_dune
+      - light.office
+      - light.office_1
+      - light.office_2
+      - light.living_room
+      - light.bathroom_main_lights
+      - light.bathroom_shower
+      - light.bathroom_back
+      - light.showtime_light
+    action: light.turn_off
+  - data:
+      transition: 15
+    target:
+      entity_id: light.indoor
+    action: light.turn_off
+  - target:
+      entity_id: switch.al_hallway
+    action: switch.turn_off
+  - data:
+      brightness_pct: 20
+    target:
+      entity_id: light.hallway
+    action: light.turn_on
+  - target:
+      entity_id: input_boolean.goodbye_routine_active
+    action: input_boolean.turn_on
+  mode: single
+  icon: mdi:power
+  description: ''
+goodbye_routine_motion_tracking:
+  alias: Goodbye Routine - Motion Tracking
+  sequence:
+  - repeat:
+      count: 3
+      sequence:
+      - wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'')
+          }}
+
+          '
+        timeout:
+          minutes: 2
+        continue_on_timeout: true
+      - wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''on'')
+          }}
+
+          '
+        timeout:
+          minutes: 2
+        continue_on_timeout: true
+      - if:
+        - condition: state
+          entity_id: binary_sensor.goodbye_motion_sensors
+          state: 'off'
+        then:
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.goodbye_routine_active
+        - stop: All clear confirmed
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.goodbye_routine_active
+  mode: restart
+  icon: mdi:motion-sensor
+  description: ''
+goodbye_routine_all_clear_arm_and_power_off:
+  alias: Goodbye Routine - All Clear, Arm and Power Off
+  sequence:
+  - wait_template: '{{ is_state(''input_boolean.goodbye_routine_active'', ''off'')
+      }}
+
+      '
+    timeout:
+      minutes: 5
+    continue_on_timeout: false
+  - data:
+      code: ''
+    target:
+      entity_id: alarm_control_panel.3302_alarm
+    action: alarm_control_panel.alarm_arm_away
+  - delay:
+      seconds: 2
+  - target:
+      entity_id:
+      - light.indoor
+      - light.hallway
+      - light.galaxy_projector
+      - light.kitchen_main_lights
+      - light.kitchen_1_color
+      - light.kitchen_2_color
+      - light.dining_room_bottom
+      - light.dining_room_top
+      - light.ribbon
+      - light.nano_sand_dune
+      - light.fluttershy
+      - light.office
+      - light.office_1
+      - light.office_2
+      - light.living_room
+      - light.bathroom_main_lights
+      - light.bathroom_shower
+      - light.bathroom_back
+      - light.showtime_light
+    action: light.turn_off
+    data: {}
+  - target:
+      entity_id:
+      - fan.air_circulator
+      - fan.bedroom_purifier
+      - fan.big_bedroom_fan
+      - fan.kitchen_purifier
+      - fan.living_room_fan
+      - fan.simpleconnect_fan_94df19_hunter_fan
+      - fan.bedroom2_fan
+    action: fan.turn_off
+    data: {}
+  - target:
+      entity_id: input_boolean.goodbye_routine_active
+    action: input_boolean.turn_off
+    data: {}
+  - target:
+      entity_id: switch.al_hallway
+    action: switch.turn_on
+    data: {}
+  mode: single
+  icon: mdi:shield-lock
+  description: ''
+goodbye_routine_alexa:
+  alias: Goodbye Routine - Alexa
+  sequence:
+  - data: {}
+    action: script.goodbye_routine_main
+  mode: single
+  icon: mdi:amazon-alexa
+  description: ''
+welcome_home_routine:
+  alias: Welcome Home Routine
+  description: Turns on hallway lights and plays time-appropriate music in the kitchen
+    at low volume. Adds bedroom speakers if motion detected. No music after 10 PM.
+  sequence:
+  - variables:
+      current_hour: '{{ now().hour }}'
+      is_after_10pm: '{{ current_hour|int >= 22 }}'
+  - alias: Turn on hallway lights
+    action: light.turn_on
+    target:
+      entity_id: light.hallway
+    data:
+      brightness_pct: 60
+      transition: 2
+  - alias: Check if after 10 PM
+    if:
+    - condition: template
+      value_template: '{{ is_after_10pm }}'
+    then:
+    - alias: After 10 PM - stay quiet
+      action: notify.mobile_app_pc_iphone
+      data:
+        title: Welcome Home
+        message: Hallway lights on. Music skipped (after 10 PM quiet time).
+    else:
+    - alias: Before 10 PM - play appropriate music
+      sequence:
+      - alias: Set kitchen volume to 0.10
+        action: media_player.volume_set
+        target:
+          entity_id: media_player.kitchen
+        data:
+          volume_level: 0.1
+      - alias: Play morning music (6 AM - 12 PM)
+        if:
+        - condition: template
+          value_template: '{{ current_hour|int < 12 }}'
+        then:
+        - continue_on_error: true
+          action: music_assistant.play_media
+          target:
+            entity_id: media_player.kitchen
+          data:
+            media_id: spotify://playlist/37i9dQZF1ORZf2VrMHlCN6
+            media_type: playlist
+      - alias: Play afternoon music (12 PM - 5 PM)
+        if:
+        - condition: template
+          value_template: '{{ current_hour|int >= 12 and current_hour|int < 17 }}'
+        then:
+        - continue_on_error: true
+          action: music_assistant.play_media
+          target:
+            entity_id: media_player.kitchen
+          data:
+            media_id: spotify://playlist/37i9dQZF1DX8FN7gCqUTwt
+            media_type: playlist
+      - alias: Play evening music (5 PM - 10 PM)
+        if:
+        - condition: template
+          value_template: '{{ current_hour|int >= 17 }}'
+        then:
+        - continue_on_error: true
+          action: music_assistant.play_media
+          target:
+            entity_id: media_player.kitchen
+          data:
+            media_id: spotify://playlist/37i9dQZF1DX5IDhnLq32l8
+            media_type: playlist
+  - alias: Check if bedroom motion detected
+    if:
+    - condition: state
+      entity_id: binary_sensor.bedroom_motion
+      state: 'on'
+    then:
+    - alias: Add bedroom to kitchen speaker group
+      action: media_player.join
+      target:
+        entity_id: media_player.kitchen
+      data:
+        group_members:
+        - media_player.bedroom
+  - alias: Check if bedroom 2 motion detected
+    if:
+    - condition: state
+      entity_id: binary_sensor.big_bedroom_motion
+      state: 'on'
+    then:
+    - alias: Add bedroom 2 to kitchen speaker group
+      action: media_player.join
+      target:
+        entity_id: media_player.kitchen
+      data:
+        group_members:
+        - media_player.bedroom_2
+  mode: single
+  icon: mdi:human-greeting

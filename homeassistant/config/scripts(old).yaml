@@ -1,0 +1,45 @@
+script_start_volvo_xc60:
+  sequence:
+  - action: button.press
+    data: {}
+    target:
+      entity_id: button.volvo_xc60_start_climatization
+  - action: hue.activate_scene
+    metadata: {}
+    data:
+      transition: 10
+    target:
+      entity_id: scene.hallway_malibu_pink
+  - action: notify.send_message
+    metadata: {}
+    target:
+      entity_id:
+      - notify.paul_s_sonos_arc_announce
+      - notify.echo_show_kitchen_announce
+    data:
+      message: XC60 will be Ready to Depart in 5 Minutes
+  - delay:
+      hours: 0
+      minutes: 4
+      seconds: 0
+      milliseconds: 0
+  - action: hue.activate_scene
+    metadata: {}
+    target:
+      entity_id: scene.hallway_energize
+    data:
+      transition: 60
+  - action: notify.send_message
+    metadata: {}
+    target:
+      entity_id: notify.paul_s_sonos_arc_announce
+    data:
+      message: XC60 is Ready to Depart
+  - action: notify.mobile_app_pc_iphone
+    metadata: {}
+    data:
+      message: XC60 is Ready to Depart
+      title: XC60 is Ready to Depart
+  alias: 'Script: Start Volvo XC60'
+  description: ''
+  icon: mdi:car

@@ -1,0 +1,30 @@
+homeassistant:
+  enabled: true
+mqtt:
+  server: mqtt://localhost:1883
+serial:
+  port: >-
+    /dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_82672c25e4a3ef11a62a4cbd61ce3355-if00-port0
+  adapter: zstack
+frontend:
+  enabled: true
+  port: 8099
+advanced:
+  log_level: info
+  last_seen: ISO_8601
+version: 5
+devices:
+  '0x54ef441000db7089':
+    friendly_name: Living_Room_Sensor
+  '0x54ef4410014f5a62':
+    friendly_name: Magic_Cube
+  '0x4ce1755243820000':
+    friendly_name: Dining Room Plug
+  '0x4ce17552270c0000':
+    friendly_name: Bedroom Plug
+
+availability:
+  active:
+    timeout: 10
+  passive:
+    timeout: 1500

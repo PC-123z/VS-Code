@@ -1,0 +1,169 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Enable Wake on LAN service
+wake_on_lan:
+
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 172.20.0.0/16
+    - 192.168.70.0/24
+    - 192.168.2.0/24
+    - 100.64.0.0/10
+    - 192.168.2.18
+    - 127.0.0.1
+  use_x_frame_options: false
+
+logger:
+  default: warning
+  logs:
+    homeassistant: fatal
+    aiohomekit.controller.ip.connection: critical
+    homeassistant.components.homekit_controller: critical
+    asyncio: critical
+    custom_components.localtuya: error
+
+go2rtc:
+  url: http://192.168.70.155:1984
+
+homekit:
+  - name: Cameras
+    port: 51828
+    filter:
+      include_entities:
+        - camera.driveway_2
+        - camera.front_door_2
+        - camera.garage
+        - camera.kitchen
+        - camera.living_room
+    entity_config:
+      camera.driveway_2:
+        name: Driveway
+        stream_source: rtsp://192.168.70.155:8554/driveway_sub
+        video_codec: copy
+      camera.front_door_2:
+        name: Front Door
+        stream_source: rtsp://192.168.70.155:8554/front_door
+      camera.garage:
+        name: Garage
+        stream_source: rtsp://192.168.70.155:8554/garage
+        video_codec: copy
+      camera.kitchen:
+        name: Kitchen
+        stream_source: rtsp://192.168.70.155:8554/kitchen
+        video_codec: copy
+      camera.living_room:
+        name: Living Room
+        stream_source: rtsp://192.168.70.155:8554/living_room
+        video_codec: copy
+
+adaptive_lighting:
+
+# Wake on LAN Switch
+switch:
+  - platform: wake_on_lan
+    name: "Office PC"
+    mac: "04:7c:16:70:bf:d0"
+    host: "192.168.70.200"
+
+input_boolean:
+  volvo_trigger:
+    name: "Volvo Trigger"
+    initial: off
+  good_morning_trigger:
+    name: "Good Morning Trigger"
+    initial: off
+  office_fan:
+    name: "Office Fan"
+    initial: off
+  welcome_home_active:
+    name: "Welcome Home Active"
+    initial: off
+  bedroom2_manual_override:
+    name: "Bedroom 2 Manual Override"
+    initial: off
+  dining_room_manual_override:
+    name: "Dining Room Manual Override"
+    initial: off
+  big_bedroom_manual_override:
+    name: "Big Bedroom Manual Override"
+    initial: off
+
+# Template switches + sensors
+template:
+  - switch:
+      - name: "Volvo Climatization"
+        unique_id: volvo_climatization_voice
+        state: "{{ states('input_boolean.volvo_trigger') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.volvo_trigger
+          - action: script.script_start_volvo_xc60
+          - delay:
+              seconds: 3
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.volvo_trigger
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.volvo_trigger
+      - name: "Good Morning"
+        unique_id: good_morning_switch
+        state: "{{ states('input_boolean.good_morning_trigger') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.good_morning_trigger
+          - action: script.good_morning_routine
+          - delay:
+              seconds: 3
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.good_morning_trigger
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.good_morning_trigger
+
+  - binary_sensor:
+      - name: "Kitchen Person Occupancy Confirmed"
+        unique_id: kitchen_person_occupancy_confirmed
+        device_class: occupancy
+        delay_on:
+          minutes: 3
+        state: "{{ is_state('binary_sensor.kitchen_person_occupancy', 'on') }}"
+
+# The Emulated Hue Bridge
+emulated_hue:
+  host_ip: 192.168.70.155
+  listen_port: 80
+  advertise_port: 80
+  advertise_ip: 192.168.70.155
+  upnp_bind_multicast: true
+  expose_by_default: false
+  entities:
+    switch.volvo_climatization:
+      name: "Volvo"
+      hidden: false
+    switch.good_morning:
+      name: "Good Morning"
+      hidden: false
+    light.showtime_light:
+      name: "Showtime Light"
+      hidden: false
+    input_boolean.office_fan:
+      name: "Office Fan"
+      hidden: false
+    switch.office_pc:
+      name: "Wake PC"
+      hidden: false

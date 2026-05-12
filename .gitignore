@@ -1,0 +1,38 @@
+# Exclude everything in HA config except YAML files
+homeassistant/config/.cloud/
+homeassistant/config/.storage/
+homeassistant/config/deps/
+homeassistant/config/tts/
+homeassistant/config/.cache/
+homeassistant/config/backups/
+homeassistant/config/www/
+homeassistant/config/custom_components/
+homeassistant/config/secrets.yaml
+
+# Exclude these entire services
+music-assistant/
+ring-mqtt/
+piper/
+
+# General
+__pycache__/
+node_modules/
+*.db
+*.log
+*.sqlite
+*.zip
+*.tar.gz
+*.mp3
+
+# HA generated/sensitive files
+homeassistant/config/.HA_VERSION
+homeassistant/config/.ha_run.lock
+homeassistant/config/.claude/
+homeassistant/config/home-assistant.log*
+homeassistant/config/*.db
+homeassistant/config/*.db-shm
+homeassistant/config/*.db-wal
+homeassistant/config/*.db.corrupt*
+homeassistant/config/*.pem
+homeassistant/config/coordinator.py
+homeassistant/config/blueprints/
