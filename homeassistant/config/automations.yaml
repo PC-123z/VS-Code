@@ -7643,6 +7643,44 @@
     to:
     - 'off'
     id: tv_off
+  - trigger: state
+    entity_id:
+    - media_player.living_room_tv
+    to:
+    - playing
+    id: playing
+  - trigger: state
+    entity_id:
+    - media_player.living_room_tv
+    to:
+    - paused
+    - idle
+    id: paused
+  - trigger: state
+    entity_id:
+    - media_player.living_room_tv
+    to:
+    - 'off'
+    id: tv_off
+  - trigger: state
+    entity_id:
+    - media_player.living_room_tv_3
+    to:
+    - playing
+    id: playing
+  - trigger: state
+    entity_id:
+    - media_player.living_room_tv_3
+    to:
+    - paused
+    - idle
+    id: paused
+  - trigger: state
+    entity_id:
+    - media_player.living_room_tv_3
+    to:
+    - 'off'
+    id: tv_off
   conditions: []
   actions:
   - choose:
