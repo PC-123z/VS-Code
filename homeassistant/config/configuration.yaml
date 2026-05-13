@@ -76,7 +76,7 @@ switch:
   - platform: wake_on_lan
     name: "Biggest Server NAS"
     mac: "b4:2e:99:a7:a4:71"
-    host: "192.168.35.4"
+    host: "192.168.35.255"
 
 input_boolean:
   volvo_trigger:
