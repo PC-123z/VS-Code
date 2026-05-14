@@ -552,6 +552,16 @@
             "should_expose": false
           }
         }
+      },
+      "automation.bathroom_speaker_join_on_motion": {
+        "assistants": {
+          "cloud.alexa": {
+            "should_expose": false
+          },
+          "cloud.google_assistant": {
+            "should_expose": false
+          }
+        }
       }
     }
   }
