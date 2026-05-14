@@ -542,6 +542,16 @@
             "should_expose": false
           }
         }
+      },
+      "automation.good_morning_2": {
+        "assistants": {
+          "cloud.alexa": {
+            "should_expose": false
+          },
+          "cloud.google_assistant": {
+            "should_expose": false
+          }
+        }
       }
     }
   }
