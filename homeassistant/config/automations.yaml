@@ -118,6 +118,11 @@
     at: '19:15:00'
     weekday:
     - sat
+  - trigger: time
+    at: '13:50:00'
+    weekday:
+    - wed
+    enabled: false
   conditions: []
   actions:
   - alias: Mark routine as active
@@ -767,297 +772,6 @@
     target:
       area_id: dining_room
     data: {}
-  mode: single
-- id: '1774819258502'
-  alias: Light Changes for TV On / Off
-  description: Dim dining/living room when TV turns on; restore correct scene on TV
-    off
-  triggers:
-  - trigger: state
-    entity_id: media_player.living_room_tv_2
-    to: 'on'
-    id: tv_on
-  - trigger: state
-    entity_id: media_player.living_room_tv_2
-    to: 'off'
-    id: tv_off
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: tv_on
-      - condition: state
-        entity_id: binary_sensor.dining_room_sensor_group
-        state: 'on'
-      sequence:
-      - action: light.turn_on
-        target:
-          label_id: dining_room_top
-        data:
-          brightness_pct: 2
-      - action: light.turn_on
-        target:
-          label_id: dining_room_bottom
-        data:
-          brightness_pct: 2
-      - action: light.turn_on
-        data:
-          brightness_pct: 2
-        target:
-          device_id: 863aebf0dc7d2964a50e9dd4f9d51dd9
-      - type: turn_off
-        device_id: a239769fc8575407917d2a4a56682e94
-        entity_id: d265a36c8203e2b0bc3ea9ae06afdf73
-        domain: light
-    - conditions:
-      - condition: trigger
-        id: tv_off
-      sequence:
-      - choose:
-        - conditions:
-          - condition: or
-            conditions:
-            - condition: state
-              entity_id: switch.al_sleep_mode_dining_room_bottom
-              state: 'on'
-            - condition: state
-              entity_id: switch.al_sleep_mode_dining_room_top
-              state: 'on'
-          sequence:
-          - condition: state
-            entity_id: binary_sensor.dining_room_sensor_group
-            state: 'on'
-          - action: switch.turn_off
-            target:
-              entity_id:
-              - switch.al_dining_room_bottom
-              - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              label_id: dining_room_bottom
-            data:
-              brightness_pct: 8
-              rgb_color:
-              - 255
-              - 20
-              - 0
-              transition: 5
-          - action: light.turn_on
-            target:
-              label_id: dining_room_top
-            data:
-              brightness_pct: 12
-              rgb_color:
-              - 255
-              - 20
-              - 0
-              transition: 5
-        - conditions:
-          - condition: time
-            after: 07:00:00
-            before: '18:00:00'
-          sequence:
-          - condition: state
-            entity_id: binary_sensor.dining_room_sensor_group
-            state: 'on'
-          - action: switch.turn_on
-            target:
-              entity_id:
-              - switch.al_dining_room_bottom
-              - switch.al_dining_room_top
-          - action: adaptive_lighting.apply
-            continue_on_error: true
-            data:
-              entity_id: switch.al_dining_room_bottom
-              transition: 3
-              adapt_color: true
-              adapt_brightness: true
-          - action: adaptive_lighting.apply
-            continue_on_error: true
-            data:
-              entity_id: switch.al_dining_room_top
-              transition: 3
-              adapt_color: true
-              adapt_brightness: true
-        - conditions:
-          - condition: time
-            after: '18:00:00'
-            before: '20:30:00'
-          sequence:
-          - condition: state
-            entity_id: binary_sensor.dining_room_sensor_group
-            state: 'on'
-          - action: switch.turn_off
-            target:
-              entity_id:
-              - switch.al_dining_room_bottom
-              - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              label_id: dining_room_top
-            data:
-              brightness_pct: 20
-              color_temp_kelvin: 3320
-              transition: 3
-          - action: light.turn_on
-            target:
-              label_id: dining_room_bottom
-            data:
-              brightness_pct: 20
-              color_temp_kelvin: 2000
-              transition: 3
-        - conditions:
-          - condition: time
-            after: '20:30:00'
-            before: '22:30:00'
-          sequence:
-          - condition: state
-            entity_id: binary_sensor.dining_room_sensor_group
-            state: 'on'
-          - action: switch.turn_off
-            target:
-              entity_id:
-              - switch.al_dining_room_bottom
-              - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              label_id: dining_room_top
-            data:
-              rgb_color:
-              - 64
-              - 224
-              - 208
-              brightness_pct: 5
-              transition: 3
-          - action: light.turn_on
-            target:
-              label_id: dining_room_bottom
-            data:
-              rgb_color:
-              - 76
-              - 26
-              - 168
-              brightness_pct: 10
-              transition: 3
-        - conditions:
-          - condition: time
-            after: '22:30:00'
-            before: 00:00:00
-          sequence:
-          - condition: state
-            entity_id: binary_sensor.dining_room_sensor_group
-            state: 'on'
-          - action: switch.turn_off
-            target:
-              entity_id:
-              - switch.al_dining_room_bottom
-              - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              label_id: dining_room_bottom
-            data:
-              brightness_pct: 8
-              rgb_color:
-              - 255
-              - 20
-              - 0
-              transition: 3
-          - action: light.turn_on
-            target:
-              label_id: dining_room_top
-            data:
-              brightness_pct: 12
-              rgb_color:
-              - 255
-              - 20
-              - 0
-              transition: 3
-      - choose:
-        - conditions:
-          - condition: state
-            entity_id: switch.al_sleep_mode_living_room
-            state: 'on'
-          sequence:
-          - condition: state
-            entity_id: binary_sensor.living_room_sensor_group
-            state: 'on'
-          - action: switch.turn_off
-            target:
-              entity_id: switch.al_living_room
-          - action: light.turn_on
-            target:
-              entity_id: light.living_room
-            data:
-              brightness_pct: 10
-              rgb_color:
-              - 255
-              - 20
-              - 0
-              transition: 5
-        - conditions:
-          - condition: time
-            after: 07:00:00
-            before: '23:59:59'
-          - condition: sun
-            before: sunset
-          sequence:
-          - condition: state
-            entity_id: binary_sensor.living_room_sensor_group
-            state: 'on'
-          - action: switch.turn_on
-            target:
-              entity_id: switch.al_living_room
-          - action: adaptive_lighting.apply
-            continue_on_error: true
-            data:
-              entity_id: switch.al_living_room
-              lights:
-              - light.living_room
-              transition: 3
-              adapt_color: true
-              adapt_brightness: true
-              prefer_rgb_color: false
-        - conditions:
-          - condition: sun
-            after: sunset
-          - condition: time
-            before: '23:00:00'
-          sequence:
-          - condition: state
-            entity_id: binary_sensor.living_room_sensor_group
-            state: 'on'
-          - action: switch.turn_off
-            target:
-              entity_id: switch.al_living_room
-          - action: light.turn_on
-            target:
-              entity_id: light.living_room
-            data:
-              brightness_pct: 3
-              rgb_color:
-              - 200
-              - 220
-              - 255
-              transition: 3
-        - conditions: []
-          sequence:
-          - condition: state
-            entity_id: binary_sensor.living_room_sensor_group
-            state: 'on'
-          - action: switch.turn_off
-            target:
-              entity_id: switch.al_living_room
-          - action: light.turn_on
-            target:
-              entity_id: light.living_room
-            data:
-              brightness_pct: 10
-              rgb_color:
-              - 255
-              - 20
-              - 0
-              transition: 3
   mode: single
 - id: '1774933764291'
   alias: Kitchen Off
@@ -1890,7 +1604,8 @@
             - light.kitchen_2_color
             - light.kitchen_lightstrip
           data:
-            transition: 10
+            brightness_pct: 40
+            transition: 2
         - action: switch.turn_on
           target:
             entity_id: switch.al_kitchen
@@ -5784,8 +5499,25 @@
   alias: '*Bedroom 2 - All Off'
   description: Turns off all lights, fan, music, and resets bedroom2_occupied boolean.
     Use after testing or to manually reset the room.
-  triggers: []
-  conditions: []
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.bedroom_2_sensor_group
+    to:
+    - 'off'
+    for:
+      hours: 0
+      minutes: 45
+      seconds: 0
+  conditions:
+  - condition: state
+    entity_id: input_boolean.bedroom2_occupied
+    state:
+    - 'off'
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
   actions:
   - alias: Turn off all lights
     action: light.turn_off
@@ -5927,7 +5659,7 @@
 - id: '1776548469615'
   alias: ZZZ - Nap Wake Up Routine
   description: Staged sunrise wake-up with 3-min light ramp, occupancy-driven music
-    tail, bathroom speaker grouping on motion, and 30-min hard cap from routine start.
+    tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
     at: '17:25:00'
@@ -6330,31 +6062,6 @@
           entity_id: input_boolean.good_morning_active
   mode: parallel
   max: 2
-- id: '1776686997730'
-  alias: Sonos Portable Battery Low Alert
-  description: Pulses the big bedroom light when Sonos battery drops below 30%. Clears
-    when placed on charger.
-  triggers:
-  - trigger: numeric_state
-    entity_id: sensor.portable_battery
-    below: 30
-    id: battery_low
-  conditions:
-  - alias: Skip if already on charger
-    condition: state
-    entity_id: binary_sensor.portable_charging
-    state: 'off'
-  actions:
-  - target:
-      entity_id: light.apollo_msr_2_big_bedroom_rgb_light
-    data:
-      rgb_color:
-      - 0
-      - 179
-      - 255
-      brightness_pct: 8
-      effect: Slow Pulse
-    action: light.turn_on
 - id: '1776687030470'
   alias: Sonos Portable Battery Charging
   description: Turn off big bedroom pulse light when Sonos is placed on charger
@@ -6366,6 +6073,59 @@
   - target:
       entity_id: light.apollo_msr_2_big_bedroom_rgb_light
     action: light.turn_off
+- id: '1747180000001'
+  alias: Sonos Portable - Battery Monitor
+  description: When Sonos Roam is idle/paused for 5 min, snapshot battery, alert if
+    below 30%, then turn the device off. Avoids polling the battery sensor.
+  triggers:
+  - trigger: state
+    entity_id: media_player.portable
+    to:
+    - idle
+    - paused
+    for:
+      minutes: 5
+  conditions:
+  - alias: Skip if already on charger
+    condition: state
+    entity_id: binary_sensor.portable_charging
+    state: 'off'
+  actions:
+  - alias: Snapshot battery level into helper
+    action: input_number.set_value
+    target:
+      entity_id: input_number.portable_battery_last_seen
+    data:
+      value: '{{ states(''sensor.portable_battery'') | int(0) }}'
+  - alias: Alert if battery below 30%
+    if:
+    - condition: numeric_state
+      entity_id: input_number.portable_battery_last_seen
+      below: 30
+    then:
+    - alias: Notify phone
+      action: notify.mobile_app_pc_iphone
+      data:
+        title: Sonos Roam Battery Low
+        message: Sonos Portable battery is at {{ states('input_number.portable_battery_last_seen')
+          | int }}% — Please Charge.
+    - alias: Pulse bedroom light
+      action: light.turn_on
+      target:
+        entity_id: light.apollo_msr_2_big_bedroom_rgb_light
+      data:
+        rgb_color:
+        - 0
+        - 179
+        - 255
+        brightness_pct: 8
+        effect: Slow Pulse
+  - alias: Turn off the Sonos Roam
+    action: media_player.turn_off
+    target:
+      entity_id: media_player.portable
+    data: {}
+  mode: single
 - id: '1776722406866'
   alias: Garage Door Auto-Close
   description: Close garage after 5 min of no person occupancy, if enabled. Uses person-only
@@ -7489,7 +7249,7 @@
     - 'off'
     for:
       hours: 0
-      minutes: 30
+      minutes: 15
       seconds: 0
   conditions:
   - condition: time
@@ -8036,7 +7796,8 @@
       entity_id: alarm_control_panel.3302_alarm
       state: armed_home
   actions:
-  - alias: Wait for engine to transition off OR BT beacon to transition home
+  - alias: Wait for engine to transition off, Home Assistant App to Arrive Home OR
+      BT beacon to transition home
     wait_for_trigger:
     - alias: Engine running -> off (just parked)
       trigger: state
@@ -8046,6 +7807,11 @@
     - alias: BT beacon away -> home (Paul just walked in)
       trigger: state
       entity_id: device_tracker.bcpro_204982_08b8
+      from: not_home
+      to: home
+    - alias: iPhone app person.paul arrives home
+      trigger: state
+      entity_id: person.paul
       from: not_home
       to: home
     timeout:
@@ -8310,44 +8076,143 @@
   mode: single
 - id: '1777520160440'
   alias: 'Living Room: Unoccupied Shutoff'
-  description: After 30 minutes of no presence, turn off the TV and fan.
+  description: After 15 min of no living room presence (with dining room also empty),
+    warn with color-changing lights then shut down TV, fan, and lights.
   triggers:
   - trigger: state
-    entity_id:
-    - binary_sensor.living_room_sensor_group
-    - binary_sensor.dining_room_sensor_group
-    to:
-    - 'off'
+    entity_id: binary_sensor.living_room_sensor_group
+    to: 'off'
     for:
-      hours: 0
-      minutes: 15
-      seconds: 0
+      minutes: 8
+      seconds: 30
   conditions:
-  - condition: state
+  - alias: Living room must still be empty
+    condition: state
     entity_id: binary_sensor.living_room_sensor_group
     state: 'off'
-  - condition: state
+  - alias: Dining room must also be empty
+    condition: state
     entity_id: binary_sensor.dining_room_sensor_group
     state: 'off'
   actions:
-  - action: media_player.turn_off
+  - alias: Warning - deep blue
+    action: light.turn_on
     target:
-      entity_id:
-      - media_player.living_room_tv_2
+      entity_id: light.living_room
+    data:
+      rgb_color:
+      - 0
+      - 0
+      - 200
+      brightness_pct: 60
+      transition: 1
+  - alias: Hold blue - cancel if presence returns
+    wait_for_trigger:
+    - trigger: state
+      entity_id: binary_sensor.living_room_sensor_group
+      to: 'on'
+    - trigger: state
+      entity_id: binary_sensor.dining_room_sensor_group
+      to: 'on'
+    timeout:
+      seconds: 30
+    continue_on_timeout: true
+  - alias: Abort if presence detected during blue
+    if:
+    - condition: template
+      value_template: '{{ wait.completed == false }}'
+    then:
+    - action: adaptive_lighting.set_manual_control
+      data:
+        entity_id: switch.al_living_room
+        lights:
+        - light.living_room
+        manual_control: false
+    - stop: Presence returned during warning - aborting shutoff
+  - alias: Warning - purple
+    action: light.turn_on
+    target:
+      entity_id: light.living_room
+    data:
+      rgb_color:
+      - 128
+      - 0
+      - 200
+      brightness_pct: 60
+      transition: 1
+  - alias: Hold purple - cancel if presence returns
+    wait_for_trigger:
+    - trigger: state
+      entity_id: binary_sensor.living_room_sensor_group
+      to: 'on'
+    - trigger: state
+      entity_id: binary_sensor.dining_room_sensor_group
+      to: 'on'
+    timeout:
+      seconds: 30
+    continue_on_timeout: true
+  - alias: Abort if presence detected during purple
+    if:
+    - condition: template
+      value_template: '{{ wait.completed == false }}'
+    then:
+    - action: adaptive_lighting.set_manual_control
+      data:
+        entity_id: switch.al_living_room
+        lights:
+        - light.living_room
+        manual_control: false
+    - stop: Presence returned during warning - aborting shutoff
+  - alias: Warning - red
+    action: light.turn_on
+    target:
+      entity_id: light.living_room
+    data:
+      rgb_color:
+      - 255
+      - 0
+      - 0
+      brightness_pct: 60
+      transition: 1
+  - alias: Hold red - cancel if presence returns
+    wait_for_trigger:
+    - trigger: state
+      entity_id: binary_sensor.living_room_sensor_group
+      to: 'on'
+    - trigger: state
+      entity_id: binary_sensor.dining_room_sensor_group
+      to: 'on'
+    timeout:
+      seconds: 30
+    continue_on_timeout: true
+  - alias: Abort if presence detected during red
+    if:
+    - condition: template
+      value_template: '{{ wait.completed == false }}'
+    then:
+    - action: adaptive_lighting.set_manual_control
+      data:
+        entity_id: switch.al_living_room
+        lights:
+        - light.living_room
+        manual_control: false
+    - stop: Presence returned during warning - aborting shutoff
+  - alias: Turn off TV
+    action: media_player.turn_off
+    target:
+      entity_id: media_player.living_room_tv_2
     data: {}
-  - action: fan.turn_off
+  - alias: Turn off fan
+    action: fan.turn_off
     target:
       entity_id: fan.living_room_fan
     data: {}
-  - delay:
-      hours: 0
-      minutes: 5
-      seconds: 0
-      milliseconds: 0
-  - action: light.turn_off
-    metadata: {}
+  - alias: Turn off living room lights
+    action: light.turn_off
     target:
-      entity_id: light.galaxy_projector
+      entity_id:
+      - light.living_room
+      - light.galaxy_projector
     data: {}
   mode: single
 - id: '1777696670196'
@@ -8454,7 +8319,7 @@
 - id: '1777796510473'
   alias: '*Good Morning Routine'
   description: Staged sunrise wake-up with 3-min light ramp, occupancy-driven music
-    tail, bathroom speaker grouping on motion, and 30-min hard cap from routine start.
+    tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
     at: 06:50:00
@@ -8890,7 +8755,7 @@
 - id: '1777893372398'
   alias: 'Good morning 2 '
   description: Staged sunrise wake-up with 3-min light ramp, occupancy-driven music
-    tail, bathroom speaker grouping on motion, and 30-min hard cap from routine start.
+    tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
     at: 08:10:00
@@ -9677,4 +9542,46 @@
       data:
         brightness_pct: 100
         transition: 1
+  mode: single
+- id: '1747200000001'
+  alias: Good Morning Active - Watchdog Shutoff
+  description: Safety net in case HA restarts mid-routine and leaves good_morning_active
+    stuck on. Turns everything off after 45 minutes regardless.
+  triggers:
+  - trigger: state
+    entity_id: input_boolean.good_morning_active
+    to: 'on'
+    for:
+      minutes: 45
+  conditions: []
+  actions:
+  - continue_on_error: true
+    action: media_player.media_stop
+    target:
+      entity_id: media_player.bedroom_2
+  - continue_on_error: true
+    action: media_player.unjoin
+    target:
+      entity_id: media_player.bathroom_2
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.good_morning_active
+  mode: single
+- id: '1778649471818'
+  alias: Auto Arm 3302 at 12:15A Daily
+  description: ''
+  triggers:
+  - trigger: time
+    at: 00:15:00
+  conditions:
+  - condition: device
+    device_id: 8ff1d1903114cafb085278be116a1e9b
+    domain: alarm_control_panel
+    entity_id: 3d13bb77598c9f789d866e1a6e340482
+    type: is_disarmed
+  actions:
+  - device_id: 8ff1d1903114cafb085278be116a1e9b
+    domain: alarm_control_panel
+    entity_id: 3d13bb77598c9f789d866e1a6e340482
+    type: arm_home
   mode: single
