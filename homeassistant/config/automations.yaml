@@ -8241,6 +8241,10 @@
       minutes: 5
       seconds: 0
   conditions:
+  - alias: Not at home
+    condition: state
+    entity_id: person.paul
+    state: not_home
   - alias: Engine must be off
     condition: state
     entity_id: binary_sensor.volvo_xc60_engine_status
