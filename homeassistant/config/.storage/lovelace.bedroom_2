@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.bedroom_2",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Bedroom 2 / Office Controls",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "custom:mushroom-fan-card",
+                  "entity": "fan.bedroom2_fan",
+                  "icon_animation": true,
+                  "show_percentage_control": true,
+                  "icon": "mdi:fan"
+                },
+                {
+                  "type": "custom:mushroom-light-card",
+                  "entity": "light.office",
+                  "use_light_color": true,
+                  "show_brightness_control": true,
+                  "show_color_control": true,
+                  "name": "Bedroom 2 - Fan Lights",
+                  "icon": "mdi:ceiling-fan-light"
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.bedroom_2_sensor_group"
+                }
+              ],
+              "column_span": 1
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Nano Leaf Lights",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "custom:mushroom-light-card",
+                  "entity": "light.fluttershy",
+                  "fill_container": false,
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 2
+                  }
+                },
+                {
+                  "type": "custom:mushroom-light-card",
+                  "entity": "light.ribbon",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 2
+                  }
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "select.ribbon_dynamic_scenes"
+                    },
+                    {
+                      "entity": "select.fluttershy_dynamic_scenes"
+                    }
+                  ],
+                  "show_header_toggle": true,
+                  "state_color": true
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Sonos Controls",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "media_player.office_2",
+                  "vertical": false,
+                  "features_position": "bottom",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 2
+                  }
+                },
+                {
+                  "type": "custom:mushroom-media-player-card",
+                  "entity": "media_player.office_2",
+                  "primary_info": "name",
+                  "secondary_info": "state",
+                  "use_media_info": true,
+                  "show_volume_level": true,
+                  "volume_controls": [
+                    "volume_mute",
+                    "volume_set",
+                    "volume_buttons"
+                  ],
+                  "media_controls": [
+                    "play_pause_stop",
+                    "next",
+                    "previous"
+                  ],
+                  "collapsible_controls": false
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Showtime Light",
+                  "heading_style": "title",
+                  "icon": "mdi:spotlight-beam"
+                },
+                {
+                  "type": "tile",
+                  "entity": "light.showtime_light"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

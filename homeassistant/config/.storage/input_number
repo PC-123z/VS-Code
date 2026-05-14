@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "input_number",
+  "data": {
+    "items": [
+      {
+        "id": "bathroom_vol_before_join",
+        "min": 0.0,
+        "max": 1.0,
+        "name": "Bathroom Vol Before Join",
+        "mode": "box",
+        "step": 0.01
+      },
+      {
+        "id": "portable_battery_last_seen",
+        "min": 0.0,
+        "max": 100.0,
+        "name": "Portable Battery Last Seen",
+        "icon": "mdi:battery-20-bluetooth",
+        "unit_of_measurement": "%",
+        "mode": "box",
+        "step": 1.0
+      }
+    ]
+  }
+}

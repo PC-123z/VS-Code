@@ -1,0 +1,335 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_sensors",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "entities",
+                  "title": "Motion & Presence Sensors",
+                  "entities": [
+                    {
+                      "type": "section",
+                      "label": "Bathroom"
+                    },
+                    {
+                      "entity": "binary_sensor.bathroom_motion",
+                      "name": "Bathroom Motion"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Bedroom - Big"
+                    },
+                    {
+                      "entity": "binary_sensor.bedroom_dot_motion",
+                      "name": "Dot Motion"
+                    },
+                    {
+                      "entity": "binary_sensor.bedroom_motion",
+                      "name": "Motion"
+                    },
+                    {
+                      "entity": "binary_sensor.bedroom_occupancy",
+                      "name": "Occupancy"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_msr_2_big_bedroom_radar_still_target",
+                      "name": "Radar Still Target"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target",
+                      "name": "Radar Moving Target"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy",
+                      "name": "Zone 1 Occupancy"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy",
+                      "name": "Zone 2 Occupancy"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy",
+                      "name": "Zone 3 Occupancy"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Bedroom 2 / Office"
+                    },
+                    {
+                      "entity": "binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy",
+                      "name": "Zone 1 Occupancy"
+                    },
+                    {
+                      "entity": "binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy",
+                      "name": "Zone 2 Occupancy"
+                    },
+                    {
+                      "entity": "binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy",
+                      "name": "Zone 3 Occupancy"
+                    },
+                    {
+                      "entity": "binary_sensor.bedroom2_sensor_apollo_radar_still_target",
+                      "name": "Still Target"
+                    },
+                    {
+                      "entity": "binary_sensor.bedroom2_sensor_apollo_radar_moving_target",
+                      "name": "Moving Target"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Dining Room"
+                    },
+                    {
+                      "entity": "binary_sensor.dining_room_apollo_ld2450_presence",
+                      "name": "LD2450 Presence"
+                    },
+                    {
+                      "entity": "binary_sensor.dining_room_apollo_ld2450_moving_target",
+                      "name": "LD2450 Moving Target"
+                    },
+                    {
+                      "entity": "binary_sensor.dining_room_apollo_ld2450_still_target",
+                      "name": "LD2450 Still Target"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Hallway"
+                    },
+                    {
+                      "entity": "binary_sensor.hallway_motion",
+                      "name": "Hallway Motion"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Kitchen"
+                    },
+                    {
+                      "entity": "binary_sensor.kitchen_motion_2",
+                      "name": "Kitchen Motion Hue"
+                    },
+                    {
+                      "entity": "binary_sensor.kitchen_sensor_group",
+                      "name": "Kitchen Presence Cam"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Living Room"
+                    },
+                    {
+                      "entity": "binary_sensor.living_room_all_occupancy",
+                      "name": "All Occupancy"
+                    },
+                    {
+                      "entity": "binary_sensor.living_room_person_occupancy",
+                      "name": "Person Occupancy"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_r_pro_1_740624_ld2412_presence",
+                      "name": "LD2412 Presence"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_r_pro_1_740624_ld2450_presence",
+                      "name": "LD2450 Presence"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "device_tracker.bcpro_204982_08b8",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "entities",
+                  "title": "Lights - Room Control",
+                  "entities": [
+                    {
+                      "type": "section",
+                      "label": "Bathroom"
+                    },
+                    {
+                      "entity": "light.bathroom",
+                      "name": "Bathroom Lights"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Bedroom - Big"
+                    },
+                    {
+                      "entity": "light.bedroom",
+                      "name": "Bedroom Lights"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Bedroom 2 / Office"
+                    },
+                    {
+                      "entity": "light.office",
+                      "name": "Bedroom 2 Lights"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Dining Room"
+                    },
+                    {
+                      "entity": "light.dining_room_top",
+                      "name": "Dining Room Top"
+                    },
+                    {
+                      "entity": "light.dining_room_bottom",
+                      "name": "Dining Room Bottom"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Hallway"
+                    },
+                    {
+                      "entity": "light.hallway",
+                      "name": "Hallway Lights"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Kitchen"
+                    },
+                    {
+                      "entity": "light.kitchen",
+                      "name": "Kitchen Lights"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Living Room"
+                    },
+                    {
+                      "entity": "light.living_room",
+                      "name": "Living Room Lights"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "entities",
+                  "title": "Apollo Sensor Details",
+                  "entities": [
+                    {
+                      "type": "section",
+                      "label": "Big Bedroom MSR-2"
+                    },
+                    {
+                      "entity": "sensor.apollo_msr_2_big_bedroom_radar_still_distance",
+                      "name": "Still Distance"
+                    },
+                    {
+                      "entity": "sensor.apollo_msr_2_big_bedroom_radar_moving_distance",
+                      "name": "Moving Distance"
+                    },
+                    {
+                      "entity": "sensor.apollo_msr_2_big_bedroom_radar_detection_distance",
+                      "name": "Detection Distance"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Bedroom 2 MSR-2"
+                    },
+                    {
+                      "entity": "sensor.bedroom2_sensor_apollo_radar_still_distance",
+                      "name": "Still Distance"
+                    },
+                    {
+                      "entity": "sensor.bedroom2_sensor_apollo_radar_moving_distance",
+                      "name": "Moving Distance"
+                    },
+                    {
+                      "entity": "sensor.bedroom2_sensor_apollo_radar_detection_distance",
+                      "name": "Detection Distance"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Dining Room MTR-1"
+                    },
+                    {
+                      "entity": "sensor.dining_room_apollo_moving_target_count",
+                      "name": "Moving Target Count"
+                    },
+                    {
+                      "entity": "sensor.dining_room_apollo_presence_target_count",
+                      "name": "Presence Target Count"
+                    },
+                    {
+                      "entity": "sensor.dining_room_apollo_still_target_count",
+                      "name": "Still Target Count"
+                    },
+                    {
+                      "entity": "sensor.dining_room_apollo_co2",
+                      "name": "CO2"
+                    },
+                    {
+                      "entity": "sensor.dining_room_apollo_dps310_temperature",
+                      "name": "Temperature"
+                    },
+                    {
+                      "entity": "sensor.dining_room_apollo_ltr390_light",
+                      "name": "Light"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Living Room R-PRO-1"
+                    },
+                    {
+                      "entity": "sensor.apollo_r_pro_1_740624_ld2450_moving_target_count",
+                      "name": "LD2450 Moving Count"
+                    },
+                    {
+                      "entity": "sensor.apollo_r_pro_1_740624_ld2450_presence_target_count",
+                      "name": "LD2450 Presence Count"
+                    },
+                    {
+                      "entity": "sensor.apollo_r_pro_1_740624_ld2450_still_target_count",
+                      "name": "LD2450 Still Count"
+                    },
+                    {
+                      "entity": "sensor.apollo_r_pro_1_740624_co2",
+                      "name": "CO2"
+                    },
+                    {
+                      "entity": "sensor.apollo_r_pro_1_740624_ltr390_light",
+                      "name": "Light"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

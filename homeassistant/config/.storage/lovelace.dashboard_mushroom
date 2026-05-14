@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_mushroom",
+  "data": {
+    "config": {
+      "strategy": {
+        "type": "custom:mushroom-strategy",
+        "options": {
+          "hide_unavailable": true,
+          "domains": {
+            "sensor": {
+              "hidden": true
+            }
+          }
+        }
+      },
+      "views": [
+        {
+          "strategy": {
+            "type": "custom:mushroom-strategy"
+          },
+          "title": "Home"
+        }
+      ]
+    }
+  }
+}

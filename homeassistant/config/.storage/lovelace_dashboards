@@ -1,0 +1,176 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace_dashboards",
+  "data": {
+    "items": [
+      {
+        "id": "map",
+        "icon": "mdi:map",
+        "title": "Map",
+        "url_path": "map",
+        "mode": "storage",
+        "require_admin": false,
+        "show_in_sidebar": false
+      },
+      {
+        "id": "dashboard_cameras",
+        "show_in_sidebar": false,
+        "icon": "mdi:hoop-house",
+        "title": "Indoor ",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-cameras"
+      },
+      {
+        "id": "dashboard_camera",
+        "show_in_sidebar": true,
+        "icon": "mdi:camera",
+        "title": "Cameras",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-camera"
+      },
+      {
+        "id": "dashboard_home2",
+        "show_in_sidebar": false,
+        "icon": "hacs:hacs",
+        "title": "Home",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-home2"
+      },
+      {
+        "id": "dashboard_test",
+        "show_in_sidebar": false,
+        "title": "Test",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-test"
+      },
+      {
+        "id": "dashboard_bedroom",
+        "show_in_sidebar": true,
+        "icon": "mdi:bed",
+        "title": "Bedroom",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-bedroom"
+      },
+      {
+        "id": "laundry_room",
+        "show_in_sidebar": false,
+        "icon": "mdi:washing-machine",
+        "title": "Laundry Room ",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "laundry-room"
+      },
+      {
+        "id": "bedroom_2",
+        "show_in_sidebar": true,
+        "icon": "mdi:bunk-bed",
+        "title": "Bedroom 2",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "bedroom-2"
+      },
+      {
+        "id": "dining_room",
+        "show_in_sidebar": false,
+        "icon": "mdi:table-furniture",
+        "title": "Dining Room ",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dining-room"
+      },
+      {
+        "id": "dashboard_rooms",
+        "show_in_sidebar": false,
+        "icon": "mdi:home-minus-outline",
+        "title": "* Rooms ",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-rooms"
+      },
+      {
+        "id": "dashboard_mushroom",
+        "show_in_sidebar": true,
+        "icon": "mdi:mushroom",
+        "title": "*Mushroom",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-mushroom"
+      },
+      {
+        "id": "dashboard_garage",
+        "show_in_sidebar": false,
+        "icon": "mdi:car",
+        "title": "Garage",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-garage"
+      },
+      {
+        "id": "dashboard_test2",
+        "show_in_sidebar": false,
+        "title": "Test2",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-test2"
+      },
+      {
+        "id": "dashboard_night",
+        "show_in_sidebar": true,
+        "title": "Night-Mode Switch ",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-night",
+        "icon": "mdi:weather-night"
+      },
+      {
+        "id": "dashboard_sensors",
+        "show_in_sidebar": true,
+        "icon": "mdi:motion-sensor",
+        "title": "Sensors",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-sensors"
+      },
+      {
+        "id": "sensor_config_page",
+        "show_in_sidebar": false,
+        "title": "Sensor Config Page (old)",
+        "require_admin": true,
+        "mode": "storage",
+        "url_path": "sensor-config-page"
+      },
+      {
+        "id": "sensor_2",
+        "show_in_sidebar": false,
+        "title": "Sensor 2",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "sensor-2"
+      },
+      {
+        "id": "dashboard_sensor3",
+        "show_in_sidebar": true,
+        "title": "Sensor Config Page",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-sensor3",
+        "icon": "mdi:leak"
+      },
+      {
+        "id": "visual_studio_code",
+        "show_in_sidebar": true,
+        "icon": "mdi:microsoft-visual-studio-code",
+        "title": "Visual Studio Code",
+        "require_admin": true,
+        "mode": "storage",
+        "url_path": "visual-studio-code"
+      }
+    ]
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "minor_version": 2,
+  "key": "repairs.issue_registry",
+  "data": {
+    "issues": [
+      {
+        "created": "2026-02-13T22:11:23.218132+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_311536795_tags/v5.14.1"
+      },
+      {
+        "created": "2026-02-28T05:49:43.190194+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_1081435944_tags/v2.5.1"
+      },
+      {
+        "created": "2026-03-22T12:55:46.695735+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_656992550_tags/v1.7.1"
+      },
+      {
+        "created": "2026-03-23T05:43:18.159815+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_656992550_tags/v1.7.3"
+      },
+      {
+        "created": "2026-03-25T04:37:11.289662+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_656992550_tags/v1.7.4"
+      },
+      {
+        "created": "2026-03-25T04:37:33.237690+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_311536795_tags/v5.15.0"
+      },
+      {
+        "created": "2026-03-25T15:31:58.473218+00:00",
+        "dismissed_version": null,
+        "domain": "template",
+        "is_persistent": false,
+        "issue_id": "deprecate_legacy_templates_switch_volvo_climatization_voice_27b0d25e8b2e5addad9615169bf819f6"
+      },
+      {
+        "created": "2026-04-01T14:47:29.479338+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_1130928743_tags/v0.6.0"
+      },
+      {
+        "created": "2026-04-05T19:17:23.550651+00:00",
+        "dismissed_version": null,
+        "domain": "homeassistant",
+        "is_persistent": false,
+        "issue_id": "platform_integration_no_support_camera_generic"
+      },
+      {
+        "created": "2026-04-27T18:42:23.458424+00:00",
+        "dismissed_version": "2026.4.4",
+        "domain": "template",
+        "is_persistent": false,
+        "issue_id": "deprecate_legacy_templates_light_office_fan_light_951eda8a9ac52b5e60b74c02fbdc60fe"
+      },
+      {
+        "created": "2026-04-27T18:50:33.647624+00:00",
+        "dismissed_version": "2026.4.4",
+        "domain": "template",
+        "is_persistent": false,
+        "issue_id": "deprecate_legacy_templates_light_office_fan_light_07d1240f56304028ec45d2fc6ee43bf0"
+      },
+      {
+        "created": "2026-05-01T11:52:32.513176+00:00",
+        "dismissed_version": null,
+        "domain": "homeassistant",
+        "is_persistent": false,
+        "issue_id": "config_entry_reauth_volvo_01KQGX9D8VNNCG3FT0197ZAP9R"
+      },
+      {
+        "created": "2026-05-13T04:22:36.042361+00:00",
+        "dismissed_version": null,
+        "domain": "homeassistant",
+        "is_persistent": false,
+        "issue_id": "config_entry_reauth_vesync_01KJNB5QZM9BN78TEQSRMN3SMZ"
+      },
+      {
+        "created": "2026-05-13T04:23:32.468094+00:00",
+        "dismissed_version": null,
+        "domain": "cloud",
+        "is_persistent": false,
+        "issue_id": "connection_error_2026-06-01 00:00:00+00:00"
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "minor_version": 2,
+  "key": "input_select",
+  "data": {
+    "items": [
+      {
+        "id": "bedroom_scene_mode",
+        "name": "Bedroom Scene Mode",
+        "icon": "mdi:form-dropdown",
+        "options": [
+          "al",
+          "starlight",
+          "tropical_twilight",
+          "nutcracker",
+          "ocean_dawn"
+        ]
+      },
+      {
+        "id": "office_scene_mode",
+        "name": "Office Scene Mode",
+        "icon": "mdi:bunk-bed",
+        "options": [
+          "al",
+          "autumn_gold",
+          "glitz_and_glam",
+          "frosty_dawn",
+          "concentrate",
+          "energize"
+        ]
+      }
+    ]
+  }
+}

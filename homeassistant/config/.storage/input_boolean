@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "input_boolean",
+  "data": {
+    "items": [
+      {
+        "id": "good_morning_active",
+        "name": "Good Morning Active",
+        "icon": "mdi:weather-sunset-up"
+      },
+      {
+        "id": "bedroom_2_occupied",
+        "name": "Bedroom 2 Occupied ",
+        "icon": "mdi:bunk-bed"
+      },
+      {
+        "id": "kitchen_manual_override",
+        "name": "Kitchen Manual Override",
+        "icon": "mdi:fridge"
+      },
+      {
+        "id": "volvo_start_active",
+        "name": "Volvo Start Active",
+        "icon": "mdi:car"
+      },
+      {
+        "id": "goodbye_routine_active",
+        "name": "Goodbye Routine Active",
+        "icon": "mdi:logout"
+      },
+      {
+        "id": "garage_auto_close_enabled",
+        "name": "Garage Auto-Close Enabled",
+        "icon": "mdi:garage-alert"
+      }
+    ]
+  }
+}

@@ -1,0 +1,313 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_rooms",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "type": "masonry",
+          "title": "Rooms",
+          "cards": [
+            {
+              "type": "custom:mushroom-template-card",
+              "primary": "Indoor Lights",
+              "secondary": "{{ 'On' if expand(label_entities('Indoor')) | selectattr('state', 'eq', 'on') | list | count > 0 else 'Off' }}",
+              "icon": "mdi:lightbulb-group",
+              "icon_color": "{{ 'amber' if expand(label_entities('Indoor')) | selectattr('state', 'eq', 'on') | list | count > 0 else 'disabled' }}",
+              "tap_action": {
+                "action": "call-service",
+                "service": "light.turn_on",
+                "target": {
+                  "label_id": "indoor"
+                }
+              },
+              "hold_action": {
+                "action": "call-service",
+                "service": "light.turn_off",
+                "target": {
+                  "label_id": "indoor"
+                }
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Kitchen"
+              },
+              "filter": {
+                "include": [
+                  {
+                    "area": "kitchen"
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "unavailable"
+                  },
+                  {
+                    "state": "unknown"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "friendly_name"
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Bedroom"
+              },
+              "filter": {
+                "include": [
+                  {
+                    "area": "bedroom"
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "unavailable"
+                  },
+                  {
+                    "state": "unknown"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "friendly_name"
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Bathroom"
+              },
+              "filter": {
+                "include": [
+                  {
+                    "area": "bathroom"
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "unavailable"
+                  },
+                  {
+                    "state": "unknown"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "friendly_name"
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Office"
+              },
+              "filter": {
+                "include": [
+                  {
+                    "area": "office"
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "unavailable"
+                  },
+                  {
+                    "state": "unknown"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "friendly_name"
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Living Room"
+              },
+              "filter": {
+                "include": [
+                  {
+                    "area": "living_room"
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "unavailable"
+                  },
+                  {
+                    "state": "unknown"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "friendly_name"
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Hallway"
+              },
+              "filter": {
+                "include": [
+                  {
+                    "area": "hallway"
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "unavailable"
+                  },
+                  {
+                    "state": "unknown"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "friendly_name"
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Outside"
+              },
+              "filter": {
+                "include": [
+                  {
+                    "area": "outside"
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "unavailable"
+                  },
+                  {
+                    "state": "unknown"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "friendly_name"
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Dining Room"
+              },
+              "filter": {
+                "include": [
+                  {
+                    "area": "dining_room"
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "unavailable"
+                  },
+                  {
+                    "state": "unknown"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "friendly_name"
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Garage"
+              },
+              "filter": {
+                "include": [
+                  {
+                    "area": "garage"
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "unavailable"
+                  },
+                  {
+                    "state": "unknown"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "friendly_name"
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Laundry Room"
+              },
+              "filter": {
+                "include": [
+                  {
+                    "area": "laundry_room"
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "unavailable"
+                  },
+                  {
+                    "state": "unknown"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "friendly_name"
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Bedroom 2"
+              },
+              "filter": {
+                "include": [
+                  {
+                    "area": "bedroom_2"
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "unavailable"
+                  },
+                  {
+                    "state": "unknown"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "friendly_name"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

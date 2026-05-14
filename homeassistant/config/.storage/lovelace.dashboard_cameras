@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_cameras",
+  "data": {
+    "config": {
+      "strategy": {
+        "type": "original-states",
+        "hide_entities_without_area": true,
+        "hide_energy": true,
+        "areas": {
+          "hidden": [
+            "outside",
+            "garage"
+          ],
+          "order": [
+            "living_room",
+            "dining_room",
+            "inside",
+            "kitchen",
+            "bedroom",
+            "bathroom",
+            "office",
+            "hallway"
+          ]
+        }
+      }
+    }
+  }
+}

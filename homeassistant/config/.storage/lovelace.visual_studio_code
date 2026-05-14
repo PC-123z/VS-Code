@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.visual_studio_code",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "title": "VS Code",
+          "panel": true,
+          "cards": [
+            {
+              "type": "iframe",
+              "url": "https://code.home-123.casa?theme=dark",
+              "aspect_ratio": "100%"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

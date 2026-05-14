@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.laundry_room",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Washing Machine",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "select.washer",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.washer_completion_time"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.washer_energy"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.washer_energy_difference"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.washer_machine_state"
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.washer_power"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.washer_power"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.washer_power_energy"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Dryer",
+                  "heading_style": "title",
+                  "icon": "mdi:tumble-dryer"
+                },
+                {
+                  "type": "tile",
+                  "entity": "select.dryer"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.dryer_completion_time"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.dryer_energy"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.dryer_energy_difference"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.dryer_energy_saved"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.dryer_job_state"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.dryer_machine_state"
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.dryer_power"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.dryer_power"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.dryer_power_energy"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.dryer_wrinkle_prevent"
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.dryer_wrinkle_prevent_active"
+                }
+              ]
+            }
+          ],
+          "header": {}
+        }
+      ]
+    }
+  }
+}

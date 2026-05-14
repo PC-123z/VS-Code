@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace_resources",
+  "data": {
+    "items": [
+      {
+        "id": "bc3c6bebd3c1499d9ca707f8a7773766",
+        "url": "/hacsfiles/advanced-camera-card/advanced-camera-card.js?hacstag=3940825527274",
+        "type": "module"
+      },
+      {
+        "id": "5d2bf96e2a0b46cfb6f2b5c2029ffac7",
+        "url": "/hacsfiles/lovelace-mushroom/mushroom.js?hacstag=444350375511",
+        "type": "module"
+      },
+      {
+        "id": "1967dfebe97d42f28b815cecfa86f85d",
+        "url": "/hacsfiles/lovelace-auto-entities/auto-entities.js?hacstag=1677445841161",
+        "type": "module"
+      },
+      {
+        "id": "a65aac67534041a781c07a31ded1abd2",
+        "url": "/hacsfiles/mushroom-strategy/mushroom-strategy.js?hacstag=619284862310",
+        "type": "module"
+      },
+      {
+        "id": "344c2d2a3a2a41648ba3810609f73cdf",
+        "url": "/hacsfiles/lovelace-mushroom-better-sliders/mushroom.js?hacstag=586363416302",
+        "type": "module"
+      },
+      {
+        "id": "c654798559954f0a9ced7ff4a2de8277",
+        "url": "/hacsfiles/streamline-card/streamline-card.js?hacstag=839495072020",
+        "type": "module"
+      },
+      {
+        "id": "575404d039884c6e8d3611ca9818cc17",
+        "url": "/hacsfiles/lovelace-plotly-graph-card/plotly-graph-card.js?hacstag=413812496335",
+        "type": "module"
+      }
+    ]
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_garage",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Start Climitization",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "grid_options": {
+                    "columns": 9,
+                    "rows": 1
+                  },
+                  "entity": "button.volvo_xc60_start_climatization",
+                  "name": "Climitization Only",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "show_name": true,
+                  "show_icon": true,
+                  "type": "button",
+                  "tap_action": {
+                    "action": "perform-action",
+                    "perform_action": "script.script_start_volvo_xc60",
+                    "target": {}
+                  },
+                  "color": "dark-grey",
+                  "show_state": true,
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 3
+                  },
+                  "entity": "script.script_start_volvo_xc60",
+                  "name": "Start the Car Automation"
+                },
+                {
+                  "show_current": true,
+                  "show_forecast": true,
+                  "type": "weather-forecast",
+                  "entity": "weather.forecast_home_2",
+                  "forecast_type": "hourly"
+                },
+                {
+                  "show_current": false,
+                  "show_forecast": true,
+                  "type": "weather-forecast",
+                  "entity": "weather.forecast_home_2",
+                  "forecast_type": "daily",
+                  "round_temperature": false
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Volvo XC60"
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.volvo_xc60_flash"
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.volvo_xc60_honk"
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.volvo_xc60_honk_flash"
+                },
+                {
+                  "type": "tile",
+                  "entity": "lock.volvo_xc60_lock"
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.volvo_xc60_start_climatization"
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.volvo_xc60_start_engine"
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.volvo_xc60_stop_climatization"
+                },
+                {
+                  "type": "tile",
+                  "entity": "button.volvo_xc60_stop_engine"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.volvo_xc60_battery"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.volvo_xc60_battery_capacity"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.volvo_xc60_car_connection"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.volvo_xc60_charging_connection_status"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.volvo_xc60_charging_power"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.volvo_xc60_charging_power_status"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.volvo_xc60_charging_status"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.volvo_xc60_distance_to_empty_tank"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.volvo_xc60_distance_to_empty_battery"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.volvo_xc60_odometer"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Garage (Live)",
+                  "heading_style": "title"
+                },
+                {
+                  "camera_view": "live",
+                  "fit_mode": "fill",
+                  "type": "picture-glance",
+                  "title": "Garage",
+                  "entities": [
+                    "sensor.backup_backup_manager_state",
+                    "sensor.backup_next_scheduled_automatic_backup"
+                  ],
+                  "camera_image": "camera.garage_2"
+                },
+                {
+                  "camera_view": "live",
+                  "fit_mode": "fill",
+                  "type": "picture-glance",
+                  "title": "Garage",
+                  "entities": [
+                    "sensor.backup_backup_manager_state",
+                    "sensor.backup_next_scheduled_automatic_backup"
+                  ],
+                  "camera_image": "camera.garage_top_2"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.parked_cars_car_active_count_2",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.garage_top_person_occupancy_2",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "device_tracker.bcpro_204982_08b8"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

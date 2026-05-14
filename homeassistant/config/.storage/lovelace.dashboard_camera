@@ -1,0 +1,553 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_camera",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "title": "Home",
+          "path": "home",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Driveway",
+                  "heading_style": "title"
+                },
+                {
+                  "camera_view": "auto",
+                  "fit_mode": "cover",
+                  "type": "picture-glance",
+                  "camera_image": "camera.driveway_2",
+                  "entities": [],
+                  "tap_action": {
+                    "action": "navigate",
+                    "navigation_path": "/dashboard-camera/driveway"
+                  },
+                  "grid_options": {
+                    "columns": 24,
+                    "rows": "auto"
+                  }
+                },
+                {
+                  "type": "picture-glance",
+                  "title": "Front Door",
+                  "camera_image": "camera.front_door_fluent",
+                  "entities": [],
+                  "camera_view": "auto",
+                  "fit_mode": "cover",
+                  "tap_action": {
+                    "action": "navigate",
+                    "navigation_path": "/dashboard-camera/front-door"
+                  }
+                },
+                {
+                  "type": "picture-glance",
+                  "title": "Garage",
+                  "camera_image": "camera.garage",
+                  "entities": [],
+                  "camera_view": "auto",
+                  "fit_mode": "cover",
+                  "tap_action": {
+                    "action": "navigate",
+                    "navigation_path": "/dashboard-camera/garage"
+                  }
+                }
+              ],
+              "column_span": 2
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Garage",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "cover.garage"
+                },
+                {
+                  "type": "tile",
+                  "entity": "device_tracker.bcpro_204982_08b8",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.garage_car_occupancy",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.volvo_xc60_engine_status"
+                },
+                {
+                  "type": "tile",
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": 1
+                  },
+                  "entity": "binary_sensor.driveway_car_occupancy",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "device_tracker.pc_iphone",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "person.paul",
+                  "show_entity_picture": true
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.volvo_xc60_battery"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.pc_iphone_battery_level"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "columns": 1,
+              "square": false,
+              "cards": [
+                {
+                  "type": "picture-glance",
+                  "title": "Kitchen",
+                  "camera_image": "camera.kitchen",
+                  "entities": [],
+                  "camera_view": "auto",
+                  "fit_mode": "cover",
+                  "tap_action": {
+                    "action": "navigate",
+                    "navigation_path": "/dashboard-camera/kitchen"
+                  }
+                },
+                {
+                  "type": "picture-glance",
+                  "title": "Living Room",
+                  "camera_image": "camera.living_room",
+                  "entities": [],
+                  "camera_view": "auto",
+                  "fit_mode": "cover",
+                  "tap_action": {
+                    "action": "navigate",
+                    "navigation_path": "/dashboard-camera/living-room"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": []
+            },
+            {
+              "type": "grid",
+              "cards": []
+            },
+            {
+              "type": "grid",
+              "cards": []
+            }
+          ],
+          "header": {
+            "type": "grid",
+            "columns": 1,
+            "square": false,
+            "cards": [
+              {
+                "type": "picture-glance",
+                "title": "Garage",
+                "camera_image": "camera.garage",
+                "camera_view": "live",
+                "entities": [
+                  {
+                    "entity": "binary_sensor.garage_motion"
+                  }
+                ],
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "/dashboard-camera/garage"
+                }
+              },
+              {
+                "type": "picture-glance",
+                "title": "Living Room",
+                "camera_image": "camera.living_room",
+                "camera_view": "live",
+                "entities": [
+                  {
+                    "entity": "light.living_room_main"
+                  }
+                ],
+                "tap_action": {
+                  "action": "navigate",
+                  "navigation_path": "/dashboard-camera/living-room"
+                }
+              }
+            ],
+            "layout": "responsive",
+            "badges_position": "bottom",
+            "badges_wrap": "wrap"
+          }
+        },
+        {
+          "title": "Cameras",
+          "path": "cameras",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Driveway",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "custom:advanced-camera-card",
+                  "cameras": [
+                    {
+                      "camera_entity": "camera.driveway_2",
+                      "live_provider": "go2rtc",
+                      "go2rtc": {
+                        "url": "http://192.168.70.155:1984",
+                        "stream": "driveway_main"
+                      }
+                    }
+                  ],
+                  "live": {
+                    "lazy_load": true,
+                    "preload": false
+                  },
+                  "grid_options": {
+                    "columns": 24,
+                    "rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:advanced-camera-card",
+                  "cameras": [
+                    {
+                      "camera_entity": "camera.front_door_fluent",
+                      "live_provider": "go2rtc",
+                      "go2rtc": {
+                        "url": "http://192.168.70.155:1984",
+                        "stream": "front_door"
+                      }
+                    }
+                  ],
+                  "live": {
+                    "lazy_load": true,
+                    "preload": false
+                  }
+                },
+                {
+                  "type": "custom:advanced-camera-card",
+                  "cameras": [
+                    {
+                      "camera_entity": "camera.garage",
+                      "live_provider": "go2rtc",
+                      "go2rtc": {
+                        "url": "http://192.168.70.155:1984",
+                        "stream": "garage"
+                      }
+                    }
+                  ],
+                  "live": {
+                    "lazy_load": true,
+                    "preload": false
+                  }
+                }
+              ],
+              "column_span": 2
+            },
+            {
+              "type": "grid",
+              "columns": 1,
+              "square": false,
+              "cards": [
+                {
+                  "type": "custom:advanced-camera-card",
+                  "cameras": [
+                    {
+                      "camera_entity": "camera.kitchen",
+                      "live_provider": "go2rtc",
+                      "go2rtc": {
+                        "url": "http://192.168.70.155:1984",
+                        "stream": "kitchen"
+                      }
+                    }
+                  ],
+                  "live": {
+                    "lazy_load": true,
+                    "preload": false
+                  }
+                },
+                {
+                  "type": "custom:advanced-camera-card",
+                  "cameras": [
+                    {
+                      "camera_entity": "camera.living_room",
+                      "live_provider": "go2rtc",
+                      "go2rtc": {
+                        "url": "http://192.168.70.155:1984",
+                        "stream": "living_room"
+                      }
+                    }
+                  ],
+                  "live": {
+                    "lazy_load": true,
+                    "preload": false
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": []
+            }
+          ]
+        },
+        {
+          "title": "Driveway",
+          "path": "driveway",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "picture-glance",
+                  "camera_image": "camera.driveway_2",
+                  "entities": [],
+                  "camera_view": "live",
+                  "fit_mode": "cover",
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:advanced-camera-card",
+                  "cameras": [
+                    {
+                      "camera_entity": "camera.driveway_2",
+                      "live_provider": "go2rtc",
+                      "go2rtc": {
+                        "url": "http://192.168.70.155:1984",
+                        "stream": "driveway_main"
+                      }
+                    }
+                  ],
+                  "live": {
+                    "lazy_load": false,
+                    "preload": true
+                  },
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": "auto"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Front Door",
+          "path": "front-door",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "picture-glance",
+                  "title": "Front Door",
+                  "camera_image": "camera.front_door_fluent",
+                  "entities": [],
+                  "camera_view": "live",
+                  "fit_mode": "cover",
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:advanced-camera-card",
+                  "cameras": [
+                    {
+                      "camera_entity": "camera.front_door_fluent",
+                      "live_provider": "go2rtc",
+                      "go2rtc": {
+                        "url": "http://192.168.70.155:1984",
+                        "stream": "front_door"
+                      }
+                    }
+                  ],
+                  "live": {
+                    "lazy_load": false,
+                    "preload": true
+                  },
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": "auto"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Garage",
+          "path": "garage",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "picture-glance",
+                  "title": "Garage",
+                  "camera_image": "camera.garage",
+                  "entities": [
+                    {
+                      "entity": "binary_sensor.garage_motion"
+                    }
+                  ],
+                  "camera_view": "live",
+                  "fit_mode": "cover",
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:advanced-camera-card",
+                  "cameras": [
+                    {
+                      "camera_entity": "camera.garage",
+                      "live_provider": "go2rtc",
+                      "go2rtc": {
+                        "url": "http://192.168.70.155:1984",
+                        "stream": "garage"
+                      }
+                    }
+                  ],
+                  "live": {
+                    "lazy_load": false,
+                    "preload": true
+                  },
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": "auto"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Kitchen",
+          "path": "kitchen",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "picture-glance",
+                  "title": "Kitchen",
+                  "camera_image": "camera.kitchen",
+                  "entities": [],
+                  "camera_view": "live",
+                  "fit_mode": "cover",
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:advanced-camera-card",
+                  "cameras": [
+                    {
+                      "camera_entity": "camera.kitchen",
+                      "live_provider": "go2rtc",
+                      "go2rtc": {
+                        "url": "http://192.168.70.155:1984",
+                        "stream": "kitchen"
+                      }
+                    }
+                  ],
+                  "live": {
+                    "lazy_load": false,
+                    "preload": true
+                  },
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": "auto"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Living Room",
+          "path": "living-room",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "picture-glance",
+                  "title": "Living Room",
+                  "camera_image": "camera.living_room",
+                  "entities": [
+                    {
+                      "entity": "binary_sensor.living_room_motion"
+                    }
+                  ],
+                  "camera_view": "live",
+                  "fit_mode": "cover",
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": "auto"
+                  }
+                },
+                {
+                  "type": "custom:advanced-camera-card",
+                  "cameras": [
+                    {
+                      "camera_entity": "camera.living_room",
+                      "live_provider": "go2rtc",
+                      "go2rtc": {
+                        "url": "http://192.168.70.155:1984",
+                        "stream": "living_room"
+                      }
+                    }
+                  ],
+                  "live": {
+                    "lazy_load": false,
+                    "preload": true
+                  },
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": "auto"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

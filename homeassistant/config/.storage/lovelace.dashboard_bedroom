@@ -1,0 +1,195 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_bedroom",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Lights",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "custom:mushroom-light-card",
+                  "entity": "light.nano_sand_dune",
+                  "tap_action": {
+                    "action": "more-info"
+                  },
+                  "show_brightness_control": true,
+                  "show_color_control": true,
+                  "show_color_temp_control": false,
+                  "use_light_color": true,
+                  "collapsible_controls": false,
+                  "icon": "mdi:lightbulb"
+                },
+                {
+                  "type": "tile",
+                  "entity": "light.bedroom"
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "select.nanoleaf_dynamic_scenes"
+                    }
+                  ],
+                  "title": "Nanoleaf - Sand Dune Scenes",
+                  "state_color": true,
+                  "show_header_toggle": false
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "select.bedroom_hue_scenes_list"
+                    }
+                  ],
+                  "state_color": true
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Air Circulator",
+                  "heading_style": "title",
+                  "icon": "mdi:fan"
+                },
+                {
+                  "type": "tile",
+                  "entity": "fan.air_circulator"
+                },
+                {
+                  "type": "tile",
+                  "entity": "number.air_circulator_horizontal_oscillation_angle"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.air_circulator_horizontally_oscillating"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.air_circulator_panel_sound"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.air_circulator_temperature"
+                },
+                {
+                  "type": "tile",
+                  "entity": "number.air_circulator_vertical_oscillation_angle"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.air_circulator_vertically_oscillating"
+                },
+                {
+                  "type": "heading",
+                  "heading": "Bedroom Fan",
+                  "heading_style": "title",
+                  "icon": "mdi:fan"
+                },
+                {
+                  "type": "custom:mushroom-fan-card",
+                  "entity": "fan.big_bedroom_fan",
+                  "icon": "mdi:fan",
+                  "icon_animation": true,
+                  "show_percentage_control": true,
+                  "tap_action": {
+                    "action": "toggle"
+                  },
+                  "hold_action": {
+                    "action": "more-info"
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "fan.bedroom_purifier",
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": 1
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Bedroom TV"
+                },
+                {
+                  "type": "tile",
+                  "entity": "media_player.bedroom_tv_2"
+                },
+                {
+                  "type": "tile",
+                  "entity": "remote.bedroom_tv"
+                },
+                {
+                  "type": "heading",
+                  "heading": "Bedroom Sonos",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "custom:mushroom-media-player-card",
+                  "entity": "media_player.bedroom",
+                  "volume_controls": [
+                    "volume_mute",
+                    "volume_set",
+                    "volume_buttons"
+                  ],
+                  "use_media_info": true,
+                  "show_volume_level": true,
+                  "media_controls": [],
+                  "collapsible_controls": false,
+                  "tap_action": {
+                    "action": "more-info"
+                  }
+                },
+                {
+                  "type": "media-control",
+                  "entity": "media_player.bedroom_2"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Occupancy Sensor",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.big_bedroom_sensor_group"
+                },
+                {
+                  "type": "entities",
+                  "title": "Big Bedroom Presence",
+                  "entities": [
+                    "binary_sensor.apollo_msr_2_big_bedroom_radar_still_target",
+                    "binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy",
+                    "binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy",
+                    "binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

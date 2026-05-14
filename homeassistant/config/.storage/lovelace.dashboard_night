@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_night",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "entities",
+                  "title": "Sleep Mode Switches",
+                  "entities": [
+                    {
+                      "entity": "switch.al_sleep_mode_bathroom",
+                      "name": "Bathroom Color"
+                    },
+                    {
+                      "entity": "switch.al_sleep_mode_bathroom_main",
+                      "name": "Bathroom Main"
+                    },
+                    {
+                      "entity": "switch.al_sleep_mode_big_bedroom",
+                      "name": "Big Bedroom"
+                    },
+                    {
+                      "entity": "switch.al_sleep_mode_dining_room_bottom",
+                      "name": "Dining Room Bottom"
+                    },
+                    {
+                      "entity": "switch.al_sleep_mode_dining_room_top",
+                      "name": "Dining Room Top"
+                    },
+                    {
+                      "entity": "switch.al_sleep_mode_hallway",
+                      "name": "Hallway"
+                    },
+                    {
+                      "entity": "switch.al_sleep_mode_kitchen",
+                      "name": "Kitchen Color"
+                    },
+                    {
+                      "entity": "switch.al_sleep_mode_kitchen_main",
+                      "name": "Kitchen Main"
+                    },
+                    {
+                      "entity": "switch.al_sleep_mode_living_room",
+                      "name": "Living Room"
+                    },
+                    {
+                      "entity": "switch.adaptive_lighting_sleep_mode_office",
+                      "name": "Office"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

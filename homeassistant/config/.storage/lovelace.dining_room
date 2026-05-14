@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dining_room",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Control",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "event.dining_room_button_4",
+                  "name": "Dining Room Off",
+                  "color": "red",
+                  "show_entity_picture": false,
+                  "vertical": false,
+                  "tap_action": {
+                    "action": "perform-action",
+                    "perform_action": "light.turn_off",
+                    "target": {
+                      "area_id": [
+                        "dining_room"
+                      ]
+                    }
+                  },
+                  "icon_tap_action": {
+                    "action": "toggle"
+                  },
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "event.dining_room_button_1",
+                  "name": "Dining Room On",
+                  "color": "green",
+                  "vertical": false,
+                  "tap_action": {
+                    "action": "perform-action",
+                    "perform_action": "light.turn_on",
+                    "target": {
+                      "area_id": "dining_room"
+                    },
+                    "data": {
+                      "transition": 15
+                    }
+                  },
+                  "features_position": "bottom"
+                },
+                {
+                  "alert_classes": [
+                    "motion",
+                    "moisture"
+                  ],
+                  "sensor_classes": [
+                    "temperature",
+                    "humidity"
+                  ],
+                  "display_type": "compact",
+                  "type": "area",
+                  "area": "dining_room",
+                  "features_position": "bottom",
+                  "vertical": true,
+                  "tap_action": {
+                    "action": "perform-action",
+                    "perform_action": "light.toggle",
+                    "target": {
+                      "area_id": "dining_room"
+                    },
+                    "data": {
+                      "transition": 7
+                    }
+                  },
+                  "color": "indigo"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "title",
+                  "heading": "Top"
+                },
+                {
+                  "type": "tile",
+                  "entity": "light.dining_top_1"
+                },
+                {
+                  "type": "tile",
+                  "entity": "light.dining_top_2"
+                },
+                {
+                  "type": "tile",
+                  "grid_options": {
+                    "columns": "full",
+                    "rows": 1
+                  },
+                  "entity": "light.dining_top_3",
+                  "show_entity_picture": false,
+                  "hide_state": false,
+                  "vertical": true,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "heading",
+                  "heading": "Bottom ",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "custom:mushroom-light-card",
+                  "entity": "light.dining_1"
+                },
+                {
+                  "type": "tile",
+                  "entity": "light.dining_2"
+                },
+                {
+                  "type": "tile",
+                  "entity": "light.dining_3"
+                },
+                {
+                  "type": "tile",
+                  "entity": "light.dining_4"
+                },
+                {
+                  "type": "tile",
+                  "entity": "light.dining_5"
+                },
+                {
+                  "type": "tile",
+                  "entity": "light.dining_6"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Dining Room Sensor Group",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "custom:mushroom-entity-card",
+                  "entity": "binary_sensor.dining_room_sensor_group",
+                  "fill_container": false,
+                  "hold_action": {
+                    "action": "more-info"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

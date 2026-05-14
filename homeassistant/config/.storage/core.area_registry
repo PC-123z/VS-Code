@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "minor_version": 9,
+  "key": "core.area_registry",
+  "data": {
+    "areas": [
+      {
+        "aliases": [],
+        "floor_id": null,
+        "humidity_entity_id": null,
+        "icon": "mdi:fridge",
+        "id": "kitchen",
+        "labels": [],
+        "name": "Kitchen",
+        "picture": null,
+        "temperature_entity_id": null,
+        "created_at": "2025-12-13T05:53:07.924048+00:00",
+        "modified_at": "2026-03-24T00:06:14.369030+00:00"
+      },
+      {
+        "aliases": [],
+        "floor_id": null,
+        "humidity_entity_id": null,
+        "icon": "mdi:bed",
+        "id": "bedroom",
+        "labels": [],
+        "name": "Bedroom - Big",
+        "picture": null,
+        "temperature_entity_id": null,
+        "created_at": "2025-12-13T05:53:08.018005+00:00",
+        "modified_at": "2026-03-24T00:08:28.132818+00:00"
+      },
+      {
+        "aliases": [],
+        "floor_id": null,
+        "humidity_entity_id": null,
+        "icon": "mdi:bathtub",
+        "id": "bathroom",
+        "labels": [],
+        "name": "Bathroom",
+        "picture": null,
+        "temperature_entity_id": null,
+        "created_at": "2025-12-13T05:53:08.122977+00:00",
+        "modified_at": "2026-03-24T00:06:32.835568+00:00"
+      },
+      {
+        "aliases": [],
+        "floor_id": null,
+        "humidity_entity_id": null,
+        "icon": "mdi:bunk-bed",
+        "id": "office",
+        "labels": [],
+        "name": "Bedroom2 / Office",
+        "picture": null,
+        "temperature_entity_id": null,
+        "created_at": "2025-12-13T05:53:08.206638+00:00",
+        "modified_at": "2026-04-16T22:26:32.348841+00:00"
+      },
+      {
+        "aliases": [],
+        "floor_id": null,
+        "humidity_entity_id": null,
+        "icon": "mdi:sofa",
+        "id": "living_room",
+        "labels": [],
+        "name": "Living Room",
+        "picture": null,
+        "temperature_entity_id": null,
+        "created_at": "2025-12-13T05:58:19.065762+00:00",
+        "modified_at": "2025-12-13T05:58:19.065765+00:00"
+      },
+      {
+        "aliases": [],
+        "floor_id": null,
+        "humidity_entity_id": null,
+        "icon": "mdi:road",
+        "id": "hallway",
+        "labels": [],
+        "name": "Hallway",
+        "picture": null,
+        "temperature_entity_id": null,
+        "created_at": "2026-01-06T03:39:25.242791+00:00",
+        "modified_at": "2026-04-20T12:57:30.741339+00:00"
+      },
+      {
+        "aliases": [],
+        "floor_id": null,
+        "humidity_entity_id": null,
+        "icon": "mdi:palm-tree",
+        "id": "outside",
+        "labels": [],
+        "name": "Outside",
+        "picture": null,
+        "temperature_entity_id": null,
+        "created_at": "2026-01-06T03:39:25.243409+00:00",
+        "modified_at": "2026-04-20T12:57:10.807798+00:00"
+      },
+      {
+        "aliases": [],
+        "floor_id": null,
+        "humidity_entity_id": null,
+        "icon": "mdi:table-furniture",
+        "id": "dining_room",
+        "labels": [],
+        "name": "Dining Room",
+        "picture": null,
+        "temperature_entity_id": null,
+        "created_at": "2026-01-06T03:39:25.244319+00:00",
+        "modified_at": "2026-03-24T00:07:07.901704+00:00"
+      },
+      {
+        "aliases": [],
+        "floor_id": null,
+        "humidity_entity_id": null,
+        "icon": "mdi:garage",
+        "id": "garage",
+        "labels": [],
+        "name": "Garage",
+        "picture": null,
+        "temperature_entity_id": null,
+        "created_at": "2026-01-06T03:53:41.287732+00:00",
+        "modified_at": "2026-01-06T03:53:41.287736+00:00"
+      },
+      {
+        "aliases": [],
+        "floor_id": null,
+        "humidity_entity_id": null,
+        "icon": "mdi:washing-machine",
+        "id": "laundry_room",
+        "labels": [],
+        "name": "Laundry Room",
+        "picture": null,
+        "temperature_entity_id": null,
+        "created_at": "2026-03-01T18:16:30.842020+00:00",
+        "modified_at": "2026-03-24T00:07:21.864542+00:00"
+      }
+    ]
+  }
+}

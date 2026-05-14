@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "timer",
+  "data": {
+    "items": [
+      {
+        "id": "bathroom_join_idle",
+        "name": "Bathroom Join Idle",
+        "icon": "mdi:timer",
+        "duration": "0:15:00",
+        "restore": true
+      },
+      {
+        "id": "departure_window",
+        "name": "Departure Window",
+        "icon": "mdi:car",
+        "duration": "0:15:00",
+        "restore": true
+      }
+    ]
+  }
+}

@@ -1,6 +1,5 @@
-# Exclude everything in HA config except YAML files
+# Exclude everything in HA config except what we explicitly want
 homeassistant/config/.cloud/
-homeassistant/config/.storage/
 homeassistant/config/deps/
 homeassistant/config/tts/
 homeassistant/config/.cache/
@@ -8,6 +7,32 @@ homeassistant/config/backups/
 homeassistant/config/www/
 homeassistant/config/custom_components/
 homeassistant/config/secrets.yaml
+
+# .storage — block sensitive/runtime files, allow config files
+homeassistant/config/.storage/auth
+homeassistant/config/.storage/auth_provider.*
+homeassistant/config/.storage/http
+homeassistant/config/.storage/http.auth
+homeassistant/config/.storage/application_credentials
+homeassistant/config/.storage/cloud
+homeassistant/config/.storage/onboarding
+homeassistant/config/.storage/core.restore_state
+homeassistant/config/.storage/core.uuid
+homeassistant/config/.storage/core.analytics
+homeassistant/config/.storage/trace.saved_traces
+homeassistant/config/.storage/bluetooth.*
+homeassistant/config/.storage/esphome.*
+homeassistant/config/.storage/reolink.*
+homeassistant/config/.storage/hacs.*
+homeassistant/config/.storage/homekit.*.aids
+homeassistant/config/.storage/homekit.*.iids
+homeassistant/config/.storage/homekit.*.state
+homeassistant/config/.storage/frontend.user_data_*
+homeassistant/config/.storage/frontend.system_data
+homeassistant/config/.storage/core.config_entries.bak.*
+homeassistant/config/.storage/backup
+homeassistant/config/.storage/androidtv_remote_*
+homeassistant/config/.storage/core.config_entries
 
 # Exclude these entire services
 music-assistant/
@@ -35,4 +60,3 @@ homeassistant/config/*.db-wal
 homeassistant/config/*.db.corrupt*
 homeassistant/config/*.pem
 homeassistant/config/coordinator.py
-homeassistant/config/blueprints/

@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_test2",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "type": "sections",
+          "sections": [
+            {
+              "type": "custom:mushroom-template-card",
+              "primary": "Indoor Lights",
+              "secondary": "{{ 'On' if expand(label_entities('Indoor')) | selectattr('state', 'eq', 'on') | list | count > 0 else 'Off' }}",
+              "icon": "mdi:lightbulb-group",
+              "icon_color": "{{ 'amber' if expand(label_entities('Indoor')) | selectattr('state', 'eq', 'on') | list | count > 0 else 'disabled' }}",
+              "tap_action": {
+                "action": "call-service",
+                "service": "light.turn_on",
+                "target": {
+                  "label_id": "indoor"
+                }
+              },
+              "hold_action": {
+                "action": "call-service",
+                "service": "light.turn_off",
+                "target": {
+                  "label_id": "indoor"
+                }
+              }
+            },
+            {
+              "type": "custom:auto-entities",
+              "card": {
+                "type": "entities",
+                "title": "Active Sensors",
+                "show_header_toggle": false
+              },
+              "filter": {
+                "include": [
+                  {
+                    "domain": "binary_sensor",
+                    "attributes": {
+                      "device_class": "motion"
+                    }
+                  },
+                  {
+                    "domain": "binary_sensor",
+                    "attributes": {
+                      "device_class": "occupancy"
+                    }
+                  }
+                ],
+                "exclude": [
+                  {
+                    "state": "off"
+                  },
+                  {
+                    "state": "unavailable"
+                  }
+                ]
+              },
+              "sort": {
+                "method": "name"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

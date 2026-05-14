@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "minor_version": 2,
+  "key": "core.label_registry",
+  "data": {
+    "labels": [
+      {
+        "color": "teal",
+        "description": null,
+        "icon": "mdi:home-outline",
+        "label_id": "indoor",
+        "name": "Indoor",
+        "created_at": "2026-03-28T03:41:10.782337+00:00",
+        "modified_at": "2026-03-28T03:41:10.782341+00:00"
+      },
+      {
+        "color": null,
+        "description": "Top of Dining Room Light",
+        "icon": null,
+        "label_id": "dining_room_top",
+        "name": "Dining Room Top",
+        "created_at": "2026-03-29T16:45:14.389159+00:00",
+        "modified_at": "2026-03-29T16:45:14.389162+00:00"
+      },
+      {
+        "color": null,
+        "description": null,
+        "icon": null,
+        "label_id": "dining_room_bottom",
+        "name": "Dining Room Bottom",
+        "created_at": "2026-03-29T16:45:58.113023+00:00",
+        "modified_at": "2026-03-29T16:45:58.113027+00:00"
+      }
+    ]
+  }
+}
