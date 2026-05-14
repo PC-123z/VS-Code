@@ -5,11 +5,6 @@
   "data": {
     "items": [
       {
-        "id": "good_morning_test_trigger",
-        "name": "Good Morning Test Trigger",
-        "icon": "mdi:weather-sunset-up"
-      },
-      {
         "id": "bedroom_2_test_trigger",
         "name": "Bedroom 2 Test Trigger",
         "icon": "mdi:bunk-bed-outline"

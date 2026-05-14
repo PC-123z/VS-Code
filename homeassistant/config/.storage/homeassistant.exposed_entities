@@ -502,6 +502,36 @@
             "should_expose": false
           }
         }
+      },
+      "automation.bedroom_2_all_off": {
+        "assistants": {
+          "cloud.alexa": {
+            "should_expose": false
+          },
+          "cloud.google_assistant": {
+            "should_expose": false
+          }
+        }
+      },
+      "automation.bedroom_2_turbo_test": {
+        "assistants": {
+          "cloud.alexa": {
+            "should_expose": false
+          },
+          "cloud.google_assistant": {
+            "should_expose": false
+          }
+        }
+      },
+      "input_button.good_morning_test": {
+        "assistants": {
+          "cloud.alexa": {
+            "should_expose": false
+          },
+          "cloud.google_assistant": {
+            "should_expose": false
+          }
+        }
       }
     }
   }
