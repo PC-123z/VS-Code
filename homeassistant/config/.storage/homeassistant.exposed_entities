@@ -562,6 +562,26 @@
             "should_expose": false
           }
         }
+      },
+      "automation.kitchen_off": {
+        "assistants": {
+          "cloud.alexa": {
+            "should_expose": false
+          },
+          "cloud.google_assistant": {
+            "should_expose": false
+          }
+        }
+      },
+      "automation.kitchen_on_2": {
+        "assistants": {
+          "cloud.alexa": {
+            "should_expose": false
+          },
+          "cloud.google_assistant": {
+            "should_expose": false
+          }
+        }
       }
     }
   }

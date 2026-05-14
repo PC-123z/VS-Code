@@ -773,44 +773,6 @@
       area_id: dining_room
     data: {}
   mode: single
-- id: '1774933764291'
-  alias: Kitchen Off
-  description: Turns off kitchen lights with a delay based on the time of day
-  triggers:
-  - trigger: state
-    entity_id:
-    - binary_sensor.kitchen_sensor_group
-    to: 'off'
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: sun.sun
-        state: above_horizon
-      sequence:
-      - delay:
-          minutes: 10
-      - action: light.turn_off
-        target:
-          area_id: kitchen
-        data:
-          transition: 60
-      alias: Day Mode - 10 Minute Before Kitchen Lights Off
-    - conditions:
-      - condition: state
-        entity_id: sun.sun
-        state: below_horizon
-      sequence:
-      - delay:
-          minutes: 5
-      - action: light.turn_off
-        target:
-          area_id: kitchen
-        data:
-          transition: 60
-      alias: Night Mode - 5 Minute Before Kitchen Lights Off
-  mode: restart
 - id: '1774943041042'
   alias: 'Big Bedroom Empty - Off '
   description: ''
@@ -1218,49 +1180,6 @@
           entity_id: light.hallway
         data:
           transition: 10
-  mode: restart
-- id: '1775347744975'
-  alias: Kitchen On
-  description: Turns on kitchen lights with day and night modes
-  triggers:
-  - trigger: state
-    entity_id:
-    - binary_sensor.kitchen_sensor_group
-    to:
-    - 'on'
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: sun.sun
-        state: above_horizon
-      sequence:
-      - delay:
-          minutes: 10
-      - action: light.turn_on
-        target:
-          area_id:
-          - kitchen
-        data:
-          brightness_pct: 100
-          color_temp_kelvin: 4500
-      alias: Day Mode
-    - conditions:
-      - condition: state
-        entity_id: sun.sun
-        state: below_horizon
-      sequence:
-      - delay:
-          minutes: 5
-      - action: light.turn_on
-        target:
-          area_id:
-          - kitchen
-        data:
-          brightness_pct: 40
-          color_temp_kelvin: 2700
-      alias: Night Mode
   mode: restart
 - id: '1775347744975'
   alias: Kitchen On
