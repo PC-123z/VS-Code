@@ -542,6 +542,12 @@ goodbye_routine_immediate_actions:
       - light.bathroom_shower
       - light.bathroom_back
       - light.showtime_light
+      - light.bedroom
+      - light.bedroom_2
+      - light.bedroom_ceiling_1
+      - light.bedroom_ceiling_2
+      - light.bedroom_lamp_1
+      - light.bedroom_lamp_2
     action: light.turn_off
   - data:
       transition: 15
@@ -635,6 +641,12 @@ goodbye_routine_all_clear_arm_and_power_off:
       - light.bathroom_shower
       - light.bathroom_back
       - light.showtime_light
+      - light.bedroom
+      - light.bedroom_2
+      - light.bedroom_ceiling_1
+      - light.bedroom_ceiling_2
+      - light.bedroom_lamp_1
+      - light.bedroom_lamp_2
     action: light.turn_off
     data: {}
   - target:

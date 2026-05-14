@@ -582,6 +582,16 @@
             "should_expose": false
           }
         }
+      },
+      "automation.departure_paul_is_away": {
+        "assistants": {
+          "cloud.alexa": {
+            "should_expose": false
+          },
+          "cloud.google_assistant": {
+            "should_expose": false
+          }
+        }
       }
     }
   }
