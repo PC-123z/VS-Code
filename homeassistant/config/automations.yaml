@@ -6698,19 +6698,33 @@
       - action: automation.turn_on
         target:
           entity_id: automation.living_room_smart_motion_presence
-      - action: adaptive_lighting.apply
-        continue_on_error: true
-        data:
-          entity_id: switch.al_living_room
-          lights:
-          - light.living_room
-          transition: 3
-          adapt_color: true
-          adapt_brightness: true
-          prefer_rgb_color: true
-      - action: light.turn_on
-        target:
-          entity_id: light.galaxy_projector
+      - alias: Only restore lights if someone is actually in the room
+        if:
+        - condition: state
+          entity_id: binary_sensor.living_room_sensor_group
+          state: 'on'
+        then:
+        - action: adaptive_lighting.apply
+          continue_on_error: true
+          data:
+            entity_id: switch.al_living_room
+            lights:
+            - light.living_room
+            transition: 3
+            adapt_color: true
+            adapt_brightness: true
+            prefer_rgb_color: true
+        - action: light.turn_on
+          target:
+            entity_id: light.galaxy_projector
+        else:
+        - action: light.turn_off
+          target:
+            entity_id:
+            - light.living_room
+            - light.galaxy_projector
+          data:
+            transition: 3
   variables:
     sun_elev: '{{ state_attr(''sun.sun'', ''elevation'') | float(0) }}'
     tv_kelvin: '{% if sun_elev > 10 %}4000 {% elif sun_elev > -6 %}2700 {% else %}2200
