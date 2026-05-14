@@ -193,6 +193,12 @@ cameras:
       width: 1280
       height: 720
       fps: 5
+    objects:
+      filters:
+        person:
+          min_score: 0.65
+          threshold: 0.75
+          min_area: 5000
 
   kitchen:
     ffmpeg:
@@ -215,6 +221,16 @@ cameras:
       width: 1280
       height: 720
       fps: 5
+    objects:
+      filters:
+        person:
+          min_score: 0.65
+          threshold: 0.75
+          min_area: 5000
+    motion:
+      threshold: 55
+      contour_area: 10
+      improve_contrast: true
 
   living_room:
     ffmpeg:
@@ -237,14 +253,20 @@ cameras:
       width: 1280
       height: 720
       fps: 5
+    objects:
+      filters:
+        person:
+          min_score: 0.65
+          threshold: 0.75
+          min_area: 5000
 
 detect:
   enabled: true
 semantic_search:
-  enabled: false
+  enabled: true
   model_size: small
 face_recognition:
-  enabled: false
+  enabled: true
   model_size: small
 lpr:
   enabled: false
