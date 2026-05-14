@@ -6155,11 +6155,11 @@
     data: {}
   mode: single
 - id: '1776722452944'
-  alias: Auto-Close Garage at 11PM
-  description: Fail-safe close if garage is left open at 11PM
+  alias: Auto-Close Garage at 10PM
+  description: Fail-safe close if garage is left open at 10PM
   triggers:
   - trigger: time
-    at: '22:59:00'
+    at: '21:59:00'
   conditions:
   - condition: state
     entity_id: binary_sensor.garage_occupancy_group
@@ -6176,7 +6176,7 @@
     data: {}
   - action: notify.mobile_app_pc_iphone
     data:
-      message: Garage was open at 11PM and auto-closed. Check why earlier automations
+      message: Garage was open at 10PM and auto-closed. Check why earlier automations
         didn't catch this.
       title: Auto Close
   mode: single
