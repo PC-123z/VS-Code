@@ -35,8 +35,8 @@ services:
       - "ollama-pc:192.168.70.156"
     volumes:
       - paperclip-data:/paperclip
-      # Hermes config for the hermes_local adapter — points to your Ollama PC
       - ./hermes-config.yaml:/paperclip/.hermes/config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       db:
         condition: service_healthy

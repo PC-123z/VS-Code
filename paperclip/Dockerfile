@@ -1,35 +1,31 @@
 # syntax=docker/dockerfile:1.7
-# Extends the official Paperclip build with hermes-agent (pip) for the hermes_local adapter.
-# Clones Paperclip from GitHub at build time — no local source copy needed.
+# Builds Paperclip from GitHub source. Hermes is invoked via
+# `docker exec hermes-gateway hermes` — no local install needed.
 
 ARG PAPERCLIP_REF=main
 
-# ── stage 1: base tools ──────────────────────────────────────────────────────
 FROM node:lts-trixie-slim AS base
 ARG USER_UID=1000
 ARG USER_GID=1000
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-       ca-certificates gosu curl git wget ripgrep python3 python3-pip \
+       ca-certificates gosu curl git wget ripgrep python3 \
   && rm -rf /var/lib/apt/lists/* \
   && corepack enable \
   && usermod  -u $USER_UID --non-unique node \
   && groupmod -g $USER_GID --non-unique node \
   && usermod  -g $USER_GID -d /paperclip node
 
-# ── stage 2: clone source ────────────────────────────────────────────────────
 FROM base AS source
 ARG PAPERCLIP_REF
 WORKDIR /src
 RUN git clone --depth=1 --branch "$PAPERCLIP_REF" \
       https://github.com/paperclipai/paperclip.git .
 
-# ── stage 3: install JS deps ─────────────────────────────────────────────────
 FROM source AS deps
 WORKDIR /src
 RUN pnpm install --frozen-lockfile
 
-# ── stage 4: build ───────────────────────────────────────────────────────────
 FROM deps AS build
 WORKDIR /src
 RUN pnpm --filter @paperclipai/ui         build \
@@ -37,7 +33,6 @@ RUN pnpm --filter @paperclipai/ui         build \
  && pnpm --filter @paperclipai/server     build \
  && test -f server/dist/index.js || (echo "ERROR: server build missing" && exit 1)
 
-# ── stage 5: production + hermes-agent ───────────────────────────────────────
 FROM base AS production
 ARG USER_UID=1000
 ARG USER_GID=1000
@@ -45,20 +40,23 @@ WORKDIR /app
 
 COPY --chown=node:node --from=build /src /app
 
-# Install global agent CLIs + hermes-agent Python CLI
+# Install global agent CLIs + docker CLI (for `docker exec hermes-gateway hermes`)
 RUN npm install --global --omit=dev \
       @anthropic-ai/claude-code@latest \
       @openai/codex@latest \
       opencode-ai \
   && apt-get update \
-  && apt-get install -y --no-install-recommends openssh-client jq \
-  && pip3 install hermes-agent --break-system-packages \
+  && apt-get install -y --no-install-recommends openssh-client jq docker.io \
   && rm -rf /var/lib/apt/lists/* \
   && mkdir -p /paperclip \
   && chown node:node /paperclip
 
 COPY --from=build /src/scripts/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Bake in hermes config so the adapter can auto-detect the Ollama model
+COPY hermes-config.yaml /paperclip/.hermes/config.yaml
+RUN chown node:node /paperclip/.hermes/config.yaml
 
 ENV NODE_ENV=production \
     HOME=/paperclip \
