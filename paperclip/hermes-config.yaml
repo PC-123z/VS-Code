@@ -1,0 +1,36 @@
+# Hermes config for use inside the Paperclip container.
+# Mounts to /paperclip/.hermes/config.yaml (HOME=/paperclip in the container).
+# Paperclip's hermes_local adapter reads this to detect the model.
+
+model:
+  default: gemma4:latest
+  provider: custom:ollama-pc
+  base_url: ''
+
+custom_providers:
+- name: Ollama-PC
+  base_url: http://192.168.70.156:11434/v1
+  model: gemma4:latest
+
+agent:
+  max_turns: 90
+  tool_use_enforcement: auto
+  verbose: false
+  reasoning_effort: medium
+
+terminal:
+  backend: local
+  timeout: 180
+  persistent_shell: true
+
+compression:
+  enabled: true
+  threshold: 0.5
+  target_ratio: 0.2
+  protect_last_n: 20
+
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+
+_config_version: 23

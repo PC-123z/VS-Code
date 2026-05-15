@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: paperclip
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-paperclip}
+      POSTGRES_DB: paperclip
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paperclip -d paperclip"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  paperclip:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PAPERCLIP_REF: main
+    ports:
+      - "${PAPERCLIP_PORT:-3100}:3100"
+    environment:
+      HOST: "0.0.0.0"
+      DATABASE_URL: "postgres://paperclip:${POSTGRES_PASSWORD:-paperclip}@db:5432/paperclip"
+      PAPERCLIP_HOME: "/paperclip"
+      SERVE_UI: "true"
+      PAPERCLIP_DEPLOYMENT_MODE: "authenticated"
+      PAPERCLIP_DEPLOYMENT_EXPOSURE: "private"
+      PAPERCLIP_PUBLIC_URL: "${PAPERCLIP_PUBLIC_URL:-http://docker2:3100}"
+      BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET}"
+    extra_hosts:
+      - "ollama-pc:192.168.70.156"
+    volumes:
+      - paperclip-data:/paperclip
+      # Hermes config for the hermes_local adapter — points to your Ollama PC
+      - ./hermes-config.yaml:/paperclip/.hermes/config.yaml:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  paperclip-data:
