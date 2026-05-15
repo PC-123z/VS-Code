@@ -101,6 +101,13 @@
         "domain": "cloud",
         "is_persistent": false,
         "issue_id": "connection_error_2026-06-01 00:00:00+00:00"
+      },
+      {
+        "created": "2026-05-15T14:58:51.602425+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_656992550_tags/v1.8.8"
       }
     ]
   }
