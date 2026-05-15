@@ -2,7 +2,7 @@
 # Builds Paperclip from GitHub source. Hermes is invoked via
 # `docker exec hermes-gateway hermes` — no local install needed.
 
-ARG PAPERCLIP_REF=main
+ARG PAPERCLIP_REF=master
 
 FROM node:lts-trixie-slim AS base
 ARG USER_UID=1000
