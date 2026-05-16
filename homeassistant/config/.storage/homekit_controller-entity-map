@@ -181,7 +181,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 21.1,
+                    "value": 21.8,
                     "description": "Current Temperature",
                     "unit": "celsius",
                     "minValue": 0,
@@ -197,7 +197,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 21.1,
+                    "value": 20.3,
                     "description": "Target Temperature",
                     "unit": "celsius",
                     "minValue": 14.4,
@@ -232,7 +232,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 22.8,
+                    "value": 21.1,
                     "description": "Cooling Threshold Temperature",
                     "unit": "celsius",
                     "minValue": 19.9,
@@ -263,7 +263,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 47.0,
+                    "value": 50.0,
                     "description": "Current Relative Humidity",
                     "unit": "percentage",
                     "minValue": 0,
@@ -317,7 +317,7 @@
                       "pr"
                     ],
                     "format": "uint8",
-                    "value": 0,
+                    "value": 3,
                     "minValue": 0,
                     "maxValue": 3,
                     "minStep": 1
@@ -425,7 +425,7 @@
                       "pw"
                     ],
                     "format": "string",
-                    "value": "2014-01-03T00:00:00-04:00Q",
+                    "value": "2026-05-16T20:17:21-04:00Q",
                     "maxLen": 64
                   },
                   {
@@ -655,7 +655,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 20.9,
+                    "value": 21.6,
                     "description": "Current Temperature",
                     "unit": "celsius",
                     "minValue": 0,
@@ -712,7 +712,7 @@
                       "ev"
                     ],
                     "format": "uint8",
-                    "value": 0,
+                    "value": 1,
                     "description": "Occupancy Detected",
                     "minValue": 0,
                     "maxValue": 1,
@@ -761,7 +761,7 @@
                       "pr"
                     ],
                     "format": "int",
-                    "value": 18044,
+                    "value": 285,
                     "unit": "seconds",
                     "minValue": -1,
                     "maxValue": 86400,
@@ -781,7 +781,7 @@
                       "ev"
                     ],
                     "format": "bool",
-                    "value": false,
+                    "value": true,
                     "description": "Motion Detected"
                   },
                   {
@@ -827,7 +827,7 @@
                       "pr"
                     ],
                     "format": "int",
-                    "value": 18044,
+                    "value": 285,
                     "unit": "seconds",
                     "minValue": -1,
                     "maxValue": 86400,
@@ -1255,7 +1255,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -54
+                    "value": -51
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
@@ -2026,7 +2026,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -61
+                    "value": -60
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
@@ -2472,7 +2472,7 @@
                       "ev"
                     ],
                     "format": "bool",
-                    "value": true,
+                    "value": false,
                     "description": "On"
                   },
                   {
@@ -2495,7 +2495,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 25.0,
+                    "value": 0.0,
                     "description": "Rotation Speed",
                     "unit": "percentage",
                     "minValue": 0.0,
