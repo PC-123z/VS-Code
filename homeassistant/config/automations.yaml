@@ -779,10 +779,10 @@
   triggers:
   - trigger: state
     entity_id:
-    - binary_sensor.big_bedroom_temp_sensor_presence
+    - binary_sensor.big_bedroom_sensor_group
     for:
       hours: 0
-      minutes: 15
+      minutes: 30
       seconds: 0
     to:
     - 'off'
@@ -5164,9 +5164,9 @@
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: 'Good morning! Today is {{ now().strftime(''%A, %B %-d'') }}.
-              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'') }},
-              with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'', ''temperature'')
-              }} degrees. Have a great day!
+              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'')
+              }}, with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'',
+              ''temperature'') }} degrees. Have a great day!
 
               '
         else:
@@ -5221,9 +5221,9 @@
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: 'Good morning! Today is {{ now().strftime(''%A, %B %-d'') }}.
-              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'') }},
-              with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'', ''temperature'')
-              }} degrees. Have a great day!
+              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'')
+              }}, with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'',
+              ''temperature'') }} degrees. Have a great day!
 
               '
         - alias: Short pause for TTS to finish then resume
@@ -6466,8 +6466,9 @@
       - notify.paul_s_sonos_one_second_edition_announce
     data:
       message: 'XC60 will be Ready to Depart in 5 Minutes. Current conditions are
-        {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'') }}, {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'',
-        ''temperature'') }} degrees.
+        {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'') }}, {{
+        state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'', ''temperature'')
+        }} degrees.
 
         '
   - delay:
@@ -7623,9 +7624,9 @@
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: Good morning! Today is {{ now().strftime('%A, %B %-d') }}. The
-              current conditions are {{ states('weather.nws_38_20113654119161_85_60519204644677_klou') }}, with
-              a temperature of {{ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou', 'temperature')
-              }} degrees. Have a great day!
+              current conditions are {{ states('weather.nws_38_20113654119161_85_60519204644677_klou')
+              }}, with a temperature of {{ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou',
+              'temperature') }} degrees. Have a great day!
         else:
         - alias: Ramp volume to 0.17 over ~2.5 minutes
           repeat:
@@ -7674,9 +7675,9 @@
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: Good morning! Today is {{ now().strftime('%A, %B %-d') }}. The
-              current conditions are {{ states('weather.nws_38_20113654119161_85_60519204644677_klou') }}, with
-              a temperature of {{ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou', 'temperature')
-              }} degrees. Have a great day!
+              current conditions are {{ states('weather.nws_38_20113654119161_85_60519204644677_klou')
+              }}, with a temperature of {{ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou',
+              'temperature') }} degrees. Have a great day!
         - alias: Short pause for TTS to finish then resume
           delay:
             seconds: 2
