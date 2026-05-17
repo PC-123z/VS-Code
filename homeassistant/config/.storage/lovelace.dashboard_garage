@@ -49,14 +49,14 @@
                   "show_current": true,
                   "show_forecast": true,
                   "type": "weather-forecast",
-                  "entity": "weather.forecast_home_2",
+                  "entity": "weather.nws_38_20113654119161_85_60519204644677_klou",
                   "forecast_type": "hourly"
                 },
                 {
                   "show_current": false,
                   "show_forecast": true,
                   "type": "weather-forecast",
-                  "entity": "weather.forecast_home_2",
+                  "entity": "weather.nws_38_20113654119161_85_60519204644677_klou",
                   "forecast_type": "daily",
                   "round_temperature": false
                 }

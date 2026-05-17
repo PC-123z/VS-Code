@@ -277,8 +277,8 @@ script_good_morning_routine_core:
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: 'Good morning! Today is {{ now().strftime(''%A, %B %-d'') }}.
-              The current conditions are {{ states(''weather.forecast_home_2'') }},
-              with a temperature of {{ state_attr(''weather.forecast_home_2'', ''temperature'')
+              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'') }},
+              with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'', ''temperature'')
               }} degrees. Have a great day!
 
               '
@@ -330,8 +330,8 @@ script_good_morning_routine_core:
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: 'Good morning! Today is {{ now().strftime(''%A, %B %-d'') }}.
-              The current conditions are {{ states(''weather.forecast_home_2'') }},
-              with a temperature of {{ state_attr(''weather.forecast_home_2'', ''temperature'')
+              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'') }},
+              with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'', ''temperature'')
               }} degrees. Have a great day!
 
               '
