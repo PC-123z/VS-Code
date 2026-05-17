@@ -101,6 +101,13 @@
         "domain": "cloud",
         "is_persistent": false,
         "issue_id": "connection_error_2026-06-01 00:00:00+00:00"
+      },
+      {
+        "created": "2026-05-17T19:52:26.656178+00:00",
+        "dismissed_version": null,
+        "domain": "mqtt",
+        "is_persistent": false,
+        "issue_id": "-0x1a02427d04e3cced"
       }
     ]
   }

@@ -178,5 +178,6 @@ mqtt:
       unique_id: kraken_rgb_light
       command_topic: "kraken/light/set"
       schema: json
-      rgb: true
+      supported_color_modes:
+        - rgb
       optimistic: true
