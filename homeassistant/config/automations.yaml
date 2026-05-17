@@ -6574,6 +6574,7 @@
     - paused
     - idle
     id: paused
+    enabled: false
   - trigger: state
     entity_id:
     - media_player.living_room_tv
@@ -6593,6 +6594,7 @@
     - paused
     - idle
     id: paused
+    enabled: false
   - trigger: state
     entity_id:
     - media_player.living_room_tv_3
