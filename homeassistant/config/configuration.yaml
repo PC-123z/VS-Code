@@ -171,3 +171,12 @@ emulated_hue:
     switch.office_pc:
       name: "Wake PC"
       hidden: false
+
+      mqtt:
+  light:
+    - name: "Kraken RGB"
+      unique_id: kraken_rgb_light
+      command_topic: "kraken/light/set"
+      schema: json
+      rgb: true
+      optimistic: true
