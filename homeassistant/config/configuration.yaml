@@ -172,7 +172,7 @@ emulated_hue:
       name: "Wake PC"
       hidden: false
 
-      mqtt:
+mqtt:
   light:
     - name: "Kraken RGB"
       unique_id: kraken_rgb_light
