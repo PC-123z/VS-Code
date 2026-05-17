@@ -592,6 +592,16 @@
             "should_expose": false
           }
         }
+      },
+      "automation.nap_wake_up_routine": {
+        "assistants": {
+          "cloud.alexa": {
+            "should_expose": false
+          },
+          "cloud.google_assistant": {
+            "should_expose": false
+          }
+        }
       }
     }
   }
