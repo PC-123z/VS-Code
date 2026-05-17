@@ -101,13 +101,6 @@
         "domain": "cloud",
         "is_persistent": false,
         "issue_id": "connection_error_2026-06-01 00:00:00+00:00"
-      },
-      {
-        "created": "2026-05-17T00:28:25.529631+00:00",
-        "dismissed_version": null,
-        "domain": "sonos",
-        "is_persistent": false,
-        "issue_id": "subscriptions_failed"
       }
     ]
   }
