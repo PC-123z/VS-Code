@@ -68,10 +68,10 @@ go2rtc:
       - 192.168.70.155:8555
   streams:
     driveway_main:
-      - rtsp://admin:Cameron20778@192.168.70.98:554/h264Preview_01_main#transport=tcp
+      - rtsp://admin:Cameron20778@192.168.70.98:554/h264Preview_01_main
       - '#restream'
     driveway_sub:
-      - rtsp://admin:Cameron20778@192.168.70.98:554/h264Preview_01_sub#transport=tcp
+      - rtsp://admin:Cameron20778@192.168.70.98:554/h264Preview_01_sub
       - '#restream'
 
     front_door:
@@ -82,24 +82,24 @@ go2rtc:
       - '#restream'
 
     garage:
-      - rtsp://admin:Cameron20778@192.168.70.101:554/h264Preview_01_main#transport=tcp
+      - rtsp://admin:Cameron20778@192.168.70.101:554/h264Preview_01_main
       - '#restream'
     garage_sub:
-      - rtsp://admin:Cameron20778@192.168.70.101:554/h264Preview_01_sub#transport=tcp
+      - rtsp://admin:Cameron20778@192.168.70.101:554/h264Preview_01_sub
       - '#restream'
 
     kitchen:
-      - rtsp://admin:Cameron20778@192.168.70.97:554/h264Preview_01_main#transport=tcp
+      - rtsp://admin:Cameron20778@192.168.70.97:554/h264Preview_01_main
       - '#restream'
     kitchen_sub:
-      - rtsp://admin:Cameron20778@192.168.70.97:554/h264Preview_01_sub#transport=tcp
+      - rtsp://admin:Cameron20778@192.168.70.97:554/h264Preview_01_sub
       - '#restream'
 
     living_room:
-      - rtsp://admin:Cameron20778@192.168.70.102:554/h264Preview_01_main#transport=tcp
+      - rtsp://admin:Cameron20778@192.168.70.102:554/h264Preview_01_main
       - '#restream'
     living_room_sub:
-      - rtsp://admin:Cameron20778@192.168.70.102:554/h264Preview_01_sub#transport=tcp
+      - rtsp://admin:Cameron20778@192.168.70.102:554/h264Preview_01_sub
       - '#restream'
 
 cameras:
