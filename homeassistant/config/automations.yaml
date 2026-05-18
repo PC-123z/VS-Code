@@ -119,9 +119,9 @@
     weekday:
     - sat
   - trigger: time
-    at: '18:45:00'
+    at: '18:30:00'
     weekday:
-    - sun
+    - mon
     enabled: true
   conditions: []
   actions:
