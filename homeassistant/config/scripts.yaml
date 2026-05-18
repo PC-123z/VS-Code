@@ -41,6 +41,24 @@ script_volvo_start_core:
     Alexa feedback.
   icon: mdi:car
   sequence:
+  - alias: Open garage if between 7AM-9PM and not opened in last 10 minutes
+    choose:
+    - conditions:
+      - condition: time
+        after: '07:00:00'
+        before: '21:00:00'
+      - condition: template
+        value_template: "{{ (now() - states.cover.garage.last_changed).total_seconds() > 600 }}"
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: cover.garage
+          state: open
+      sequence:
+      - action: cover.open_cover
+        target:
+          entity_id: cover.garage
+        data: {}
   - alias: Press climatization button
     action: button.press
     target:
