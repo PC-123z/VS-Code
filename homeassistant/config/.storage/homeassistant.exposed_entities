@@ -1322,6 +1322,16 @@
             "should_expose": false
           }
         }
+      },
+      "media_player.vsx_lx102": {
+        "assistants": {
+          "cloud.alexa": {
+            "should_expose": false
+          },
+          "cloud.google_assistant": {
+            "should_expose": false
+          }
+        }
       }
     }
   }
