@@ -4490,7 +4490,7 @@
     presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: 06:50:00
+    at: 07:50:00
     weekday:
     - mon
     - tue
@@ -7041,7 +7041,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 06:50:00
+    at: 07:50:00
     weekday:
     - mon
     - tue
@@ -7940,17 +7940,15 @@
     trigger: mqtt
   conditions:
   - condition: template
-    value_template: >-
-      {{ trigger.payload_json.type == 'new' and
-         trigger.payload_json.after.label == 'person' and
-         trigger.payload_json.after.score >= 0.75 }}
+    value_template: "{{ trigger.payload_json.type == 'new' and\n   trigger.payload_json.after.label
+      == 'person' and\n   trigger.payload_json.after.score >= 0.75 }}"
   actions:
   - alias: Mute Echo Show if between 11PM and 7AM
     choose:
     - conditions:
       - condition: time
         after: '23:00:00'
-        before: '07:00:00'
+        before: 07:00:00
       sequence:
       - action: media_player.volume_set
         target:
@@ -7962,6 +7960,7 @@
     target:
       entity_id: media_player.echo_show_kitchen
     data:
-      media_content_id: "{{ 'Front Door Camera' if trigger.id == 'front_door' else 'Driveway Camera' }}"
+      media_content_id: '{{ ''Front Door Camera'' if trigger.id == ''front_door''
+        else ''Driveway Camera'' }}'
       media_content_type: smart_home_camera
   mode: single
