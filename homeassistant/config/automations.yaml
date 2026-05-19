@@ -7962,6 +7962,6 @@
     target:
       entity_id: media_player.echo_show_kitchen
     data:
-      media_content_id: "{{ 'front_door' if trigger.id == 'front_door' else 'driveway' }}"
+      media_content_id: "{{ 'Front Door' if trigger.id == 'front_door' else 'Driveway' }}"
       media_content_type: smart_home_camera
   mode: single
