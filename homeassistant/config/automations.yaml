@@ -7927,3 +7927,41 @@
     entity_id: 3d13bb77598c9f789d866e1a6e340482
     type: arm_home
   mode: single
+- id: '1779140000001'
+  alias: Frigate - Show Camera on Echo Show Kitchen (Person Detected)
+  description: On person detection at front door or driveway, display the camera feed
+    on the kitchen Echo Show. Mutes the Echo Show between 11PM and 7AM.
+  triggers:
+  - topic: frigate/front_door/events
+    id: front_door
+    trigger: mqtt
+  - topic: frigate/driveway/events
+    id: driveway
+    trigger: mqtt
+  conditions:
+  - condition: template
+    value_template: >-
+      {{ trigger.payload_json.type == 'new' and
+         trigger.payload_json.after.label == 'person' and
+         trigger.payload_json.after.score >= 0.75 }}
+  actions:
+  - alias: Mute Echo Show if between 11PM and 7AM
+    choose:
+    - conditions:
+      - condition: time
+        after: '23:00:00'
+        before: '07:00:00'
+      sequence:
+      - action: media_player.volume_set
+        target:
+          entity_id: media_player.echo_show_kitchen
+        data:
+          volume_level: 0
+  - alias: Show camera feed on Echo Show
+    action: media_player.play_media
+    target:
+      entity_id: media_player.echo_show_kitchen
+    data:
+      media_content_id: "{{ 'front_door' if trigger.id == 'front_door' else 'driveway' }}"
+      media_content_type: smart_home_camera
+  mode: single
