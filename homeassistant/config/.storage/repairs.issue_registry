@@ -108,6 +108,13 @@
         "domain": "mqtt",
         "is_persistent": false,
         "issue_id": "-0x1a02427d04e3cced"
+      },
+      {
+        "created": "2026-05-19T05:15:36.749904+00:00",
+        "dismissed_version": null,
+        "domain": "sonos",
+        "is_persistent": false,
+        "issue_id": "subscriptions_failed"
       }
     ]
   }
