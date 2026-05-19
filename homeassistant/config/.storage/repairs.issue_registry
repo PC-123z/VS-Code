@@ -108,13 +108,6 @@
         "domain": "mqtt",
         "is_persistent": false,
         "issue_id": "-0x1a02427d04e3cced"
-      },
-      {
-        "created": "2026-05-19T01:18:19.227982+00:00",
-        "dismissed_version": null,
-        "domain": "hacs",
-        "is_persistent": false,
-        "issue_id": "restart_required_139664351_tags/v5.15.2"
       }
     ]
   }
