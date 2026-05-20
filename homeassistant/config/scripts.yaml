@@ -55,10 +55,23 @@ script_volvo_start_core:
           entity_id: cover.garage
           state: open
       sequence:
-      - action: cover.open_cover
-        target:
-          entity_id: cover.garage
-        data: {}
+      - alias: Wait for person detected in garage (up to 5 minutes)
+        wait_for_trigger:
+        - trigger: state
+          entity_id: binary_sensor.garage_occupancy_group
+          to: 'on'
+        timeout:
+          minutes: 10
+        continue_on_timeout: false
+      - alias: Open garage only if person was detected
+        if:
+        - condition: template
+          value_template: '{{ wait.completed }}'
+        then:
+        - action: cover.open_cover
+          target:
+            entity_id: cover.garage
+          data: {}
   - alias: Press climatization button
     action: button.press
     target:
