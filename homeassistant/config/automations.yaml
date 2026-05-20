@@ -4490,7 +4490,7 @@
     presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: 07:50:00
+    at: 06:50:00
     weekday:
     - mon
     - tue
