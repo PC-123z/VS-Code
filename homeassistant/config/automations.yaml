@@ -1611,6 +1611,10 @@
       - action: switch.turn_on
         target:
           entity_id: switch.adaptive_lighting_sleep_mode_office
+      - alias: Skip AL apply if dimmer override is active (user set lights manually)
+        condition: state
+        entity_id: input_boolean.bedroom2_manual_override
+        state: 'off'
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -5552,6 +5556,9 @@
   - trigger: time
     at: '22:50:00'
     id: lights_out
+  - trigger: time
+    at: '00:00:00'
+    id: midnight_override_reset
   actions:
   - choose:
     - conditions:
