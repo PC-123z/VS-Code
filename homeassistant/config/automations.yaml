@@ -7222,7 +7222,7 @@
               }}, with a temperature of {{ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou',
               'temperature') }} degrees. Have a great day!
         else:
-        - alias: Ramp volume to 0.17 over ~2.5 minutes
+        - alias: Ramp volume to 0.20 over ~2.5 minutes
           repeat:
             count: 8
             sequence:
@@ -7232,7 +7232,7 @@
               target:
                 entity_id: media_player.bedroom_2
               data:
-                volume_level: '{{ [0.05 + (repeat.index * 0.019), 0.17] | min | round(3)
+                volume_level: '{{ [0.05 + (repeat.index * 0.019), 0.20] | min | round(3)
                   }}'
         - alias: Wait for bedroom motion before announcement
           wait_for_trigger:
