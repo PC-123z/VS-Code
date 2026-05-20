@@ -5529,7 +5529,8 @@
 - id: '1776965023589'
   alias: 'Office/Bedroom 2: Smart Motion & Presence'
   description: AL daytime, sleep mode evening, off after 22:50. Uses moving_target
-    for motion windows 22:15-22:50.
+    for motion windows 22:15-22:50. Dimmer override holds lights until room empty
+    15 min or midnight.
   triggers:
   - trigger: state
     entity_id:
@@ -5557,7 +5558,7 @@
     at: '22:50:00'
     id: lights_out
   - trigger: time
-    at: '00:00:00'
+    at: 00:00:00
     id: midnight_override_reset
   actions:
   - choose:
@@ -5634,6 +5635,10 @@
       - condition: trigger
         id: lights_out
       sequence:
+      - alias: Skip lights_out if dimmer override is active (keep lights as set)
+        condition: state
+        entity_id: input_boolean.bedroom2_manual_override
+        state: 'off'
       - action: light.turn_off
         target:
           entity_id:
@@ -5643,6 +5648,36 @@
           - light.office_2
         data:
           transition: 15
+    - conditions:
+      - condition: trigger
+        id: midnight_override_reset
+      sequence:
+      - alias: Clear override at midnight so automations resume normally
+        action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.bedroom2_manual_override
+      - action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.adaptive_lighting_office
+          lights:
+          - light.office
+          manual_control: false
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.adaptive_lighting_office
+          - switch.adaptive_lighting_adapt_color_office
+          - switch.adaptive_lighting_adapt_brightness_office
+          - switch.adaptive_lighting_sleep_mode_office
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.ribbon
+          - light.fluttershy
+          - light.office_1
+          - light.office_2
+        data:
+          transition: 30
     - conditions:
       - condition: trigger
         id: detected
