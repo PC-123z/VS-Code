@@ -820,24 +820,16 @@
     data: {}
   mode: single
 - id: '1774970377473'
-  alias: 'Hue Button 1 - Big Bedroom: Bright/Mood Override'
+  alias: 'Pico Button 1 - Big Bedroom: Bright/Mood Override'
   description: 'Press: time-based bright/functional scene. Hold: time-based cozy/mood
     scene. Both override AL/sleep until sensor clears for 10 min.'
   triggers:
-  - device_id: aa30217bd770e8befb593a51899cbf4b
-    domain: hue
-    type: initial_press
-    subtype: 1
-    unique_id: da34ba0c-d931-434d-8531-b8dbb4ffac2e
+  - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
     trigger: device
     id: press
-  - device_id: aa30217bd770e8befb593a51899cbf4b
-    domain: hue
-    type: repeat
-    subtype: 1
-    unique_id: bedroom-dimmer-hold-btn1-al-toggle
-    trigger: device
-    id: hold
   conditions: []
   actions:
   - alias: Set manual override
@@ -5130,14 +5122,21 @@
       title: Auto Close
   mode: single
 - id: '1776828862786'
-  alias: 'Pico Button 1 - Big Bedroom: Restore AL'
+  alias: 'Hue Button 1 - Big Bedroom: Restore AL'
   description: Pico 'on' press clears all overrides, re-enables AL switches and motion
     automation, clears manual_control, and applies adaptive lighting.
   triggers:
-  - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
-    domain: lutron_caseta
-    type: press
-    subtype: 'on'
+  - device_id: aa30217bd770e8befb593a51899cbf4b
+    domain: hue
+    type: initial_press
+    subtype: 1
+    unique_id: da34ba0c-d931-434d-8531-b8dbb4ffac2e
+    trigger: device
+  - device_id: aa30217bd770e8befb593a51899cbf4b
+    domain: hue
+    type: repeat
+    subtype: 1
+    unique_id: bedroom-dimmer-hold-btn1-al-toggle
     trigger: device
   conditions: []
   actions:
