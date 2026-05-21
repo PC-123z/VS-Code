@@ -7329,13 +7329,42 @@
               current conditions are {{ states('weather.nws_38_20113654119161_85_60519204644677_klou')
               }}, with a temperature of {{ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou',
               'temperature') }} degrees. Have a great day!
-        - alias: Short pause for TTS to finish then resume
-          delay:
-            seconds: 2
+        - alias: Wait for TTS to finish speaking before resuming
+          wait_template: "{{ not is_state('media_player.bedroom_2', 'playing') }}"
+          timeout:
+            seconds: 30
+          continue_on_timeout: true
+        - delay:
+            seconds: 1
         - alias: Resume music
           action: media_player.media_play
           target:
             entity_id: media_player.bedroom_2
+        - delay:
+            seconds: 3
+        - alias: Restart playlist if media_play failed (TTS cleared the queue)
+          if:
+          - condition: or
+            conditions:
+            - condition: state
+              entity_id: media_player.bedroom_2
+              state: idle
+            - condition: state
+              entity_id: media_player.bedroom_2
+              state: 'off'
+          then:
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.bedroom_2
+            data:
+              volume_level: 0.2
+          - action: music_assistant.play_media
+            continue_on_error: true
+            target:
+              entity_id: media_player.bedroom_2
+            data:
+              media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
+              media_type: playlist
         - alias: Occupancy-driven music loop using Sensor Group
           repeat:
             while:
