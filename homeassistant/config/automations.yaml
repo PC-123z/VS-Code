@@ -4776,8 +4776,6 @@
             - condition: state
               entity_id: input_boolean.bedroom2_occupied
               state: 'on'
-            - condition: time
-              before: 07:30:00
             sequence:
             - if:
               - condition: or
