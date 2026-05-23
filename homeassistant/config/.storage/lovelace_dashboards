@@ -163,6 +163,15 @@
         "icon": "mdi:leak"
       },
       {
+        "id": "dashboard_wol",
+        "show_in_sidebar": true,
+        "icon": "mdi:power",
+        "title": "Wake on LAN",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-wol"
+      },
+      {
         "id": "visual_studio_code",
         "show_in_sidebar": true,
         "icon": "mdi:microsoft-visual-studio-code",
