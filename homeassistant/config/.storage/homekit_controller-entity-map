@@ -181,7 +181,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 21.8,
+                    "value": 21.9,
                     "description": "Current Temperature",
                     "unit": "celsius",
                     "minValue": 0,
@@ -655,7 +655,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 21.7,
+                    "value": 21.8,
                     "description": "Current Temperature",
                     "unit": "celsius",
                     "minValue": 0,
@@ -2026,7 +2026,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -62
+                    "value": -61
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
@@ -2797,7 +2797,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -58
+                    "value": -56
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
