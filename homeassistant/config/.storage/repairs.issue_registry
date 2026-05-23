@@ -115,6 +115,20 @@
         "domain": "sonos",
         "is_persistent": false,
         "issue_id": "subscriptions_failed"
+      },
+      {
+        "created": "2026-05-23T00:34:21.266727+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_139664351_tags/v5.15.4"
+      },
+      {
+        "created": "2026-05-23T00:34:30.837962+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_656992550_tags/v1.9.0"
       }
     ]
   }
