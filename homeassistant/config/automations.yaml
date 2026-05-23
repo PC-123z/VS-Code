@@ -6622,8 +6622,8 @@
       entity_id: alarm_control_panel.3302_alarm
       state: armed_home
   actions:
-  - alias: Wait for engine to transition off, Home Assistant App to Arrive Home OR
-      BT beacon to transition home
+  - alias: Wait for engine to transition off, Home Assistant App to Arrive Home,
+      BT beacon to transition home, OR iOS Shortcut webhook
     wait_for_trigger:
     - alias: Engine running -> off (just parked)
       trigger: state
@@ -6640,6 +6640,12 @@
       entity_id: person.paul
       from: not_home
       to: home
+    - alias: iOS Shortcut geofence webhook
+      trigger: webhook
+      webhook_id: paul_arrived_home
+      allowed_methods:
+      - POST
+      local_only: false
     timeout:
       minutes: 5
     continue_on_timeout: false
