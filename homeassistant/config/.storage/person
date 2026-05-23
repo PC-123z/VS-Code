@@ -22,7 +22,9 @@
       {
         "id": "deja",
         "name": "Deja",
-        "device_trackers": [],
+        "device_trackers": [
+          "device_tracker.4_79d7"
+        ],
         "user_id": null,
         "picture": null
       }
