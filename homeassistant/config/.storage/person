@@ -18,6 +18,13 @@
         "device_trackers": [],
         "user_id": "38588824d2b740f984b8f42d7b5249c0",
         "picture": null
+      },
+      {
+        "id": "deja",
+        "name": "Deja",
+        "device_trackers": [],
+        "user_id": null,
+        "picture": null
       }
     ]
   }
