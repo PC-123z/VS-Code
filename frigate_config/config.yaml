@@ -179,14 +179,12 @@ cameras:
           roles: [record]
           input_args: >-
             -rtsp_transport tcp
-            -use_wallclock_as_timestamps 1
             -fflags +genpts+discardcorrupt
             -flags low_delay
         - path: rtsp://127.0.0.1:8554/garage_sub
           roles: [detect]
           input_args: >-
             -rtsp_transport tcp
-            -use_wallclock_as_timestamps 1
             -fflags +genpts+discardcorrupt
             -flags low_delay
     detect:
@@ -207,14 +205,12 @@ cameras:
           roles: [record]
           input_args: >-
             -rtsp_transport tcp
-            -use_wallclock_as_timestamps 1
             -fflags +genpts+discardcorrupt
             -flags low_delay
         - path: rtsp://127.0.0.1:8554/kitchen_sub
           roles: [detect]
           input_args: >-
             -rtsp_transport tcp
-            -use_wallclock_as_timestamps 1
             -fflags +genpts+discardcorrupt
             -flags low_delay
     detect:
@@ -239,14 +235,12 @@ cameras:
           roles: [record]
           input_args: >-
             -rtsp_transport tcp
-            -use_wallclock_as_timestamps 1
             -fflags +genpts+discardcorrupt
             -flags low_delay
         - path: rtsp://127.0.0.1:8554/living_room_sub
           roles: [detect]
           input_args: >-
             -rtsp_transport tcp
-            -use_wallclock_as_timestamps 1
             -fflags +genpts+discardcorrupt
             -flags low_delay
     detect:
