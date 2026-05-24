@@ -5947,7 +5947,9 @@
       to: not_home
     - trigger: state
       entity_id: device_tracker.bcpro_204982_08b8
-      to: not_home
+      to:
+      - not_home
+      - unavailable
     timeout:
       minutes: 15
     continue_on_timeout: false
@@ -6564,7 +6566,9 @@
       to: not_home
     - trigger: state
       entity_id: device_tracker.bcpro_204982_08b8
-      to: not_home
+      to:
+      - not_home
+      - unavailable
     timeout:
       hours: 0
       minutes: 15
@@ -6633,7 +6637,9 @@
     - alias: BT beacon away -> home (Paul just walked in)
       trigger: state
       entity_id: device_tracker.bcpro_204982_08b8
-      from: not_home
+      from:
+      - not_home
+      - unavailable
       to: home
     - alias: iPhone app person.paul arrives home
       trigger: state
