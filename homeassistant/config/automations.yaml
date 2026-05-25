@@ -5739,8 +5739,9 @@
     - conditions:
       - condition: trigger
         id: detected
-      - alias: After 23:45 ignore motion entirely - lights stay off for the night
+      - alias: Ignore motion outside 06:30-23:45 - lights stay off overnight
         condition: time
+        after: '06:30:00'
         before: '23:45:00'
       sequence:
       - alias: Skip all light changes if manual override is active
