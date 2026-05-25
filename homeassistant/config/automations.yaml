@@ -4315,9 +4315,9 @@
   mode: single
 - id: '1776378416550'
   alias: '*Bedroom 2 Bedtime Routine'
-  description: Triggers on MOTION (not presence) after 9:45pm. Sets bedroom2_occupied,
-    starts sleep lighting, fan, and music. Transitions to dim red at 10:30pm, lights
-    off at 10:40pm, music stops at 11:30pm.
+  description: Triggers on MOTION after 9:45pm. Sets bedroom2_occupied, starts sleep
+    lighting, fan, and music. Dim red at 10:30pm, lights off at 10:40pm, music stops
+    at 11:30pm. Hard lights-off at 11:45pm regardless of motion or override.
   triggers:
   - trigger: state
     entity_id:
@@ -4340,6 +4340,9 @@
   - trigger: time
     at: '23:30:00'
     id: music_ramp_down
+  - trigger: time
+    at: '23:45:00'
+    id: hard_lights_out
   conditions: []
   actions:
   - choose:
@@ -4495,6 +4498,20 @@
       - action: media_player.media_stop
         target:
           entity_id: media_player.office_2
+    - conditions:
+      - condition: trigger
+        id: hard_lights_out
+      sequence:
+      - alias: Hard off - ceiling and nanoleafs regardless of occupied or override state
+        action: light.turn_off
+        target:
+          entity_id:
+          - light.ribbon
+          - light.fluttershy
+          - light.office
+          - light.bedroom_2
+        data:
+          transition: 30
   mode: parallel
   max: 3
 - id: '1776378473889'
@@ -4917,6 +4934,28 @@
   conditions: []
   actions:
   - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.bedroom2_occupied
+  mode: single
+- id: '1776382720394'
+  alias: '*Bedroom 2 Occupancy Latch'
+  description: Sets bedroom2_occupied once per night when the sensor group detects
+    presence between 22:00 and midnight. Single-fire - won't retrigger if already
+    occupied. Cleared by Good Morning Routine and Daily Reset.
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.bedroom_2_sensor_group
+    to: 'on'
+  conditions:
+  - condition: time
+    after: '22:00:00'
+    before: '00:00:00'
+  - condition: state
+    entity_id: input_boolean.bedroom2_occupied
+    state: 'off'
+  actions:
+  - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.bedroom2_occupied
   mode: single
@@ -5543,9 +5582,9 @@
   mode: restart
 - id: '1776965023589'
   alias: 'Office/Bedroom 2: Smart Motion & Presence'
-  description: AL daytime, sleep mode evening, off after 22:50. Uses moving_target
-    for motion windows 22:15-22:50. Dimmer override holds lights until room empty
-    15 min or midnight.
+  description: AL daytime, sleep mode evening. Motion triggers 8% red when sleep mode
+    on; fades off after 20 min no movement. Hard cutoff at 23:45 - no motion response
+    after that. Dimmer override holds lights until room empty 20 min or midnight.
   triggers:
   - trigger: state
     entity_id:
@@ -5559,7 +5598,7 @@
     to:
     - 'off'
     for:
-      minutes: 15
+      minutes: 20
     id: stopped
   - trigger: state
     entity_id: switch.adaptive_lighting_sleep_mode_office
@@ -5570,7 +5609,7 @@
     to: 'off'
     id: sleep_off
   - trigger: time
-    at: '22:50:00'
+    at: '23:45:00'
     id: lights_out
   - trigger: time
     at: 00:00:00
@@ -5583,6 +5622,10 @@
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.bedroom2_manual_override
+        state: 'off'
+      - alias: Skip if room already occupied - avoid waking a sleeping person
+        condition: state
+        entity_id: input_boolean.bedroom2_occupied
         state: 'off'
       sequence:
       - action: light.turn_on
@@ -5696,6 +5739,9 @@
     - conditions:
       - condition: trigger
         id: detected
+      - alias: After 23:45 ignore motion entirely - lights stay off for the night
+        condition: time
+        before: '23:45:00'
       sequence:
       - alias: Skip all light changes if manual override is active
         condition: state
@@ -5870,7 +5916,7 @@
       - condition: trigger
         id: stopped
       sequence:
-      - alias: Clear manual override when room has been empty 15 minutes
+      - alias: Clear manual override when room has been empty 20 minutes
         action: input_boolean.turn_off
         target:
           entity_id: input_boolean.bedroom2_manual_override
