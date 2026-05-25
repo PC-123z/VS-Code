@@ -4504,7 +4504,7 @@
     presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: 06:50:00
+    at: 07:50:00
     weekday:
     - mon
     - tue
@@ -6626,8 +6626,8 @@
       entity_id: alarm_control_panel.3302_alarm
       state: armed_home
   actions:
-  - alias: Wait for engine to transition off, Home Assistant App to Arrive Home,
-      BT beacon to transition home, OR iOS Shortcut webhook
+  - alias: Wait for engine to transition off, Home Assistant App to Arrive Home, BT
+      beacon to transition home, OR iOS Shortcut webhook
     wait_for_trigger:
     - alias: Engine running -> off (just parked)
       trigger: state
@@ -7342,7 +7342,8 @@
               }}, with a temperature of {{ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou',
               'temperature') }} degrees. Have a great day!
         - alias: Wait for TTS to finish speaking before resuming
-          wait_template: "{{ not is_state('media_player.bedroom_2', 'playing') }}"
+          wait_template: '{{ not is_state(''media_player.bedroom_2'', ''playing'')
+            }}'
           timeout:
             seconds: 30
           continue_on_timeout: true
