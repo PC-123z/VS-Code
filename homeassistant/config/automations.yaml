@@ -4502,7 +4502,8 @@
       - condition: trigger
         id: hard_lights_out
       sequence:
-      - alias: Hard off - ceiling and nanoleafs regardless of occupied or override state
+      - alias: Hard off - ceiling and nanoleafs regardless of occupied or override
+          state
         action: light.turn_off
         target:
           entity_id:
@@ -4950,7 +4951,7 @@
   conditions:
   - condition: time
     after: '22:00:00'
-    before: '00:00:00'
+    before: 00:00:00
   - condition: state
     entity_id: input_boolean.bedroom2_occupied
     state: 'off'
@@ -5741,9 +5742,8 @@
         id: detected
       - alias: Block motion when occupied outside active sleep window (22:00-23:45)
         condition: template
-        value_template: >
-          {{ states('input_boolean.bedroom2_occupied') == 'off'
-             or (now().hour >= 22 and now().strftime('%H:%M') < '23:45') }}
+        value_template: "{{ states('input_boolean.bedroom2_occupied') == 'off'\n   or
+          (now().hour >= 22 and now().strftime('%H:%M') < '23:45') }}\n"
       sequence:
       - alias: Skip all light changes if manual override is active
         condition: state
@@ -7158,7 +7158,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 06:50:00
+    at: 07:30:00
     weekday:
     - mon
     - tue
