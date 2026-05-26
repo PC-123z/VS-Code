@@ -4363,6 +4363,7 @@
           percentage: 50
         target:
           entity_id: fan.bedroom2_fan
+        enabled: false
       - alias: Skip light and music changes if dimmer override is active
         if:
         - condition: state
