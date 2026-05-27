@@ -15,8 +15,7 @@ mqtt:
 detectors:
   ov:
     type: openvino
-    device: CPU
-    num_threads: 4
+    device: GPU
 
 model:
   path: /openvino-model/ssdlite_mobilenet_v2.xml
