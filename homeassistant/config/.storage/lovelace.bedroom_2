@@ -132,6 +132,15 @@
                   "entity": "light.showtime_light"
                 }
               ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "New section"
+                }
+              ]
             }
           ]
         }
