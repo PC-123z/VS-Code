@@ -12,9 +12,6 @@ mqtt:
   user: mqtt_user
   password: mqtt_user50221
 
-# CHANGED: removed num_threads (ignored by OpenVINO). Kept TWO detectors so two
-# frames can infer in parallel across your 5 cameras — important for keeping up
-# on CPU. OpenVINO auto-tunes thread count.
 detectors:
   ov_0:
     type: openvino
@@ -32,13 +29,7 @@ model:
   input_pixel_format: bgr
 
 ffmpeg:
-  # CHANGED: '' (software decode) -> preset-vaapi. This offloads detect-stream
-  # decoding to Intel Quick Sync (the iGPU media engine, NOT the inference path
-  # that gave you trouble), freeing CPU for detection. Needs /dev/dri/renderD128
-  # + LIBVA_DRIVER_NAME=iHD in compose, which you have.
-  # For zero iGPU involvement, set this back to '' — your sub streams are
-  # low-res and cheap to decode in software, so it's a safe fallback.
-  hwaccel_args: preset-vaapi
+  hwaccel_args: ''
   input_args: preset-rtsp-restream-low-latency
   output_args:
     record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1
@@ -130,9 +121,9 @@ cameras:
             -fflags +genpts+discardcorrupt
             -flags low_delay
     detect:
-      width: 1920    # VERIFY: must match the actual driveway_sub resolution.
-      height: 576    # 1920x576 is unusual for a sub stream — if the real sub is
-      fps: 4         # e.g. 640x480, set these to match or zones + motion CPU suffer.
+      width: 1920    
+      height: 576    
+      fps: 4         
     objects:
       mask:
         0.257,0.988,0.387,0.596,0.385,0.541,0.403,0.468,0.414,0.434,0.607,0.407,0.667,0.602,0.762,0.92,0.783,0.991
@@ -181,10 +172,10 @@ cameras:
     detect:
       width: 640
       height: 480
-      fps: 5          # CHANGED: 7 -> 5. 7fps detection is rarely needed; saves CPU.
+      fps: 5          
     objects:
       track:
-        - person      # ADDED: a door cam doesn't need 'car' — cuts noise + load.
+        - person      
 
   garage:
     ffmpeg:
@@ -237,7 +228,7 @@ cameras:
       fps: 5
     objects:
       track:
-        - person      # ADDED: indoor cam — person only (drops pointless 'car').
+        - person      
       filters:
         person:
           min_score: 0.65
@@ -271,7 +262,7 @@ cameras:
       fps: 5
     objects:
       track:
-        - person      # ADDED: indoor cam — person only.
+        - person      
       filters:
         person:
           min_score: 0.65
