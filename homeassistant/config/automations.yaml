@@ -5586,10 +5586,9 @@
   mode: restart
 - id: '1776965023589'
   alias: 'Office/Bedroom 2: Smart Motion & Presence'
-  description: AL daytime, sleep mode evening. Motion triggers 8% red when sleep mode
-    on; fades off after 20 min no movement. Hard cutoff at 22:45 - no motion response
-    after that until 07:00. Dimmer override holds lights until room empty 20 min or
-    midnight.
+  description: AL daytime, sleep mode evening. Handles motion 07:00-22:30 only. Stands
+    down when bedroom2_occupied is on (Bedtime Routine has taken over). Hard cutoff
+    at 22:30 - no motion response after that until 07:00.
   triggers:
   - trigger: state
     entity_id:
@@ -5744,10 +5743,14 @@
     - conditions:
       - condition: trigger
         id: detected
-      - alias: Hard block - no light changes between 22:45 and 07:00
+      - alias: Hard block - Smart Motion only active 07:00 to 22:30
         condition: time
         after: 07:00:00
-        before: '22:45:00'
+        before: '22:30:00'
+      - alias: Stand down if Bedtime Routine has taken over
+        condition: state
+        entity_id: input_boolean.bedroom2_occupied
+        state: 'off'
       sequence:
       - alias: Skip all light changes if manual override is active
         condition: state
@@ -5782,43 +5785,8 @@
               transition: 2
         - conditions:
           - condition: time
-            after: '22:50:00'
-          sequence:
-          - action: light.turn_off
-            target:
-              entity_id:
-              - light.ribbon
-              - light.fluttershy
-              - light.office_1
-              - light.office_2
-            data:
-              transition: 2
-        - conditions:
-          - condition: time
-            after: '22:35:00'
-            before: '22:50:00'
-          sequence:
-          - action: light.turn_on
-            target:
-              entity_id: light.office
-            data:
-              brightness_pct: 1
-              rgb_color:
-              - 255
-              - 62
-              - 1
-              transition: 2
-          - action: light.turn_off
-            target:
-              entity_id:
-              - light.ribbon
-              - light.fluttershy
-            data:
-              transition: 2
-        - conditions:
-          - condition: time
             after: '22:15:00'
-            before: '22:35:00'
+            before: '22:30:00'
           sequence:
           - action: light.turn_on
             target:
