@@ -4349,7 +4349,8 @@
     - conditions:
       - condition: trigger
         id: motion_detected
-      - condition: time
+      - alias: Hard block - no light changes between 22:45 and 07:00
+        condition: time
         after: '21:45:00'
         before: '22:45:00'
       sequence:
@@ -4410,7 +4411,8 @@
       - condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'on'
-      - condition: time
+      - alias: Hard block - no light changes between 22:45 and 07:00
+        condition: time
         after: '21:45:00'
         before: '22:45:00'
       - alias: Skip if dimmer override is active
