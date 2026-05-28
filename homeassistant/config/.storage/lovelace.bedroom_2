@@ -142,10 +142,6 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "input_boolean.bedroom2_occupied"
-                },
-                {
-                  "type": "tile",
                   "entity": "switch.adaptive_lighting_adapt_brightness_office"
                 },
                 {
@@ -159,6 +155,19 @@
                 {
                   "type": "tile",
                   "entity": "switch.adaptive_lighting_office"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_boolean.bedroom2_occupied"
                 }
               ]
             }
