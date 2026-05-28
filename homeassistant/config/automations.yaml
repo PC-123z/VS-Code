@@ -4315,7 +4315,7 @@
   mode: single
 - id: '1776378416550'
   alias: '*Bedroom 2 Bedtime Routine'
-  description: Triggers on MOTION after 9:45pm. Sets bedroom2_occupied, starts sleep
+  description: Triggers on MOTION after 10:30pm. Sets bedroom2_occupied, starts sleep
     lighting, fan, and music. Dim red at 10:30pm, lights off at 10:40pm, music stops
     at 11:30pm. Hard lights-off at 11:45pm regardless of motion or override.
   triggers:
@@ -4349,10 +4349,10 @@
     - conditions:
       - condition: trigger
         id: motion_detected
-      - alias: Hard block - no light changes between 22:45 and 07:00
+      - alias: Bedtime Routine active window - 10:30pm to 11:45pm
         condition: time
-        after: '21:45:00'
-        before: '22:45:00'
+        after: '22:30:00'
+        before: '23:45:00'
       sequence:
       - alias: Set bedroom 2 occupied (always, so Good Morning works)
         action: input_boolean.turn_on
@@ -4411,10 +4411,10 @@
       - condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'on'
-      - alias: Hard block - no light changes between 22:45 and 07:00
+      - alias: Bedtime Routine active window - 10:30pm to 11:45pm
         condition: time
-        after: '21:45:00'
-        before: '22:45:00'
+        after: '22:30:00'
+        before: '23:45:00'
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.bedroom2_manual_override
