@@ -129,6 +129,13 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_1081435944_tags/v2.7.1"
+      },
+      {
+        "created": "2026-05-28T06:57:22.124859+00:00",
+        "dismissed_version": null,
+        "domain": "homeassistant",
+        "is_persistent": false,
+        "issue_id": "config_entry_reauth_volvo_01KQJR6JZ576NN7F3MJF847E4E"
       }
     ]
   }
