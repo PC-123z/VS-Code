@@ -5585,8 +5585,9 @@
 - id: '1776965023589'
   alias: 'Office/Bedroom 2: Smart Motion & Presence'
   description: AL daytime, sleep mode evening. Motion triggers 8% red when sleep mode
-    on; fades off after 20 min no movement. Hard cutoff at 23:45 - no motion response
-    after that. Dimmer override holds lights until room empty 20 min or midnight.
+    on; fades off after 20 min no movement. Hard cutoff at 22:45 - no motion response
+    after that until 07:00. Dimmer override holds lights until room empty 20 min or
+    midnight.
   triggers:
   - trigger: state
     entity_id:
@@ -5741,10 +5742,10 @@
     - conditions:
       - condition: trigger
         id: detected
-      - alias: Block motion when occupied outside active sleep window (22:00-23:45)
-        condition: template
-        value_template: "{{ states('input_boolean.bedroom2_occupied') == 'off'\n   or
-          (now().hour >= 22 and now().strftime('%H:%M') < '23:45') }}\n"
+      - alias: Hard block - no light changes between 22:45 and 07:00
+        condition: time
+        after: 07:00:00
+        before: '22:45:00'
       sequence:
       - alias: Skip all light changes if manual override is active
         condition: state
