@@ -1236,6 +1236,11 @@
     id: motion_detected
   - trigger: state
     entity_id:
+    - binary_sensor.kitchen_motion
+    to: 'on'
+    id: motion_detected
+  - trigger: state
+    entity_id:
     - binary_sensor.kitchen_sensor_group
     to:
     - 'off'
