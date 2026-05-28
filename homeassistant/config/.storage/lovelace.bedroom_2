@@ -138,7 +138,27 @@
               "cards": [
                 {
                   "type": "heading",
-                  "heading": "New section"
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_boolean.bedroom2_occupied"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.adaptive_lighting_adapt_brightness_office"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.adaptive_lighting_adapt_color_office"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.adaptive_lighting_sleep_mode_office"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.adaptive_lighting_office"
                 }
               ]
             }
