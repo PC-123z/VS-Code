@@ -29,7 +29,7 @@ model:
   input_pixel_format: bgr
 
 ffmpeg:
-  hwaccel_args: preset-intel-qsv-h264
+  hwaccel_args: ''
   input_args: preset-rtsp-restream-low-latency
   output_args:
     record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1
