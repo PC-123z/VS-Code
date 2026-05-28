@@ -1466,11 +1466,30 @@
               entity_id:
               - switch.al_kitchen
               - switch.al_kitchen_main
-          - action: light.turn_on
-            target:
-              entity_id: light.kitchen_main_lights
-            data:
-              transition: 2
+          - alias: Main light only when TV not active on Sonos
+            choose:
+            - conditions:
+              - condition: template
+                value_template: "{{ not (is_state('media_player.kitchen', 'playing')
+                  and state_attr('media_player.kitchen', 'source') == 'TV') }}"
+              sequence:
+              - action: light.turn_on
+                target:
+                  entity_id: light.kitchen_main_lights
+                data:
+                  transition: 2
+              - action: switch.turn_on
+                target:
+                  entity_id: switch.al_kitchen_main
+              - action: adaptive_lighting.apply
+                continue_on_error: true
+                data:
+                  entity_id: switch.al_kitchen_main
+                  lights:
+                  - light.kitchen_main_lights
+                  transition: 2
+                  adapt_color: true
+                  adapt_brightness: true
           - action: light.turn_on
             target:
               entity_id:
@@ -1481,18 +1500,7 @@
               transition: 2
           - action: switch.turn_on
             target:
-              entity_id:
-              - switch.al_kitchen
-              - switch.al_kitchen_main
-          - action: adaptive_lighting.apply
-            continue_on_error: true
-            data:
-              entity_id: switch.al_kitchen_main
-              lights:
-              - light.kitchen_main_lights
-              transition: 2
-              adapt_color: true
-              adapt_brightness: true
+              entity_id: switch.al_kitchen
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
