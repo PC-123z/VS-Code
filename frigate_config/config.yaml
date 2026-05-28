@@ -45,13 +45,13 @@ objects:
 record:
   enabled: true
   alerts:
-    pre_capture: 10
+    pre_capture: 5
     post_capture: 30
     retain:
       days: 7
       mode: active_objects
   detections:
-    pre_capture: 10
+    pre_capture: 5
     post_capture: 30
     retain:
       days: 7
