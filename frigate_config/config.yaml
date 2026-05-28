@@ -15,11 +15,11 @@ mqtt:
 detectors:
   ov_0:
     type: openvino
-    device: CPU
+    device: GPU
     num_threads: 2
   ov_1:
     type: openvino
-    device: CPU
+    device: GPU
     num_threads: 2
 
 model:
@@ -31,7 +31,7 @@ model:
   input_pixel_format: bgr
 
 ffmpeg:
-  hwaccel_args: ''
+  hwaccel_args: preset-vaapi
   input_args: preset-rtsp-restream-low-latency
   output_args:
     record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 
