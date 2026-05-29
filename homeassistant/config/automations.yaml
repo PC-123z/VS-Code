@@ -1238,9 +1238,19 @@
     - 'off'
     for:
       hours: 0
-      minutes: 5
+      minutes: 1
       seconds: 0
     id: kitchen_cleared
+  - trigger: state
+    entity_id:
+    - binary_sensor.kitchen_sensor_group
+    to:
+    - 'off'
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 30
+    id: kitchen_cleared_hue
   - trigger: state
     entity_id:
     - switch.al_sleep_mode_kitchen
@@ -1459,20 +1469,14 @@
               entity_id:
               - switch.al_kitchen
               - switch.al_kitchen_main
-          - alias: Main light only when Hue sensor confirms a person (not just radar/TV)
-            choose:
-            - conditions:
-              - condition: state
-                entity_id: binary_sensor.kitchen_motion
-                state: 'on'
-              sequence:
-              - action: light.turn_on
-                target:
-                  entity_id: light.kitchen_main_lights
-                data:
-                  brightness_pct: 30
-                  color_temp_kelvin: 2700
-                  transition: 2
+          - alias: Main light on (TV dimming handled by Living Room TV Mode)
+            action: light.turn_on
+            target:
+              entity_id: light.kitchen_main_lights
+            data:
+              brightness_pct: 30
+              color_temp_kelvin: 2700
+              transition: 2
           - action: light.turn_on
             target:
               entity_id:
@@ -1505,30 +1509,24 @@
               entity_id:
               - switch.al_kitchen
               - switch.al_kitchen_main
-          - alias: Main light only when Hue sensor confirms a person (not just radar/TV)
-            choose:
-            - conditions:
-              - condition: state
-                entity_id: binary_sensor.kitchen_motion
-                state: 'on'
-              sequence:
-              - action: light.turn_on
-                target:
-                  entity_id: light.kitchen_main_lights
-                data:
-                  transition: 2
-              - action: switch.turn_on
-                target:
-                  entity_id: switch.al_kitchen_main
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_kitchen_main
-                  lights:
-                  - light.kitchen_main_lights
-                  transition: 2
-                  adapt_color: true
-                  adapt_brightness: true
+          - alias: Main light on via AL (TV dimming handled by Living Room TV Mode)
+            action: light.turn_on
+            target:
+              entity_id: light.kitchen_main_lights
+            data:
+              transition: 2
+          - action: switch.turn_on
+            target:
+              entity_id: switch.al_kitchen_main
+          - action: adaptive_lighting.apply
+            continue_on_error: true
+            data:
+              entity_id: switch.al_kitchen_main
+              lights:
+              - light.kitchen_main_lights
+              transition: 2
+              adapt_color: true
+              adapt_brightness: true
           - action: light.turn_on
             target:
               entity_id:
@@ -1586,44 +1584,56 @@
     - conditions:
       - condition: trigger
         id: kitchen_cleared
+      alias: 'Cleared 60s: main light dims to 15% then turns off (Hue stays on)'
       sequence:
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.kitchen_manual_override
-      - alias: Fade off ALL kitchen lights (main + 3 Hue) after 5 min clear
-        action: light.turn_off
+      - alias: Disable main AL so it cannot fight the dim/off
+        action: switch.turn_off
         target:
-          entity_id:
-          - light.kitchen_main_lights
-          - light.kitchen_1_color
-          - light.kitchen_2_color
-          - light.kitchen_lightstrip
-        data:
-          transition: 10
-      - action: adaptive_lighting.set_manual_control
-        data:
-          entity_id: switch.al_kitchen
-          manual_control: false
+          entity_id: switch.al_kitchen_main
       - action: adaptive_lighting.set_manual_control
         data:
           entity_id: switch.al_kitchen_main
           manual_control: false
-      - choose:
-        - conditions:
-          - condition: and
-            conditions:
-            - condition: state
-              entity_id: switch.al_sleep_mode_kitchen
-              state: 'off'
-            - condition: state
-              entity_id: switch.al_sleep_mode_kitchen_main
-              state: 'off'
-          sequence:
-          - action: switch.turn_on
-            target:
-              entity_id:
-              - switch.al_kitchen
-              - switch.al_kitchen_main
+      - alias: Dim main to 15% as a soft warning
+        action: light.turn_on
+        target:
+          entity_id: light.kitchen_main_lights
+        data:
+          brightness_pct: 15
+          transition: 2
+      - delay:
+          seconds: 3
+      - alias: Then turn main off
+        action: light.turn_off
+        target:
+          entity_id: light.kitchen_main_lights
+        data:
+          transition: 2
+    - conditions:
+      - condition: trigger
+        id: kitchen_cleared_hue
+      alias: 'Cleared 3:30: fade the 3 Hue lights off over 30s'
+      sequence:
+      - alias: Disable color AL so it cannot re-apply during the fade
+        action: switch.turn_off
+        target:
+          entity_id: switch.al_kitchen
+      - action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.al_kitchen
+          manual_control: false
+      - alias: Fade the 3 Hue lights off over 30 seconds
+        action: light.turn_off
+        target:
+          entity_id:
+          - light.kitchen_1_color
+          - light.kitchen_2_color
+          - light.kitchen_lightstrip
+        data:
+          transition: 30
   mode: queued
   max: 10
 - id: '1775368699660'
