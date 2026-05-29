@@ -1550,13 +1550,7 @@
           entity_id: input_boolean.kitchen_manual_override
       - action: light.turn_off
         target:
-          entity_id:
-          - light.kitchen_main_lights
-          - light.kitchen_1_color
-          - light.kitchen_2_color
-          - light.kitchen_lightstrip
-        data:
-          transition: 10
+          entity_id: light.kitchen_main_lights
       - action: adaptive_lighting.set_manual_control
         data:
           entity_id: switch.al_kitchen
