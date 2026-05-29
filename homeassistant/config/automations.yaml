@@ -1454,6 +1454,53 @@
               - 0
               transition: 5
         - conditions:
+          - condition: state
+            entity_id: sun.sun
+            state: below_horizon
+          alias: Evening/Night (sun down, before sleep mode)
+          sequence:
+          - action: switch.turn_off
+            target:
+              entity_id:
+              - switch.al_kitchen
+              - switch.al_kitchen_main
+          - alias: Main light only when Hue sensor confirms a person (not just radar/TV)
+            choose:
+            - conditions:
+              - condition: state
+                entity_id: binary_sensor.kitchen_motion
+                state: 'on'
+              sequence:
+              - action: light.turn_on
+                target:
+                  entity_id: light.kitchen_main_lights
+                data:
+                  brightness_pct: 30
+                  color_temp_kelvin: 2700
+                  transition: 2
+          - action: light.turn_on
+            target:
+              entity_id:
+              - light.kitchen_1_color
+              - light.kitchen_2_color
+              - light.kitchen_lightstrip
+            data:
+              transition: 2
+          - action: switch.turn_on
+            target:
+              entity_id: switch.al_kitchen
+          - action: adaptive_lighting.apply
+            continue_on_error: true
+            data:
+              entity_id: switch.al_kitchen
+              lights:
+              - light.kitchen_1_color
+              - light.kitchen_2_color
+              - light.kitchen_lightstrip
+              transition: 2
+              adapt_color: true
+              adapt_brightness: true
+        - conditions:
           - condition: time
             after: 07:00:00
             before: '22:30:00'
