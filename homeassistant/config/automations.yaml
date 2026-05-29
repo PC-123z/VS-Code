@@ -88,22 +88,19 @@
   actions:
   - action: light.turn_off
     target:
-      entity_id:
-      - light.kitchen_main_lights
-      - light.kitchen_1_color
-      - light.kitchen_2_color
-      - light.kitchen_lightstrip
-    data:
-      transition: 1
+      entity_id: light.kitchen_main_lights
   - delay:
-      seconds: 3
+      minutes: 2
+      seconds: 30
   - action: light.turn_off
     target:
       entity_id:
       - light.kitchen_1_color
       - light.kitchen_2_color
       - light.kitchen_lightstrip
-  mode: single
+    data:
+      transition: 30
+  mode: restart
 - &id001
   id: '1772717730627'
   alias: '*Nap Wake Up Routine v3'
