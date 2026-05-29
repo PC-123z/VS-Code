@@ -68,9 +68,11 @@
   mode: single
 - id: '1772505504350'
   alias: Kitchen Off Switch
-  description: 'Kills all kitchen lights when the Pico OFF button is pressed OR when
-    Kitchen Main Lights are turned off externally. Uses explicit entity IDs to avoid
-    registry-UUID drift.
+  description: 'Kills all kitchen lights when the Pico OFF button is pressed. Presence-based
+    shutoff (main at 60s, Hue at 3:30 after the room clears) is owned by the Kitchen:
+    Smart Motion & Presence automation, so the old "main turned off externally" trigger
+    was removed - it killed the Hue lights 2:30 after any main-off even if someone had
+    walked back in. Uses explicit entity IDs to avoid registry-UUID drift.
 
     '
   triggers:
@@ -80,10 +82,6 @@
     subtype: 'off'
     trigger: device
     id: pico_off
-  - trigger: state
-    entity_id: light.kitchen_main_lights
-    to: 'off'
-    id: main_lights_off
   conditions: []
   actions:
   - action: light.turn_off
