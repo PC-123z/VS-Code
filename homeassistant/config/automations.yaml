@@ -6317,9 +6317,30 @@
           brightness_pct: '{{ playing_brightness | int }}'
           color_temp_kelvin: '{{ tv_kelvin | int }}'
           transition: 3
-      - action: light.turn_off
-        target:
-          entity_id: light.kitchen_main_lights
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.kitchen_sensor_group
+            state: 'on'
+          sequence:
+          - action: light.turn_on
+            target:
+              entity_id:
+              - light.kitchen_main_lights
+              - light.kitchen_1_color
+              - light.kitchen_2_color
+              - light.kitchen_lightstrip
+            data:
+              brightness_pct: 5
+              transition: 3
+        default:
+        - action: light.turn_off
+          target:
+            entity_id:
+            - light.kitchen_main_lights
+            - light.kitchen_1_color
+            - light.kitchen_2_color
+            - light.kitchen_lightstrip
       - action: light.turn_off
         target:
           entity_id: light.galaxy_projector
