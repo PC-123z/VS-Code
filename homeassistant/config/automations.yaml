@@ -1233,11 +1233,6 @@
     id: motion_detected
   - trigger: state
     entity_id:
-    - binary_sensor.kitchen_motion
-    to: 'on'
-    id: motion_detected
-  - trigger: state
-    entity_id:
     - binary_sensor.kitchen_sensor_group
     to:
     - 'off'
@@ -1245,12 +1240,6 @@
       hours: 0
       minutes: 5
       seconds: 0
-    id: kitchen_cleared
-  - trigger: template
-    value_template: "{{ is_state('binary_sensor.kitchen_motion', 'off') and\n   is_state('binary_sensor.kitchen_person_occupancy',
-      'off') }}\n"
-    for:
-      minutes: 10
     id: kitchen_cleared
   - trigger: state
     entity_id:
