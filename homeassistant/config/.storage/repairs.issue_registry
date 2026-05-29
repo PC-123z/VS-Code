@@ -129,13 +129,6 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_1081435944_tags/v2.7.1"
-      },
-      {
-        "created": "2026-05-29T13:47:00.531420+00:00",
-        "dismissed_version": null,
-        "domain": "backup",
-        "is_persistent": false,
-        "issue_id": "automatic_backup_agents_unavailable_cloud.cloud"
       }
     ]
   }
