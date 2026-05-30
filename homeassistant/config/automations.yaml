@@ -71,8 +71,8 @@
   description: 'Kills all kitchen lights when the Pico OFF button is pressed. Presence-based
     shutoff (main at 60s, Hue at 3:30 after the room clears) is owned by the Kitchen:
     Smart Motion & Presence automation, so the old "main turned off externally" trigger
-    was removed - it killed the Hue lights 2:30 after any main-off even if someone had
-    walked back in. Uses explicit entity IDs to avoid registry-UUID drift.
+    was removed - it killed the Hue lights 2:30 after any main-off even if someone
+    had walked back in. Uses explicit entity IDs to avoid registry-UUID drift.
 
     '
   triggers:
@@ -110,14 +110,14 @@
     grace. 60-minute hard cap from routine start.'
   triggers:
   - trigger: time
-    at: '19:15:00'
+    at: '16:30:00'
     weekday:
     - sat
   - trigger: time
     at: '19:00:00'
     weekday:
     - wed
-    enabled: true
+    enabled: false
   conditions: []
   actions:
   - alias: Mark routine as active
