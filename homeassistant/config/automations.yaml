@@ -6468,6 +6468,9 @@
           target:
             entity_id: light.galaxy_projector
         else:
+        - action: fan.turn_off
+          target:
+            entity_id: fan.living_room_fan
         - action: light.turn_off
           target:
             entity_id:
@@ -7021,10 +7024,6 @@
   - alias: Living room must still be empty
     condition: state
     entity_id: binary_sensor.living_room_sensor_group
-    state: 'off'
-  - alias: Dining room must also be empty
-    condition: state
-    entity_id: binary_sensor.dining_room_sensor_group
     state: 'off'
   actions:
   - alias: Warning - deep blue
