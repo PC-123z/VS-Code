@@ -4410,6 +4410,10 @@
     - conditions:
       - condition: trigger
         id: motion_detected
+      - alias: Only run full setup once - skip if already occupied
+        condition: state
+        entity_id: input_boolean.bedroom2_occupied
+        state: 'off'
       - alias: Bedtime Routine active window - 10:30pm to 11:45pm
         condition: time
         after: '22:30:00'
