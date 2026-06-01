@@ -129,6 +129,27 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_1081435944_tags/v2.7.1"
+      },
+      {
+        "created": "2026-06-01T06:33:11.461819+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_1140485967_tags/v2.3.0"
+      },
+      {
+        "created": "2026-06-01T06:33:16.453142+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_656992550_tags/v1.9.5"
+      },
+      {
+        "created": "2026-06-01T06:33:23.068658+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_656992550_tags/v1.9.7"
       }
     ]
   }
