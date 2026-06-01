@@ -814,6 +814,52 @@
       - media_player.bedroom_2
     data: {}
   mode: single
+- id: '1748800000001'
+  alias: '*Big Bedroom: Reset Override When Empty'
+  description: After 15 min empty, re-enables motion automation, AL, and clears manual
+    override so normal lighting resumes on next entry. Runs at any time of day.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.big_bedroom_sensor_group
+    to: 'off'
+    for:
+      minutes: 15
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.big_bedroom_manual_override
+      state: 'on'
+    - condition: state
+      entity_id: automation.big_bedroom_smart_motion_presence
+      state: 'off'
+  actions:
+  - alias: Clear manual override boolean
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.big_bedroom_manual_override
+  - alias: Re-enable motion automation
+    action: automation.turn_on
+    target:
+      entity_id: automation.big_bedroom_smart_motion_presence
+  - alias: Re-enable AL switches
+    action: switch.turn_on
+    target:
+      entity_id:
+      - switch.al_big_bedroom
+      - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_color_big_bedroom_al
+      - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_brightness_big_bedroom_al
+  - alias: Clear manual control on bedroom lights
+    action: adaptive_lighting.set_manual_control
+    data:
+      entity_id: switch.al_big_bedroom
+      lights:
+      - light.bedroom_ceiling_1
+      - light.bedroom_ceiling_2
+      - light.bedroom_lamp_1
+      - light.bedroom_lamp_2
+      manual_control: false
+  mode: single
 - id: '1774970377473'
   alias: 'Pico Button 1 - Big Bedroom: Bright/Mood Override'
   description: 'Press: time-based bright/functional scene. Hold: time-based cozy/mood
