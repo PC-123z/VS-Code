@@ -823,7 +823,7 @@
     entity_id: binary_sensor.big_bedroom_sensor_group
     to: 'off'
     for:
-      minutes: 15
+      minutes: 60
   conditions:
   - alias: Skip if sleep mode is active (bedtime/goodnight - don't wake a sleeping person)
     condition: state
