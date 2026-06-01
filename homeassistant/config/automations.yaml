@@ -4770,7 +4770,7 @@
             minutes: 45
         - if:
           - condition: template
-            value_template: '{{ wait.completed == true }}'
+            value_template: '{{ wait.completed == false }}'
           then:
           - action: input_boolean.turn_off
             target:
@@ -4841,7 +4841,7 @@
             minutes: 45
         - if:
           - condition: template
-            value_template: '{{ wait.completed == true }}'
+            value_template: '{{ wait.completed == false }}'
           then:
           - action: media_player.media_stop
             target:
