@@ -4169,7 +4169,7 @@
         action: media_player.media_stop
         target:
           entity_id: media_player.bedroom_2
-  mode: restart
+  mode: single
 - id: '1776307653783'
   alias: 'Hue Button 4 - Big Bedroom: Hue Switch Override - Button 4'
   description: Press turns off all lights, hold turns off everything in bedroom
