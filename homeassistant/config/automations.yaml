@@ -322,7 +322,7 @@
         - if:
           - alias: No motion detected within 5 min - escalate
             condition: template
-            value_template: '{{ wait.completed == false }}'
+            value_template: '{{ wait.completed == true }}'
           then:
           - alias: Boost music to 0.30 for escalation
             action: media_player.volume_set
@@ -378,7 +378,7 @@
           - if:
             - alias: Still no motion - end routine
               condition: template
-              value_template: '{{ wait.completed == false }}'
+              value_template: '{{ wait.completed == true }}'
             then:
             - continue_on_error: true
               action: media_player.media_stop
@@ -4715,7 +4715,7 @@
             minutes: 45
         - if:
           - condition: template
-            value_template: '{{ wait.completed == false }}'
+            value_template: '{{ wait.completed == true }}'
           then:
           - action: input_boolean.turn_off
             target:
@@ -4786,7 +4786,7 @@
             minutes: 45
         - if:
           - condition: template
-            value_template: '{{ wait.completed == false }}'
+            value_template: '{{ wait.completed == true }}'
           then:
           - action: media_player.media_stop
             target:
@@ -7055,7 +7055,7 @@
   - alias: Abort if presence detected during blue
     if:
     - condition: template
-      value_template: '{{ wait.completed == false }}'
+      value_template: '{{ wait.completed == true }}'
     then:
     - action: adaptive_lighting.set_manual_control
       data:
@@ -7089,7 +7089,7 @@
   - alias: Abort if presence detected during purple
     if:
     - condition: template
-      value_template: '{{ wait.completed == false }}'
+      value_template: '{{ wait.completed == true }}'
     then:
     - action: adaptive_lighting.set_manual_control
       data:
@@ -7123,7 +7123,7 @@
   - alias: Abort if presence detected during red
     if:
     - condition: template
-      value_template: '{{ wait.completed == false }}'
+      value_template: '{{ wait.completed == true }}'
     then:
     - action: adaptive_lighting.set_manual_control
       data:
@@ -7410,7 +7410,7 @@
         - alias: Check if occupancy wait timed out
           if:
           - condition: template
-            value_template: '{{ wait.completed == false }}'
+            value_template: '{{ wait.completed == true }}'
           then:
           - action: media_player.media_stop
             target:
