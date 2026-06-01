@@ -143,13 +143,6 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_656992550_tags/v1.9.7"
-      },
-      {
-        "created": "2026-06-01T06:34:44.636033+00:00",
-        "dismissed_version": null,
-        "domain": "homeassistant",
-        "is_persistent": false,
-        "issue_id": "config_entry_reauth_jellyfin_01KPW17S2Z0SVP3PWY8NXCT4J4"
       }
     ]
   }
