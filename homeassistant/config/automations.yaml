@@ -7025,6 +7025,10 @@
     condition: state
     entity_id: binary_sensor.living_room_sensor_group
     state: 'off'
+  - alias: Dining room must also be empty
+    condition: state
+    entity_id: binary_sensor.dining_room_sensor_group
+    state: 'off'
   actions:
   - alias: Warning - deep blue
     action: light.turn_on
