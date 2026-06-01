@@ -7465,7 +7465,7 @@
         - alias: Check if occupancy wait timed out
           if:
           - condition: template
-            value_template: '{{ wait.completed == true }}'
+            value_template: '{{ wait.completed == false }}'
           then:
           - action: media_player.media_stop
             target:
