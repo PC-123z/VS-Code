@@ -6919,108 +6919,92 @@
             media_id: spotify://album/4ZIOCYviEphLj1EpwXXvHy
             media_type: album
       continue_on_error: true
-  - alias: Minimum 5 minutes of music before room-clear logic kicks in
-    delay:
-      minutes: 5
-  - alias: Monitor each room independently and stop music when clear for 5 min
-    parallel:
-    - alias: Safety timeout - clear boolean and stop all music after 30 minutes no
-        matter what
-      sequence:
-      - delay:
-          minutes: 30
-      - action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.welcome_home_active
-      - continue_on_error: true
-        action: media_player.media_stop
-        target:
-          entity_id: media_player.kitchen
-      - continue_on_error: true
-        action: media_player.media_stop
-        target:
-          entity_id: media_player.bedroom
-      - continue_on_error: true
-        action: media_player.media_stop
-        target:
-          entity_id: media_player.office
-      - continue_on_error: true
-        action: media_player.unjoin
-        target:
-          entity_id:
-          - media_player.bedroom
-          - media_player.office
-          - media_player.bathroom
-        data: {}
-    - alias: Kitchen - stop when clear for 5 minutes
-      sequence:
-      - wait_template: '{{ is_state(''binary_sensor.kitchen_sensor_group'', ''off'')
-          }}'
-        timeout:
-          minutes: 30
-        continue_on_timeout: true
-      - wait_template: '{{ is_state(''binary_sensor.kitchen_sensor_group'', ''on'')
-          }}'
-        timeout:
-          minutes: 5
-        continue_on_timeout: true
-      - if:
-        - condition: template
-          value_template: '{{ wait.timed_out }}'
-        then:
-        - continue_on_error: true
-          action: media_player.media_stop
-          target:
-            entity_id: media_player.kitchen
-    - alias: Bedroom - stop and unjoin when clear for 5 minutes
-      sequence:
-      - wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'', ''off'')
-          }}'
-        timeout:
-          minutes: 30
-        continue_on_timeout: true
-      - wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'', ''on'')
-          }}'
-        timeout:
-          minutes: 5
-        continue_on_timeout: true
-      - if:
-        - condition: template
-          value_template: '{{ wait.timed_out }}'
-        then:
-        - continue_on_error: true
-          action: media_player.unjoin
-          target:
-            entity_id: media_player.bedroom
-        - continue_on_error: true
-          action: media_player.media_stop
-          target:
-            entity_id: media_player.bedroom
-    - alias: Bedroom 2 / Office - stop and unjoin when clear for 5 minutes
-      sequence:
-      - wait_template: '{{ is_state(''binary_sensor.bedroom_2_sensor_group'', ''off'')
-          }}'
-        timeout:
-          minutes: 30
-        continue_on_timeout: true
-      - wait_template: '{{ is_state(''binary_sensor.bedroom_2_sensor_group'', ''on'')
-          }}'
-        timeout:
-          minutes: 5
-        continue_on_timeout: true
-      - if:
-        - condition: template
-          value_template: '{{ wait.timed_out }}'
-        then:
-        - continue_on_error: true
-          action: media_player.unjoin
-          target:
-            entity_id: media_player.office
-        - continue_on_error: true
-          action: media_player.media_stop
-          target:
-            entity_id: media_player.office
   mode: single
+- id: '1748800000001'
+  alias: 'Welcome Home: Stop All Music When Kitchen Unoccupied 10 Min'
+  description: Kitchen is the anchor for the welcome home session. When it has been
+    empty for 10 minutes, stop all music, unjoin satellite rooms, and clear the active
+    flag. Bathroom handles itself via its own kitchen_stopped trigger.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    to: 'off'
+    for:
+      minutes: 10
+  conditions:
+  - condition: state
+    entity_id: input_boolean.welcome_home_active
+    state: 'on'
+  actions:
+  - alias: Clear welcome home flag
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.welcome_home_active
+  - alias: Unjoin satellite rooms
+    continue_on_error: true
+    action: media_player.unjoin
+    target:
+      entity_id:
+      - media_player.bedroom
+      - media_player.bedroom_2
+      - media_player.office
+      - media_player.bathroom
+    data: {}
+  - alias: Stop kitchen
+    continue_on_error: true
+    action: media_player.media_stop
+    target:
+      entity_id: media_player.kitchen
+  mode: single
+
+- id: '1748800000002'
+  alias: 'Welcome Home: Unjoin Bedroom When Unoccupied 10 Min'
+  description: While welcome home is active, unjoin the bedroom speaker when the
+    room has been empty for 10 minutes. The auto-join automation handles re-joining
+    if someone returns.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.big_bedroom_sensor_group
+    to: 'off'
+    for:
+      minutes: 10
+  conditions:
+  - condition: state
+    entity_id: input_boolean.welcome_home_active
+    state: 'on'
+  actions:
+  - alias: Unjoin bedroom from kitchen group
+    continue_on_error: true
+    action: media_player.unjoin
+    target:
+      entity_id: media_player.bedroom
+    data: {}
+  mode: single
+
+- id: '1748800000003'
+  alias: 'Welcome Home: Unjoin Office When Unoccupied 10 Min'
+  description: While welcome home is active, unjoin the office speaker when the room
+    has been empty for 10 minutes. The auto-join automation handles re-joining if
+    someone returns.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.bedroom_2_sensor_group
+    to: 'off'
+    for:
+      minutes: 10
+  conditions:
+  - condition: state
+    entity_id: input_boolean.welcome_home_active
+    state: 'on'
+  actions:
+  - alias: Unjoin office from kitchen group
+    continue_on_error: true
+    action: media_player.unjoin
+    target:
+      entity_id: media_player.office
+    data: {}
+  mode: single
+
 - id: '1777890200001'
   alias: 'Welcome Home: Auto Join Bedroom Speakers on Motion'
   description: While welcome home music is playing in kitchen, joins bedroom speakers
