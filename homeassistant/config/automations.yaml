@@ -322,7 +322,7 @@
         - if:
           - alias: No motion detected within 5 min - escalate
             condition: template
-            value_template: '{{ wait.completed == true }}'
+            value_template: '{{ wait.completed == false }}'
           then:
           - alias: Boost music to 0.30 for escalation
             action: media_player.volume_set
@@ -378,7 +378,7 @@
           - if:
             - alias: Still no motion - end routine
               condition: template
-              value_template: '{{ wait.completed == true }}'
+              value_template: '{{ wait.completed == false }}'
             then:
             - continue_on_error: true
               action: media_player.media_stop
