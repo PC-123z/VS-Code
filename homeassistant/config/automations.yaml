@@ -825,6 +825,10 @@
     for:
       minutes: 15
   conditions:
+  - alias: Skip if sleep mode is active (bedtime/goodnight - don't wake a sleeping person)
+    condition: state
+    entity_id: switch.al_sleep_mode_big_bedroom
+    state: 'off'
   - condition: or
     conditions:
     - condition: state
