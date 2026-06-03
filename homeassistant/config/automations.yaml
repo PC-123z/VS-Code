@@ -6238,58 +6238,10 @@
     trigger: device
   conditions: []
   actions:
-  - alias: Start Volvo XC60 climatization
-    action: button.press
+  - alias: Trigger Volvo start script
+    action: script.turn_on
     target:
-      entity_id: button.volvo_xc60_start_climatization
-  - action: hue.activate_scene
-    metadata: {}
-    data:
-      transition: 15
-    target:
-      entity_id: scene.hallway_malibu_pink
-  - action: notify.send_message
-    metadata: {}
-    target:
-      entity_id:
-      - notify.paul_s_sonos_arc_announce
-      - notify.echo_show_kitchen_announce
-      - notify.office_speaker_announce
-      - notify.living_room_dot_announce
-      - notify.paul_s_sonos_one_second_edition_announce
-    data:
-      message: 'XC60 will be Ready to Depart in 5 Minutes. Current conditions are
-        {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'') }}, {{
-        state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'', ''temperature'')
-        }} degrees.
-
-        '
-  - delay:
-      hours: 0
-      minutes: 4
-      seconds: 0
-      milliseconds: 0
-  - action: hue.activate_scene
-    metadata: {}
-    data:
-      transition: 60
-    target:
-      entity_id: scene.hallway_energize
-  - action: notify.send_message
-    metadata: {}
-    target:
-      entity_id:
-      - notify.paul_s_sonos_arc_announce
-      - notify.echo_show_kitchen_announce
-      - notify.office_speaker_announce
-      - notify.living_room_dot_announce
-      - notify.paul_s_sonos_one_second_edition_announce
-    data:
-      message: XC60 is Ready to Depart
-  - action: notify.mobile_app_pc_iphone
-    data:
-      message: XC60 is Ready to Go!!!
-      title: Car Remote
+      entity_id: script.script_start_volvo_xc60
   mode: single
 - id: '1777251099134'
   alias: 'Living Room: TV Mode (Unified)'
