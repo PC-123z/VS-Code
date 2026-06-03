@@ -6238,6 +6238,10 @@
     trigger: device
   conditions: []
   actions:
+  - alias: Start Volvo XC60 climatization
+    action: button.press
+    target:
+      entity_id: button.volvo_xc60_start_climatization
   - action: hue.activate_scene
     metadata: {}
     data:
