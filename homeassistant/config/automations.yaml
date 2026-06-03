@@ -6956,12 +6956,11 @@
     target:
       entity_id: media_player.kitchen
   mode: single
-
 - id: '1748800000002'
   alias: 'Welcome Home: Unjoin Bedroom When Unoccupied 10 Min'
-  description: While welcome home is active, unjoin the bedroom speaker when the
-    room has been empty for 10 minutes. The auto-join automation handles re-joining
-    if someone returns.
+  description: While welcome home is active, unjoin the bedroom speaker when the room
+    has been empty for 10 minutes. The auto-join automation handles re-joining if
+    someone returns.
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
@@ -6980,7 +6979,6 @@
       entity_id: media_player.bedroom
     data: {}
   mode: single
-
 - id: '1748800000003'
   alias: 'Welcome Home: Unjoin Office When Unoccupied 10 Min'
   description: While welcome home is active, unjoin the office speaker when the room
@@ -7004,7 +7002,6 @@
       entity_id: media_player.office
     data: {}
   mode: single
-
 - id: '1777890200001'
   alias: 'Welcome Home: Auto Join Bedroom Speakers on Motion'
   description: While welcome home music is playing in kitchen, joins bedroom speakers
@@ -7246,7 +7243,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 08:00:00
+    at: 08:35:00
     weekday:
     - mon
     - tue
