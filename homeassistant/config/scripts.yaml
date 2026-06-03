@@ -81,26 +81,23 @@ script_volvo_start_core:
     target:
       entity_id: scene.hallway_malibu_pink
     data:
-      transition: 10
-  - alias: Announce departure via Big Bedroom Sonos
-    action: tts.speak
+      transition: 15
+  - alias: Announce departure with weather
+    action: notify.send_message
     target:
-      entity_id: tts.piper
+      entity_id:
+      - notify.paul_s_sonos_arc_announce
+      - notify.echo_show_kitchen_announce
+      - notify.office_speaker_announce
+      - notify.living_room_dot_announce
+      - notify.paul_s_sonos_one_second_edition_announce
     data:
-      message: XC60 will be ready to depart in 5 minutes
-      cache: true
-      media_player_entity_id: media_player.bedroom_2
+      message: "XC60 will be Ready to Depart in 5 Minutes. Current conditions are\
+        \ {{ states('weather.nws_38_20113654119161_85_60519204644677_klou') }}, {{\
+        \ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou', 'temperature')\
+        \ }} degrees."
     continue_on_error: true
-  - alias: Announce departure via Kitchen Sonos
-    action: tts.speak
-    target:
-      entity_id: tts.piper
-    data:
-      message: XC60 will be ready to depart in 5 minutes
-      cache: true
-      media_player_entity_id: media_player.kitchen
-    continue_on_error: true
-  - alias: Send iPhone notification
+  - alias: Send departure iPhone notification
     action: notify.mobile_app_pc_iphone
     data:
       message: XC60 will be Ready to Depart in 5 Minutes
@@ -114,29 +111,23 @@ script_volvo_start_core:
       entity_id: scene.hallway_energize
     data:
       transition: 60
-  - alias: Announce ready via Big Bedroom Sonos
-    action: tts.speak
+  - alias: Announce ready
+    action: notify.send_message
     target:
-      entity_id: tts.piper
+      entity_id:
+      - notify.paul_s_sonos_arc_announce
+      - notify.echo_show_kitchen_announce
+      - notify.office_speaker_announce
+      - notify.living_room_dot_announce
+      - notify.paul_s_sonos_one_second_edition_announce
     data:
-      message: XC60 is ready to depart
-      cache: true
-      media_player_entity_id: media_player.bedroom_2
+      message: XC60 is Ready to Depart
     continue_on_error: true
-  - alias: Announce ready via Kitchen Sonos
-    action: tts.speak
-    target:
-      entity_id: tts.piper
-    data:
-      message: XC60 is ready to depart
-      cache: true
-      media_player_entity_id: media_player.kitchen
-    continue_on_error: true
-  - alias: Send final iPhone notification
+  - alias: Send ready iPhone notification
     action: notify.mobile_app_pc_iphone
     data:
       message: XC60 is Ready to Depart
-      title: XC60 is Ready to Depart
+      title: Car Remote
   - alias: Clear Volvo start active flag
     action: input_boolean.turn_off
     target:
