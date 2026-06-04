@@ -46,93 +46,100 @@ script_volvo_start_core:
     target:
       entity_id: button.volvo_xc60_start_climatization
     data: {}
-  - alias: Activate initial scene (Malibu Pink)
-    action: hue.activate_scene
-    target:
-      entity_id: scene.hallway_malibu_pink
-    data:
-      transition: 15
-  - alias: Announce departure with weather
-    action: notify.send_message
-    target:
-      entity_id:
-      - notify.paul_s_sonos_arc_announce
-      - notify.echo_show_kitchen_announce
-      - notify.office_speaker_announce
-      - notify.living_room_dot_announce
-      - notify.paul_s_sonos_one_second_edition_announce
-    data:
-      message: XC60 will be Ready to Depart in 5 Minutes. Current conditions are {{
-        states('weather.nws_38_20113654119161_85_60519204644677_klou') }}, {{ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou',
-        'temperature') }} degrees.
-    continue_on_error: true
-  - alias: Send departure iPhone notification
-    action: notify.mobile_app_pc_iphone
-    data:
-      message: XC60 will be Ready to Depart in 5 Minutes
-      title: Volvo XC60
-  - alias: Open garage if between 7AM-9PM and not opened in last 10 minutes
-    choose:
-    - conditions:
-      - condition: time
-        after: 07:00:00
-        before: '21:00:00'
-      - condition: template
-        value_template: '{{ (now() - states.cover.garage.last_changed).total_seconds()
-          > 600 }}'
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: cover.garage
-          state: open
-      sequence:
-      - alias: Wait for person detected in garage (up to 5 minutes)
-        wait_for_trigger:
-        - trigger: state
-          entity_id: binary_sensor.garage_occupancy_group
-          to: 'on'
-        timeout:
-          minutes: 10
-        continue_on_timeout: false
-      - alias: Open garage only if person was detected
-        if:
-        - condition: template
-          value_template: '{{ wait.completed }}'
-        then:
-        - action: cover.open_cover
-          target:
-            entity_id: cover.garage
-          data: {}
-  - alias: Wait 4 minutes
-    delay:
-      minutes: 4
-  - alias: Activate final scene (Energize)
-    action: hue.activate_scene
-    target:
-      entity_id: scene.hallway_energize
-    data:
-      transition: 60
-  - alias: Announce ready
-    action: notify.send_message
-    target:
-      entity_id:
-      - notify.paul_s_sonos_arc_announce
-      - notify.echo_show_kitchen_announce
-      - notify.office_speaker_announce
-      - notify.living_room_dot_announce
-      - notify.paul_s_sonos_one_second_edition_announce
-    data:
-      message: 'Vehicle Ready, Time to Go!!!!  '
-    continue_on_error: true
-  - alias: Send ready iPhone notification
-    action: notify.mobile_app_pc_iphone
-    data:
-      message: XC60 is Ready to Depart
-      title: Car Remote
-  - alias: Clear Volvo start active flag
-    action: input_boolean.turn_off
-    target:
-      entity_id: input_boolean.volvo_start_active
+  - alias: Run main sequence and garage in parallel
+    parallel:
+    - sequence:
+      - alias: Activate initial scene (Malibu Pink)
+        action: hue.activate_scene
+        target:
+          entity_id: scene.hallway_malibu_pink
+        data:
+          transition: 15
+      - alias: Announce departure with weather
+        action: notify.send_message
+        target:
+          entity_id:
+          - notify.paul_s_sonos_arc_announce
+          - notify.echo_show_kitchen_announce
+          - notify.office_speaker_announce
+          - notify.living_room_dot_announce
+          - notify.paul_s_sonos_one_second_edition_announce
+        data:
+          message: XC60 will be Ready to Depart in 5 Minutes. Current conditions are {{
+            states('weather.nws_38_20113654119161_85_60519204644677_klou') }}, {{ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou',
+            'temperature') }} degrees.
+        continue_on_error: true
+      - alias: Send departure iPhone notification
+        action: notify.mobile_app_pc_iphone
+        data:
+          message: XC60 will be Ready to Depart in 5 Minutes
+          title: Volvo XC60
+      - alias: Wait 4 minutes
+        delay:
+          minutes: 4
+      - alias: Activate final scene (Energize)
+        action: hue.activate_scene
+        target:
+          entity_id: scene.hallway_energize
+        data:
+          transition: 60
+      - alias: Announce ready
+        action: notify.send_message
+        target:
+          entity_id:
+          - notify.paul_s_sonos_arc_announce
+          - notify.echo_show_kitchen_announce
+          - notify.office_speaker_announce
+          - notify.living_room_dot_announce
+          - notify.paul_s_sonos_one_second_edition_announce
+        data:
+          message: 'Vehicle Ready, Time to Go!!!!  '
+        continue_on_error: true
+      - alias: Send ready iPhone notification
+        action: notify.mobile_app_pc_iphone
+        data:
+          message: XC60 is Ready to Depart
+          title: Car Remote
+      - alias: Clear Volvo start active flag
+        action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.volvo_start_active
+    - sequence:
+      - alias: Open garage if Volvo start active, between 7AM-9PM, not opened recently
+        choose:
+        - conditions:
+          - condition: state
+            entity_id: input_boolean.volvo_start_active
+            state: 'on'
+          - condition: time
+            after: '07:00:00'
+            before: '21:00:00'
+          - condition: template
+            value_template: '{{ (now() - states.cover.garage.last_changed).total_seconds()
+              > 600 }}'
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: cover.garage
+              state: open
+          sequence:
+          - alias: Wait for person detected in garage (up to 10 minutes)
+            wait_for_trigger:
+            - trigger: state
+              entity_id: binary_sensor.garage_occupancy_group
+              to: 'on'
+            timeout:
+              minutes: 10
+            continue_on_timeout: false
+          - alias: Open garage only if person was detected
+            if:
+            - condition: template
+              value_template: '{{ wait.completed }}'
+            then:
+            - action: cover.open_cover
+              target:
+                entity_id: cover.garage
+              data: {}
   mode: single
 script_good_morning_routine_core:
   alias: 'Script: Good Morning Routine Core'
