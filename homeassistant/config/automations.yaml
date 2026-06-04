@@ -2855,6 +2855,20 @@
         action: input_boolean.turn_off
         target:
           entity_id: input_boolean.big_bedroom_manual_override
+      - alias: Turn lights off first before re-enabling AL to prevent race condition
+        action: light.turn_off
+        target:
+          entity_id:
+          - light.nano_sand_dune
+          - light.bedroom_ceiling_1
+          - light.bedroom_ceiling_2
+          - light.bedroom_lamp_1
+          - light.bedroom_lamp_2
+        data:
+          transition: 15
+      - alias: Wait for transition to complete before re-enabling AL
+        delay:
+          seconds: 16
       - alias: Clear manual_control so AL can take over on next motion
         action: adaptive_lighting.set_manual_control
         data:
@@ -2881,16 +2895,6 @@
         - action: switch.turn_on
           target:
             entity_id: switch.al_sleep_mode_big_bedroom
-      - action: light.turn_off
-        target:
-          entity_id:
-          - light.nano_sand_dune
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
-        data:
-          transition: 15
       - action: input_select.select_option
         target:
           entity_id: input_select.bedroom_scene_mode
