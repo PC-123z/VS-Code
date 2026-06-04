@@ -66,11 +66,8 @@ script_volvo_start_core:
           - notify.paul_s_sonos_one_second_edition_announce
         data:
           message: >-
-            {% set nws = 'weather.nws_38_20113654119161_85_60519204644677_klou' %}
-            {% set home = 'weather.forecast_home_2' %}
-            {% set w = nws if states(nws) not in ['unavailable','unknown'] else home %}
             XC60 will be Ready to Depart in 5 Minutes. Current conditions are
-            {{ states(w) }}, {{ state_attr(w, 'temperature') }} degrees.
+            {{ states('weather.forecast_home_2') }}, {{ state_attr('weather.forecast_home_2', 'temperature') }} degrees.
         continue_on_error: true
       - alias: Send departure iPhone notification
         action: notify.mobile_app_pc_iphone
@@ -310,8 +307,8 @@ script_good_morning_routine_core:
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: 'Good morning! Today is {{ now().strftime(''%A, %B %-d'') }}.
-              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'')
-              }}, with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'',
+              The current conditions are {{ states(''weather.forecast_home_2'')
+              }}, with a temperature of {{ state_attr(''weather.forecast_home_2'',
               ''temperature'') }} degrees. Have a great day!
 
               '
@@ -363,8 +360,8 @@ script_good_morning_routine_core:
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: 'Good morning! Today is {{ now().strftime(''%A, %B %-d'') }}.
-              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'')
-              }}, with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'',
+              The current conditions are {{ states(''weather.forecast_home_2'')
+              }}, with a temperature of {{ state_attr(''weather.forecast_home_2'',
               ''temperature'') }} degrees. Have a great day!
 
               '
