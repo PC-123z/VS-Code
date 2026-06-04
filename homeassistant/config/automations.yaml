@@ -5747,6 +5747,10 @@
         condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'off'
+      - alias: Skip if lights are already off - don't turn on lights in an empty room
+        condition: state
+        entity_id: light.ribbon
+        state: 'on'
       sequence:
       - action: light.turn_on
         target:
