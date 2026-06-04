@@ -65,9 +65,12 @@ script_volvo_start_core:
           - notify.living_room_dot_announce
           - notify.paul_s_sonos_one_second_edition_announce
         data:
-          message: XC60 will be Ready to Depart in 5 Minutes. Current conditions are {{
-            states('weather.nws_38_20113654119161_85_60519204644677_klou') }}, {{ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou',
-            'temperature') }} degrees.
+          message: >-
+            {% set nws = 'weather.nws_38_20113654119161_85_60519204644677_klou' %}
+            {% set home = 'weather.forecast_home_2' %}
+            {% set w = nws if states(nws) not in ['unavailable','unknown'] else home %}
+            XC60 will be Ready to Depart in 5 Minutes. Current conditions are
+            {{ states(w) }}, {{ state_attr(w, 'temperature') }} degrees.
         continue_on_error: true
       - alias: Send departure iPhone notification
         action: notify.mobile_app_pc_iphone
