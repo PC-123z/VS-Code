@@ -6138,16 +6138,9 @@
     below: 50
     id: battery_dropped
   conditions:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: person.paul
-      state:
-      - home
-    - condition: state
-      entity_id: device_tracker.bcpro_204982_08b8
-      state:
-      - home
+  - condition: state
+    entity_id: device_tracker.bcpro_204982_08b8
+    state: home
   - condition: state
     entity_id: sensor.volvo_xc60_charging_connection_status
     state: disconnected
