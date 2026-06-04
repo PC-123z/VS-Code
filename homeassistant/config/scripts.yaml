@@ -41,14 +41,45 @@ script_volvo_start_core:
     Alexa feedback.
   icon: mdi:car
   sequence:
+  - alias: Press climatization button
+    action: button.press
+    target:
+      entity_id: button.volvo_xc60_start_climatization
+    data: {}
+  - alias: Activate initial scene (Malibu Pink)
+    action: hue.activate_scene
+    target:
+      entity_id: scene.hallway_malibu_pink
+    data:
+      transition: 15
+  - alias: Announce departure with weather
+    action: notify.send_message
+    target:
+      entity_id:
+      - notify.paul_s_sonos_arc_announce
+      - notify.echo_show_kitchen_announce
+      - notify.office_speaker_announce
+      - notify.living_room_dot_announce
+      - notify.paul_s_sonos_one_second_edition_announce
+    data:
+      message: XC60 will be Ready to Depart in 5 Minutes. Current conditions are {{
+        states('weather.nws_38_20113654119161_85_60519204644677_klou') }}, {{ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou',
+        'temperature') }} degrees.
+    continue_on_error: true
+  - alias: Send departure iPhone notification
+    action: notify.mobile_app_pc_iphone
+    data:
+      message: XC60 will be Ready to Depart in 5 Minutes
+      title: Volvo XC60
   - alias: Open garage if between 7AM-9PM and not opened in last 10 minutes
     choose:
     - conditions:
       - condition: time
-        after: '07:00:00'
+        after: 07:00:00
         before: '21:00:00'
       - condition: template
-        value_template: "{{ (now() - states.cover.garage.last_changed).total_seconds() > 600 }}"
+        value_template: '{{ (now() - states.cover.garage.last_changed).total_seconds()
+          > 600 }}'
       - condition: not
         conditions:
         - condition: state
@@ -72,36 +103,6 @@ script_volvo_start_core:
           target:
             entity_id: cover.garage
           data: {}
-  - alias: Press climatization button
-    action: button.press
-    target:
-      entity_id: button.volvo_xc60_start_climatization
-  - alias: Activate initial scene (Malibu Pink)
-    action: hue.activate_scene
-    target:
-      entity_id: scene.hallway_malibu_pink
-    data:
-      transition: 15
-  - alias: Announce departure with weather
-    action: notify.send_message
-    target:
-      entity_id:
-      - notify.paul_s_sonos_arc_announce
-      - notify.echo_show_kitchen_announce
-      - notify.office_speaker_announce
-      - notify.living_room_dot_announce
-      - notify.paul_s_sonos_one_second_edition_announce
-    data:
-      message: "XC60 will be Ready to Depart in 5 Minutes. Current conditions are\
-        \ {{ states('weather.nws_38_20113654119161_85_60519204644677_klou') }}, {{\
-        \ state_attr('weather.nws_38_20113654119161_85_60519204644677_klou', 'temperature')\
-        \ }} degrees."
-    continue_on_error: true
-  - alias: Send departure iPhone notification
-    action: notify.mobile_app_pc_iphone
-    data:
-      message: XC60 will be Ready to Depart in 5 Minutes
-      title: Volvo XC60
   - alias: Wait 4 minutes
     delay:
       minutes: 4
@@ -121,7 +122,7 @@ script_volvo_start_core:
       - notify.living_room_dot_announce
       - notify.paul_s_sonos_one_second_edition_announce
     data:
-      message: XC60 is Ready to Depart
+      message: 'Vehicle Ready, Time to Go!!!!  '
     continue_on_error: true
   - alias: Send ready iPhone notification
     action: notify.mobile_app_pc_iphone
@@ -299,9 +300,9 @@ script_good_morning_routine_core:
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: 'Good morning! Today is {{ now().strftime(''%A, %B %-d'') }}.
-              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'') }},
-              with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'', ''temperature'')
-              }} degrees. Have a great day!
+              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'')
+              }}, with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'',
+              ''temperature'') }} degrees. Have a great day!
 
               '
         else:
@@ -352,9 +353,9 @@ script_good_morning_routine_core:
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: 'Good morning! Today is {{ now().strftime(''%A, %B %-d'') }}.
-              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'') }},
-              with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'', ''temperature'')
-              }} degrees. Have a great day!
+              The current conditions are {{ states(''weather.nws_38_20113654119161_85_60519204644677_klou'')
+              }}, with a temperature of {{ state_attr(''weather.nws_38_20113654119161_85_60519204644677_klou'',
+              ''temperature'') }} degrees. Have a great day!
 
               '
         - alias: Short pause for TTS to finish then resume
