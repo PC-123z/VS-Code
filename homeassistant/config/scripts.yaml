@@ -62,7 +62,7 @@ script_volvo_start_core:
           to: 'on'
         timeout:
           minutes: 10
-        continue_on_timeout: true
+        continue_on_timeout: false
       - alias: Open garage only if person was detected
         if:
         - condition: template
