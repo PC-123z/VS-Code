@@ -8238,3 +8238,40 @@
         else ''Driveway Camera'' }}'
       media_content_type: smart_home_camera
   mode: single
+- id: '1749150000000'
+  alias: 'Living Room: Turn off TV when PS5 and Apple TV both off'
+  description: Turns off the living room TV if both the PS5 and all Apple TVs have
+    been off for 30 seconds.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.ps5_living_room
+    to: 'off'
+    for:
+      seconds: 30
+  - trigger: state
+    entity_id:
+    - media_player.appletv_5
+    - media_player.appletv_6
+    - media_player.appletv_14
+    to: 'off'
+    for:
+      seconds: 30
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.ps5_living_room
+    state: 'off'
+  - condition: state
+    entity_id: media_player.appletv_5
+    state: 'off'
+  - condition: state
+    entity_id: media_player.appletv_6
+    state: 'off'
+  - condition: state
+    entity_id: media_player.appletv_14
+    state: 'off'
+  actions:
+  - action: media_player.turn_off
+    target:
+      entity_id: media_player.living_room_tv_2
+    data: {}
+  mode: single
