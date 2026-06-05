@@ -289,8 +289,8 @@
             media_player_entity_id: media_player.bedroom_2
             message: 'Time to wake up! Today is {{ now().strftime(''%A, %B %-d'')
               }}. The current conditions are {{ states(''weather.forecast_home'')
-              }}, with a temperature of {{ state_attr(''weather.forecast_home'',
-              ''temperature'') }} degrees. Have a great evening!
+              }}, with a temperature of {{ state_attr(''weather.forecast_home'', ''temperature'')
+              }} degrees. Have a great evening!
 
               '
         else:
@@ -4881,8 +4881,8 @@
             message: 'Good morning Lily & Caylee! Today is {{ now().strftime(''%A,
               %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M
               %p'') }}. The current conditions are {{ states(''weather.forecast_home'')
-              }}, with a temperature of {{ state_attr(''weather.forecast_home'',
-              ''temperature'') }} degrees. Let''s go!!!!!
+              }}, with a temperature of {{ state_attr(''weather.forecast_home'', ''temperature'')
+              }} degrees. Let''s go!!!!!
 
               '
         - delay:
@@ -4904,8 +4904,8 @@
               awake now. Good morning Lily & Caylee! Today is {{ now().strftime(''%A,
               %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M
               %p'') }}. The current conditions are {{ states(''weather.forecast_home'')
-              }}, with a temperature of {{ state_attr(''weather.forecast_home'',
-              ''temperature'') }} degrees. Let''s go!!!!!
+              }}, with a temperature of {{ state_attr(''weather.forecast_home'', ''temperature'')
+              }} degrees. Let''s go!!!!!
 
               '
         else:
@@ -4959,8 +4959,8 @@
             message: 'Good morning Lily & Caylee! Today is {{ now().strftime(''%A,
               %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M
               %p'') }}. The current conditions are {{ states(''weather.forecast_home'')
-              }}, with a temperature of {{ state_attr(''weather.forecast_home'',
-              ''temperature'') }} degrees. Let''s go!!!!!
+              }}, with a temperature of {{ state_attr(''weather.forecast_home'', ''temperature'')
+              }} degrees. Let''s go!!!!!
 
               '
         - delay:
@@ -4982,8 +4982,8 @@
               awake now. Good morning Lily & Caylee! Today is {{ now().strftime(''%A,
               %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M
               %p'') }}. The current conditions are {{ states(''weather.forecast_home'')
-              }}, with a temperature of {{ state_attr(''weather.forecast_home'',
-              ''temperature'') }} degrees. Let''s go!!!!!
+              }}, with a temperature of {{ state_attr(''weather.forecast_home'', ''temperature'')
+              }} degrees. Let''s go!!!!!
 
               '
         - alias: Resume music after announcements
@@ -7285,7 +7285,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 07:55:00
+    at: 07:00:00
     weekday:
     - mon
     - tue
@@ -7462,8 +7462,8 @@
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: Good morning! Today is {{ now().strftime('%A, %B %-d') }}. The
-              current conditions are {{ states('weather.forecast_home') }}, with
-              a temperature of {{ state_attr('weather.forecast_home', 'temperature')
+              current conditions are {{ states('weather.forecast_home') }}, with a
+              temperature of {{ state_attr('weather.forecast_home', 'temperature')
               }} degrees. Have a great day!
         else:
         - alias: Ramp volume to 0.20 over ~2.5 minutes
@@ -7513,8 +7513,8 @@
             cache: true
             media_player_entity_id: media_player.bedroom_2
             message: Good morning! Today is {{ now().strftime('%A, %B %-d') }}. The
-              current conditions are {{ states('weather.forecast_home') }}, with
-              a temperature of {{ state_attr('weather.forecast_home', 'temperature')
+              current conditions are {{ states('weather.forecast_home') }}, with a
+              temperature of {{ state_attr('weather.forecast_home', 'temperature')
               }} degrees. Have a great day!
         - alias: Wait for TTS to finish speaking before resuming
           wait_template: '{{ not is_state(''media_player.bedroom_2'', ''playing'')
