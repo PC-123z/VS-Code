@@ -140,6 +140,12 @@ template:
               entity_id: input_boolean.good_morning_trigger
 
   - binary_sensor:
+      - name: "PS5 Living Room"
+        unique_id: ps5_living_room_power
+        device_class: running
+        state: >
+          {{ states('sensor.living_room_entertainment_current_power') | float(0) > 100 }}
+
       - name: "Kitchen Person Occupancy Confirmed"
         unique_id: kitchen_person_occupancy_confirmed
         device_class: occupancy
