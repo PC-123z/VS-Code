@@ -4429,6 +4429,91 @@
       minutes: 15
     enabled: false
   mode: single
+- id: '1776310243676'
+  alias: 'Hue Button 3 - Big Bedroom: Goodnight Button Hold - Hue Button 3'
+  description: Hold - lights off, fans up (purifier+circulator 100%), alarm set
+  triggers:
+  - device_id: aa30217bd770e8befb593a51899cbf4b
+    domain: hue
+    type: repeat
+    subtype: 3
+    trigger: device
+    id: hold
+  conditions: []
+  actions:
+  - alias: Disable motion automation
+    action: automation.turn_off
+    target:
+      entity_id: automation.big_bedroom_smart_motion_presence
+    data:
+      stop_actions: true
+  - alias: Turn off AL switches and set manual control
+    action: switch.turn_off
+    target:
+      entity_id:
+      - switch.al_big_bedroom
+      - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_color_big_bedroom_al
+      - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_brightness_big_bedroom_al
+  - action: adaptive_lighting.set_manual_control
+    data:
+      entity_id: switch.al_big_bedroom
+      lights:
+      - light.bedroom_ceiling_1
+      - light.bedroom_ceiling_2
+      - light.bedroom_lamp_1
+      - light.bedroom_lamp_2
+      manual_control: true
+  - alias: Set alarm to Home/Stay
+    action: alarm_control_panel.alarm_arm_home
+    target:
+      entity_id: alarm_control_panel.3302_alarm
+  - alias: Set bedroom fan to 50%
+    action: fan.turn_on
+    data:
+      percentage: 50
+    target:
+      entity_id: fan.big_bedroom_fan
+  - alias: Set purifier to 100%
+    action: fan.turn_on
+    target:
+      device_id: c2504c8438baeadcf59cca47e71a14b4
+    data:
+      percentage: 100
+  - alias: Set air circulator to 100%
+    action: fan.turn_on
+    target:
+      device_id: ca438fb682d663761f41ccdd014ee6b0
+    data:
+      percentage: 100
+  - alias: Nanoleaf to deep red 2%
+    action: light.turn_on
+    target:
+      entity_id: light.nano_sand_dune
+    data:
+      rgb_color:
+      - 255
+      - 30
+      - 0
+      brightness_pct: 2
+      transition: 1
+    enabled: false
+  - alias: Fade all Hue lights off over 5 seconds
+    action: light.turn_off
+    target:
+      entity_id: light.bedroom
+      area_id: bathroom
+    data:
+      transition: 5
+  - action: light.turn_off
+    target:
+      entity_id: light.nano_sand_dune
+    data:
+      transition: 30
+  - alias: Turn off Nanoleaf after 15 minutes
+    delay:
+      minutes: 15
+    enabled: false
+  mode: single
 - id: '1776378416550'
   alias: '*Bedroom 2 Bedtime Routine'
   description: Triggers on MOTION after 10:30pm. Sets bedroom2_occupied, starts sleep
