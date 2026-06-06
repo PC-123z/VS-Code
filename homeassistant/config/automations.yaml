@@ -8301,15 +8301,9 @@
     data:
       cache: false
       media_player_entity_id:
-      - media_player.bathroom
-      - media_player.bathroom_2
       - media_player.bedroom
-      - media_player.bedroom_2
-      - media_player.bedroom_2_2
-      - media_player.echo_show_kitchen
-      - media_player.kitchen
-      - media_player.office
-      - media_player.office_2
+      - media_player.living_room_dot
+      - media_player.kitchen_echo_show_kitchen
       message: >
         {% if trigger.id == 'five_minutes' %}
           The washer will be done in 5 minutes.
@@ -8343,15 +8337,9 @@
     data:
       cache: false
       media_player_entity_id:
-      - media_player.bathroom
-      - media_player.bathroom_2
       - media_player.bedroom
-      - media_player.bedroom_2
-      - media_player.bedroom_2_2
-      - media_player.echo_show_kitchen
-      - media_player.kitchen
-      - media_player.office
-      - media_player.office_2
+      - media_player.living_room_dot
+      - media_player.kitchen_echo_show_kitchen
       message: >
         {% if trigger.id == 'five_minutes' %}
           The dryer will be done in 5 minutes.
