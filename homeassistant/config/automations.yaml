@@ -8296,7 +8296,8 @@
       cache: false
       media_player_entity_id:
       - media_player.bedroom
-      - media_player.living_room_dot
+      - media_player.living_room_living_room_dot
+      - media_player.kitchen_echo_show_kitchen
       message: The washer will be done in 5 minutes.
   mode: single
 - id: washer_done_announcement
@@ -8319,7 +8320,7 @@
       cache: false
       media_player_entity_id:
       - media_player.bedroom
-      - media_player.living_room_dot
+      - media_player.living_room_living_room_dot
       - media_player.kitchen_echo_show_kitchen
       message: The washer is done!
   mode: single
@@ -8344,7 +8345,7 @@
       cache: false
       media_player_entity_id:
       - media_player.bedroom
-      - media_player.living_room_dot
+      - media_player.living_room_living_room_dot
       - media_player.kitchen_echo_show_kitchen
       message: The dryer will be done in 5 minutes.
   mode: single
@@ -8368,7 +8369,7 @@
       cache: false
       media_player_entity_id:
       - media_player.bedroom
-      - media_player.living_room_dot
+      - media_player.living_room_living_room_dot
       - media_player.kitchen_echo_show_kitchen
       message: The dryer is done!
   mode: single
