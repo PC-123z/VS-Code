@@ -8277,16 +8277,23 @@
   mode: single
 - id: washer_done_announcement
   alias: Washer Done Announcement
-  description: Announce when washer finishes between 8AM and 10:30PM
+  description: Announce 5 min warning and completion for washer between 8AM and 10:30PM
   triggers:
+  - trigger: template
+    id: five_minutes
+    value_template: >
+      {{ states('sensor.washer_machine_state') == 'run' and
+         (as_timestamp(states('sensor.washer_completion_time')) - as_timestamp(now())) | int <= 300 and
+         (as_timestamp(states('sensor.washer_completion_time')) - as_timestamp(now())) | int > 0 }}
   - trigger: state
+    id: done
     entity_id: sensor.washer_machine_state
     from: run
     to: stop
   conditions:
   - condition: time
-    after: 08:00:00
-    before: '22:30:00'
+    after: "08:00:00"
+    before: "22:30:00"
   actions:
   - action: tts.speak
     target:
@@ -8303,20 +8310,32 @@
       - media_player.kitchen
       - media_player.office
       - media_player.office_2
-      message: The washer is done!
+      message: >
+        {% if trigger.id == 'five_minutes' %}
+          The washer will be done in 5 minutes.
+        {% else %}
+          The washer is done!
+        {% endif %}
   mode: single
 - id: dryer_done_announcement
   alias: Dryer Done Announcement
-  description: Announce when dryer finishes between 8AM and 10:30PM
+  description: Announce 5 min warning and completion for dryer between 8AM and 10:30PM
   triggers:
+  - trigger: template
+    id: five_minutes
+    value_template: >
+      {{ states('sensor.dryer_machine_state') == 'run' and
+         (as_timestamp(states('sensor.dryer_completion_time')) - as_timestamp(now())) | int <= 300 and
+         (as_timestamp(states('sensor.dryer_completion_time')) - as_timestamp(now())) | int > 0 }}
   - trigger: state
+    id: done
     entity_id: sensor.dryer_machine_state
     from: run
     to: stop
   conditions:
   - condition: time
-    after: 08:00:00
-    before: '22:30:00'
+    after: "08:00:00"
+    before: "22:30:00"
   actions:
   - action: tts.speak
     target:
@@ -8333,5 +8352,10 @@
       - media_player.kitchen
       - media_player.office
       - media_player.office_2
-      message: The dryer is done!
+      message: >
+        {% if trigger.id == 'five_minutes' %}
+          The dryer will be done in 5 minutes.
+        {% else %}
+          The dryer is done!
+        {% endif %}
   mode: single
