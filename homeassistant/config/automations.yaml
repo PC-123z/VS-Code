@@ -110,7 +110,7 @@
     grace. 60-minute hard cap from routine start.'
   triggers:
   - trigger: time
-    at: '16:30:00'
+    at: '16:50:00'
     weekday:
     - sat
   - trigger: time
@@ -8281,11 +8281,10 @@
   triggers:
   - trigger: template
     id: five_minutes
-    value_template: >-
-      {{ states('sensor.washer_machine_state') == 'run'
-         and states('sensor.washer_completion_time') not in ['unavailable', 'unknown', 'none']
-         and (as_timestamp(states('sensor.washer_completion_time')) - as_timestamp(now())) | int <= 300
-         and (as_timestamp(states('sensor.washer_completion_time')) - as_timestamp(now())) | int > 0 }}
+    value_template: "{{ states('sensor.washer_machine_state') == 'run'\n   and states('sensor.washer_completion_time')
+      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.washer_completion_time'))
+      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.washer_completion_time'))
+      - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.washer_machine_state
@@ -8293,12 +8292,12 @@
     to: stop
   conditions:
   - condition: time
-    after: "08:00:00"
-    before: "22:30:00"
+    after: 08:00:00
+    before: '22:30:00'
   actions:
   - if:
     - condition: template
-      value_template: "{{ trigger.id == 'five_minutes' }}"
+      value_template: '{{ trigger.id == ''five_minutes'' }}'
     then:
     - action: notify.alexa_media_living_room_dot
       data:
@@ -8342,11 +8341,10 @@
   triggers:
   - trigger: template
     id: five_minutes
-    value_template: >-
-      {{ states('sensor.dryer_machine_state') == 'run'
-         and states('sensor.dryer_completion_time') not in ['unavailable', 'unknown', 'none']
-         and (as_timestamp(states('sensor.dryer_completion_time')) - as_timestamp(now())) | int <= 300
-         and (as_timestamp(states('sensor.dryer_completion_time')) - as_timestamp(now())) | int > 0 }}
+    value_template: "{{ states('sensor.dryer_machine_state') == 'run'\n   and states('sensor.dryer_completion_time')
+      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.dryer_completion_time'))
+      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.dryer_completion_time'))
+      - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.dryer_machine_state
@@ -8354,12 +8352,12 @@
     to: stop
   conditions:
   - condition: time
-    after: "08:00:00"
-    before: "22:30:00"
+    after: 08:00:00
+    before: '22:30:00'
   actions:
   - if:
     - condition: template
-      value_template: "{{ trigger.id == 'five_minutes' }}"
+      value_template: '{{ trigger.id == ''five_minutes'' }}'
     then:
     - action: notify.alexa_media_living_room_dot
       data:
