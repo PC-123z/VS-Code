@@ -8275,71 +8275,20 @@
       entity_id: media_player.living_room_tv_2
     data: {}
   mode: single
-- id: washer_done_announcement
-  alias: Washer Done Announcement
-  description: Announce 5 min warning and completion for washer between 8AM and 10:30PM
+- id: washer_5min_warning
+  alias: Washer 5 Minute Warning
+  description: Announce washer finishing soon between 8AM and 10:30PM
   triggers:
   - trigger: template
-    id: five_minutes
-    value_template: "{{ states('sensor.washer_machine_state') == 'run' and\n   states('sensor.washer_completion_time')
-      not in ['unavailable','unknown'] and\n   (as_timestamp(states('sensor.washer_completion_time'))
-      - as_timestamp(now())) | int <= 300 and\n   (as_timestamp(states('sensor.washer_completion_time'))
-      - as_timestamp(now())) | int > 0 }}"
-  - trigger: state
-    id: done
-    entity_id: sensor.washer_machine_state
-    from: run
-    to: stop
+    value_template: >-
+      {{ states('sensor.washer_machine_state') == 'run'
+         and states('sensor.washer_completion_time') not in ['unavailable', 'unknown', 'none']
+         and (as_timestamp(states('sensor.washer_completion_time')) - as_timestamp(now())) | int <= 300
+         and (as_timestamp(states('sensor.washer_completion_time')) - as_timestamp(now())) | int > 0 }}
   conditions:
   - condition: time
-    after: 08:00:00
-    before: '22:30:00'
-  actions:
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{{ trigger.id == ''five_minutes'' }}'
-      sequence:
-      - action: tts.speak
-        target:
-          entity_id: tts.piper
-        data:
-          cache: false
-          media_player_entity_id:
-          - media_player.bedroom
-          - media_player.living_room_dot
-          - media_player.kitchen_echo_show_kitchen
-          message: The washer will be done in 5 minutes.
-    default:
-    - action: tts.speak
-      target:
-        entity_id: tts.piper
-      data:
-        cache: false
-        media_player_entity_id:
-        - media_player.bedroom
-        - media_player.living_room_dot
-        - media_player.kitchen_echo_show_kitchen
-        message: The washer is done!
-  mode: single
-- id: dryer_done_announcement
-  alias: Dryer Done Announcement
-  description: Announce 5 min warning and completion for dryer between 8AM and 10:30PM
-  triggers:
-  - trigger: template
-    id: five_minutes
-    value_template: "{{ states('sensor.dryer_machine_state') == 'run' and\n   (as_timestamp(states('sensor.dryer_completion_time'))
-      - as_timestamp(now())) | int <= 300 and\n   (as_timestamp(states('sensor.dryer_completion_time'))
-      - as_timestamp(now())) | int > 0 }}\n"
-  - trigger: state
-    id: done
-    entity_id: sensor.dryer_machine_state
-    from: run
-    to: stop
-  conditions:
-  - condition: time
-    after: 08:00:00
-    before: '22:30:00'
+    after: "08:00:00"
+    before: "22:30:00"
   actions:
   - action: tts.speak
     target:
@@ -8350,6 +8299,79 @@
       - media_player.bedroom
       - media_player.living_room_dot
       - media_player.kitchen_echo_show_kitchen
-      message: "{% if trigger.id == 'five_minutes' %}\n  The dryer will be done in
-        5 minutes.\n{% else %}\n  The dryer is done!\n{% endif %}\n"
+      message: The washer will be done in 5 minutes.
+  mode: single
+- id: washer_done_announcement
+  alias: Washer Done Announcement
+  description: Announce washer finished between 8AM and 10:30PM
+  triggers:
+  - trigger: state
+    entity_id: sensor.washer_machine_state
+    from: run
+    to: stop
+  conditions:
+  - condition: time
+    after: "08:00:00"
+    before: "22:30:00"
+  actions:
+  - action: tts.speak
+    target:
+      entity_id: tts.piper
+    data:
+      cache: false
+      media_player_entity_id:
+      - media_player.bedroom
+      - media_player.living_room_dot
+      - media_player.kitchen_echo_show_kitchen
+      message: The washer is done!
+  mode: single
+- id: dryer_5min_warning
+  alias: Dryer 5 Minute Warning
+  description: Announce dryer finishing soon between 8AM and 10:30PM
+  triggers:
+  - trigger: template
+    value_template: >-
+      {{ states('sensor.dryer_machine_state') == 'run'
+         and states('sensor.dryer_completion_time') not in ['unavailable', 'unknown', 'none']
+         and (as_timestamp(states('sensor.dryer_completion_time')) - as_timestamp(now())) | int <= 300
+         and (as_timestamp(states('sensor.dryer_completion_time')) - as_timestamp(now())) | int > 0 }}
+  conditions:
+  - condition: time
+    after: "08:00:00"
+    before: "22:30:00"
+  actions:
+  - action: tts.speak
+    target:
+      entity_id: tts.piper
+    data:
+      cache: false
+      media_player_entity_id:
+      - media_player.bedroom
+      - media_player.living_room_dot
+      - media_player.kitchen_echo_show_kitchen
+      message: The dryer will be done in 5 minutes.
+  mode: single
+- id: dryer_done_announcement
+  alias: Dryer Done Announcement
+  description: Announce dryer finished between 8AM and 10:30PM
+  triggers:
+  - trigger: state
+    entity_id: sensor.dryer_machine_state
+    from: run
+    to: stop
+  conditions:
+  - condition: time
+    after: "08:00:00"
+    before: "22:30:00"
+  actions:
+  - action: tts.speak
+    target:
+      entity_id: tts.piper
+    data:
+      cache: false
+      media_player_entity_id:
+      - media_player.bedroom
+      - media_player.living_room_dot
+      - media_player.kitchen_echo_show_kitchen
+      message: The dryer is done!
   mode: single
