@@ -8305,12 +8305,36 @@
         message: The washer will be done in 5 minutes.
         data:
           type: announce
+    - action: notify.alexa_media_echo_show_kitchen
+      data:
+        message: The washer will be done in 5 minutes.
+        data:
+          type: announce
+    - action: tts.speak
+      target:
+        entity_id: tts.piper
+      data:
+        cache: false
+        media_player_entity_id: media_player.bedroom
+        message: The washer will be done in 5 minutes.
     else:
     - action: notify.alexa_media_living_room_dot
       data:
         message: The washer is done!
         data:
           type: announce
+    - action: notify.alexa_media_echo_show_kitchen
+      data:
+        message: The washer is done!
+        data:
+          type: announce
+    - action: tts.speak
+      target:
+        entity_id: tts.piper
+      data:
+        cache: false
+        media_player_entity_id: media_player.bedroom
+        message: The washer is done!
   mode: single
 - id: dryer_announcement
   alias: Dryer Announcement
@@ -8342,10 +8366,34 @@
         message: The dryer will be done in 5 minutes.
         data:
           type: announce
+    - action: notify.alexa_media_echo_show_kitchen
+      data:
+        message: The dryer will be done in 5 minutes.
+        data:
+          type: announce
+    - action: tts.speak
+      target:
+        entity_id: tts.piper
+      data:
+        cache: false
+        media_player_entity_id: media_player.bedroom
+        message: The dryer will be done in 5 minutes.
     else:
     - action: notify.alexa_media_living_room_dot
       data:
         message: The dryer is done!
         data:
           type: announce
+    - action: notify.alexa_media_echo_show_kitchen
+      data:
+        message: The dryer is done!
+        data:
+          type: announce
+    - action: tts.speak
+      target:
+        entity_id: tts.piper
+      data:
+        cache: false
+        media_player_entity_id: media_player.bedroom
+        message: The dryer is done!
   mode: single
