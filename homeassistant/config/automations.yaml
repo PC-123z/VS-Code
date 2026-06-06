@@ -8289,13 +8289,11 @@
     after: 08:00:00
     before: '22:30:00'
   actions:
-  - action: tts.speak
-    target:
-      entity_id: tts.piper
+  - action: notify.alexa_media_living_room_dot
     data:
-      cache: false
-      media_player_entity_id: media_player.living_room_dot
       message: The washer will be done in 5 minutes.
+      data:
+        type: announce
   mode: single
 - id: washer_done_announcement
   alias: Washer Done Announcement
