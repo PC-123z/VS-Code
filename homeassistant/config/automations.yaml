@@ -8280,15 +8280,14 @@
   description: Announce washer finishing soon between 8AM and 10:30PM
   triggers:
   - trigger: template
-    value_template: >-
-      {{ states('sensor.washer_machine_state') == 'run'
-         and states('sensor.washer_completion_time') not in ['unavailable', 'unknown', 'none']
-         and (as_timestamp(states('sensor.washer_completion_time')) - as_timestamp(now())) | int <= 300
-         and (as_timestamp(states('sensor.washer_completion_time')) - as_timestamp(now())) | int > 0 }}
+    value_template: "{{ states('sensor.washer_machine_state') == 'run'\n   and states('sensor.washer_completion_time')
+      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.washer_completion_time'))
+      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.washer_completion_time'))
+      - as_timestamp(now())) | int > 0 }}"
   conditions:
   - condition: time
-    after: "08:00:00"
-    before: "22:30:00"
+    after: 08:00:00
+    before: '22:30:00'
   actions:
   - action: tts.speak
     target:
@@ -8298,7 +8297,6 @@
       media_player_entity_id:
       - media_player.bedroom
       - media_player.living_room_dot
-      - media_player.kitchen_echo_show_kitchen
       message: The washer will be done in 5 minutes.
   mode: single
 - id: washer_done_announcement
@@ -8311,8 +8309,8 @@
     to: stop
   conditions:
   - condition: time
-    after: "08:00:00"
-    before: "22:30:00"
+    after: 08:00:00
+    before: '22:30:00'
   actions:
   - action: tts.speak
     target:
@@ -8330,15 +8328,14 @@
   description: Announce dryer finishing soon between 8AM and 10:30PM
   triggers:
   - trigger: template
-    value_template: >-
-      {{ states('sensor.dryer_machine_state') == 'run'
-         and states('sensor.dryer_completion_time') not in ['unavailable', 'unknown', 'none']
-         and (as_timestamp(states('sensor.dryer_completion_time')) - as_timestamp(now())) | int <= 300
-         and (as_timestamp(states('sensor.dryer_completion_time')) - as_timestamp(now())) | int > 0 }}
+    value_template: "{{ states('sensor.dryer_machine_state') == 'run'\n   and states('sensor.dryer_completion_time')
+      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.dryer_completion_time'))
+      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.dryer_completion_time'))
+      - as_timestamp(now())) | int > 0 }}"
   conditions:
   - condition: time
-    after: "08:00:00"
-    before: "22:30:00"
+    after: 08:00:00
+    before: '22:30:00'
   actions:
   - action: tts.speak
     target:
@@ -8361,8 +8358,8 @@
     to: stop
   conditions:
   - condition: time
-    after: "08:00:00"
-    before: "22:30:00"
+    after: 08:00:00
+    before: '22:30:00'
   actions:
   - action: tts.speak
     target:
