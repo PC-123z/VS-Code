@@ -8240,19 +8240,11 @@
   mode: single
 - id: '1749150000000'
   alias: 'Living Room: Turn off TV when PS5 and Apple TV both off'
-  description: Turns off the living room TV if both the PS5 and all Apple TVs have
-    been off for 30 seconds.
+  description: When PS5 turns off and no Apple TV is playing, announce and turn off
+    the TV after 30 seconds.
   triggers:
   - trigger: state
     entity_id: binary_sensor.ps5_living_room
-    to: 'off'
-    for:
-      seconds: 30
-  - trigger: state
-    entity_id:
-    - media_player.appletv_5
-    - media_player.appletv_6
-    - media_player.appletv_14
     to: 'off'
     for:
       seconds: 30
@@ -8260,16 +8252,30 @@
   - condition: state
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
+  - condition: template
+    value_template: >
+      {{ states('media_player.appletv_5') != 'playing'
+         and states('media_player.appletv_6') != 'playing'
+         and states('media_player.appletv_14') != 'playing' }}
   - condition: state
-    entity_id: media_player.appletv_5
-    state: 'off'
-  - condition: state
-    entity_id: media_player.appletv_6
-    state: 'off'
-  - condition: state
-    entity_id: media_player.appletv_14
-    state: 'off'
+    entity_id: media_player.living_room_tv_2
+    state: 'on'
   actions:
+  - action: notify.alexa_media_living_room_dot
+    data:
+      message: The PS5 has been turned off. The TV will turn off in 30 seconds.
+      data:
+        type: announce
+  - delay:
+      seconds: 30
+  - condition: state
+    entity_id: binary_sensor.ps5_living_room
+    state: 'off'
+  - condition: template
+    value_template: >
+      {{ states('media_player.appletv_5') != 'playing'
+         and states('media_player.appletv_6') != 'playing'
+         and states('media_player.appletv_14') != 'playing' }}
   - action: media_player.turn_off
     target:
       entity_id: media_player.living_room_tv_2
