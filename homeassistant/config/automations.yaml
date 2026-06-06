@@ -8294,10 +8294,7 @@
       entity_id: tts.piper
     data:
       cache: false
-      media_player_entity_id:
-      - media_player.bedroom
-      - media_player.living_room_living_room_dot
-      - media_player.kitchen_echo_show_kitchen
+      media_player_entity_id: media_player.living_room_dot
       message: The washer will be done in 5 minutes.
   mode: single
 - id: washer_done_announcement
