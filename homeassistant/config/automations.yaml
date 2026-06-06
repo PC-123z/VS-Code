@@ -8275,7 +8275,6 @@
       entity_id: media_player.living_room_tv_2
     data: {}
   mode: single
-
 - id: washer_done_announcement
   alias: Washer Done Announcement
   description: Announce when washer finishes between 8AM and 10:30PM
@@ -8286,8 +8285,8 @@
     to: stop
   conditions:
   - condition: time
-    after: "08:00:00"
-    before: "22:30:00"
+    after: 08:00:00
+    before: '22:30:00'
   actions:
   - action: tts.speak
     target:
@@ -8295,18 +8294,17 @@
     data:
       cache: false
       media_player_entity_id:
-        - media_player.bathroom
-        - media_player.bathroom_2
-        - media_player.bedroom
-        - media_player.bedroom_2
-        - media_player.bedroom_2_2
-        - media_player.echo_show_kitchen
-        - media_player.kitchen
-        - media_player.office
-        - media_player.office_2
-      message: "The washer is done!"
+      - media_player.bathroom
+      - media_player.bathroom_2
+      - media_player.bedroom
+      - media_player.bedroom_2
+      - media_player.bedroom_2_2
+      - media_player.echo_show_kitchen
+      - media_player.kitchen
+      - media_player.office
+      - media_player.office_2
+      message: The washer is done!
   mode: single
-
 - id: dryer_done_announcement
   alias: Dryer Done Announcement
   description: Announce when dryer finishes between 8AM and 10:30PM
@@ -8317,8 +8315,8 @@
     to: stop
   conditions:
   - condition: time
-    after: "08:00:00"
-    before: "22:30:00"
+    after: 08:00:00
+    before: '22:30:00'
   actions:
   - action: tts.speak
     target:
@@ -8326,14 +8324,14 @@
     data:
       cache: false
       media_player_entity_id:
-        - media_player.bathroom
-        - media_player.bathroom_2
-        - media_player.bedroom
-        - media_player.bedroom_2
-        - media_player.bedroom_2_2
-        - media_player.echo_show_kitchen
-        - media_player.kitchen
-        - media_player.office
-        - media_player.office_2
-      message: "The dryer is done!"
+      - media_player.bathroom
+      - media_player.bathroom_2
+      - media_player.bedroom
+      - media_player.bedroom_2
+      - media_player.bedroom_2_2
+      - media_player.echo_show_kitchen
+      - media_player.kitchen
+      - media_player.office
+      - media_player.office_2
+      message: The dryer is done!
   mode: single
