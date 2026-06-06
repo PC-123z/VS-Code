@@ -144,7 +144,7 @@ template:
         unique_id: ps5_living_room_power
         device_class: running
         state: >
-          {{ states('sensor.living_room_entertainment_current_power') | float(0) > 100 }}
+          {{ states('sensor.ps5_current_consumption') | float(0) > 10 }}
 
       - name: "Kitchen Person Occupancy Confirmed"
         unique_id: kitchen_person_occupancy_confirmed
