@@ -308,10 +308,6 @@
                       "name": "LD2450 Still Count"
                     },
                     {
-                      "entity": "sensor.apollo_r_pro_1_740624_co2",
-                      "name": "CO2"
-                    },
-                    {
                       "entity": "sensor.apollo_r_pro_1_740624_ltr390_light",
                       "name": "Light"
                     }
