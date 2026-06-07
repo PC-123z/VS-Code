@@ -124,6 +124,26 @@
                       "name": "Kitchen Presence Cam"
                     },
                     {
+                      "entity": "binary_sensor.kitchen_occupancy_sensor_radar_still_target",
+                      "name": "Radar Still Target"
+                    },
+                    {
+                      "entity": "binary_sensor.kitchen_occupancy_sensor_radar_moving_target",
+                      "name": "Radar Moving Target"
+                    },
+                    {
+                      "entity": "binary_sensor.kitchen_occupancy_sensor_radar_zone_1_occupancy",
+                      "name": "Zone 1 Occupancy"
+                    },
+                    {
+                      "entity": "binary_sensor.kitchen_occupancy_sensor_radar_zone_2_occupancy",
+                      "name": "Zone 2 Occupancy"
+                    },
+                    {
+                      "entity": "binary_sensor.kitchen_occupancy_sensor_radar_zone_3_occupancy",
+                      "name": "Zone 3 Occupancy"
+                    },
+                    {
                       "type": "section",
                       "label": "Living Room"
                     },
@@ -269,6 +289,22 @@
                     },
                     {
                       "entity": "sensor.bedroom2_sensor_apollo_radar_detection_distance",
+                      "name": "Detection Distance"
+                    },
+                    {
+                      "type": "section",
+                      "label": "Kitchen MSR-2"
+                    },
+                    {
+                      "entity": "sensor.kitchen_occupancy_sensor_radar_still_distance",
+                      "name": "Still Distance"
+                    },
+                    {
+                      "entity": "sensor.kitchen_occupancy_sensor_radar_moving_distance",
+                      "name": "Moving Distance"
+                    },
+                    {
+                      "entity": "sensor.kitchen_occupancy_sensor_radar_detection_distance",
                       "name": "Detection Distance"
                     },
                     {
