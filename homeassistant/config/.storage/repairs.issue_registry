@@ -157,41 +157,6 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_656992550_tags/v1.9.9"
-      },
-      {
-        "created": "2026-06-07T05:35:49.462170+00:00",
-        "dismissed_version": null,
-        "domain": "homeassistant",
-        "is_persistent": false,
-        "issue_id": "config_entry_reauth_tplink_01KJHB18VCS05MNV9ADQ4P2QT8"
-      },
-      {
-        "created": "2026-06-07T05:35:49.468467+00:00",
-        "dismissed_version": null,
-        "domain": "homeassistant",
-        "is_persistent": false,
-        "issue_id": "config_entry_reauth_tplink_01KQRH4H3TV4KEZYEQCK2M4J53"
-      },
-      {
-        "created": "2026-06-07T05:35:49.475100+00:00",
-        "dismissed_version": null,
-        "domain": "homeassistant",
-        "is_persistent": false,
-        "issue_id": "config_entry_reauth_tplink_01KJHB2Y93F7RJ26RN8YBYNQH3"
-      },
-      {
-        "created": "2026-06-07T05:35:49.475577+00:00",
-        "dismissed_version": null,
-        "domain": "homeassistant",
-        "is_persistent": false,
-        "issue_id": "config_entry_reauth_tplink_01KQX40N13XPP5SV3YTN07V4R0"
-      },
-      {
-        "created": "2026-06-07T05:35:49.476021+00:00",
-        "dismissed_version": null,
-        "domain": "homeassistant",
-        "is_persistent": false,
-        "issue_id": "config_entry_reauth_tplink_01KJHB3G0NS9P1GWFXEDHT8NBF"
       }
     ]
   }
