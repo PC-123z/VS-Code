@@ -6098,6 +6098,10 @@
     - conditions:
       - condition: trigger
         id: stopped
+      - alias: Skip if hard-off window (11:45 PM - 7 AM) - let Bedtime/Morning routines own this
+        condition: time
+        after: 07:00:00
+        before: '23:45:00'
       sequence:
       - alias: Clear manual override when room has been empty 20 minutes
         action: input_boolean.turn_off
