@@ -27,7 +27,7 @@
         "show_in_sidebar": true,
         "icon": "mdi:camera",
         "title": "Cameras",
-        "require_admin": false,
+        "require_admin": true,
         "mode": "storage",
         "url_path": "dashboard-camera"
       },
