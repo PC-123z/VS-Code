@@ -167,7 +167,7 @@
         "show_in_sidebar": true,
         "icon": "mdi:power",
         "title": "Wake on LAN",
-        "require_admin": false,
+        "require_admin": true,
         "mode": "storage",
         "url_path": "dashboard-wol"
       },
