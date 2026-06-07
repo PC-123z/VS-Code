@@ -6876,7 +6876,7 @@
       transition: 2
   - variables:
       current_hour: '{{ now().hour }}'
-      is_after_10pm: '{{ current_hour|int >= 22 }}'
+      is_after_10pm: '{{ current_hour|int >= 22 or current_hour|int < 6 }}'
   - alias: Check if after 10 PM
     if:
     - condition: template
