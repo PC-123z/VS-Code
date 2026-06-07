@@ -25,6 +25,13 @@
         "device_trackers": [],
         "user_id": null,
         "picture": null
+      },
+      {
+        "id": "lily",
+        "name": "Lily",
+        "device_trackers": [],
+        "user_id": null,
+        "picture": null
       }
     ]
   }
