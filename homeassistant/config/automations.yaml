@@ -6876,17 +6876,17 @@
       transition: 2
   - variables:
       current_hour: '{{ now().hour }}'
-      is_after_10pm: '{{ current_hour|int >= 22 or current_hour|int < 6 }}'
-  - alias: Check if after 10 PM
+      is_quiet_hours: '{{ current_hour|int < 8 or current_hour|int >= 22 }}'
+  - alias: Check if quiet hours (before 8 AM or after 10 PM)
     if:
     - condition: template
-      value_template: '{{ is_after_10pm }}'
+      value_template: '{{ is_quiet_hours }}'
     then:
-    - alias: After 10 PM - stay quiet
+    - alias: Quiet hours - stay silent
       action: notify.mobile_app_pc_iphone
       data:
         title: Welcome Home
-        message: Hallway lights on. Music skipped (after 10 PM quiet time).
+        message: Hallway lights on. Music skipped (quiet hours 10 PM – 8 AM).
     else:
     - alias: Before 10 PM - play appropriate music
       sequence:
