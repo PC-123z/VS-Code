@@ -133,7 +133,7 @@
         "show_in_sidebar": true,
         "icon": "mdi:motion-sensor",
         "title": "Sensors",
-        "require_admin": false,
+        "require_admin": true,
         "mode": "storage",
         "url_path": "dashboard-sensors"
       },
@@ -157,7 +157,7 @@
         "id": "dashboard_sensor3",
         "show_in_sidebar": true,
         "title": "Sensor Config Page",
-        "require_admin": false,
+        "require_admin": true,
         "mode": "storage",
         "url_path": "dashboard-sensor3",
         "icon": "mdi:leak"
