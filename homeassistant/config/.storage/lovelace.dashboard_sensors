@@ -288,14 +288,6 @@
                       "name": "Still Target Count"
                     },
                     {
-                      "entity": "sensor.dining_room_apollo_co2",
-                      "name": "CO2"
-                    },
-                    {
-                      "entity": "sensor.dining_room_apollo_dps310_temperature",
-                      "name": "Temperature"
-                    },
-                    {
                       "entity": "sensor.dining_room_apollo_ltr390_light",
                       "name": "Light"
                     },
