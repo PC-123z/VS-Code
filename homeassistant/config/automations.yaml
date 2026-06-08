@@ -6098,7 +6098,8 @@
     - conditions:
       - condition: trigger
         id: stopped
-      - alias: Skip if hard-off window (11:45 PM - 7 AM) - let Bedtime/Morning routines own this
+      - alias: Skip if hard-off window (11:45 PM - 7 AM) - let Bedtime/Morning routines
+          own this
         condition: time
         after: 07:00:00
         before: '23:45:00'
@@ -8257,10 +8258,8 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: >
-      {{ states('media_player.appletv_5') != 'playing'
-         and states('media_player.appletv_6') != 'playing'
-         and states('media_player.appletv_14') != 'playing' }}
+    value_template: "{{ states('media_player.appletv_5') != 'playing'\n   and states('media_player.appletv_6')
+      != 'playing'\n   and states('media_player.appletv_14') != 'playing' }}\n"
   - condition: state
     entity_id: media_player.living_room_tv_2
     state: 'on'
@@ -8276,10 +8275,8 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: >
-      {{ states('media_player.appletv_5') != 'playing'
-         and states('media_player.appletv_6') != 'playing'
-         and states('media_player.appletv_14') != 'playing' }}
+    value_template: "{{ states('media_player.appletv_5') != 'playing'\n   and states('media_player.appletv_6')
+      != 'playing'\n   and states('media_player.appletv_14') != 'playing' }}\n"
   - action: media_player.turn_off
     target:
       entity_id: media_player.living_room_tv_2
@@ -8405,20 +8402,20 @@
         media_player_entity_id: media_player.bedroom
         message: The dryer is done!
   mode: single
-
 - id: wake_office_pc_via_boolean
-  alias: "Wake Office PC via Boolean"
-  trigger:
-    - platform: state
+  alias: Wake Office PC via Boolean
+  description: ''
+  triggers:
+  - entity_id: input_boolean.office_pc_wake
+    to: 'on'
+    trigger: state
+  actions:
+  - action: switch.turn_on
+    target:
+      entity_id: switch.office_pc
+  - delay:
+      seconds: 5
+  - action: input_boolean.turn_off
+    target:
       entity_id: input_boolean.office_pc_wake
-      to: "on"
-  action:
-    - action: switch.turn_on
-      target:
-        entity_id: switch.office_pc
-    - delay:
-        seconds: 5
-    - action: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.office_pc_wake
   mode: single
