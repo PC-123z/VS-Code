@@ -8405,3 +8405,20 @@
         media_player_entity_id: media_player.bedroom
         message: The dryer is done!
   mode: single
+
+- id: wake_office_pc_via_boolean
+  alias: "Wake Office PC via Boolean"
+  trigger:
+    - platform: state
+      entity_id: input_boolean.office_pc_wake
+      to: "on"
+  action:
+    - action: switch.turn_on
+      target:
+        entity_id: switch.office_pc
+    - delay:
+        seconds: 5
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.office_pc_wake
+  mode: single

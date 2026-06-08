@@ -88,6 +88,9 @@ input_boolean:
   office_fan:
     name: "Office Fan"
     initial: off
+  office_pc_wake:
+    name: "Wake PC"
+    initial: off
   welcome_home_active:
     name: "Welcome Home Active"
     initial: off
@@ -174,6 +177,6 @@ emulated_hue:
     input_boolean.office_fan:
       name: "Office Fan"
       hidden: false
-    switch.office_pc:
+    input_boolean.office_pc_wake:
       name: "Wake PC"
       hidden: false
