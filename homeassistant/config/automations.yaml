@@ -7438,6 +7438,8 @@
         action: media_player.unjoin
         target:
           entity_id: media_player.bedroom_2
+      - delay:
+          seconds: 3
       - action: media_player.volume_set
         target:
           entity_id: media_player.bedroom_2
