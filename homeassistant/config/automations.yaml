@@ -7437,40 +7437,33 @@
         continue_on_error: true
         action: media_player.unjoin
         target:
-          entity_id: media_player.bedroom_2
+          entity_id: media_player.bedroom
       - delay:
           seconds: 3
       - action: media_player.volume_set
         target:
-          entity_id: media_player.bedroom_2
+          entity_id: media_player.bedroom
         data:
           volume_level: 0.05
       - alias: Play morning playlist via Music Assistant
         continue_on_error: true
         action: music_assistant.play_media
         target:
-          entity_id: media_player.bedroom_2
+          entity_id: media_player.bedroom
         data:
           media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
           media_type: playlist
-      - delay:
-          seconds: 5
-      - alias: Set volume to 0.20
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.bedroom_2
-        data:
-          volume_level: 0.20
-      - delay:
-          seconds: 5
+      - alias: Wait 10 seconds then check if music is playing
+        delay:
+          seconds: 10
       - if:
         - condition: or
           conditions:
           - condition: state
-            entity_id: media_player.bedroom_2
+            entity_id: media_player.bedroom
             state: idle
           - condition: state
-            entity_id: media_player.bedroom_2
+            entity_id: media_player.bedroom
             state: 'off'
         then:
         - alias: TTS good morning announcement (music failed)
@@ -7479,11 +7472,24 @@
             entity_id: tts.piper
           data:
             cache: true
-            media_player_entity_id: media_player.bedroom_2
+            media_player_entity_id: media_player.bedroom
             message: Good morning! Today is {{ now().strftime('%A, %B %-d') }}. The
               current conditions are {{ states('weather.forecast_home') }},  with
               a temperature of {{ state_attr('weather.forecast_home', 'temperature')
               }} degrees.  Have a great day!
+        else:
+        - alias: Ramp volume to 0.20 over ~2.5 minutes
+          repeat:
+            count: 8
+            sequence:
+            - delay:
+                seconds: 18
+            - action: media_player.volume_set
+              target:
+                entity_id: media_player.bedroom
+              data:
+                volume_level: '{{ [0.05 + (repeat.index * 0.019), 0.20] | min | round(3)
+                  }}'
         - alias: Wait for bedroom motion before announcement
           wait_for_trigger:
           - trigger: state
@@ -7498,7 +7504,7 @@
           then:
           - action: media_player.media_stop
             target:
-              entity_id: media_player.bedroom_2
+              entity_id: media_player.bedroom
           - continue_on_error: true
             action: media_player.unjoin
             target:
@@ -7511,20 +7517,20 @@
           - alias: Pause music for announcement
             action: media_player.media_pause
             target:
-              entity_id: media_player.bedroom_2
+              entity_id: media_player.bedroom
           - alias: TTS good morning announcement
             action: tts.speak
             target:
               entity_id: tts.piper
             data:
               cache: true
-              media_player_entity_id: media_player.bedroom_2
+              media_player_entity_id: media_player.bedroom
               message: Good morning! Today is {{ now().strftime('%A, %B %-d') }}.
                 The current conditions are {{ states('weather.forecast_home') }},  with
                 a temperature of {{ state_attr('weather.forecast_home', 'temperature')
                 }} degrees.  Have a great day!
           - alias: Wait for TTS to finish speaking before resuming
-            wait_template: '{{ not is_state(''media_player.bedroom_2'', ''playing'')
+            wait_template: '{{ not is_state(''media_player.bedroom'', ''playing'')
               }}'
             timeout:
               seconds: 30
@@ -7534,7 +7540,7 @@
           - alias: Resume music
             action: media_player.media_play
             target:
-              entity_id: media_player.bedroom_2
+              entity_id: media_player.bedroom
           - delay:
               seconds: 3
           - alias: Restart playlist if media_play failed (TTS cleared the queue)
@@ -7542,21 +7548,21 @@
             - condition: or
               conditions:
               - condition: state
-                entity_id: media_player.bedroom_2
+                entity_id: media_player.bedroom
                 state: idle
               - condition: state
-                entity_id: media_player.bedroom_2
+                entity_id: media_player.bedroom
                 state: 'off'
             then:
             - action: media_player.volume_set
               target:
-                entity_id: media_player.bedroom_2
+                entity_id: media_player.bedroom
               data:
                 volume_level: 0.2
             - action: music_assistant.play_media
               continue_on_error: true
               target:
-                entity_id: media_player.bedroom_2
+                entity_id: media_player.bedroom
               data:
                 media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
                 media_type: playlist
@@ -7574,7 +7580,7 @@
               then:
               - action: media_player.volume_set
                 target:
-                  entity_id: media_player.bedroom_2
+                  entity_id: media_player.bedroom
                 data:
                   volume_level: 0.2
               - delay:
@@ -7594,7 +7600,7 @@
                 then:
                 - action: media_player.volume_set
                   target:
-                    entity_id: media_player.bedroom_2
+                    entity_id: media_player.bedroom
                   data:
                     volume_level: 0.2
                 else:
@@ -7604,7 +7610,7 @@
                     sequence:
                     - action: media_player.volume_set
                       target:
-                        entity_id: media_player.bedroom_2
+                        entity_id: media_player.bedroom
                       data:
                         volume_level: '{{ [0.20 - (repeat.index * 0.019), 0.05] |
                           max | round(3) }}'
@@ -7612,7 +7618,7 @@
                         seconds: 15
                 - action: media_player.media_stop
                   target:
-                    entity_id: media_player.bedroom_2
+                    entity_id: media_player.bedroom
                 - continue_on_error: true
                   action: media_player.unjoin
                   target:
