@@ -7433,6 +7433,11 @@
       - alias: Wait 30 seconds (sync with lamp start)
         delay:
           seconds: 30
+      - alias: Unjoin bedroom speaker from any group before starting
+        continue_on_error: true
+        action: media_player.unjoin
+        target:
+          entity_id: media_player.bedroom_2
       - action: media_player.volume_set
         target:
           entity_id: media_player.bedroom_2
