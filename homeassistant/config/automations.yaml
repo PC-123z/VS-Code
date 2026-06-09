@@ -7453,9 +7453,10 @@
         data:
           media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
           media_type: playlist
-      - alias: Wait 10 seconds then check if music is playing
-        delay:
-          seconds: 10
+      - alias: Wait up to 15 seconds for music to start playing
+        wait_template: "{{ is_state('media_player.bedroom_2', 'playing') }}"
+        timeout:
+          seconds: 15
       - if:
         - condition: or
           conditions:
