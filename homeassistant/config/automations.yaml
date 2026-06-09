@@ -7453,14 +7453,25 @@
         data:
           media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
           media_type: playlist
-      - alias: Wait up to 20 seconds for music to start playing
-        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
-        timeout:
-          seconds: 20
+      - delay:
+          seconds: 5
+      - alias: Set volume to 0.20
+        action: media_player.volume_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          volume_level: 0.20
+      - delay:
+          seconds: 5
       - if:
-        - condition: template
-          value_template: '{{ not is_state(''media_player.bedroom_2'', ''playing'')
-            }}'
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: media_player.bedroom_2
+            state: idle
+          - condition: state
+            entity_id: media_player.bedroom_2
+            state: 'off'
         then:
         - alias: TTS good morning announcement (music failed)
           action: tts.speak
@@ -7473,13 +7484,6 @@
               current conditions are {{ states('weather.forecast_home') }},  with
               a temperature of {{ state_attr('weather.forecast_home', 'temperature')
               }} degrees.  Have a great day!
-        else:
-        - alias: Set volume to 0.20
-          action: media_player.volume_set
-          target:
-            entity_id: media_player.bedroom_2
-          data:
-            volume_level: 0.20
         - alias: Wait for bedroom motion before announcement
           wait_for_trigger:
           - trigger: state
