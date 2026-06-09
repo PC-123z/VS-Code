@@ -7453,6 +7453,13 @@
         data:
           media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
           media_type: playlist
+      - delay:
+          seconds: 3
+      - alias: Ensure playback is not paused after unjoin
+        continue_on_error: true
+        action: media_player.media_play
+        target:
+          entity_id: media_player.bedroom
       - alias: Wait 10 seconds then check if music is playing
         delay:
           seconds: 10
