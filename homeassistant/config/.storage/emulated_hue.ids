@@ -136,6 +136,7 @@
     "131": "fan.simpleconnect_fan_94df19_hunter_fan",
     "132": "light.office_fan_light",
     "133": "input_boolean.office_fan",
-    "134": "switch.office_pc"
+    "134": "switch.office_pc",
+    "135": "input_boolean.office_pc_wake"
   }
 }
