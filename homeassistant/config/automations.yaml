@@ -7437,7 +7437,7 @@
         continue_on_error: true
         action: media_player.unjoin
         target:
-          entity_id: media_player.bedroom
+          entity_id: media_player.bedroom_2
       - delay:
           seconds: 3
       - action: media_player.volume_set
@@ -7449,7 +7449,7 @@
         continue_on_error: true
         action: music_assistant.play_media
         target:
-          entity_id: media_player.bedroom
+          entity_id: media_player.bedroom_2
         data:
           media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
           media_type: playlist
@@ -7459,7 +7459,7 @@
         continue_on_error: true
         action: media_player.media_play
         target:
-          entity_id: media_player.bedroom
+          entity_id: media_player.bedroom_2
       - alias: Wait 10 seconds then check if music is playing
         delay:
           seconds: 10
@@ -7467,10 +7467,10 @@
         - condition: or
           conditions:
           - condition: state
-            entity_id: media_player.bedroom
+            entity_id: media_player.bedroom_2
             state: idle
           - condition: state
-            entity_id: media_player.bedroom
+            entity_id: media_player.bedroom_2
             state: 'off'
         then:
         - alias: TTS good morning announcement (music failed)
