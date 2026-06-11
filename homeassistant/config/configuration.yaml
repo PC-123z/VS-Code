@@ -103,6 +103,8 @@ input_boolean:
   big_bedroom_manual_override:
     name: "Big Bedroom Manual Override"
     initial: off
+  big_bedroom_asleep:
+    name: "Big Bedroom Asleep"
 
 # Template switches + sensors
 template:

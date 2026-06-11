@@ -816,19 +816,21 @@
   mode: single
 - id: '1748800000001'
   alias: '*Big Bedroom: Reset Override When Empty'
-  description: After 15 min empty, re-enables motion automation, AL, and clears manual
-    override so normal lighting resumes on next entry. Runs at any time of day.
+  description: After 30 min empty, turns lights off, clears manual override, and
+    re-enables motion automation + AL so presence lighting resumes on next entry.
+    Skipped while asleep (Hue button 2/3/4) - only Good Morning re-arms the room
+    then.
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
     to: 'off'
     for:
-      minutes: 60
+      minutes: 30
   conditions:
-  - alias: Skip if sleep mode is active (bedtime/goodnight - don't wake a sleeping
-      person)
+  - alias: Skip if asleep - goodnight/bedtime pressed, lights stay off until Good
+      Morning
     condition: state
-    entity_id: switch.al_sleep_mode_big_bedroom
+    entity_id: input_boolean.big_bedroom_asleep
     state: 'off'
   - condition: or
     conditions:
@@ -839,6 +841,20 @@
       entity_id: automation.big_bedroom_smart_motion_presence
       state: 'off'
   actions:
+  - alias: Turn lights off first before re-enabling AL to prevent race condition
+    action: light.turn_off
+    target:
+      entity_id:
+      - light.nano_sand_dune
+      - light.bedroom_ceiling_1
+      - light.bedroom_ceiling_2
+      - light.bedroom_lamp_1
+      - light.bedroom_lamp_2
+    data:
+      transition: 15
+  - alias: Wait for transition to complete before re-enabling AL
+    delay:
+      seconds: 16
   - alias: Clear manual override boolean
     action: input_boolean.turn_off
     target:
@@ -864,6 +880,15 @@
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
       manual_control: false
+  - alias: Restore sleep mode during night hours
+    if:
+    - condition: time
+      after: '23:00:00'
+      before: 07:00:00
+    then:
+    - action: switch.turn_on
+      target:
+        entity_id: switch.al_sleep_mode_big_bedroom
   mode: single
 - id: '1774970377473'
   alias: 'Pico Button 1 - Big Bedroom: Bright/Mood Override'
@@ -2580,9 +2605,6 @@
     - conditions:
       - condition: trigger
         id: detected
-      - condition: state
-        entity_id: switch.al_sleep_mode_big_bedroom
-        state: 'off'
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.big_bedroom_manual_override
@@ -2850,11 +2872,12 @@
     - conditions:
       - condition: trigger
         id: stopped
+      - alias: Skip if override is active - overridden lights hold until the 30-min
+          reset
+        condition: state
+        entity_id: input_boolean.big_bedroom_manual_override
+        state: 'off'
       sequence:
-      - alias: Clear manual override when room has been empty 10 minutes
-        action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.big_bedroom_manual_override
       - alias: Turn lights off first before re-enabling AL to prevent race condition
         action: light.turn_off
         target:
