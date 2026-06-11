@@ -4608,8 +4608,8 @@
             target:
               entity_id: media_player.office_2
             data:
-              media_id: ytmusic://album/MPREb_V1D8jtdOxK4
-              media_type: album
+              media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+              radio_mode: false
     - conditions:
       - condition: trigger
         id: motion_cleared
