@@ -65,6 +65,10 @@
     enabled: true
     data:
       stop_actions: true
+  - alias: Mark asleep so nothing re-arms lighting until Good Morning
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.big_bedroom_asleep
   mode: single
 - id: '1772505504350'
   alias: Kitchen Off Switch
@@ -4105,6 +4109,10 @@
       entity_id: automation.big_bedroom_smart_motion_presence
     data:
       stop_actions: true
+  - alias: Mark asleep so nothing re-arms lighting until Good Morning
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.big_bedroom_asleep
   - alias: Turn off AL switches and set manual control
     action: switch.turn_off
     target:
@@ -4275,6 +4283,10 @@
         action: automation.turn_off
         target:
           entity_id: automation.big_bedroom_smart_motion_presence
+      - alias: Mark asleep so nothing re-arms lighting until Good Morning
+        action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.big_bedroom_asleep
       - alias: Turn off AL switches
         action: switch.turn_off
         target:
@@ -4319,6 +4331,10 @@
         action: automation.turn_off
         target:
           entity_id: automation.big_bedroom_smart_motion_presence
+      - alias: Mark asleep so nothing re-arms lighting until Good Morning
+        action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.big_bedroom_asleep
       - alias: Turn off AL switches
         action: switch.turn_off
         target:
@@ -4385,6 +4401,10 @@
       entity_id: automation.big_bedroom_smart_motion_presence
     data:
       stop_actions: true
+  - alias: Mark asleep so nothing re-arms lighting until Good Morning
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.big_bedroom_asleep
   - alias: Turn off AL switches and set manual control
     action: switch.turn_off
     target:
@@ -4470,6 +4490,10 @@
       entity_id: automation.big_bedroom_smart_motion_presence
     data:
       stop_actions: true
+  - alias: Mark asleep so nothing re-arms lighting until Good Morning
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.big_bedroom_asleep
   - alias: Turn off AL switches and set manual control
     action: switch.turn_off
     target:
@@ -5408,6 +5432,10 @@
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.big_bedroom_manual_override
+  - alias: Clear asleep flag - explicit wake via button 1
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.big_bedroom_asleep
   - alias: Clear manual_control flag so AL can adapt freely
     action: adaptive_lighting.set_manual_control
     data:
@@ -7326,6 +7354,10 @@
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_active
+  - alias: Clear asleep flag - presence lighting allowed again
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.big_bedroom_asleep
   - alias: Turn off all sleep modes
     action: switch.turn_off
     target:
