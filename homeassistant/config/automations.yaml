@@ -4516,9 +4516,9 @@
   mode: single
 - id: '1776378416550'
   alias: '*Bedroom 2 Bedtime Routine'
-  description: Triggers on MOTION after 10:30pm. Sets bedroom2_occupied, starts sleep
-    lighting, fan, and music. Dim red at 10:30pm, lights off at 10:40pm, music stops
-    at 11:30pm. Hard lights-off at 11:45pm regardless of motion or override.
+  description: Triggers on motion or bedroom2_occupied turning on between 10pm-11:30pm.
+    Sets bedroom2_occupied, starts fan and sleep music. Lights dim red at 10:30pm,
+    off at 10:40pm. Music and all lights off at 11:30pm.
   triggers:
   - trigger: state
     entity_id:
@@ -4532,6 +4532,10 @@
     for:
       minutes: 2
     id: motion_cleared
+  - trigger: state
+    entity_id: input_boolean.bedroom2_occupied
+    to: 'on'
+    id: occupied_set
   - trigger: time
     at: '22:30:00'
     id: lights_to_red
@@ -4547,6 +4551,44 @@
   conditions: []
   actions:
   - choose:
+    - conditions:
+      - condition: trigger
+        id: occupied_set
+      - alias: Bedtime Routine active window - 10pm to 11:30pm
+        condition: time
+        after: '22:00:00'
+        before: '23:30:00'
+      sequence:
+      - alias: Fan on
+        action: fan.turn_on
+        data:
+          percentage: 25
+        target:
+          entity_id: fan.bedroom2_fan
+        enabled: true
+      - alias: Start sleep music if not already playing and no override
+        if:
+        - condition: state
+          entity_id: input_boolean.bedroom2_manual_override
+          state: 'off'
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: media_player.office_2
+            state: playing
+        then:
+        - action: media_player.volume_set
+          target:
+            entity_id: media_player.office_2
+          data:
+            volume_level: 0.15
+        - action: music_assistant.play_media
+          continue_on_error: true
+          target:
+            entity_id: media_player.office_2
+          data:
+            media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+            radio_mode: false
     - conditions:
       - condition: trigger
         id: motion_detected
@@ -4706,6 +4748,16 @@
       - action: media_player.media_stop
         target:
           entity_id: media_player.office_2
+      - alias: All lights off at 11:30pm
+        action: light.turn_off
+        target:
+          entity_id:
+          - light.ribbon
+          - light.fluttershy
+          - light.office
+          - light.bedroom_2
+        data:
+          transition: 30
     - conditions:
       - condition: trigger
         id: hard_lights_out
