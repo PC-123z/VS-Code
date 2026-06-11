@@ -4516,9 +4516,9 @@
   mode: single
 - id: '1776378416550'
   alias: '*Bedroom 2 Bedtime Routine'
-  description: Triggers on motion or bedroom2_occupied turning on between 10pm-11:30pm.
+  description: Triggers on motion or bedroom2_occupied turning on between 10:30pm-11:40pm.
     Sets bedroom2_occupied, starts fan and sleep music. Lights dim red at 10:30pm,
-    off at 10:40pm. Music and all lights off at 11:30pm.
+    off at 10:40pm. All lights fade off at 11:40pm. Music hard stop at 11:59pm.
   triggers:
   - trigger: state
     entity_id:
@@ -4543,21 +4543,21 @@
     at: '22:40:00'
     id: lights_out
   - trigger: time
-    at: '23:30:00'
-    id: music_ramp_down
-  - trigger: time
-    at: '23:45:00'
+    at: '23:40:00'
     id: hard_lights_out
+  - trigger: time
+    at: '23:59:00'
+    id: music_stop
   conditions: []
   actions:
   - choose:
     - conditions:
       - condition: trigger
         id: occupied_set
-      - alias: Bedtime Routine active window - 10pm to 11:30pm
+      - alias: Bedtime Routine active window - 10:30pm to 11:40pm
         condition: time
-        after: '22:00:00'
-        before: '23:30:00'
+        after: '22:30:00'
+        before: '23:40:00'
       sequence:
       - alias: Fan on
         action: fan.turn_on
@@ -4566,18 +4566,23 @@
         target:
           entity_id: fan.bedroom2_fan
         enabled: true
-      - alias: Set volume and start sleep music
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.office_2
-        data:
-          volume_level: 0.15
-      - action: music_assistant.play_media
-        target:
-          entity_id: media_player.office_2
-        data:
-          media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
-          radio_mode: false
+      - alias: Skip music if dimmer override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.bedroom2_manual_override
+          state: 'off'
+        then:
+        - action: media_player.volume_set
+          target:
+            entity_id: media_player.office_2
+          data:
+            volume_level: 0.15
+        - action: music_assistant.play_media
+          target:
+            entity_id: media_player.office_2
+          data:
+            media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+            radio_mode: false
     - conditions:
       - condition: trigger
         id: motion_detected
@@ -4585,23 +4590,16 @@
         condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'off'
-      - alias: Bedtime Routine active window - 10:30pm to 11:45pm
+      - alias: Bedtime Routine active window - 10:30pm to 11:40pm
         condition: time
         after: '22:30:00'
-        before: '23:45:00'
+        before: '23:40:00'
       sequence:
-      - alias: Set bedroom 2 occupied (always, so Good Morning works)
+      - alias: Set bedroom 2 occupied (fan and music start via occupied_set branch)
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.bedroom2_occupied
-      - alias: Fan on
-        action: fan.turn_on
-        data:
-          percentage: 25
-        target:
-          entity_id: fan.bedroom2_fan
-        enabled: true
-      - alias: Skip light and music changes if dimmer override is active
+      - alias: Skip light changes if dimmer override is active
         if:
         - condition: state
           entity_id: input_boolean.bedroom2_manual_override
@@ -4621,36 +4619,16 @@
             - 0
             brightness_pct: 10
             transition: 3
-        - alias: Start sleep music if not already playing
-          if:
-          - condition: not
-            conditions:
-            - condition: state
-              entity_id: media_player.office_2
-              state: playing
-          then:
-          - action: media_player.volume_set
-            target:
-              entity_id: media_player.office_2
-            data:
-              volume_level: 0.15
-          - action: music_assistant.play_media
-            continue_on_error: true
-            target:
-              entity_id: media_player.office_2
-            data:
-              media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
-              radio_mode: false
     - conditions:
       - condition: trigger
         id: motion_cleared
       - condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'on'
-      - alias: Bedtime Routine active window - 10:30pm to 11:45pm
+      - alias: Bedtime Routine active window - 10:30pm to 11:40pm
         condition: time
         after: '22:30:00'
-        before: '23:45:00'
+        before: '23:40:00'
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.bedroom2_manual_override
@@ -4717,42 +4695,9 @@
           transition: 120
     - conditions:
       - condition: trigger
-        id: music_ramp_down
-      - condition: state
-        entity_id: input_boolean.bedroom2_occupied
-        state: 'on'
-      sequence:
-      - alias: Ramp volume down from 0.15 to 0 over ~3 minutes
-        repeat:
-          count: 6
-          sequence:
-          - action: media_player.volume_set
-            target:
-              entity_id: media_player.office_2
-            data:
-              volume_level: '{{ [0.15 - (repeat.index * 0.025), 0.0] | max | round(3)
-                }}'
-          - delay:
-              seconds: 30
-      - action: media_player.media_stop
-        target:
-          entity_id: media_player.office_2
-      - alias: All lights off at 11:30pm
-        action: light.turn_off
-        target:
-          entity_id:
-          - light.ribbon
-          - light.fluttershy
-          - light.office
-          - light.bedroom_2
-        data:
-          transition: 30
-    - conditions:
-      - condition: trigger
         id: hard_lights_out
       sequence:
-      - alias: Hard off - ceiling and nanoleafs regardless of occupied or override
-          state
+      - alias: All lights fade off at 11:40pm regardless of occupied or override state
         action: light.turn_off
         target:
           entity_id:
@@ -4761,7 +4706,16 @@
           - light.office
           - light.bedroom_2
         data:
-          transition: 30
+          transition: 60
+    - conditions:
+      - condition: trigger
+        id: music_stop
+      sequence:
+      - alias: Hard music stop at 11:59pm regardless of occupied or override state
+        action: media_player.media_stop
+        continue_on_error: true
+        target:
+          entity_id: media_player.office_2
   mode: parallel
   max: 3
 - id: '1776378473889'
