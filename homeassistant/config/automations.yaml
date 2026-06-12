@@ -5216,9 +5216,10 @@
     light that stays on for 60 seconds fades back off. Ignores the dimmer manual
     override (same as the 11:40pm hard cutoff) so the kids can't defeat it from the
     wall dimmer. The midnight sweep trigger catches lights turned on between the
-    11:40pm cutoff and midnight. Window ends before the Good Morning sunrise ramp
-    starts; bedroom2_occupied being cleared by Good Morning or Daily Reset also
-    disables it.
+    11:40pm cutoff and midnight, and the startup sweep catches lights already on
+    when HA restarts overnight (restored states don't fire the state trigger).
+    Window ends before the Good Morning sunrise ramp starts; bedroom2_occupied
+    being cleared by Good Morning or Daily Reset also disables it.
   triggers:
   - trigger: state
     entity_id:
@@ -5232,7 +5233,10 @@
     id: light_on
   - trigger: time
     at: 00:00:30
-    id: midnight_sweep
+    id: sweep
+  - trigger: homeassistant
+    event: start
+    id: sweep
   conditions:
   - condition: state
     entity_id: input_boolean.bedroom2_occupied
@@ -5259,9 +5263,9 @@
   - choose:
     - conditions:
       - condition: trigger
-        id: midnight_sweep
+        id: sweep
       sequence:
-      - alias: Fade off anything left on at midnight
+      - alias: Fade off anything left on at midnight or HA startup
         action: light.turn_off
         target:
           entity_id:
