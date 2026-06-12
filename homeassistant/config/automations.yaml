@@ -820,10 +820,9 @@
   mode: single
 - id: '1748800000001'
   alias: '*Big Bedroom: Reset Override When Empty'
-  description: After 30 min empty, turns lights off, clears manual override, and
-    re-enables motion automation + AL so presence lighting resumes on next entry.
-    Skipped while asleep (Hue button 2/3/4) - only Good Morning re-arms the room
-    then.
+  description: After 30 min empty, turns lights off, clears manual override, and re-enables
+    motion automation + AL so presence lighting resumes on next entry. Skipped while
+    asleep (Hue button 2/3/4) - only Good Morning re-arms the room then.
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
@@ -5213,13 +5212,13 @@
 - id: '1781237174423'
   alias: '*Bedroom 2 After Midnight Lights Out'
   description: After midnight while bedroom2_occupied is on, any Bedroom 2 / Office
-    light that stays on for 60 seconds fades back off. Ignores the dimmer manual
-    override (same as the 11:40pm hard cutoff) so the kids can't defeat it from the
-    wall dimmer. The midnight sweep trigger catches lights turned on between the
-    11:40pm cutoff and midnight, and the startup sweep catches lights already on
-    when HA restarts overnight (restored states don't fire the state trigger).
-    Window ends before the Good Morning sunrise ramp starts; bedroom2_occupied
-    being cleared by Good Morning or Daily Reset also disables it.
+    light that stays on for 60 seconds fades back off. Ignores the dimmer manual override
+    (same as the 11:40pm hard cutoff) so the kids can't defeat it from the wall dimmer.
+    The midnight sweep trigger catches lights turned on between the 11:40pm cutoff
+    and midnight, and the startup sweep catches lights already on when HA restarts
+    overnight (restored states don't fire the state trigger). Window ends before the
+    Good Morning sunrise ramp starts; bedroom2_occupied being cleared by Good Morning
+    or Daily Reset also disables it.
   triggers:
   - trigger: state
     entity_id:
@@ -7408,7 +7407,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 07:15:00
+    at: 07:00:00
     weekday:
     - mon
     - tue
