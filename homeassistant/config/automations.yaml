@@ -114,14 +114,14 @@
     grace. 60-minute hard cap from routine start.'
   triggers:
   - trigger: time
-    at: '16:50:00'
+    at: '15:45:00'
     weekday:
     - sat
   - trigger: time
     at: '17:15:00'
     weekday:
     - thu
-    enabled: true
+    enabled: false
   conditions: []
   actions:
   - alias: Mark routine as active
