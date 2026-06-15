@@ -7407,13 +7407,9 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 07:00:00
+    at: 04:00:00
     weekday:
     - mon
-    - tue
-    - wed
-    - thu
-    - fri
   - trigger: time
     at: 09:15:00
     weekday:
