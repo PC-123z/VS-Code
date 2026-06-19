@@ -141,7 +141,7 @@
                       "ev"
                     ],
                     "format": "uint8",
-                    "value": 0,
+                    "value": 2,
                     "description": "Current Heating Cooling State",
                     "minValue": 0,
                     "maxValue": 2,
@@ -181,7 +181,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 24.0,
+                    "value": 22.5,
                     "description": "Current Temperature",
                     "unit": "celsius",
                     "minValue": 0,
@@ -197,7 +197,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 21.7,
+                    "value": 20.8,
                     "description": "Target Temperature",
                     "unit": "celsius",
                     "minValue": 14.4,
@@ -232,7 +232,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 27.8,
+                    "value": 22.2,
                     "description": "Cooling Threshold Temperature",
                     "unit": "celsius",
                     "minValue": 19.9,
@@ -248,7 +248,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 15.6,
+                    "value": 19.4,
                     "description": "Heating Threshold Temperature",
                     "unit": "celsius",
                     "minValue": 14.4,
@@ -263,7 +263,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 56.0,
+                    "value": 54.0,
                     "description": "Current Relative Humidity",
                     "unit": "percentage",
                     "minValue": 0,
@@ -304,7 +304,7 @@
                       "ev"
                     ],
                     "format": "uint8",
-                    "value": 0,
+                    "value": 2,
                     "description": "Current Fan State",
                     "minValue": 0,
                     "maxValue": 2,
@@ -317,7 +317,7 @@
                       "pr"
                     ],
                     "format": "uint8",
-                    "value": 3,
+                    "value": 0,
                     "minValue": 0,
                     "maxValue": 3,
                     "minStep": 1
@@ -425,7 +425,7 @@
                       "pw"
                     ],
                     "format": "string",
-                    "value": "2026-06-19T00:30:00-04:00Q",
+                    "value": "2014-01-03T00:00:00-04:00Q",
                     "maxLen": 64
                   },
                   {
@@ -490,7 +490,7 @@
                       "pr"
                     ],
                     "format": "uint8",
-                    "value": 0,
+                    "value": 100,
                     "unit": "percentage",
                     "minValue": 0,
                     "maxValue": 100,
@@ -624,7 +624,7 @@
                       "ev"
                     ],
                     "format": "uint8",
-                    "value": 1,
+                    "value": 0,
                     "description": "Status Low Battery",
                     "minValue": 0,
                     "maxValue": 1,
@@ -655,7 +655,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 100.0,
+                    "value": 21.4,
                     "description": "Current Temperature",
                     "unit": "celsius",
                     "minValue": 0,
@@ -681,7 +681,7 @@
                       "ev"
                     ],
                     "format": "bool",
-                    "value": false,
+                    "value": true,
                     "description": "Status Active"
                   },
                   {
@@ -692,7 +692,7 @@
                       "ev"
                     ],
                     "format": "uint8",
-                    "value": 1,
+                    "value": 0,
                     "description": "Status Low Battery",
                     "minValue": 0,
                     "maxValue": 1,
@@ -712,7 +712,7 @@
                       "ev"
                     ],
                     "format": "uint8",
-                    "value": 1,
+                    "value": 0,
                     "description": "Occupancy Detected",
                     "minValue": 0,
                     "maxValue": 1,
@@ -737,7 +737,7 @@
                       "ev"
                     ],
                     "format": "bool",
-                    "value": false,
+                    "value": true,
                     "description": "Status Active"
                   },
                   {
@@ -748,7 +748,7 @@
                       "ev"
                     ],
                     "format": "uint8",
-                    "value": 1,
+                    "value": 0,
                     "description": "Status Low Battery",
                     "minValue": 0,
                     "maxValue": 1,
@@ -803,7 +803,7 @@
                       "ev"
                     ],
                     "format": "bool",
-                    "value": false,
+                    "value": true,
                     "description": "Status Active"
                   },
                   {
@@ -814,7 +814,7 @@
                       "ev"
                     ],
                     "format": "uint8",
-                    "value": 1,
+                    "value": 0,
                     "description": "Status Low Battery",
                     "minValue": 0,
                     "maxValue": 1,
@@ -1255,7 +1255,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -48
+                    "value": -55
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
@@ -1701,7 +1701,7 @@
                       "ev"
                     ],
                     "format": "bool",
-                    "value": true,
+                    "value": false,
                     "description": "On"
                   },
                   {
@@ -1724,7 +1724,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 25.0,
+                    "value": 0.0,
                     "description": "Rotation Speed",
                     "unit": "percentage",
                     "minValue": 0.0,
@@ -2026,7 +2026,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -62
+                    "value": -64
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
@@ -2797,7 +2797,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -60
+                    "value": -56
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
