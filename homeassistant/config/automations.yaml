@@ -1203,26 +1203,44 @@
       - condition: trigger
         id: motion_detected
       sequence:
-      - action: light.turn_on
-        target:
-          entity_id: light.hallway
-        data:
-          transition: 2
-      - if:
-        - condition: template
-          value_template: "{{ 'light.hallway' not in\n   state_attr('switch.al_hallway',
-            'manual_control') }}\n"
-        then:
-        - action: adaptive_lighting.apply
-          continue_on_error: true
+      - choose:
+        - alias: Sleep mode on - go straight to dim red to avoid white flash
+          conditions:
+          - condition: state
+            entity_id: switch.al_sleep_mode_hallway
+            state: 'on'
+          sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.hallway
+            data:
+              brightness_pct: 5
+              rgb_color:
+              - 255
+              - 20
+              - 0
+              transition: 2
+        default:
+        - action: light.turn_on
+          target:
+            entity_id: light.hallway
           data:
-            entity_id: switch.al_hallway
-            lights:
-            - light.hallway
             transition: 2
-            adapt_color: true
-            adapt_brightness: true
-            prefer_rgb_color: true
+        - if:
+          - condition: template
+            value_template: "{{ 'light.hallway' not in\n   state_attr('switch.al_hallway',
+              'manual_control') }}\n"
+          then:
+          - action: adaptive_lighting.apply
+            continue_on_error: true
+            data:
+              entity_id: switch.al_hallway
+              lights:
+              - light.hallway
+              transition: 2
+              adapt_color: true
+              adapt_brightness: true
+              prefer_rgb_color: true
     - conditions:
       - condition: trigger
         id: motion_stopped
