@@ -1484,7 +1484,7 @@
             - light.kitchen_2_color
             - light.kitchen_lightstrip
           data:
-            brightness_pct: 8
+            brightness_pct: 24
             rgb_color:
             - 255
             - 20
@@ -1547,7 +1547,7 @@
               - light.kitchen_2_color
               - light.kitchen_lightstrip
             data:
-              brightness_pct: 8
+              brightness_pct: 24
               rgb_color:
               - 255
               - 20
