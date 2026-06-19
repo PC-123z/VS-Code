@@ -2995,6 +2995,14 @@
       minutes: 14
       seconds: 30
     id: cleared
+  - trigger: state
+    entity_id:
+    - binary_sensor.living_room_sensor_group
+    to:
+    - 'off'
+    for:
+      minutes: 5
+    id: cleared_night
   - trigger: time
     at: 07:00:00
     id: morning_transition
