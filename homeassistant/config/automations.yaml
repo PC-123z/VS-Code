@@ -2843,35 +2843,63 @@
             after: '23:00:00'
             before: 07:00:00
           sequence:
-          - action: light.turn_on
-            target:
-              entity_id: light.bedroom
-            data:
-              transition: 30
-          - action: adaptive_lighting.apply
-            continue_on_error: true
-            data:
-              entity_id: switch.al_big_bedroom
-              lights:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
-              transition: 30
-              adapt_color: true
-              adapt_brightness: true
-              prefer_rgb_color: true
-          - action: light.turn_on
-            target:
-              entity_id: light.nano_sand_dune
-            data:
-              rgb_color:
-              - 255
-              - 30
-              - 0
-              brightness_pct: '{{ [50 - ((now().hour * 60 + now().minute - 23 * 60)
-                / 60 * 48) | round(0), 2] | max }}'
-              transition: 30
+          - choose:
+            - alias: Sleep mode already on - go straight to red to avoid white flash
+              conditions:
+              - condition: state
+                entity_id: switch.al_sleep_mode_big_bedroom
+                state: 'on'
+              sequence:
+              - action: light.turn_on
+                target:
+                  entity_id: light.bedroom
+                data:
+                  brightness_pct: 10
+                  rgb_color:
+                  - 255
+                  - 30
+                  - 0
+                  transition: 30
+              - action: light.turn_on
+                target:
+                  entity_id: light.nano_sand_dune
+                data:
+                  brightness_pct: 10
+                  rgb_color:
+                  - 255
+                  - 30
+                  - 0
+                  transition: 30
+            default:
+            - action: light.turn_on
+              target:
+                entity_id: light.bedroom
+              data:
+                transition: 30
+            - action: adaptive_lighting.apply
+              continue_on_error: true
+              data:
+                entity_id: switch.al_big_bedroom
+                lights:
+                - light.bedroom_ceiling_1
+                - light.bedroom_ceiling_2
+                - light.bedroom_lamp_1
+                - light.bedroom_lamp_2
+                transition: 30
+                adapt_color: true
+                adapt_brightness: true
+                prefer_rgb_color: true
+            - action: light.turn_on
+              target:
+                entity_id: light.nano_sand_dune
+              data:
+                rgb_color:
+                - 255
+                - 30
+                - 0
+                brightness_pct: '{{ [50 - ((now().hour * 60 + now().minute - 23 * 60)
+                  / 60 * 48) | round(0), 2] | max }}'
+                transition: 30
     - conditions:
       - condition: trigger
         id: stopped
