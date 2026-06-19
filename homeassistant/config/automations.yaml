@@ -3062,6 +3062,29 @@
           entity_id: switch.al_living_room
     - conditions:
       - condition: trigger
+        id: cleared_night
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: switch.al_sleep_mode_living_room
+          state: 'on'
+        - condition: time
+          after: '23:00:00'
+          before: 07:00:00
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.living_room
+        data:
+          transition: 15
+      - action: light.turn_off
+        target:
+          entity_id: light.galaxy_projector
+      - action: switch.turn_off
+        target:
+          entity_id: switch.al_living_room
+    - conditions:
+      - condition: trigger
         id: morning_transition
       sequence:
       - condition: state
