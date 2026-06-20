@@ -4349,7 +4349,7 @@
         action: media_player.media_stop
         target:
           entity_id: media_player.bedroom_2
-  mode: single
+  mode: restart
 - id: '1776302554735'
   alias: 'Hue Button 2 - Big Bedroom: Bedtime Button - Hue Button 2'
   description: Single press sets bedtime mode - warm light fade, music, fans, alarm
