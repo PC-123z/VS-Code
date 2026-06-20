@@ -4173,7 +4173,7 @@
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
-    type: repeat
+    type: long_release
     subtype: 2
     trigger: device
     id: hold
@@ -4356,7 +4356,7 @@
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
-    type: initial_press
+    type: short_release
     subtype: 2
     trigger: device
     id: press
