@@ -114,7 +114,7 @@
     grace. 60-minute hard cap from routine start.'
   triggers:
   - trigger: time
-    at: '15:45:00'
+    at: '18:45:00'
     weekday:
     - sat
   - trigger: time
@@ -2915,8 +2915,8 @@
                 - 255
                 - 30
                 - 0
-                brightness_pct: '{{ [50 - ((now().hour * 60 + now().minute - 23 * 60)
-                  / 60 * 48) | round(0), 2] | max }}'
+                brightness_pct: '{{ [50 - ((now().hour * 60 + now().minute - 23 *
+                  60) / 60 * 48) | round(0), 2] | max }}'
                 transition: 30
     - conditions:
       - condition: trigger
