@@ -4290,7 +4290,7 @@
     target:
       entity_id: media_player.bedroom_2
     data:
-      media_id: spotify:album:03nDtt5fxux68gnwhNGWnB
+      media_id: spotify:audiobook:03nDtt5fxux68gnwhNGWnB
       radio_mode: false
   - alias: Run light stepdown, fan boost, audio stop and Nanoleaf off in parallel
     parallel:
