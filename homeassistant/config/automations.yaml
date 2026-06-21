@@ -1265,49 +1265,6 @@
         data:
           transition: 10
   mode: restart
-- id: '1775347744975'
-  alias: Kitchen On
-  description: Turns on kitchen lights with day and night modes
-  triggers:
-  - trigger: state
-    entity_id:
-    - binary_sensor.kitchen_sensor_group
-    to:
-    - 'on'
-  conditions: []
-  actions:
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: sun.sun
-        state: above_horizon
-      sequence:
-      - delay:
-          minutes: 10
-      - action: light.turn_on
-        target:
-          area_id:
-          - kitchen
-        data:
-          brightness_pct: 100
-          color_temp_kelvin: 4500
-      alias: Day Mode
-    - conditions:
-      - condition: state
-        entity_id: sun.sun
-        state: below_horizon
-      sequence:
-      - delay:
-          minutes: 5
-      - action: light.turn_on
-        target:
-          area_id:
-          - kitchen
-        data:
-          brightness_pct: 40
-          color_temp_kelvin: 2700
-      alias: Night Mode
-  mode: restart
 - id: '1775348628799'
   alias: 'Kitchen: Smart Motion & Presence (Split Color/White)'
   description: 'Hue sensors trigger lights on immediately. Frigate confirmed presence
