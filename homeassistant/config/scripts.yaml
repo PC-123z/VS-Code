@@ -529,9 +529,9 @@ goodbye_routine_immediate_actions:
       - fan.big_bedroom_fan
       - fan.kitchen_purifier
       - fan.living_room_fan
-      - fan.simpleconnect_fan_94df19_hunter_fan
       - fan.bedroom2_fan
     action: fan.turn_off
+    data: {}
   - target:
       entity_id:
       - media_player.living_room_tv_2
