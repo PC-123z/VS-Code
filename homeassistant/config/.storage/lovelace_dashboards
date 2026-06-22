@@ -95,7 +95,7 @@
       },
       {
         "id": "dashboard_mushroom",
-        "show_in_sidebar": true,
+        "show_in_sidebar": false,
         "icon": "mdi:mushroom",
         "title": "*Mushroom",
         "require_admin": true,
