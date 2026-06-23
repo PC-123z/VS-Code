@@ -522,7 +522,8 @@ goodbye_routine_main:
 goodbye_routine_immediate_actions:
   alias: Goodbye Routine - Immediate Actions
   sequence:
-  - target:
+  - continue_on_error: true
+    target:
       entity_id:
       - fan.air_circulator
       - fan.bedroom_purifier
@@ -532,12 +533,14 @@ goodbye_routine_immediate_actions:
       - fan.bedroom2_fan
     action: fan.turn_off
     data: {}
-  - target:
+  - continue_on_error: true
+    target:
       entity_id:
       - media_player.living_room_tv_2
       - media_player.bedroom_tv_2
     action: media_player.turn_off
-  - data:
+  - continue_on_error: true
+    data:
       with_group: true
     target:
       entity_id:
@@ -546,14 +549,16 @@ goodbye_routine_immediate_actions:
       - media_player.bedroom
       - media_player.office
     action: sonos.snapshot
-  - target:
+  - continue_on_error: true
+    target:
       entity_id:
       - media_player.bathroom
       - media_player.kitchen
       - media_player.bedroom
       - media_player.office
     action: media_player.media_stop
-  - target:
+  - continue_on_error: true
+    target:
       entity_id:
       - light.galaxy_projector
       - light.kitchen_main_lights
@@ -579,15 +584,18 @@ goodbye_routine_immediate_actions:
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
     action: light.turn_off
-  - data:
+  - continue_on_error: true
+    data:
       transition: 15
     target:
       entity_id: light.indoor
     action: light.turn_off
-  - target:
+  - continue_on_error: true
+    target:
       entity_id: switch.al_hallway
     action: switch.turn_off
-  - data:
+  - continue_on_error: true
+    data:
       brightness_pct: 20
     target:
       entity_id: light.hallway
