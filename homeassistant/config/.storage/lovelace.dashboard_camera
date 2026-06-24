@@ -105,16 +105,16 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "person.paul",
-                  "show_entity_picture": true
-                },
-                {
-                  "type": "tile",
                   "entity": "sensor.volvo_xc60_battery"
                 },
                 {
                   "type": "tile",
                   "entity": "sensor.pc_iphone_battery_level"
+                },
+                {
+                  "type": "tile",
+                  "entity": "person.paul",
+                  "show_entity_picture": true
                 }
               ]
             },
