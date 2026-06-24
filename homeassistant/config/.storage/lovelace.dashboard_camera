@@ -73,27 +73,13 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "device_tracker.bcpro_204982_08b8",
-                  "vertical": false,
-                  "features_position": "bottom"
-                },
-                {
-                  "type": "tile",
                   "entity": "binary_sensor.garage_car_occupancy",
                   "vertical": false,
                   "features_position": "bottom"
                 },
                 {
                   "type": "tile",
-                  "entity": "binary_sensor.volvo_xc60_engine_status"
-                },
-                {
-                  "type": "tile",
-                  "grid_options": {
-                    "columns": 12,
-                    "rows": 1
-                  },
-                  "entity": "binary_sensor.driveway_car_occupancy",
+                  "entity": "device_tracker.bcpro_204982_08b8",
                   "vertical": false,
                   "features_position": "bottom"
                 },
@@ -105,7 +91,21 @@
                 },
                 {
                   "type": "tile",
+                  "entity": "binary_sensor.volvo_xc60_engine_status"
+                },
+                {
+                  "type": "tile",
                   "entity": "sensor.volvo_xc60_battery"
+                },
+                {
+                  "type": "tile",
+                  "grid_options": {
+                    "columns": 12,
+                    "rows": 1
+                  },
+                  "entity": "binary_sensor.driveway_car_occupancy",
+                  "vertical": false,
+                  "features_position": "bottom"
                 },
                 {
                   "type": "tile",
