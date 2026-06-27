@@ -173,27 +173,6 @@
         "issue_id": "restart_required_656992550_tags/v1.9.21"
       },
       {
-        "created": "2026-06-27T15:55:10.242968+00:00",
-        "dismissed_version": null,
-        "domain": "sensor",
-        "is_persistent": false,
-        "issue_id": "units_changed_sensor.pc_ring_high_activity_time"
-      },
-      {
-        "created": "2026-06-27T15:55:10.243148+00:00",
-        "dismissed_version": null,
-        "domain": "sensor",
-        "is_persistent": false,
-        "issue_id": "units_changed_sensor.pc_ring_medium_activity_time"
-      },
-      {
-        "created": "2026-06-27T15:55:10.243269+00:00",
-        "dismissed_version": null,
-        "domain": "sensor",
-        "is_persistent": false,
-        "issue_id": "units_changed_sensor.pc_ring_low_activity_time"
-      },
-      {
         "created": "2026-06-27T17:24:19.758291+00:00",
         "dismissed_version": null,
         "domain": "automation",
