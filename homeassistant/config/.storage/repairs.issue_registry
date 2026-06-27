@@ -171,6 +171,13 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_656992550_tags/v1.9.21"
+      },
+      {
+        "created": "2026-06-27T15:15:40.121527+00:00",
+        "dismissed_version": null,
+        "domain": "homeassistant",
+        "is_persistent": false,
+        "issue_id": "config_entry_reauth_playstation_network_01KNG9PKHH8P523XE8MJ786MEB"
       }
     ]
   }
