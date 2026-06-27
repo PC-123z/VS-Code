@@ -7103,6 +7103,14 @@
   - trigger: state
     entity_id: cover.garage
     to: open
+    id: garage
+  - alias: iOS Shortcut geofence-exit failsafe (beacon backup)
+    trigger: webhook
+    webhook_id: paul_left_home
+    allowed_methods:
+    - POST
+    local_only: false
+    id: webhook
   conditions:
   - alias: Don't run if Departure - Monitor Garage and Arm Based on Occupancy is active
     condition: state
@@ -7111,22 +7119,28 @@
     - 'off'
     enabled: false
   actions:
-  - alias: Wait for Paul or car to be detected away
-    wait_for_trigger:
-    - trigger: state
-      entity_id: person.paul
-      to: not_home
-    - trigger: state
-      entity_id: device_tracker.bcpro_204982_08b8
-      to:
-      - not_home
-      - unavailable
-    timeout:
-      hours: 0
-      minutes: 15
-      seconds: 0
-      milliseconds: 0
-    continue_on_timeout: false
+  - alias: Confirm departure (skip wait when geofence webhook already confirmed Paul
+      left)
+    if:
+    - condition: template
+      value_template: '{{ trigger.id != ''webhook'' }}'
+    then:
+    - alias: Wait for Paul or car to be detected away
+      wait_for_trigger:
+      - trigger: state
+        entity_id: person.paul
+        to: not_home
+      - trigger: state
+        entity_id: device_tracker.bcpro_204982_08b8
+        to:
+        - not_home
+        - unavailable
+      timeout:
+        hours: 0
+        minutes: 15
+        seconds: 0
+        milliseconds: 0
+      continue_on_timeout: false
   - alias: Wait for motion to clear or timeout after 5 minutes
     wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'')
       }}'
