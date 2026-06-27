@@ -159,11 +159,18 @@
         "issue_id": "restart_required_656992550_tags/v1.9.9"
       },
       {
-        "created": "2026-06-27T15:14:58.623104+00:00",
+        "created": "2026-06-27T15:15:09.400319+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_139664351_tags/v5.15.5"
+        "issue_id": "restart_required_1081435944_tags/v2.8.2"
+      },
+      {
+        "created": "2026-06-27T15:15:19.577042+00:00",
+        "dismissed_version": null,
+        "domain": "hacs",
+        "is_persistent": false,
+        "issue_id": "restart_required_656992550_tags/v1.9.21"
       }
     ]
   }
