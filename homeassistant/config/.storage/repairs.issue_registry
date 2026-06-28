@@ -191,6 +191,13 @@
           "name": "Living Room: Turn off TV when PS5 and Apple TV both off",
           "edit": "/config/automation/edit/1749150000000"
         }
+      },
+      {
+        "created": "2026-06-28T00:34:50.397885+00:00",
+        "dismissed_version": null,
+        "domain": "sonos",
+        "is_persistent": false,
+        "issue_id": "subscriptions_failed"
       }
     ]
   }
