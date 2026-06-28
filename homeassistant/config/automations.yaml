@@ -7665,7 +7665,7 @@
     - thu
     - fri
   - trigger: time
-    at: '10:15:00'
+    at: 09:45:00
     weekday:
     - sat
     - sun
