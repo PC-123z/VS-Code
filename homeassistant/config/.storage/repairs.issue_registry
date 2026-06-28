@@ -194,7 +194,7 @@
       },
       {
         "created": "2026-06-28T00:34:50.397885+00:00",
-        "dismissed_version": null,
+        "dismissed_version": "2026.6.0",
         "domain": "sonos",
         "is_persistent": false,
         "issue_id": "subscriptions_failed"
