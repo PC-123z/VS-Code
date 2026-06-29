@@ -6970,26 +6970,18 @@
       - action: fan.turn_off
         target:
           entity_id: fan.bedroom2_fan
-- &id001
-  id: frigate_camera_alerts
+- id: frigate_camera_alerts
   alias: Frigate Camera Alerts
   description: ''
   triggers:
-  - topic: frigate/driveway/events
-    id: driveway
+  - topic: frigate/events
     trigger: mqtt
-  - id: front_door
-    trigger: mqtt
-    options:
-      topic: frigate/front_door/events
-  - id: garage
-    trigger: mqtt
-    options:
-      topic: frigate/garage/events
   conditions:
   - condition: template
     value_template: "{{ trigger.payload_json.type == 'new' and\n   trigger.payload_json.after.label
-      in ['person', 'car'] and\n   trigger.payload_json.after.score >= 0.75 }}\n"
+      in ['person', 'car'] and\n   trigger.payload_json.after.score >= 0.75 and\n
+      \  trigger.payload_json.after.camera in ['driveway', 'front_door', 'garage']
+      }}\n"
   actions:
   - data:
       title: '{{ trigger.payload_json.after.label | capitalize }} Detected
