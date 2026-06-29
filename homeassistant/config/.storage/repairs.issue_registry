@@ -205,46 +205,6 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_656992550_tags/v1.9.22"
-      },
-      {
-        "created": "2026-06-28T18:48:04.970424+00:00",
-        "dismissed_version": null,
-        "domain": "automation",
-        "is_persistent": true,
-        "issue_id": "automation.washer_announcement_service_not_found_notify.alexa_media_living_room_dot",
-        "breaks_in_ha_version": null,
-        "data": null,
-        "is_fixable": true,
-        "issue_domain": null,
-        "learn_more_url": null,
-        "severity": "error",
-        "translation_key": "service_not_found",
-        "translation_placeholders": {
-          "service": "notify.alexa_media_living_room_dot",
-          "entity_id": "automation.washer_announcement",
-          "name": "Washer Announcement",
-          "edit": "/config/automation/edit/washer_announcement"
-        }
-      },
-      {
-        "created": "2026-06-28T22:53:00.137918+00:00",
-        "dismissed_version": null,
-        "domain": "automation",
-        "is_persistent": true,
-        "issue_id": "automation.dryer_announcement_service_not_found_notify.alexa_media_living_room_dot",
-        "breaks_in_ha_version": null,
-        "data": null,
-        "is_fixable": true,
-        "issue_domain": null,
-        "learn_more_url": null,
-        "severity": "error",
-        "translation_key": "service_not_found",
-        "translation_placeholders": {
-          "service": "notify.alexa_media_living_room_dot",
-          "entity_id": "automation.dryer_announcement",
-          "name": "Dryer Announcement",
-          "edit": "/config/automation/edit/dryer_announcement"
-        }
       }
     ]
   }
