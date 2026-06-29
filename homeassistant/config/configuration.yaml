@@ -105,6 +105,9 @@ input_boolean:
     initial: off
   big_bedroom_asleep:
     name: "Big Bedroom Asleep"
+  arrival_recent:
+    name: "Arrival Recent (latch)"
+    initial: off
 
 # Template switches + sensors
 template:
