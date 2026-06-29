@@ -7110,10 +7110,12 @@
           entity_id: script.goodbye_routine_main
   mode: single
 - id: '1777484175032'
-  alias: Arrival (Welcome Home) - Disarm Alarm on Garage Cycle and Engine Off
-  description: When garage opens and alarm is armed (confirming departure happened),
-    wait for engine transition off OR BT beacon transition to home, then disarm and
-    run welcome home routine.
+  alias: Arrival (Welcome Home) - Disarm Alarm on Garage Cycle + Arrival Latch
+  description: Two-factor disarm. The arrival latch (input_boolean.arrival_recent)
+    must already be on (set by phone geofence / webhook / BT beacon when Paul got
+    near home) AND the garage must open while the alarm is armed. Both confirm arrival,
+    so disarm immediately and run the welcome home routine. If the latch is off, this
+    does nothing and the alarm must be disarmed manually.
   triggers:
   - trigger: state
     entity_id: cover.garage
@@ -7129,36 +7131,11 @@
     - condition: state
       entity_id: alarm_control_panel.3302_alarm
       state: armed_home
+  - alias: Arrival latch must be on (phone/beacon already confirmed Paul arrived)
+    condition: state
+    entity_id: input_boolean.arrival_recent
+    state: 'on'
   actions:
-  - alias: Wait for engine to transition off, Home Assistant App to Arrive Home, BT
-      beacon to transition home, OR iOS Shortcut webhook
-    wait_for_trigger:
-    - alias: Engine running -> off (just parked)
-      trigger: state
-      entity_id: binary_sensor.volvo_xc60_engine_status
-      from: 'on'
-      to: 'off'
-    - alias: BT beacon away -> home (Paul just walked in)
-      trigger: state
-      entity_id: device_tracker.bcpro_204982_08b8
-      from:
-      - not_home
-      - unavailable
-      to: home
-    - alias: iPhone app person.paul arrives home
-      trigger: state
-      entity_id: person.paul
-      from: not_home
-      to: home
-    - alias: iOS Shortcut geofence webhook
-      trigger: webhook
-      webhook_id: paul_arrived_home
-      allowed_methods:
-      - POST
-      local_only: false
-    timeout:
-      minutes: 5
-    continue_on_timeout: false
   - alias: Disarm the security panel
     action: alarm_control_panel.alarm_disarm
     target:
@@ -7271,6 +7248,60 @@
             media_id: spotify://album/4ZIOCYviEphLj1EpwXXvHy
             media_type: album
       continue_on_error: true
+  mode: single
+- id: '1777484175033'
+  alias: Arrival Latch - Set on Phone/Beacon Arrival
+  description: Sets the arrival latch when any early arrival signal fires (phone geofence,
+    iOS Shortcut webhook, or BT beacon going home). These fire ~15-25s before the
+    garage opens, so the latch captures them so the garage-open automation can read
+    them later. Auto-clears after 15 min or on disarm (see companion automation).
+  triggers:
+  - alias: iPhone app person.paul arrives home
+    trigger: state
+    entity_id: person.paul
+    from: not_home
+    to: home
+  - alias: BT beacon away -> home (Paul just arrived)
+    trigger: state
+    entity_id: device_tracker.bcpro_204982_08b8
+    from:
+    - not_home
+    - unavailable
+    to: home
+  - alias: iOS Shortcut geofence webhook
+    trigger: webhook
+    webhook_id: paul_arrived_home
+    allowed_methods:
+    - POST
+    local_only: false
+  conditions: []
+  actions:
+  - alias: Set the arrival latch
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.arrival_recent
+  mode: single
+- id: '1777484175034'
+  alias: Arrival Latch - Clear after 15 min or on Disarm
+  description: Clears the arrival latch 15 minutes after it was set, or as soon as
+    the alarm is disarmed (so a stale latch never lingers).
+  triggers:
+  - alias: Latch has been on for 15 minutes
+    trigger: state
+    entity_id: input_boolean.arrival_recent
+    to: 'on'
+    for:
+      minutes: 15
+  - alias: Alarm disarmed
+    trigger: state
+    entity_id: alarm_control_panel.3302_alarm
+    to: disarmed
+  conditions: []
+  actions:
+  - alias: Clear the arrival latch
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.arrival_recent
   mode: single
 - id: '1748800000004'
   alias: 'Welcome Home: Stop All Music When Kitchen Unoccupied 15 Min'
