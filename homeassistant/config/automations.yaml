@@ -7029,9 +7029,9 @@
         %}Front Door {% else %}Garage{% endif %}.
 
         '
-      data:
-        type: announce
-    action: notify.alexa_media_big_bedroom
+    action: notify.send_message
+    target:
+      entity_id: notify.bedroom_dot_announce
 - id: frigate_camera_alerts
   alias: Frigate Camera Alerts
   description: ''
@@ -7091,9 +7091,9 @@
         %}Front Door {% else %}Garage{% endif %}.
 
         '
-      data:
-        type: announce
-    action: notify.alexa_media_big_bedroom
+    action: notify.send_message
+    target:
+      entity_id: notify.bedroom_dot_announce
 - id: '1777484048364'
   alias: 'AUTO AWAY: Departure - Monitor Garage and Arm Based on Occupancy'
   description: When garage opens and Paul or the car is detected away, wait for motion
@@ -8650,11 +8650,11 @@
     entity_id: media_player.living_room_tv_2
     state: 'on'
   actions:
-  - action: notify.alexa_media_living_room_dot
+  - action: notify.send_message
+    target:
+      entity_id: notify.living_room_dot_announce
     data:
       message: The PS5 has been turned off. The TV will turn off in 30 seconds.
-      data:
-        type: announce
   - delay:
       seconds: 30
   - condition: state
@@ -8692,16 +8692,16 @@
     - condition: template
       value_template: '{{ trigger.id == ''five_minutes'' }}'
     then:
-    - action: notify.alexa_media_living_room_dot
+    - action: notify.send_message
+      target:
+        entity_id: notify.living_room_dot_announce
       data:
         message: The washer will be done in 5 minutes.
-        data:
-          type: announce
-    - action: notify.alexa_media_echo_show_kitchen
+    - action: notify.send_message
+      target:
+        entity_id: notify.echo_show_kitchen_announce
       data:
         message: The washer will be done in 5 minutes.
-        data:
-          type: announce
     - action: tts.speak
       target:
         entity_id: tts.piper
@@ -8710,16 +8710,16 @@
         media_player_entity_id: media_player.bedroom
         message: The washer will be done in 5 minutes.
     else:
-    - action: notify.alexa_media_living_room_dot
+    - action: notify.send_message
+      target:
+        entity_id: notify.living_room_dot_announce
       data:
         message: The washer is done!
-        data:
-          type: announce
-    - action: notify.alexa_media_echo_show_kitchen
+    - action: notify.send_message
+      target:
+        entity_id: notify.echo_show_kitchen_announce
       data:
         message: The washer is done!
-        data:
-          type: announce
     - action: tts.speak
       target:
         entity_id: tts.piper
@@ -8752,16 +8752,16 @@
     - condition: template
       value_template: '{{ trigger.id == ''five_minutes'' }}'
     then:
-    - action: notify.alexa_media_living_room_dot
+    - action: notify.send_message
+      target:
+        entity_id: notify.living_room_dot_announce
       data:
         message: The dryer will be done in 5 minutes.
-        data:
-          type: announce
-    - action: notify.alexa_media_echo_show_kitchen
+    - action: notify.send_message
+      target:
+        entity_id: notify.echo_show_kitchen_announce
       data:
         message: The dryer will be done in 5 minutes.
-        data:
-          type: announce
     - action: tts.speak
       target:
         entity_id: tts.piper
@@ -8770,16 +8770,16 @@
         media_player_entity_id: media_player.bedroom
         message: The dryer will be done in 5 minutes.
     else:
-    - action: notify.alexa_media_living_room_dot
+    - action: notify.send_message
+      target:
+        entity_id: notify.living_room_dot_announce
       data:
         message: The dryer is done!
-        data:
-          type: announce
-    - action: notify.alexa_media_echo_show_kitchen
+    - action: notify.send_message
+      target:
+        entity_id: notify.echo_show_kitchen_announce
       data:
         message: The dryer is done!
-        data:
-          type: announce
     - action: tts.speak
       target:
         entity_id: tts.piper
