@@ -103,7 +103,7 @@
     data:
       transition: 30
   mode: restart
-- &id001
+- &id002
   id: '1772717730627'
   alias: '*Nap Wake Up Routine v3'
   description: 'Staged sunrise wake-up with 3-min light ramp. Music ramps to 0.20,
@@ -6970,19 +6970,22 @@
       - action: fan.turn_off
         target:
           entity_id: fan.bedroom2_fan
-- id: frigate_camera_alerts
+- &id001
+  id: frigate_camera_alerts
   alias: Frigate Camera Alerts
   description: ''
   triggers:
   - topic: frigate/driveway/events
     id: driveway
     trigger: mqtt
-  - topic: frigate/front_door/events
-    id: front_door
+  - id: front_door
     trigger: mqtt
-  - topic: frigate/garage/events
-    id: garage
+    options:
+      topic: frigate/front_door/events
+  - id: garage
     trigger: mqtt
+    options:
+      topic: frigate/garage/events
   conditions:
   - condition: template
     value_template: "{{ trigger.payload_json.type == 'new' and\n   trigger.payload_json.after.label
@@ -7023,6 +7026,8 @@
     - wed
     - thu
     - fri
+    - sun
+    - sat
   - data:
       message: 'Alert: {{ trigger.payload_json.after.label | capitalize }} detected
         at {% if trigger.id == ''driveway'' %}Driveway {% elif trigger.id == ''front_door''
@@ -7032,68 +7037,7 @@
     action: notify.send_message
     target:
       entity_id: notify.bedroom_dot_announce
-- id: frigate_camera_alerts
-  alias: Frigate Camera Alerts
-  description: ''
-  triggers:
-  - topic: frigate/driveway/events
-    id: driveway
-    trigger: mqtt
-  - topic: frigate/front_door/events
-    id: front_door
-    trigger: mqtt
-  - topic: frigate/garage/events
-    id: garage
-    trigger: mqtt
-  conditions:
-  - condition: template
-    value_template: "{{ trigger.payload_json.type == 'new' and\n   trigger.payload_json.after.label
-      in ['person', 'car'] and\n   trigger.payload_json.after.score >= 0.75 }}\n"
-  actions:
-  - data:
-      title: '{{ trigger.payload_json.after.label | capitalize }} Detected
-
-        '
-      message: '{{ trigger.payload_json.after.label | capitalize }} detected at {%
-        if trigger.id == ''driveway'' %}Driveway {% elif trigger.id == ''front_door''
-        %}Front Door {% else %}Garage{% endif %}
-
-        '
-      data:
-        image: /api/frigate/notifications/{{ trigger.payload_json.after.id }}/thumbnail.jpg
-        url: /api/frigate/notifications/{{ trigger.payload_json.after.id }}/clip.mp4
-        tag: frigate-{{ trigger.id }}
-    action: notify.mobile_app_pc_iphone
-  - data:
-      title: '{{ trigger.payload_json.after.label | capitalize }} at {% if trigger.id
-        == ''driveway'' %}Driveway {% elif trigger.id == ''front_door'' %}Front Door
-        {% else %}Garage{% endif %}
-
-        '
-      message: '{{ trigger.payload_json.after.label | capitalize }} detected — [View
-        Clip](/api/frigate/notifications/{{ trigger.payload_json.after.id }}/clip.mp4)
-
-        '
-      notification_id: frigate_{{ trigger.id }}
-    action: persistent_notification.create
-  - condition: time
-    after: 08:00:00
-    before: '18:00:00'
-    weekday:
-    - mon
-    - tue
-    - wed
-    - thu
-    - fri
-  - data:
-      message: 'Alert: {{ trigger.payload_json.after.label | capitalize }} detected
-        at {% if trigger.id == ''driveway'' %}Driveway {% elif trigger.id == ''front_door''
-        %}Front Door {% else %}Garage{% endif %}.
-
-        '
-    action: notify.send_message
-    target:
-      entity_id: notify.bedroom_dot_announce
+- *id001
 - id: '1777484048364'
   alias: 'AUTO AWAY: Departure - Monitor Garage and Arm Based on Occupancy'
   description: When garage opens and Paul or the car is detected away, wait for motion
@@ -7649,8 +7593,8 @@
       title: Volvo Locked
       message: XC60 engine off and doors unlocked for 2 minutes — automatically locked.
   mode: single
-- *id001
-- *id001
+- *id002
+- *id002
 - id: '1777796510473'
   alias: '*Good Morning Routine'
   description: Staged sunrise wake-up with 3-min light ramp, occupancy-driven music
@@ -7916,8 +7860,8 @@
           - delay:
               seconds: 1
           - alias: Restart playlist on Music Assistant after announcement (Sonos TTS
-              snapshot/restore breaks the MA queue, so re-queue unconditionally on the
-              MA entity rather than resuming the Sonos entity)
+              snapshot/restore breaks the MA queue, so re-queue unconditionally on
+              the MA entity rather than resuming the Sonos entity)
             continue_on_error: true
             action: music_assistant.play_media
             target:
