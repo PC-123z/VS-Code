@@ -6988,26 +6988,26 @@
 
         '
       message: '{{ trigger.payload_json.after.label | capitalize }} detected at {%
-        if trigger.id == ''driveway'' %}Driveway {% elif trigger.id == ''front_door''
-        %}Front Door {% else %}Garage{% endif %}
+        if trigger.payload_json.after.camera == ''driveway'' %}Driveway {% elif trigger.payload_json.after.camera
+        == ''front_door'' %}Front Door {% else %}Garage{% endif %}
 
         '
       data:
         image: /api/frigate/notifications/{{ trigger.payload_json.after.id }}/thumbnail.jpg
         url: /api/frigate/notifications/{{ trigger.payload_json.after.id }}/clip.mp4
-        tag: frigate-{{ trigger.id }}
+        tag: frigate-{{ trigger.payload_json.after.camera }}
     action: notify.mobile_app_pc_iphone
   - data:
-      title: '{{ trigger.payload_json.after.label | capitalize }} at {% if trigger.id
-        == ''driveway'' %}Driveway {% elif trigger.id == ''front_door'' %}Front Door
-        {% else %}Garage{% endif %}
+      title: '{{ trigger.payload_json.after.label | capitalize }} at {% if trigger.payload_json.after.camera
+        == ''driveway'' %}Driveway {% elif trigger.payload_json.after.camera == ''front_door''
+        %}Front Door {% else %}Garage{% endif %}
 
         '
       message: '{{ trigger.payload_json.after.label | capitalize }} detected — [View
         Clip](/api/frigate/notifications/{{ trigger.payload_json.after.id }}/clip.mp4)
 
         '
-      notification_id: frigate_{{ trigger.id }}
+      notification_id: frigate_{{ trigger.payload_json.after.camera }}
     action: persistent_notification.create
   - condition: time
     after: 08:00:00
@@ -7022,14 +7022,14 @@
     - sat
   - data:
       message: 'Alert: {{ trigger.payload_json.after.label | capitalize }} detected
-        at {% if trigger.id == ''driveway'' %}Driveway {% elif trigger.id == ''front_door''
-        %}Front Door {% else %}Garage{% endif %}.
+        at {% if trigger.payload_json.after.camera == ''driveway'' %}Driveway {% elif
+        trigger.payload_json.after.camera == ''front_door'' %}Front Door {% else %}Garage{%
+        endif %}.
 
         '
     action: notify.send_message
     target:
       entity_id: notify.bedroom_dot_announce
-- *id001
 - id: '1777484048364'
   alias: 'AUTO AWAY: Departure - Monitor Garage and Arm Based on Occupancy'
   description: When garage opens and Paul or the car is detected away, wait for motion
@@ -8537,16 +8537,13 @@
   description: On person detection at front door or driveway, display the camera feed
     on the kitchen Echo Show. Mutes the Echo Show between 11PM and 7AM.
   triggers:
-  - topic: frigate/front_door/events
-    id: front_door
-    trigger: mqtt
-  - topic: frigate/driveway/events
-    id: driveway
+  - topic: frigate/events
     trigger: mqtt
   conditions:
   - condition: template
     value_template: "{{ trigger.payload_json.type == 'new' and\n   trigger.payload_json.after.label
-      == 'person' and\n   trigger.payload_json.after.score >= 0.75 }}"
+      == 'person' and\n   trigger.payload_json.after.score >= 0.75 and\n   trigger.payload_json.after.camera
+      in ['front_door', 'driveway'] }}"
   actions:
   - alias: Mute Echo Show if between 11PM and 7AM
     choose:
@@ -8565,8 +8562,8 @@
     target:
       entity_id: media_player.echo_show_kitchen
     data:
-      media_content_id: '{{ ''Front Door Camera'' if trigger.id == ''front_door''
-        else ''Driveway Camera'' }}'
+      media_content_id: '{{ ''Front Door Camera'' if trigger.payload_json.after.camera
+        == ''front_door'' else ''Driveway Camera'' }}'
       media_content_type: smart_home_camera
   mode: single
 - id: '1749150000000'
