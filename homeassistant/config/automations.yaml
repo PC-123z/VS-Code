@@ -7915,35 +7915,24 @@
             continue_on_timeout: true
           - delay:
               seconds: 1
-          - alias: Resume music
-            action: media_player.media_play
+          - alias: Restart playlist on Music Assistant after announcement (Sonos TTS
+              snapshot/restore breaks the MA queue, so re-queue unconditionally on the
+              MA entity rather than resuming the Sonos entity)
+            continue_on_error: true
+            action: music_assistant.play_media
+            target:
+              entity_id: media_player.bedroom_2
+            data:
+              media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
+              media_type: playlist
+          - delay:
+              seconds: 2
+          - alias: Restore listening volume after announcement
+            action: media_player.volume_set
             target:
               entity_id: media_player.bedroom
-          - delay:
-              seconds: 3
-          - alias: Restart playlist if media_play failed (TTS cleared the queue)
-            if:
-            - condition: or
-              conditions:
-              - condition: state
-                entity_id: media_player.bedroom
-                state: idle
-              - condition: state
-                entity_id: media_player.bedroom
-                state: 'off'
-            then:
-            - action: media_player.volume_set
-              target:
-                entity_id: media_player.bedroom
-              data:
-                volume_level: 0.2
-            - action: music_assistant.play_media
-              continue_on_error: true
-              target:
-                entity_id: media_player.bedroom
-              data:
-                media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
-                media_type: playlist
+            data:
+              volume_level: 0.2
         - alias: Occupancy-driven music loop using Sensor Group
           repeat:
             while:
@@ -7956,6 +7945,21 @@
                 entity_id: binary_sensor.big_bedroom_sensor_group
                 state: 'on'
               then:
+              - alias: Self-heal - re-queue playlist if Music Assistant went silent
+                if:
+                - condition: state
+                  entity_id: media_player.bedroom_2
+                  state:
+                  - idle
+                  - 'off'
+                then:
+                - continue_on_error: true
+                  action: music_assistant.play_media
+                  target:
+                    entity_id: media_player.bedroom_2
+                  data:
+                    media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
+                    media_type: playlist
               - action: media_player.volume_set
                 target:
                   entity_id: media_player.bedroom
