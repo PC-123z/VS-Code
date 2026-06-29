@@ -103,8 +103,7 @@
     data:
       transition: 30
   mode: restart
-- &id002
-  id: '1772717730627'
+- id: '1772717730627'
   alias: '*Nap Wake Up Routine v3'
   description: 'Staged sunrise wake-up with 3-min light ramp. Music ramps to 0.20,
     then waits for motion in bedroom/bathroom/hallway/kitchen before announcing. If
@@ -7270,7 +7269,7 @@
             media_type: album
       continue_on_error: true
   mode: single
-- id: '1748800000001'
+- id: '1748800000004'
   alias: 'Welcome Home: Stop All Music When Kitchen Unoccupied 15 Min'
   description: Kitchen is the anchor for the welcome home session. When it has been
     empty for 15 minutes, stop all music, unjoin satellite rooms, and clear the active
@@ -7585,8 +7584,6 @@
       title: Volvo Locked
       message: XC60 engine off and doors unlocked for 2 minutes — automatically locked.
   mode: single
-- *id002
-- *id002
 - id: '1777796510473'
   alias: '*Good Morning Routine'
   description: Staged sunrise wake-up with 3-min light ramp, occupancy-driven music
