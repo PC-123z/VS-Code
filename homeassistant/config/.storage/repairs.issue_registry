@@ -173,38 +173,11 @@
         "issue_id": "restart_required_656992550_tags/v1.9.21"
       },
       {
-        "created": "2026-06-27T21:43:19.774135+00:00",
-        "dismissed_version": null,
-        "domain": "automation",
-        "is_persistent": true,
-        "issue_id": "automation.living_room_turn_off_tv_when_ps5_and_apple_tv_both_off_service_not_found_notify.alexa_media_living_room_dot",
-        "breaks_in_ha_version": null,
-        "data": null,
-        "is_fixable": true,
-        "issue_domain": null,
-        "learn_more_url": null,
-        "severity": "error",
-        "translation_key": "service_not_found",
-        "translation_placeholders": {
-          "service": "notify.alexa_media_living_room_dot",
-          "entity_id": "automation.living_room_turn_off_tv_when_ps5_and_apple_tv_both_off",
-          "name": "Living Room: Turn off TV when PS5 and Apple TV both off",
-          "edit": "/config/automation/edit/1749150000000"
-        }
-      },
-      {
         "created": "2026-06-28T00:34:50.397885+00:00",
         "dismissed_version": "2026.6.0",
         "domain": "sonos",
         "is_persistent": false,
         "issue_id": "subscriptions_failed"
-      },
-      {
-        "created": "2026-06-28T13:47:15.497270+00:00",
-        "dismissed_version": null,
-        "domain": "hacs",
-        "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.9.22"
       }
     ]
   }
