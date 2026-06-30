@@ -4485,9 +4485,9 @@
         data:
           percentage: 50
     - sequence:
-      - alias: Wait 30 minutes then stop audio
+      - alias: Wait 55 minutes then stop audio
         delay:
-          minutes: 30
+          minutes: 55
       - alias: Stop bedroom audio
         action: media_player.media_stop
         target:
