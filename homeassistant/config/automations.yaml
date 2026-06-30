@@ -6977,13 +6977,11 @@
     trigger: mqtt
   conditions:
   - condition: template
-    value_template: >-
-      {{ trigger.payload_json.type == 'new'
-      and trigger.payload_json.after.label in ['person', 'car']
-      and trigger.payload_json.after.camera in ['driveway', 'front_door', 'garage']
-      and (trigger.payload_json.after.data.score
-      if trigger.payload_json.after.data is defined and trigger.payload_json.after.data.score is not none
-      else trigger.payload_json.after.score) | float(0) >= 0.75 }}
+    value_template: '{{ trigger.payload_json.type == ''new'' and trigger.payload_json.after.label
+      in [''person'', ''car''] and trigger.payload_json.after.camera in [''driveway'',
+      ''front_door'', ''garage''] and (trigger.payload_json.after.data.score if trigger.payload_json.after.data
+      is defined and trigger.payload_json.after.data.score is not none else trigger.payload_json.after.score)
+      | float(0) >= 0.75 }}'
   actions:
   - data:
       title: '{{ trigger.payload_json.after.label | capitalize }} Detected
@@ -7624,7 +7622,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 07:10:00
+    at: 07:40:00
     weekday:
     - mon
     - tue
@@ -8572,13 +8570,11 @@
     trigger: mqtt
   conditions:
   - condition: template
-    value_template: >-
-      {{ trigger.payload_json.type == 'new'
-      and trigger.payload_json.after.label == 'person'
-      and trigger.payload_json.after.camera in ['front_door', 'driveway']
-      and (trigger.payload_json.after.data.score
-      if trigger.payload_json.after.data is defined and trigger.payload_json.after.data.score is not none
-      else trigger.payload_json.after.score) | float(0) >= 0.75 }}
+    value_template: '{{ trigger.payload_json.type == ''new'' and trigger.payload_json.after.label
+      == ''person'' and trigger.payload_json.after.camera in [''front_door'', ''driveway'']
+      and (trigger.payload_json.after.data.score if trigger.payload_json.after.data
+      is defined and trigger.payload_json.after.data.score is not none else trigger.payload_json.after.score)
+      | float(0) >= 0.75 }}'
   actions:
   - alias: Mute Echo Show if between 11PM and 7AM
     choose:
