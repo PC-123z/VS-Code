@@ -8776,3 +8776,56 @@
     target:
       entity_id: input_boolean.office_pc_wake
   mode: single
+- id: '1775510700000'
+  alias: '*Big Bedroom: Nanoleaf stuck-on watchdog'
+  description: The Nanoleaf frequently drops offline (unavailable) and can miss the
+    presence turn-off; when it reconnects it restores to its last on-state. This retries
+    turning it off whenever the room is empty and presence lighting is in charge, so
+    a single missed command no longer leaves it on all day.
+  triggers:
+  - alias: Fires when the Nanoleaf reconnects into an on-state
+    trigger: state
+    entity_id: light.nano_sand_dune
+    to: 'on'
+    for:
+      seconds: 30
+    id: reconnected
+  - alias: Safety-net retry to catch it during an available window
+    trigger: time_pattern
+    minutes: /5
+    id: periodic
+  conditions:
+  - alias: Only when presence lighting is active (TV mode disables that automation)
+    condition: state
+    entity_id: automation.big_bedroom_smart_motion_presence
+    state: 'on'
+  - alias: Room empty - matches the presence automation's 10-min clear
+    condition: state
+    entity_id: binary_sensor.big_bedroom_sensor_group
+    state: 'off'
+    for:
+      minutes: 10
+  - alias: Respect the manual dimmer override
+    condition: state
+    entity_id: input_boolean.big_bedroom_manual_override
+    state: 'off'
+  - alias: Don't kill the intentional night light while sleeping
+    condition: state
+    entity_id: switch.al_sleep_mode_big_bedroom
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.big_bedroom_asleep
+    state: 'off'
+  - alias: Only act if it's genuinely on (skip when unavailable/off)
+    condition: state
+    entity_id: light.nano_sand_dune
+    state: 'on'
+  actions:
+  - alias: Retry the off it missed while offline
+    action: light.turn_off
+    continue_on_error: true
+    target:
+      entity_id: light.nano_sand_dune
+    data:
+      transition: 5
+  mode: single
