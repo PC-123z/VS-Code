@@ -105,11 +105,11 @@
   mode: restart
 - id: '1772717730627'
   alias: '*Nap Wake Up Routine v3'
-  description: 'Staged sunrise wake-up with 3-min light ramp. Music ramps to 0.20,
+  description: 'Staged sunrise wake-up with 3-min light ramp. Music ramps to 0.30,
     then waits for motion in bedroom/bathroom/hallway/kitchen before announcing. If
-    no motion within 5 minutes of routine start, escalates: music to 0.30, 40-second
+    no motion within 5 minutes of routine start, escalates: music to 0.40, 40-second
     pause, insistent TTS naming the alarm time and current time, then music resumes
-    at 0.35 while waiting for motion. Occupancy-driven music tail uses 30-min clear
+    at 0.45 while waiting for motion. Occupancy-driven music tail uses 30-min clear
     grace. 60-minute hard cap from routine start.'
   triggers:
   - trigger: time
@@ -261,7 +261,7 @@
         target:
           entity_id: media_player.bedroom_2
         data:
-          volume_level: 0.05
+          volume_level: 0.1
       - alias: Play Dance Pop Hits playlist via Music Assistant
         continue_on_error: true
         action: music_assistant.play_media
@@ -297,7 +297,7 @@
 
               '
         else:
-        - alias: Ramp volume to 0.20 over ~2.5 minutes
+        - alias: Ramp volume to 0.30 over ~2.5 minutes
           repeat:
             count: 8
             sequence:
@@ -307,7 +307,7 @@
               target:
                 entity_id: media_player.bedroom_2
               data:
-                volume_level: '{{ [0.05 + (repeat.index * 0.019), 0.20] | min | round(3)
+                volume_level: '{{ [0.1 + (repeat.index * 0.025), 0.30] | min | round(3)
                   }}'
         - alias: Wait for motion in bedroom/bathroom/hallway/kitchen (up to ~5 min
             from routine start)
@@ -327,12 +327,12 @@
             condition: template
             value_template: '{{ wait.completed == false }}'
           then:
-          - alias: Boost music to 0.30 for escalation
+          - alias: Boost music to 0.40 for escalation
             action: media_player.volume_set
             target:
               entity_id: media_player.bedroom_2
             data:
-              volume_level: 0.3
+              volume_level: 0.4
           - alias: Wait 40 seconds before insistent announcement
             delay:
               seconds: 40
@@ -360,12 +360,12 @@
             action: media_player.media_play
             target:
               entity_id: media_player.bedroom_2
-          - alias: Boost music to 0.35
+          - alias: Boost music to 0.45
             action: media_player.volume_set
             target:
               entity_id: media_player.bedroom_2
             data:
-              volume_level: 0.35
+              volume_level: 0.45
           - alias: Wait for motion after escalation (remaining time budget)
             wait_for_trigger:
             - trigger: state
@@ -438,7 +438,7 @@
                 target:
                   entity_id: media_player.bedroom_2
                 data:
-                  volume_level: 0.2
+                  volume_level: 0.3
               - delay:
                   seconds: 30
               else:
@@ -458,7 +458,7 @@
                   target:
                     entity_id: media_player.bedroom_2
                   data:
-                    volume_level: 0.2
+                    volume_level: 0.3
                 else:
                 - alias: Ramp volume down over 2 minutes
                   repeat:
@@ -468,7 +468,7 @@
                       target:
                         entity_id: media_player.bedroom_2
                       data:
-                        volume_level: '{{ [0.20 - (repeat.index * 0.019), 0.05] |
+                        volume_level: '{{ [0.30 - (repeat.index * 0.031), 0.05] |
                           max | round(3) }}'
                     - delay:
                         seconds: 15
@@ -4320,7 +4320,11 @@
     subtype: 2
     trigger: device
     id: press
-  conditions: []
+  conditions:
+  - alias: Don't hijack an active wake-up routine
+    condition: state
+    entity_id: input_boolean.good_morning_active
+    state: 'off'
   actions:
   - alias: Disable motion automation
     action: automation.turn_off
@@ -8525,15 +8529,36 @@
 - id: '1747200000001'
   alias: Good Morning Active - Watchdog Shutoff
   description: Safety net in case HA restarts mid-routine and leaves good_morning_active
-    stuck on. Turns everything off after 45 minutes regardless.
+    stuck on. Turns everything off after 45 minutes regardless. Also runs 2 minutes
+    after HA start, because a restored 'on' state never fires the 45-minute state
+    trigger.
   triggers:
   - trigger: state
     entity_id: input_boolean.good_morning_active
     to: 'on'
     for:
       minutes: 45
-  conditions: []
+  - trigger: homeassistant
+    event: start
+  conditions:
+  - condition: state
+    entity_id: input_boolean.good_morning_active
+    state: 'on'
   actions:
+  - alias: On HA start, wait 2 min then bail out unless the flag is still orphaned
+    if:
+    - condition: template
+      value_template: '{{ trigger.platform == ''homeassistant'' }}'
+    then:
+    - delay:
+        minutes: 2
+    - condition: state
+      entity_id: input_boolean.good_morning_active
+      state: 'on'
+    - alias: Skip if the wake routine is actually running right now
+      condition: template
+      value_template: '{{ (state_attr(''automation.good_morning_routine'', ''current'')
+        or 0) == 0 }}'
   - continue_on_error: true
     action: media_player.media_stop
     target:
