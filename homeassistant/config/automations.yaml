@@ -7625,7 +7625,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 08:15:00
+    at: 08:30:00
     weekday:
     - mon
     - tue
@@ -8780,8 +8780,8 @@
   alias: '*Big Bedroom: Nanoleaf stuck-on watchdog'
   description: The Nanoleaf frequently drops offline (unavailable) and can miss the
     presence turn-off; when it reconnects it restores to its last on-state. This retries
-    turning it off whenever the room is empty and presence lighting is in charge, so
-    a single missed command no longer leaves it on all day.
+    turning it off whenever the room is empty and presence lighting is in charge,
+    so a single missed command no longer leaves it on all day.
   triggers:
   - alias: Fires when the Nanoleaf reconnects into an on-state
     trigger: state
