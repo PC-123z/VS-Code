@@ -8552,13 +8552,13 @@
     then:
     - delay:
         minutes: 2
-    - condition: state
-      entity_id: input_boolean.good_morning_active
-      state: 'on'
-    - alias: Skip if the wake routine is actually running right now
-      condition: template
-      value_template: '{{ (state_attr(''automation.good_morning_routine'', ''current'')
-        or 0) == 0 }}'
+    - if:
+      - condition: template
+        value_template: '{{ is_state(''input_boolean.good_morning_active'', ''off'')
+          or (state_attr(''automation.good_morning_routine'', ''current'') or 0) >
+          0 }}'
+      then:
+      - stop: Flag cleared or wake routine actively running - nothing to clean up
   - continue_on_error: true
     action: media_player.media_stop
     target:
