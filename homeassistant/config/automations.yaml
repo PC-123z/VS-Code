@@ -7020,7 +7020,7 @@
     action: persistent_notification.create
   - condition: time
     after: 08:00:00
-    before: '18:00:00'
+    before: '23:00:00'
     weekday:
     - mon
     - tue
@@ -7029,6 +7029,10 @@
     - fri
     - sun
     - sat
+  - alias: Skip the spoken announcement while Big Bedroom sleep mode is on
+    condition: state
+    entity_id: switch.al_sleep_mode_big_bedroom
+    state: 'off'
   - data:
       message: 'Alert: {{ trigger.payload_json.after.label | capitalize }} detected
         at {% if trigger.payload_json.after.camera == ''driveway'' %}Driveway {% elif
