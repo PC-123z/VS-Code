@@ -7806,6 +7806,14 @@
       - alias: Wait 10 seconds then check if music is playing
         delay:
           seconds: 10
+      - alias: Get today's daily forecast (high/low/expected condition) for the announcement
+        continue_on_error: true
+        action: weather.get_forecasts
+        target:
+          entity_id: weather.forecast_home
+        data:
+          type: daily
+        response_variable: today_fc
       - if:
         - condition: or
           conditions:
@@ -7821,12 +7829,15 @@
           target:
             entity_id: tts.piper
           data:
-            cache: true
+            cache: false
             media_player_entity_id: media_player.bedroom
-            message: Good morning! Today is {{ now().strftime('%A, %B %-d') }}. The
-              current conditions are {{ states('weather.forecast_home') }},  with
-              a temperature of {{ state_attr('weather.forecast_home', 'temperature')
-              }} degrees.  Have a great day!
+            message: >-
+              {% set fc = today_fc['weather.forecast_home']['forecast'] if (today_fc is defined and today_fc and 'weather.forecast_home' in today_fc) else [] %}
+              {% set f = fc[0] if fc else none %}
+              Good morning! Today is {{ now().strftime('%A, %B %-d') }}.
+              Right now it's {{ states('weather.forecast_home') | replace('-', ' ') }} and {{ (state_attr('weather.forecast_home', 'temperature') | float(0)) | round | int }} degrees.
+              {% if f %}Today will be {{ f.condition | replace('-', ' ') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %}
+              Have a great day!
         else:
         - alias: Ramp volume to 0.20 over ~2.5 minutes
           repeat:
@@ -7873,12 +7884,15 @@
             target:
               entity_id: tts.piper
             data:
-              cache: true
+              cache: false
               media_player_entity_id: media_player.bedroom_2
-              message: Good morning! Today is {{ now().strftime('%A, %B %-d') }}.
-                The current conditions are {{ states('weather.forecast_home') }},  with
-                a temperature of {{ state_attr('weather.forecast_home', 'temperature')
-                }} degrees.  Have a great day!
+              message: >-
+                {% set fc = today_fc['weather.forecast_home']['forecast'] if (today_fc is defined and today_fc and 'weather.forecast_home' in today_fc) else [] %}
+                {% set f = fc[0] if fc else none %}
+                Good morning! Today is {{ now().strftime('%A, %B %-d') }}.
+                Right now it's {{ states('weather.forecast_home') | replace('-', ' ') }} and {{ (state_attr('weather.forecast_home', 'temperature') | float(0)) | round | int }} degrees.
+                {% if f %}Today will be {{ f.condition | replace('-', ' ') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %}
+                Have a great day!
           - alias: Wait for the announcement to finish and music to resume
             wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
             timeout:
