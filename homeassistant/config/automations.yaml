@@ -7864,41 +7864,26 @@
               entity_id: input_boolean.good_morning_active
           - stop: Occupancy wait timed out - routine complete
           else:
-          - alias: Pause music for announcement
-            action: media_player.media_pause
-            target:
-              entity_id: media_player.bedroom
-          - alias: TTS good morning announcement
+          - alias: Good morning announcement via Music Assistant (sent to the MA entity
+              so MA plays it as an announcement - it ducks/pauses its own queue, speaks,
+              then resumes the SAME track at the SAME position. This avoids the Sonos
+              TTS snapshot that used to break the MA queue and force a full playlist
+              re-queue, which restarted the music from track 1.)
             action: tts.speak
             target:
               entity_id: tts.piper
             data:
               cache: true
-              media_player_entity_id: media_player.bedroom
+              media_player_entity_id: media_player.bedroom_2
               message: Good morning! Today is {{ now().strftime('%A, %B %-d') }}.
                 The current conditions are {{ states('weather.forecast_home') }},  with
                 a temperature of {{ state_attr('weather.forecast_home', 'temperature')
                 }} degrees.  Have a great day!
-          - alias: Wait for TTS to finish speaking before resuming
-            wait_template: '{{ not is_state(''media_player.bedroom'', ''playing'')
-              }}'
+          - alias: Wait for the announcement to finish and music to resume
+            wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
             timeout:
               seconds: 30
             continue_on_timeout: true
-          - delay:
-              seconds: 1
-          - alias: Restart playlist on Music Assistant after announcement (Sonos TTS
-              snapshot/restore breaks the MA queue, so re-queue unconditionally on
-              the MA entity rather than resuming the Sonos entity)
-            continue_on_error: true
-            action: music_assistant.play_media
-            target:
-              entity_id: media_player.bedroom_2
-            data:
-              media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
-              media_type: playlist
-          - delay:
-              seconds: 2
           - alias: Restore listening volume after announcement
             action: media_player.volume_set
             target:
