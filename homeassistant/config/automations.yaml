@@ -7637,7 +7637,7 @@
     - thu
     - fri
   - trigger: time
-    at: 09:45:00
+    at: 09:35:00
     weekday:
     - sat
     - sun
