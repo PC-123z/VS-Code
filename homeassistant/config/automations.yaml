@@ -8886,3 +8886,23 @@
     data:
       transition: 5
   mode: single
+- id: '1783354000090'
+  alias: Turn off Elgato Light when Office2 clears
+  description: Turns off the Elgato Showtime light when office2 clears.
+  triggers:
+  - trigger: state
+    entity_id:
+    - binary_sensor.bedroom_2_sensor_group
+    to:
+    - 'off'
+    for:
+      hours: 0
+      minutes: 20
+      seconds: 0
+  conditions: []
+  actions:
+  - alias: Turn off Elgato light when PC powers down
+    action: light.turn_off
+    target:
+      entity_id: light.showtime_light
+  mode: single
