@@ -4628,6 +4628,11 @@
           entity_id: input_select.bedroom_scene_mode
         data:
           option: al
+      - action: input_boolean.turn_off
+        metadata: {}
+        target:
+          entity_id: input_boolean.good_morning_active
+        data: {}
   mode: single
 - id: '1776310243675'
   alias: 'Hue Button 3 - Big Bedroom: Goodnight Button - Hue Button 3'
