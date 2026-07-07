@@ -4564,6 +4564,11 @@
         target:
           area_id: bathroom
         data: {}
+      - action: input_boolean.turn_off
+        metadata: {}
+        target:
+          entity_id: input_boolean.good_morning_active
+        data: {}
     - conditions:
       - condition: trigger
         id: hold
