@@ -8690,7 +8690,7 @@
   actions:
   - if:
     - condition: time
-      after: 06:00:00
+      after: 09:00:00
       before: '21:00:00'
     then:
     - action: notify.send_message
