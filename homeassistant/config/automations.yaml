@@ -8688,11 +8688,16 @@
     entity_id: media_player.living_room_tv_2
     state: 'on'
   actions:
-  - action: notify.send_message
-    target:
-      entity_id: notify.living_room_dot_announce
-    data:
-      message: The PS5 has been turned off. The TV will turn off in 30 seconds.
+  - if:
+    - condition: time
+      after: 06:00:00
+      before: '21:00:00'
+    then:
+    - action: notify.send_message
+      target:
+        entity_id: notify.living_room_dot_announce
+      data:
+        message: The PS5 has been turned off. The TV will turn off in 30 seconds.
   - delay:
       seconds: 30
   - condition: state
