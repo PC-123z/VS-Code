@@ -118,9 +118,9 @@
     - fri
     enabled: false
   - trigger: time
-    at: '18:45:00'
+    at: '17:30:00'
     weekday:
-    - fri
+    - sat
     enabled: true
   conditions: []
   actions:
