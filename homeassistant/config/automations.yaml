@@ -1,19 +1,38 @@
 - id: '1773000000001'
   alias: Good Morning - Stop routine when music stopped from speaker
   description: When music is stopped from the Sonos speaker during Good Morning routine,
-    end the routine so it stops restarting playback
+    end the routine completely and ensure music stays stopped
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
+    from: playing
     to: paused
+  - trigger: state
+    entity_id: media_player.bedroom_2
+    from: playing
+    to: idle
   conditions:
   - condition: state
     entity_id: input_boolean.good_morning_active
     state: 'on'
   actions:
-  - action: input_boolean.turn_off
+  - alias: Stop the music player explicitly
+    action: media_player.media_stop
+    target:
+      entity_id: media_player.bedroom_2
+    continue_on_error: true
+  - alias: Turn off good morning routine
+    action: input_boolean.turn_off
     target:
       entity_id: input_boolean.good_morning_active
+  - alias: Wait a moment to let stop take effect
+    delay:
+      milliseconds: 500
+  - alias: Stop again to ensure it stays stopped
+    action: media_player.media_stop
+    target:
+      entity_id: media_player.bedroom_2
+    continue_on_error: true
   mode: single
 - id: '1772496443457'
   alias: Goodnight-Button
@@ -447,6 +466,19 @@
               entity_id: input_boolean.good_morning_active
               state: 'on'
             sequence:
+            - alias: Check if music is still playing; exit loop if stopped
+              if:
+              - condition: not
+                conditions:
+                - condition: state
+                  entity_id: media_player.bedroom_2
+                  state: playing
+              then:
+              - alias: Music was stopped manually - exit routine
+                action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.good_morning_active
+              - stop: User stopped music from Sonos speaker
             - if:
               - condition: state
                 entity_id: binary_sensor.big_bedroom_sensor_group
