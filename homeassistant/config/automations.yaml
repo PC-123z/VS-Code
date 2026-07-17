@@ -466,19 +466,6 @@
               entity_id: input_boolean.good_morning_active
               state: 'on'
             sequence:
-            - alias: Check if music is still playing; exit loop if stopped
-              if:
-              - condition: not
-                conditions:
-                - condition: state
-                  entity_id: media_player.bedroom_2
-                  state: playing
-              then:
-              - alias: Music was stopped manually - exit routine
-                action: input_boolean.turn_off
-                target:
-                  entity_id: input_boolean.good_morning_active
-              - stop: User stopped music from Sonos speaker
             - if:
               - condition: state
                 entity_id: binary_sensor.big_bedroom_sensor_group
