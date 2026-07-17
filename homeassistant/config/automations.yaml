@@ -1,11 +1,10 @@
 - id: '1773000000002'
   alias: Good Morning - Stop routine when music stopped from speaker
-  description: If the Sonos speaker is paused/stopped manually (sustained for 8+
-    seconds, to avoid false triggers from the routine's own brief TTS-announcement
-    pause) while Good Morning is active, end that run only by clearing
-    input_boolean.good_morning_active. Does not touch this automation's or the
-    Good Morning Routine automation's enabled state, so scheduled/manual runs
-    still work normally in the future.
+  description: If the Sonos speaker is paused/stopped manually (sustained for 8+ seconds,
+    to avoid false triggers from the routine's own brief TTS-announcement pause) while
+    Good Morning is active, end that run only by clearing input_boolean.good_morning_active.
+    Does not touch this automation's or the Good Morning Routine automation's enabled
+    state, so scheduled/manual runs still work normally in the future.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
@@ -149,15 +148,15 @@
     grace. 60-minute hard cap from routine start.'
   triggers:
   - trigger: time
-    at: '18:00:00'
+    at: '18:15:00'
     weekday:
     - fri
-    enabled: false
+    enabled: true
   - trigger: time
     at: '17:30:00'
     weekday:
     - sat
-    enabled: true
+    enabled: false
   conditions: []
   actions:
   - alias: Mark routine as active
