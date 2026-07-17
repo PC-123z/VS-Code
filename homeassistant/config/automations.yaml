@@ -1,3 +1,20 @@
+- id: '1773000000001'
+  alias: Good Morning - Stop routine when music stopped from speaker
+  description: When music is stopped from the Sonos speaker during Good Morning routine,
+    end the routine so it stops restarting playback
+  triggers:
+  - trigger: state
+    entity_id: media_player.bedroom_2
+    to: paused
+  conditions:
+  - condition: state
+    entity_id: input_boolean.good_morning_active
+    state: 'on'
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.good_morning_active
+  mode: single
 - id: '1772496443457'
   alias: Goodnight-Button
   description: Big Bedroom Goodnight button. Strictly scoped - only affects Big Bedroom
