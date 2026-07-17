@@ -178,6 +178,13 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_656992550_tags/v1.10.1"
+      },
+      {
+        "created": "2026-07-17T04:00:08.354217+00:00",
+        "dismissed_version": null,
+        "domain": "homeassistant",
+        "is_persistent": false,
+        "issue_id": "config_entry_reauth_esphome_01KNYWR8F317SWWKR0AX56RJ4M"
       }
     ]
   }
