@@ -180,13 +180,6 @@
         "issue_id": "restart_required_656992550_tags/v1.10.1"
       },
       {
-        "created": "2026-07-17T04:44:56.691055+00:00",
-        "dismissed_version": null,
-        "domain": "hacs",
-        "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.10.2"
-      },
-      {
         "created": "2026-07-17T04:45:06.046598+00:00",
         "dismissed_version": null,
         "domain": "hacs",
