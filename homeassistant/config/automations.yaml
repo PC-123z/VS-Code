@@ -2069,9 +2069,18 @@
   - trigger: time
     at: 07:30:00
     id: weekday_reset
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
   - trigger: time
-    at: '10:15:00'
+    at: '11:45:00'
     id: weekend_reset
+    weekday:
+    - sat
+    - sun
   conditions:
   - condition: or
     conditions:
