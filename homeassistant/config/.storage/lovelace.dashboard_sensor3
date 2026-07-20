@@ -1316,10 +1316,6 @@
                 "name": "Restart Radar"
               },
               {
-                "entity": "button.[[device_base_name]]_factory_reset_radar",
-                "name": "Factory Reset Radar"
-              },
-              {
                 "entity": "button.[[device_base_name]]_esp_reboot",
                 "name": "ESP Reboot"
               }
