@@ -181,7 +181,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 23.4,
+                    "value": 22.6,
                     "description": "Current Temperature",
                     "unit": "celsius",
                     "minValue": 0,
@@ -263,7 +263,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 54.0,
+                    "value": 52.0,
                     "description": "Current Relative Humidity",
                     "unit": "percentage",
                     "minValue": 0,
@@ -655,7 +655,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 23.1,
+                    "value": 22.0,
                     "description": "Current Temperature",
                     "unit": "celsius",
                     "minValue": 0,
