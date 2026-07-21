@@ -8966,3 +8966,48 @@
     target:
       entity_id: light.showtime_light
   mode: single
+- id: '1784100000001'
+  alias: iBeacon integration - reload on HA start
+  description: HA restarts have left the iBeacon platform unable to resume tracking
+    device_tracker.bcpro_204982_08b8 (car beacon) even though both MSR-2 bluetooth
+    proxies reconnect fine within a second. Proactively reload the iBeacon config
+    entry ~90s after HA starts (after Bluetooth/ESPHome integrations have settled)
+    so beacon tracking resumes cleanly instead of getting stuck unavailable for hours.
+  triggers:
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - delay:
+      minutes: 1
+      seconds: 30
+  - action: homeassistant.reload_config_entry
+    target:
+      entry_id: 01KPCMN52QH2YGAC4WCM2JM3NV
+  mode: single
+- id: '1784100000002'
+  alias: Beacon watchdog - reload iBeacon if bcpro stuck unavailable
+  description: Car BT beacon (device_tracker.bcpro_204982_08b8) is the authoritative
+    presence signal (see person.paul is unreliable while away). It has been observed
+    to get stuck 'unavailable' for hours after an HA restart even while both MSR-2
+    proxies show online and reporting RSSI. If it stays unavailable for 15+ minutes,
+    reload the iBeacon integration to force re-detection and notify so this doesn't
+    silently break presence-based automations again.
+  triggers:
+  - trigger: state
+    entity_id: device_tracker.bcpro_204982_08b8
+    to: unavailable
+    for:
+      minutes: 15
+  conditions: []
+  actions:
+  - action: homeassistant.reload_config_entry
+    target:
+      entry_id: 01KPCMN52QH2YGAC4WCM2JM3NV
+  - alias: Notify that the beacon watchdog fired
+    action: notify.mobile_app_pc_iphone
+    data:
+      title: Car beacon watchdog
+      message: bcpro beacon was stuck unavailable for 15+ min; reloaded the iBeacon
+        integration to recover tracking.
+  mode: single
