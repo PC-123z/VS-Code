@@ -8982,7 +8982,7 @@
       minutes: 1
       seconds: 30
   - action: homeassistant.reload_config_entry
-    target:
+    data:
       entry_id: 01KPCMN52QH2YGAC4WCM2JM3NV
   mode: single
 - id: '1784100000002'
@@ -9002,7 +9002,7 @@
   conditions: []
   actions:
   - action: homeassistant.reload_config_entry
-    target:
+    data:
       entry_id: 01KPCMN52QH2YGAC4WCM2JM3NV
   - alias: Notify that the beacon watchdog fired
     action: notify.mobile_app_pc_iphone
