@@ -181,7 +181,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 24.3,
+                    "value": 24.6,
                     "description": "Current Temperature",
                     "unit": "celsius",
                     "minValue": 0,
@@ -263,7 +263,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 55.0,
+                    "value": 56.0,
                     "description": "Current Relative Humidity",
                     "unit": "percentage",
                     "minValue": 0,
@@ -655,7 +655,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 23.3,
+                    "value": 23.8,
                     "description": "Current Temperature",
                     "unit": "celsius",
                     "minValue": 0,
@@ -1255,7 +1255,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -52
+                    "value": -50
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
@@ -2026,7 +2026,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -66
+                    "value": -62
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
@@ -2797,7 +2797,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -61
+                    "value": -58
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
