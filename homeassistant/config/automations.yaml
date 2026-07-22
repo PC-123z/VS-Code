@@ -7199,16 +7199,26 @@
   mode: single
 - id: '1777484175032'
   alias: Arrival (Welcome Home) - Disarm Alarm on Garage Cycle + Arrival Latch
-  description: Two-factor disarm. The arrival latch (input_boolean.arrival_recent)
-    must already be on (set by phone geofence / webhook / BT beacon when Paul got
-    near home) AND the garage must open while the alarm is armed. Both confirm arrival,
-    so disarm immediately and run the welcome home routine. If the latch is off, this
-    does nothing and the alarm must be disarmed manually.
+  description: Two-factor disarm, order-independent. Needs BOTH the garage opening
+    AND the beacon/phone arrival signal while armed - whichever happens first just
+    latches its own flag (input_boolean.garage_open_recent or input_boolean.arrival_recent)
+    and stops; whichever happens second finds the other flag already on and disarms +
+    runs welcome home. Fixed 2026-07-22: previously only triggered on garage-open and
+    required the arrival latch to already be set, so a garage-open that beat the beacon
+    update by a few seconds silently did nothing.
   triggers:
-  - trigger: state
+  - id: garage
+    trigger: state
     entity_id: cover.garage
     to: open
     enabled: true
+  - id: beacon
+    trigger: state
+    entity_id: device_tracker.bcpro_204982_08b8
+    from:
+    - not_home
+    - unavailable
+    to: home
   conditions:
   - alias: Alarm must be armed (confirms we departed, not just opening garage at home)
     condition: or
@@ -7219,11 +7229,29 @@
     - condition: state
       entity_id: alarm_control_panel.3302_alarm
       state: armed_home
-  - alias: Arrival latch must be on (phone/beacon already confirmed Paul arrived)
-    condition: state
-    entity_id: input_boolean.arrival_recent
-    state: 'on'
   actions:
+  - alias: Latch this signal; only fall through to disarm if the OTHER signal already fired
+    choose:
+    - alias: Garage opened - if beacon hasn't confirmed yet, latch and wait
+      conditions:
+      - condition: template
+        value_template: '{{ trigger.id == "garage" and is_state("input_boolean.arrival_recent", "off") }}'
+      sequence:
+      - alias: Set the garage-open latch
+        action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.garage_open_recent
+      - stop: Waiting for beacon/phone arrival signal to confirm before disarming
+    - alias: Beacon arrived - if garage hasn't opened yet, latch and wait
+      conditions:
+      - condition: template
+        value_template: '{{ trigger.id == "beacon" and is_state("input_boolean.garage_open_recent", "off") }}'
+      sequence:
+      - alias: Set the arrival latch
+        action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.arrival_recent
+      - stop: Waiting for garage to open to confirm before disarming
   - alias: Disarm the security panel
     action: alarm_control_panel.alarm_disarm
     target:

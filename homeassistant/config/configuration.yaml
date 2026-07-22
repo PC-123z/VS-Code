@@ -108,6 +108,9 @@ input_boolean:
   arrival_recent:
     name: "Arrival Recent (latch)"
     initial: off
+  garage_open_recent:
+    name: "Garage Open Recent (latch)"
+    initial: off
 
 # Template switches + sensors
 template:
