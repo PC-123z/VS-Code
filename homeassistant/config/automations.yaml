@@ -153,10 +153,10 @@
     - fri
     enabled: false
   - trigger: time
-    at: '17:05:00'
-    weekday:
-    - tue
+    at: '18:05:00'
     enabled: true
+    weekday:
+    - wed
   conditions: []
   actions:
   - alias: Mark routine as active
