@@ -3346,6 +3346,17 @@
           lights:
           - light.dining_room_top
           manual_control: false
+      - alias: Turn off lights before re-enabling AL (avoid AL flashing them back on)
+        action: light.turn_off
+        target:
+          label_id: dining_room_bottom
+        data:
+          transition: 30
+      - action: light.turn_off
+        target:
+          label_id: dining_room_top
+        data:
+          transition: 30
       - alias: Re-enable AL switches so they're ready for next motion
         action: switch.turn_on
         target:
@@ -3363,16 +3374,6 @@
             entity_id:
             - switch.al_sleep_mode_dining_room_bottom
             - switch.al_sleep_mode_dining_room_top
-      - action: light.turn_off
-        target:
-          label_id: dining_room_bottom
-        data:
-          transition: 30
-      - action: light.turn_off
-        target:
-          label_id: dining_room_top
-        data:
-          transition: 30
     - conditions:
       - condition: trigger
         id: cleared
