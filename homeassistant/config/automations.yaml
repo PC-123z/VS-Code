@@ -7200,34 +7200,29 @@
 - id: '1777484175032'
   alias: Arrival (Welcome Home) - Disarm Alarm on Garage Cycle + Arrival Latch
   description: >-
-    Two-factor disarm, order-independent. Needs BOTH the garage opening
-    AND an arrival signal (BT beacon or iOS Shortcut webhook) while armed - whichever
-    happens first just latches its own flag (input_boolean.garage_open_recent or
-    input_boolean.arrival_recent) and stops; whichever happens second finds the other
-    flag already on and disarms and runs welcome home. Fixed 2026-07-22 - previously
-    only triggered on garage-open and required the arrival latch to already be set, so
-    a garage-open that beat the beacon/webhook update by a few seconds silently did
-    nothing. Webhook wired in directly (not just via the latch-setting automation) so
-    it works as a real fallback if the beacon is ever down, regardless of ordering.
+    Two-factor disarm, order-independent. Needs BOTH the garage opening AND an arrival
+    signal (BT beacon, iOS Shortcut webhook, or phone geofence - all three set
+    input_boolean.arrival_recent via the companion "Arrival Latch - Set on Phone/Beacon
+    Arrival" automation) while armed - whichever happens first just latches its own flag
+    (input_boolean.garage_open_recent or input_boolean.arrival_recent) and stops;
+    whichever happens second finds the other flag already on and disarms and runs
+    welcome home. Fixed 2026-07-22 - previously only triggered on garage-open and
+    required the arrival latch to already be set, so a garage-open that beat the beacon
+    update by a few seconds silently did nothing. Triggers on arrival_recent turning on
+    (rather than duplicating the beacon/webhook triggers here) so all three arrival
+    signals work as a fallback for each other, regardless of ordering with the garage -
+    webhook isn't wired in directly because HA only allows one automation to register a
+    given webhook_id, and the latch automation already owns paul_arrived_home.
   triggers:
   - id: garage
     trigger: state
     entity_id: cover.garage
     to: open
     enabled: true
-  - id: beacon
+  - id: arrival
     trigger: state
-    entity_id: device_tracker.bcpro_204982_08b8
-    from:
-    - not_home
-    - unavailable
-    to: home
-  - id: webhook
-    trigger: webhook
-    webhook_id: paul_arrived_home
-    allowed_methods:
-    - POST
-    local_only: false
+    entity_id: input_boolean.arrival_recent
+    to: 'on'
   conditions:
   - alias: Alarm must be armed (confirms we departed, not just opening garage at home)
     condition: or
@@ -7241,7 +7236,7 @@
   actions:
   - alias: Latch this signal; only fall through to disarm if the OTHER signal already fired
     choose:
-    - alias: Garage opened - if beacon hasn't confirmed yet, latch and wait
+    - alias: Garage opened - if no arrival signal has confirmed yet, latch and wait
       conditions:
       - condition: template
         value_template: '{{ trigger.id == "garage" and is_state("input_boolean.arrival_recent", "off") }}'
@@ -7250,16 +7245,12 @@
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.garage_open_recent
-      - stop: Waiting for beacon/phone arrival signal to confirm before disarming
-    - alias: Beacon arrived - if garage hasn't opened yet, latch and wait
+      - stop: Waiting for an arrival signal (beacon/phone/webhook) to confirm before disarming
+    - alias: Arrival signal fired - if garage hasn't opened yet, wait
       conditions:
       - condition: template
-        value_template: '{{ trigger.id == "beacon" and is_state("input_boolean.garage_open_recent", "off") }}'
+        value_template: '{{ trigger.id == "arrival" and is_state("input_boolean.garage_open_recent", "off") }}'
       sequence:
-      - alias: Set the arrival latch
-        action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.arrival_recent
       - stop: Waiting for garage to open to confirm before disarming
   - alias: Disarm the security panel
     action: alarm_control_panel.alarm_disarm
