@@ -3357,6 +3357,10 @@
           label_id: dining_room_top
         data:
           transition: 30
+      - alias: Only re-enable AL switches if room is still unoccupied
+        condition: state
+        entity_id: binary_sensor.dining_room_sensor_group
+        state: 'off'
       - alias: Re-enable AL switches so they're ready for next motion
         action: switch.turn_on
         target:
