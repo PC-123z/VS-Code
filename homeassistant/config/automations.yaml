@@ -7201,12 +7201,14 @@
   alias: Arrival (Welcome Home) - Disarm Alarm on Garage Cycle + Arrival Latch
   description: >-
     Two-factor disarm, order-independent. Needs BOTH the garage opening
-    AND the beacon/phone arrival signal while armed - whichever happens first just
-    latches its own flag (input_boolean.garage_open_recent or input_boolean.arrival_recent)
-    and stops; whichever happens second finds the other flag already on and disarms
-    and runs welcome home. Fixed 2026-07-22 - previously only triggered on garage-open and
-    required the arrival latch to already be set, so a garage-open that beat the beacon
-    update by a few seconds silently did nothing.
+    AND an arrival signal (BT beacon or iOS Shortcut webhook) while armed - whichever
+    happens first just latches its own flag (input_boolean.garage_open_recent or
+    input_boolean.arrival_recent) and stops; whichever happens second finds the other
+    flag already on and disarms and runs welcome home. Fixed 2026-07-22 - previously
+    only triggered on garage-open and required the arrival latch to already be set, so
+    a garage-open that beat the beacon/webhook update by a few seconds silently did
+    nothing. Webhook wired in directly (not just via the latch-setting automation) so
+    it works as a real fallback if the beacon is ever down, regardless of ordering.
   triggers:
   - id: garage
     trigger: state
@@ -7220,6 +7222,12 @@
     - not_home
     - unavailable
     to: home
+  - id: webhook
+    trigger: webhook
+    webhook_id: paul_arrived_home
+    allowed_methods:
+    - POST
+    local_only: false
   conditions:
   - alias: Alarm must be armed (confirms we departed, not just opening garage at home)
     condition: or
