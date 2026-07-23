@@ -2632,6 +2632,10 @@
         condition: state
         entity_id: input_boolean.big_bedroom_manual_override
         state: 'off'
+      - alias: Skip if still asleep - only Good Morning re-arms lighting
+        condition: state
+        entity_id: input_boolean.big_bedroom_asleep
+        state: 'off'
       sequence:
       - choose:
         - conditions:
