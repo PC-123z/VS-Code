@@ -32,10 +32,6 @@
                       "label": "Bedroom - Big"
                     },
                     {
-                      "entity": "binary_sensor.bedroom_dot_motion",
-                      "name": "Dot Motion"
-                    },
-                    {
                       "entity": "binary_sensor.bedroom_motion",
                       "name": "Motion"
                     },
