@@ -4864,9 +4864,12 @@
   mode: single
 - id: '1776378416550'
   alias: '*Bedroom 2 Bedtime Routine'
-  description: Triggers on motion or bedroom2_occupied turning on between 10:30pm-11:40pm.
-    Sets bedroom2_occupied, starts fan and sleep music. Lights dim red at 10:30pm,
-    off at 10:40pm. All lights fade off at 11:40pm. Music hard stop at 11:59pm.
+  description: Triggers on motion or bedroom2_occupied turning on any time from 10:30pm
+    to 6am (no more hard 11:40pm cutoff on the initial trigger - a late bedtime no
+    longer skips the whole routine). Sets bedroom2_occupied, starts fan (stays on
+    until Good Morning turns it off) and sleep music (stops after 30-45 min or at
+    12:15am, whichever comes first). Lights dim red at 10:30pm, off at 10:40pm. All
+    lights fade off at 11:40pm (but motion after that still turns them back on).
   triggers:
   - trigger: state
     entity_id:
@@ -4894,7 +4897,7 @@
     at: '23:40:00'
     id: hard_lights_out
   - trigger: time
-    at: '23:59:00'
+    at: '00:15:00'
     id: music_stop
   conditions: []
   actions:
@@ -4902,12 +4905,12 @@
     - conditions:
       - condition: trigger
         id: occupied_set
-      - alias: Bedtime Routine active window - 10:30pm to 11:40pm
+      - alias: Bedtime Routine active window - 10:30pm to 6am
         condition: time
         after: '22:30:00'
-        before: '23:40:00'
+        before: '06:00:00'
       sequence:
-      - alias: Fan on
+      - alias: Fan on - stays on until Good Morning routine turns it off
         action: fan.turn_on
         data:
           percentage: 25
@@ -4931,6 +4934,17 @@
           data:
             media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
             radio_mode: false
+        - alias: Let it play 40 minutes or until 12:15am, whichever comes first
+          wait_for_trigger:
+          - trigger: time
+            at: '00:15:00'
+          timeout:
+            minutes: 40
+        - alias: Stop sleep music
+          action: media_player.media_stop
+          continue_on_error: true
+          target:
+            entity_id: media_player.office_2
     - conditions:
       - condition: trigger
         id: motion_detected
@@ -4938,10 +4952,10 @@
         condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'off'
-      - alias: Bedtime Routine active window - 10:30pm to 11:40pm
+      - alias: Bedtime Routine active window - 10:30pm to 6am
         condition: time
         after: '22:30:00'
-        before: '23:40:00'
+        before: '06:00:00'
       sequence:
       - alias: Set bedroom 2 occupied (fan and music start via occupied_set branch)
         action: input_boolean.turn_on
@@ -4973,10 +4987,10 @@
       - condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'on'
-      - alias: Bedtime Routine active window - 10:30pm to 11:40pm
+      - alias: Bedtime Routine active window - 10:30pm to 6am
         condition: time
         after: '22:30:00'
-        before: '23:40:00'
+        before: '06:00:00'
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.bedroom2_manual_override
@@ -5059,7 +5073,7 @@
       - condition: trigger
         id: music_stop
       sequence:
-      - alias: Hard music stop at 11:59pm regardless of occupied or override state
+      - alias: Hard music stop at 12:15am regardless of occupied or override state
         action: media_player.media_stop
         continue_on_error: true
         target:
