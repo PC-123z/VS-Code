@@ -1294,177 +1294,471 @@
           "cards": []
         },
         {
-          "type": "custom:plotly-graph",
-          "title": "R-Pro1 LD2412 Gate Energy",
-          "refresh_interval": 1,
-          "raw_plotly_config": true,
-          "init": [
-            "$ex { vars.get_entity_state = (entity, default_state) => { let entity_obj = hass.states[entity]; if (entity_obj === undefined) { if (default_state === undefined) { throw new TypeError(\"Entity not found -> \" + entity); } return default_state; } var state = entity_obj.state; if (state === undefined || state === null || state === 'unknown') { if (default_state === undefined) { throw new TypeError(\"Entity state is undefined or null -> \" + entity); } return default_state; } return state; }; }",
-            "$ex { let eng = vars.get_entity_state('switch.apollo_r_pro_1_740624_ld2412_engineering_mode', 'off'); vars.show_eng = eng === 'on'; }"
+          "type": "sections",
+          "max_columns": 4,
+          "title": "Living Room R-Pro1 - Gates",
+          "path": "living-room-rpro1-gates",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "custom:plotly-graph",
+                  "title": "R-Pro1 LD2412 Gate Energy",
+                  "refresh_interval": 1,
+                  "raw_plotly_config": true,
+                  "init": [
+                    "$ex { vars.get_entity_state = (entity, default_state) => { let entity_obj = hass.states[entity]; if (entity_obj === undefined) { if (default_state === undefined) { throw new TypeError(\"Entity not found -> \" + entity); } return default_state; } var state = entity_obj.state; if (state === undefined || state === null || state === 'unknown') { if (default_state === undefined) { throw new TypeError(\"Entity state is undefined or null -> \" + entity); } return default_state; } return state; }; }",
+                    "$ex { let eng = vars.get_entity_state('switch.apollo_r_pro_1_740624_ld2412_engineering_mode', 'off'); vars.show_eng = eng === 'on'; }"
+                  ],
+                  "defaults": {
+                    "entity": {
+                      "texttemplate": "%{y}",
+                      "x": [
+                        "G0",
+                        "G1",
+                        "G2",
+                        "G3",
+                        "G4",
+                        "G5",
+                        "G6",
+                        "G7",
+                        "G8",
+                        "G9",
+                        "G10",
+                        "G11",
+                        "G12",
+                        "G13"
+                      ]
+                    }
+                  },
+                  "entities": [
+                    {
+                      "entity": "",
+                      "name": "Move Energy",
+                      "legendgroup": "Move",
+                      "type": "bar",
+                      "marker": {
+                        "color": "#4b0082"
+                      },
+                      "y": [
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g00_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g01_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g02_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g03_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g04_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g05_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g06_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g07_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g08_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g09_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g10_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g11_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g12_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g13_move_energy', 0)"
+                      ]
+                    },
+                    {
+                      "entity": "",
+                      "name": "Move Threshold",
+                      "legendgroup": "Move",
+                      "visible": "$ex vars.show_eng",
+                      "type": "scatter",
+                      "mode": "markers",
+                      "marker": {
+                        "symbol": "arrow-right",
+                        "size": 15,
+                        "color": "#9467bd"
+                      },
+                      "y": [
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g00_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g01_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g02_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g03_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g04_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g05_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g06_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g07_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g08_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g09_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g10_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g11_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g12_move_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g13_move_threshold')"
+                      ]
+                    },
+                    {
+                      "entity": "",
+                      "name": "Still Energy",
+                      "legendgroup": "Still",
+                      "type": "bar",
+                      "marker": {
+                        "color": "#274e13"
+                      },
+                      "y": [
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g00_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g01_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g02_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g03_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g04_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g05_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g06_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g07_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g08_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g09_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g10_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g11_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g12_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g13_still_energy', 0)"
+                      ]
+                    },
+                    {
+                      "entity": "",
+                      "name": "Still Threshold",
+                      "legendgroup": "Still",
+                      "visible": "$ex vars.show_eng",
+                      "type": "scatter",
+                      "mode": "markers",
+                      "marker": {
+                        "symbol": "arrow-left",
+                        "size": 15,
+                        "color": "#8cb640"
+                      },
+                      "y": [
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g00_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g01_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g02_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g03_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g04_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g05_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g06_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g07_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g08_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g09_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g10_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g11_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g12_still_threshold')",
+                        "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g13_still_threshold')"
+                      ]
+                    }
+                  ],
+                  "layout": {
+                    "barmode": "group",
+                    "dragmode": false,
+                    "hovermode": false,
+                    "legend": {
+                      "itemsizing": "constant",
+                      "orientation": "h"
+                    },
+                    "margin": {
+                      "t": 15,
+                      "l": 30,
+                      "r": 10
+                    },
+                    "xaxis": {
+                      "showgrid": false,
+                      "tickfont": {
+                        "size": 14
+                      }
+                    },
+                    "yaxis": {
+                      "dtick": 10,
+                      "fixedrange": true,
+                      "range": [
+                        0,
+                        100.3
+                      ]
+                    }
+                  },
+                  "config": {
+                    "displayModeBar": false,
+                    "disablePinchToZoom": true
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "custom:plotly-graph",
+                  "title": "R-Pro1 LD2412 Distances",
+                  "refresh_interval": 1,
+                  "raw_plotly_config": true,
+                  "defaults": {
+                    "entity": {
+                      "type": "bar",
+                      "orientation": "h",
+                      "showlegend": false
+                    }
+                  },
+                  "entities": [
+                    {
+                      "entity": "sensor.apollo_r_pro_1_740624_ld2412_still_distance",
+                      "name": "Still",
+                      "marker": {
+                        "color": "#274e13"
+                      },
+                      "y": [
+                        "Still"
+                      ]
+                    },
+                    {
+                      "entity": "sensor.apollo_r_pro_1_740624_ld2412_moving_distance",
+                      "name": "Moving",
+                      "marker": {
+                        "color": "#4b0082"
+                      },
+                      "y": [
+                        "Moving"
+                      ]
+                    },
+                    {
+                      "entity": "sensor.apollo_r_pro_1_740624_ld2412_detection_distance",
+                      "name": "Detection",
+                      "marker": {
+                        "color": "#8b0000"
+                      },
+                      "y": [
+                        "Detection"
+                      ]
+                    }
+                  ],
+                  "layout": {
+                    "height": 260,
+                    "dragmode": false,
+                    "hovermode": false,
+                    "margin": {
+                      "t": 15,
+                      "l": 70,
+                      "r": 20
+                    },
+                    "xaxis": {
+                      "ticksuffix": " cm",
+                      "fixedrange": true,
+                      "range": [
+                        0,
+                        800
+                      ]
+                    },
+                    "yaxis": {
+                      "showgrid": false
+                    }
+                  },
+                  "config": {
+                    "displayModeBar": false,
+                    "disablePinchToZoom": true
+                  }
+                },
+                {
+                  "type": "entities",
+                  "title": "LD2412 Gate Config",
+                  "entities": [
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_max_distance_gate",
+                      "name": "Max Distance Gate"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_min_distance_gate",
+                      "name": "Min Distance Gate"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_timeout",
+                      "name": "Timeout"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g00_move_threshold",
+                      "name": "G00 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g00_still_threshold",
+                      "name": "G00 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g01_move_threshold",
+                      "name": "G01 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g01_still_threshold",
+                      "name": "G01 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g02_move_threshold",
+                      "name": "G02 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g02_still_threshold",
+                      "name": "G02 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g03_move_threshold",
+                      "name": "G03 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g03_still_threshold",
+                      "name": "G03 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g04_move_threshold",
+                      "name": "G04 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g04_still_threshold",
+                      "name": "G04 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g05_move_threshold",
+                      "name": "G05 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g05_still_threshold",
+                      "name": "G05 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g06_move_threshold",
+                      "name": "G06 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g06_still_threshold",
+                      "name": "G06 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g07_move_threshold",
+                      "name": "G07 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g07_still_threshold",
+                      "name": "G07 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g08_move_threshold",
+                      "name": "G08 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g08_still_threshold",
+                      "name": "G08 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g09_move_threshold",
+                      "name": "G09 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g09_still_threshold",
+                      "name": "G09 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g10_move_threshold",
+                      "name": "G10 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g10_still_threshold",
+                      "name": "G10 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g11_move_threshold",
+                      "name": "G11 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g11_still_threshold",
+                      "name": "G11 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g12_move_threshold",
+                      "name": "G12 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g12_still_threshold",
+                      "name": "G12 still threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g13_move_threshold",
+                      "name": "G13 move threshold"
+                    },
+                    {
+                      "entity": "number.apollo_r_pro_1_740624_ld2412_g13_still_threshold",
+                      "name": "G13 still threshold"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "history-graph",
+                  "title": "LD2412 Occupancy History",
+                  "hours_to_show": 1,
+                  "entities": [
+                    {
+                      "entity": "binary_sensor.apollo_r_pro_1_740624_ld2412_presence",
+                      "name": "Presence"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_r_pro_1_740624_ld2412_moving_target",
+                      "name": "Moving Target"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_r_pro_1_740624_ld2412_still_target",
+                      "name": "Still Target"
+                    }
+                  ]
+                },
+                {
+                  "type": "entities",
+                  "title": "LD2412 Target / Occupancy",
+                  "entities": [
+                    {
+                      "entity": "binary_sensor.apollo_r_pro_1_740624_ld2412_presence",
+                      "name": "Presence"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_r_pro_1_740624_ld2412_moving_target",
+                      "name": "Moving Target"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_r_pro_1_740624_ld2412_still_target",
+                      "name": "Still Target"
+                    },
+                    {
+                      "entity": "binary_sensor.apollo_r_pro_1_740624_ld2412_dynamic_background_correction_status",
+                      "name": "Dynamic BG Correction Status"
+                    }
+                  ]
+                },
+                {
+                  "type": "entities",
+                  "title": "LD2412 Controls",
+                  "entities": [
+                    {
+                      "entity": "switch.apollo_r_pro_1_740624_ld2412_engineering_mode",
+                      "name": "Radar Engineering Mode"
+                    },
+                    {
+                      "entity": "switch.apollo_r_pro_1_740624_ld2412_bluetooth",
+                      "name": "LD2412 Bluetooth"
+                    },
+                    {
+                      "entity": "button.apollo_r_pro_1_740624_ld2412_restart",
+                      "name": "Restart Radar"
+                    },
+                    {
+                      "entity": "button.apollo_r_pro_1_740624_ld2412_factory_reset",
+                      "name": "Factory Reset"
+                    },
+                    {
+                      "entity": "button.apollo_r_pro_1_740624_ld2412_start_dynamic_background_correction",
+                      "name": "Start Dynamic Background Correction"
+                    },
+                    {
+                      "entity": "button.apollo_r_pro_1_740624_esp_reboot",
+                      "name": "ESP Reboot"
+                    }
+                  ]
+                }
+              ]
+            }
           ],
-          "defaults": {
-            "entity": {
-              "texttemplate": "%{y}",
-              "x": [
-                "G0",
-                "G1",
-                "G2",
-                "G3",
-                "G4",
-                "G5",
-                "G6",
-                "G7",
-                "G8",
-                "G9",
-                "G10",
-                "G11",
-                "G12",
-                "G13"
-              ]
-            }
-          },
-          "entities": [
-            {
-              "entity": "",
-              "name": "Move Energy",
-              "legendgroup": "Move",
-              "type": "bar",
-              "marker": {
-                "color": "#4b0082"
-              },
-              "y": [
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g00_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g01_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g02_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g03_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g04_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g05_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g06_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g07_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g08_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g09_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g10_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g11_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g12_move_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g13_move_energy', 0)"
-              ]
-            },
-            {
-              "entity": "",
-              "name": "Move Threshold",
-              "legendgroup": "Move",
-              "visible": "$ex vars.show_eng",
-              "type": "scatter",
-              "mode": "markers",
-              "marker": {
-                "symbol": "arrow-right",
-                "size": 15,
-                "color": "#9467bd"
-              },
-              "y": [
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g00_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g01_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g02_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g03_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g04_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g05_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g06_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g07_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g08_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g09_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g10_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g11_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g12_move_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g13_move_threshold')"
-              ]
-            },
-            {
-              "entity": "",
-              "name": "Still Energy",
-              "legendgroup": "Still",
-              "type": "bar",
-              "marker": {
-                "color": "#274e13"
-              },
-              "y": [
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g00_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g01_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g02_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g03_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g04_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g05_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g06_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g07_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g08_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g09_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g10_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g11_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g12_still_energy', 0)",
-                "$ex vars.get_entity_state('sensor.apollo_r_pro_1_740624_ld2412_g13_still_energy', 0)"
-              ]
-            },
-            {
-              "entity": "",
-              "name": "Still Threshold",
-              "legendgroup": "Still",
-              "visible": "$ex vars.show_eng",
-              "type": "scatter",
-              "mode": "markers",
-              "marker": {
-                "symbol": "arrow-left",
-                "size": 15,
-                "color": "#8cb640"
-              },
-              "y": [
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g00_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g01_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g02_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g03_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g04_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g05_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g06_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g07_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g08_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g09_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g10_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g11_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g12_still_threshold')",
-                "$ex vars.get_entity_state('number.apollo_r_pro_1_740624_ld2412_g13_still_threshold')"
-              ]
-            }
-          ],
-          "layout": {
-            "barmode": "group",
-            "dragmode": false,
-            "hovermode": false,
-            "legend": {
-              "itemsizing": "constant",
-              "orientation": "h"
-            },
-            "margin": {
-              "t": 15,
-              "l": 30,
-              "r": 10
-            },
-            "xaxis": {
-              "showgrid": false,
-              "tickfont": {
-                "size": 14
-              }
-            },
-            "yaxis": {
-              "dtick": 10,
-              "fixedrange": true,
-              "range": [
-                0,
-                100.3
-              ]
-            }
-          },
-          "config": {
-            "displayModeBar": false,
-            "disablePinchToZoom": true
-          },
           "cards": []
         }
       ],
