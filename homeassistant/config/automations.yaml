@@ -3346,7 +3346,8 @@
           lights:
           - light.dining_room_top
           manual_control: false
-      - alias: Turn off lights before re-enabling AL (avoid AL flashing them back on)
+      - alias: Turn off lights before re-enabling AL (avoid AL flashing them back
+          on)
         action: light.turn_off
         target:
           label_id: dining_room_bottom
@@ -4897,7 +4898,7 @@
     at: '23:40:00'
     id: hard_lights_out
   - trigger: time
-    at: '00:15:00'
+    at: 00:15:00
     id: music_stop
   conditions: []
   actions:
@@ -4908,7 +4909,7 @@
       - alias: Bedtime Routine active window - 10:30pm to 6am
         condition: time
         after: '22:30:00'
-        before: '06:00:00'
+        before: 06:00:00
       sequence:
       - alias: Fan on - stays on until Good Morning routine turns it off
         action: fan.turn_on
@@ -4937,7 +4938,7 @@
         - alias: Let it play 40 minutes or until 12:15am, whichever comes first
           wait_for_trigger:
           - trigger: time
-            at: '00:15:00'
+            at: 00:15:00
           timeout:
             minutes: 40
         - alias: Stop sleep music
@@ -4955,7 +4956,7 @@
       - alias: Bedtime Routine active window - 10:30pm to 6am
         condition: time
         after: '22:30:00'
-        before: '06:00:00'
+        before: 06:00:00
       sequence:
       - alias: Set bedroom 2 occupied (fan and music start via occupied_set branch)
         action: input_boolean.turn_on
@@ -4990,7 +4991,7 @@
       - alias: Bedtime Routine active window - 10:30pm to 6am
         condition: time
         after: '22:30:00'
-        before: '06:00:00'
+        before: 06:00:00
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.bedroom2_manual_override
@@ -7218,20 +7219,19 @@
   mode: single
 - id: '1777484175032'
   alias: Arrival (Welcome Home) - Disarm Alarm on Garage Cycle + Arrival Latch
-  description: >-
-    Two-factor disarm, order-independent. Needs BOTH the garage opening AND an arrival
-    signal (BT beacon, iOS Shortcut webhook, or phone geofence - all three set
-    input_boolean.arrival_recent via the companion "Arrival Latch - Set on Phone/Beacon
-    Arrival" automation) while armed - whichever happens first just latches its own flag
-    (input_boolean.garage_open_recent or input_boolean.arrival_recent) and stops;
-    whichever happens second finds the other flag already on and disarms and runs
-    welcome home. Fixed 2026-07-22 - previously only triggered on garage-open and
-    required the arrival latch to already be set, so a garage-open that beat the beacon
-    update by a few seconds silently did nothing. Triggers on arrival_recent turning on
-    (rather than duplicating the beacon/webhook triggers here) so all three arrival
-    signals work as a fallback for each other, regardless of ordering with the garage -
-    webhook isn't wired in directly because HA only allows one automation to register a
-    given webhook_id, and the latch automation already owns paul_arrived_home.
+  description: Two-factor disarm, order-independent. Needs BOTH the garage opening
+    AND an arrival signal (BT beacon, iOS Shortcut webhook, or phone geofence - all
+    three set input_boolean.arrival_recent via the companion "Arrival Latch - Set
+    on Phone/Beacon Arrival" automation) while armed - whichever happens first just
+    latches its own flag (input_boolean.garage_open_recent or input_boolean.arrival_recent)
+    and stops; whichever happens second finds the other flag already on and disarms
+    and runs welcome home. Fixed 2026-07-22 - previously only triggered on garage-open
+    and required the arrival latch to already be set, so a garage-open that beat the
+    beacon update by a few seconds silently did nothing. Triggers on arrival_recent
+    turning on (rather than duplicating the beacon/webhook triggers here) so all three
+    arrival signals work as a fallback for each other, regardless of ordering with
+    the garage - webhook isn't wired in directly because HA only allows one automation
+    to register a given webhook_id, and the latch automation already owns paul_arrived_home.
   triggers:
   - id: garage
     trigger: state
@@ -7253,22 +7253,26 @@
       entity_id: alarm_control_panel.3302_alarm
       state: armed_home
   actions:
-  - alias: Latch this signal; only fall through to disarm if the OTHER signal already fired
+  - alias: Latch this signal; only fall through to disarm if the OTHER signal already
+      fired
     choose:
     - alias: Garage opened - if no arrival signal has confirmed yet, latch and wait
       conditions:
       - condition: template
-        value_template: '{{ trigger.id == "garage" and is_state("input_boolean.arrival_recent", "off") }}'
+        value_template: '{{ trigger.id == "garage" and is_state("input_boolean.arrival_recent",
+          "off") }}'
       sequence:
       - alias: Set the garage-open latch
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.garage_open_recent
-      - stop: Waiting for an arrival signal (beacon/phone/webhook) to confirm before disarming
+      - stop: Waiting for an arrival signal (beacon/phone/webhook) to confirm before
+          disarming
     - alias: Arrival signal fired - if garage hasn't opened yet, wait
       conditions:
       - condition: template
-        value_template: '{{ trigger.id == "arrival" and is_state("input_boolean.garage_open_recent", "off") }}'
+        value_template: '{{ trigger.id == "arrival" and is_state("input_boolean.garage_open_recent",
+          "off") }}'
       sequence:
       - stop: Waiting for garage to open to confirm before disarming
   - alias: Disarm the security panel
@@ -7769,7 +7773,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 08:30:00
+    at: 08:15:00
     weekday:
     - mon
     - tue
