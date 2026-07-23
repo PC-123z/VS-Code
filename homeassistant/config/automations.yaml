@@ -7199,11 +7199,12 @@
   mode: single
 - id: '1777484175032'
   alias: Arrival (Welcome Home) - Disarm Alarm on Garage Cycle + Arrival Latch
-  description: Two-factor disarm, order-independent. Needs BOTH the garage opening
+  description: >-
+    Two-factor disarm, order-independent. Needs BOTH the garage opening
     AND the beacon/phone arrival signal while armed - whichever happens first just
     latches its own flag (input_boolean.garage_open_recent or input_boolean.arrival_recent)
-    and stops; whichever happens second finds the other flag already on and disarms +
-    runs welcome home. Fixed 2026-07-22: previously only triggered on garage-open and
+    and stops; whichever happens second finds the other flag already on and disarms
+    and runs welcome home. Fixed 2026-07-22 - previously only triggered on garage-open and
     required the arrival latch to already be set, so a garage-open that beat the beacon
     update by a few seconds silently did nothing.
   triggers:
@@ -7364,7 +7365,8 @@
             media_id: spotify://album/4ZIOCYviEphLj1EpwXXvHy
             media_type: album
       continue_on_error: true
-  mode: single
+  mode: queued
+  max: 4
 - id: '1777484175033'
   alias: Arrival Latch - Set on Phone/Beacon Arrival
   description: Sets the arrival latch when any early arrival signal fires (phone geofence,
@@ -7399,12 +7401,19 @@
   mode: single
 - id: '1777484175034'
   alias: Arrival Latch - Clear after 15 min or on Disarm
-  description: Clears the arrival latch 15 minutes after it was set, or as soon as
-    the alarm is disarmed (so a stale latch never lingers).
+  description: Clears both arrival latches (beacon/phone and garage-open) 15 minutes
+    after either was set, or as soon as the alarm is disarmed (so a stale latch never
+    lingers or wrongly satisfies the two-factor check on some unrelated future event).
   triggers:
-  - alias: Latch has been on for 15 minutes
+  - alias: Arrival latch has been on for 15 minutes
     trigger: state
     entity_id: input_boolean.arrival_recent
+    to: 'on'
+    for:
+      minutes: 15
+  - alias: Garage-open latch has been on for 15 minutes
+    trigger: state
+    entity_id: input_boolean.garage_open_recent
     to: 'on'
     for:
       minutes: 15
@@ -7414,10 +7423,12 @@
     to: disarmed
   conditions: []
   actions:
-  - alias: Clear the arrival latch
+  - alias: Clear both arrival latches
     action: input_boolean.turn_off
     target:
-      entity_id: input_boolean.arrival_recent
+      entity_id:
+      - input_boolean.arrival_recent
+      - input_boolean.garage_open_recent
   mode: single
 - id: '1748800000004'
   alias: 'Welcome Home: Stop All Music When Kitchen Unoccupied 15 Min'
