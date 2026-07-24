@@ -4914,8 +4914,8 @@
       - condition: trigger
         id: window_open_catchup
       - alias: Occupied was latched on before the window opened (e.g. by the Occupancy
-          Latch automation) - occupied_set never fired inside the window, so run
-          setup now
+          Latch automation) - occupied_set never fired inside the window, so run setup
+          now
         condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'on'
@@ -4967,7 +4967,7 @@
         - alias: Let it play 40 minutes or until 12:15am, whichever comes first
           wait_for_trigger:
           - trigger: time
-            at: '00:15:00'
+            at: 00:15:00
           timeout:
             minutes: 40
         - alias: Stop sleep music
@@ -7845,7 +7845,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 08:15:00
+    at: 07:05:00
     weekday:
     - mon
     - tue
