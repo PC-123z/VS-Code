@@ -4894,6 +4894,9 @@
     id: occupied_set
   - trigger: time
     at: '22:30:00'
+    id: window_open_catchup
+  - trigger: time
+    at: '22:30:00'
     id: lights_to_red
   - trigger: time
     at: '22:40:00'
@@ -4907,6 +4910,71 @@
   conditions: []
   actions:
   - choose:
+    - conditions:
+      - condition: trigger
+        id: window_open_catchup
+      - alias: Occupied was latched on before the window opened (e.g. by the Occupancy
+          Latch automation) - occupied_set never fired inside the window, so run
+          setup now
+        condition: state
+        entity_id: input_boolean.bedroom2_occupied
+        state: 'on'
+      sequence:
+      - alias: Skip if dimmer override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.bedroom2_manual_override
+          state: 'off'
+        then:
+        - alias: Nanoleafs and office to burnt orange at 10%
+          action: light.turn_on
+          target:
+            entity_id:
+            - light.ribbon
+            - light.fluttershy
+            - light.office
+          data:
+            rgb_color:
+            - 191
+            - 87
+            - 0
+            brightness_pct: 10
+            transition: 3
+      - alias: Fan on - stays on until Good Morning routine turns it off
+        action: fan.turn_on
+        data:
+          percentage: 25
+        target:
+          entity_id: fan.bedroom2_fan
+        enabled: true
+      - alias: Skip music if dimmer override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.bedroom2_manual_override
+          state: 'off'
+        then:
+        - action: media_player.volume_set
+          target:
+            entity_id: media_player.office_2
+          data:
+            volume_level: 0.15
+        - action: music_assistant.play_media
+          target:
+            entity_id: media_player.office_2
+          data:
+            media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+            radio_mode: false
+        - alias: Let it play 40 minutes or until 12:15am, whichever comes first
+          wait_for_trigger:
+          - trigger: time
+            at: '00:15:00'
+          timeout:
+            minutes: 40
+        - alias: Stop sleep music
+          action: media_player.media_stop
+          continue_on_error: true
+          target:
+            entity_id: media_player.office_2
     - conditions:
       - condition: trigger
         id: occupied_set
