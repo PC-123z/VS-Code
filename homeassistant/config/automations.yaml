@@ -4468,6 +4468,7 @@
       entity_id: fan.big_bedroom_fan
     data:
       percentage: 50
+    enabled: false
   - alias: Turn on purifier at 25%
     action: fan.turn_on
     target:
