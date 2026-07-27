@@ -150,7 +150,7 @@
   - trigger: time
     at: '17:15:00'
     weekday:
-    - fri
+    - mon
     enabled: true
   - trigger: time
     at: '18:05:00'
