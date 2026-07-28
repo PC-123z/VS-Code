@@ -4739,6 +4739,7 @@
       percentage: 50
     target:
       entity_id: fan.big_bedroom_fan
+    enabled: false
   - alias: Set purifier to 50%
     action: fan.turn_on
     target:
@@ -4828,6 +4829,7 @@
       percentage: 50
     target:
       entity_id: fan.big_bedroom_fan
+    enabled: false
   - alias: Set purifier to 100%
     action: fan.turn_on
     target:
