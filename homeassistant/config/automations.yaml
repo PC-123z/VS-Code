@@ -7220,7 +7220,7 @@
       - action: script.turn_on
         target:
           entity_id: script.goodbye_routine_main
-  mode: single
+  mode: restart
 - id: '1777484175032'
   alias: Arrival (Welcome Home) - Disarm Alarm on Garage Cycle + Arrival Latch
   description: Two-factor disarm, order-independent. Needs BOTH the garage opening
