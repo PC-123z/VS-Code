@@ -192,13 +192,6 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_1130928743_tags/v0.7.0"
-      },
-      {
-        "created": "2026-07-28T23:45:39.912445+00:00",
-        "dismissed_version": null,
-        "domain": "hacs",
-        "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.10.9"
       }
     ]
   }
