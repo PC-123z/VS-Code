@@ -7785,10 +7785,9 @@
     - thu
     - fri
   - trigger: time
-    at: 08:40:00
+    at: '10:05:00'
     weekday:
     - sat
-    - sun
   conditions: []
   actions:
   - alias: Mark routine as active
