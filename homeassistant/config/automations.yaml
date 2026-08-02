@@ -5632,7 +5632,7 @@
   mode: parallel
   max: 6
 - id: '1776427656334'
-  alias: '*Good Morning - Kitchen Speaker Join'
+  alias: Good Morning - Kitchen Speaker Join
   description: During the good morning routine, joins kitchen speaker on first motion
     detection and ramps to 0.15. Stays grouped until bedroom music stops or routine
     ends. Unjoins when music stops or good morning deactivates.
@@ -5689,13 +5689,9 @@
     - trigger: state
       entity_id: media_player.bedroom_2
       to: idle
-      for:
-        seconds: 8
     - trigger: state
       entity_id: media_player.bedroom_2
       to: paused
-      for:
-        seconds: 8
     - trigger: state
       entity_id: binary_sensor.kitchen_sensor_group
       to: 'off'
