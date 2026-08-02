@@ -5689,9 +5689,13 @@
     - trigger: state
       entity_id: media_player.bedroom_2
       to: idle
+      for:
+        seconds: 8
     - trigger: state
       entity_id: media_player.bedroom_2
       to: paused
+      for:
+        seconds: 8
     - trigger: state
       entity_id: binary_sensor.kitchen_sensor_group
       to: 'off'
