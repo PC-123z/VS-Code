@@ -7748,9 +7748,10 @@
       minutes: 5
       seconds: 0
   conditions:
-  - alias: Not at home
+  - alias: Not at home (car BT beacon - more reliable than person.paul, which lags
+      without Tailscale connectivity)
     condition: state
-    entity_id: person.paul
+    entity_id: device_tracker.bcpro_204982_08b8
     state: not_home
   - alias: Engine must be off
     condition: state
