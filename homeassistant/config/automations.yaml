@@ -9010,6 +9010,47 @@
     data:
       transition: 5
   mode: single
+- id: '1785884136035'
+  alias: '*Bedroom 2: Nanoleaf stuck-on watchdog'
+  description: Ribbon and Fluttershy (the two Bedroom 2/Office Nanoleaf Shapes panels)
+    frequently drop offline and reconnect back into an on-state overnight, when the
+    Smart Motion & Presence automation is hard-blocked (23:45-07:00) and Bedtime/Morning
+    routines own the lights instead. This retries turning them off during that quiet
+    window so a reconnect glitch doesn't leave them lit all night.
+  triggers:
+  - alias: Fires when either panel reconnects into an on-state
+    trigger: state
+    entity_id:
+    - light.ribbon
+    - light.fluttershy
+    to: 'on'
+    for:
+      seconds: 30
+    id: reconnected
+  - alias: Safety-net retry to catch it during an available window
+    trigger: time_pattern
+    minutes: /5
+    id: periodic
+  conditions:
+  - alias: Only during the overnight window the Smart Motion automation stands down for
+    condition: time
+    after: '23:45:00'
+    before: 07:00:00
+  - alias: Respect the manual dimmer override
+    condition: state
+    entity_id: input_boolean.bedroom2_manual_override
+    state: 'off'
+  actions:
+  - alias: Retry the off it missed while offline
+    action: light.turn_off
+    continue_on_error: true
+    target:
+      entity_id:
+      - light.ribbon
+      - light.fluttershy
+    data:
+      transition: 5
+  mode: single
 - id: '1783354000090'
   alias: Turn off Elgato Light when Office2 clears
   description: Turns off the Elgato Showtime light when office2 clears.
