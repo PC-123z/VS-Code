@@ -9051,6 +9051,67 @@
     data:
       transition: 5
   mode: single
+- id: '1785884600000'
+  alias: '*Bedroom 2: Nanoleaf Power Cycle (P115 outlets)'
+  description: Ribbon/Fluttershy (Nanoleaf Shapes) are unreliable enough overnight
+    that a software turn_off can be missed the same way the original on-command was.
+    This cuts power completely via their Kasa P115 outlets (Nano1/Nano2) ~2 min after
+    the Bedtime Routine's hard 11:40pm lights-out finishes fading, so no WiFi
+    reconnect can bring them back on. Power is restored ~3 min before Good Morning
+    Routine stages them, giving the panels time to reboot and rejoin WiFi before
+    they're commanded.
+  triggers:
+  - trigger: time
+    at: '23:42:00'
+    id: power_off
+  - trigger: time
+    at: '08:27:00'
+    id: power_on_weekday
+  - trigger: time
+    at: '10:27:00'
+    id: power_on_weekend
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: power_off
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id:
+          - switch.bedroom2_office_nano1
+          - switch.nano2
+    - conditions:
+      - condition: trigger
+        id: power_on_weekday
+      - condition: time
+        weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.bedroom2_office_nano1
+          - switch.nano2
+    - conditions:
+      - condition: trigger
+        id: power_on_weekend
+      - condition: time
+        weekday:
+        - sat
+        - sun
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.bedroom2_office_nano1
+          - switch.nano2
+  mode: single
 - id: '1783354000090'
   alias: Turn off Elgato Light when Office2 clears
   description: Turns off the Elgato Showtime light when office2 clears.
