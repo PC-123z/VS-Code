@@ -4879,34 +4879,30 @@
         target:
           entity_id: fan.bedroom2_fan
         enabled: true
-      - alias: Skip music if dimmer override is active
-        if:
-        - condition: state
-          entity_id: input_boolean.bedroom2_manual_override
-          state: 'off'
-        then:
-        - action: media_player.volume_set
-          target:
-            entity_id: media_player.office_2
-          data:
-            volume_level: 0.15
-        - action: music_assistant.play_media
-          target:
-            entity_id: media_player.office_2
-          data:
-            media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
-            radio_mode: false
-        - alias: Let it play 40 minutes or until 12:15am, whichever comes first
-          wait_for_trigger:
-          - trigger: time
-            at: 00:15:00
-          timeout:
-            minutes: 40
-        - alias: Stop sleep music
-          action: media_player.media_stop
-          continue_on_error: true
-          target:
-            entity_id: media_player.office_2
+      - alias: Play sleep music regardless of dimmer override - a button press to
+          adjust lights shouldn't silently skip the music too
+        action: media_player.volume_set
+        target:
+          entity_id: media_player.office_2
+        data:
+          volume_level: 0.15
+      - action: music_assistant.play_media
+        target:
+          entity_id: media_player.office_2
+        data:
+          media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+          radio_mode: false
+      - alias: Let it play 40 minutes or until 12:15am, whichever comes first
+        wait_for_trigger:
+        - trigger: time
+          at: 00:15:00
+        timeout:
+          minutes: 40
+      - alias: Stop sleep music
+        action: media_player.media_stop
+        continue_on_error: true
+        target:
+          entity_id: media_player.office_2
     - conditions:
       - condition: trigger
         id: occupied_set
@@ -4922,34 +4918,30 @@
         target:
           entity_id: fan.bedroom2_fan
         enabled: true
-      - alias: Skip music if dimmer override is active
-        if:
-        - condition: state
-          entity_id: input_boolean.bedroom2_manual_override
-          state: 'off'
-        then:
-        - action: media_player.volume_set
-          target:
-            entity_id: media_player.office_2
-          data:
-            volume_level: 0.15
-        - action: music_assistant.play_media
-          target:
-            entity_id: media_player.office_2
-          data:
-            media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
-            radio_mode: false
-        - alias: Let it play 40 minutes or until 12:15am, whichever comes first
-          wait_for_trigger:
-          - trigger: time
-            at: 00:15:00
-          timeout:
-            minutes: 40
-        - alias: Stop sleep music
-          action: media_player.media_stop
-          continue_on_error: true
-          target:
-            entity_id: media_player.office_2
+      - alias: Play sleep music regardless of dimmer override - a button press to
+          adjust lights shouldn't silently skip the music too
+        action: media_player.volume_set
+        target:
+          entity_id: media_player.office_2
+        data:
+          volume_level: 0.15
+      - action: music_assistant.play_media
+        target:
+          entity_id: media_player.office_2
+        data:
+          media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+          radio_mode: false
+      - alias: Let it play 40 minutes or until 12:15am, whichever comes first
+        wait_for_trigger:
+        - trigger: time
+          at: 00:15:00
+        timeout:
+          minutes: 40
+      - alias: Stop sleep music
+        action: media_player.media_stop
+        continue_on_error: true
+        target:
+          entity_id: media_player.office_2
     - conditions:
       - condition: trigger
         id: motion_detected
