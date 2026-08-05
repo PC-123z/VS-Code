@@ -4237,7 +4237,7 @@
           media_id: spotify:audiobook:03nDtt5fxux68gnwhNGWnB
           radio_mode: false
       - alias: Give playback a few seconds to start
-        wait_template: "{{ is_state('media_player.bedroom_2', 'playing') }}"
+        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
         timeout:
           seconds: 8
         continue_on_timeout: true
@@ -4255,7 +4255,8 @@
     - action: notify.mobile_app_pc_iphone
       data:
         title: White noise didn't start
-        message: Bedroom Sonos didn't start playing after two tries - speaker may be offline.
+        message: Bedroom Sonos didn't start playing after two tries - speaker may
+          be offline.
   - alias: Run light stepdown, fan boost, audio stop and Nanoleaf off in parallel
     parallel:
     - sequence:
@@ -4451,7 +4452,7 @@
           media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
           radio_mode: false
       - alias: Give playback a few seconds to start
-        wait_template: "{{ is_state('media_player.bedroom_2', 'playing') }}"
+        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
         timeout:
           seconds: 8
         continue_on_timeout: true
@@ -4469,7 +4470,8 @@
     - action: notify.mobile_app_pc_iphone
       data:
         title: Bedtime music didn't start
-        message: Bedroom Sonos didn't start playing after two tries - speaker may be offline.
+        message: Bedroom Sonos didn't start playing after two tries - speaker may
+          be offline.
   - alias: Run light stepdown, fan boost, audio stop and Nanoleaf off in parallel
     parallel:
     - sequence:
@@ -4944,7 +4946,7 @@
               media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
               radio_mode: false
           - alias: Give playback a few seconds to start
-            wait_template: "{{ is_state('media_player.office_2', 'playing') }}"
+            wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
             timeout:
               seconds: 8
             continue_on_timeout: true
@@ -4962,7 +4964,8 @@
         - action: notify.mobile_app_pc_iphone
           data:
             title: Bedroom 2 sleep music didn't start
-            message: Office/Bedroom 2 speaker didn't start playing after two tries - speaker may be offline.
+            message: Office/Bedroom 2 speaker didn't start playing after two tries
+              - speaker may be offline.
       - alias: Let it play 40 minutes or until 11:15pm, whichever comes first
         wait_for_trigger:
         - trigger: time
@@ -5008,7 +5011,7 @@
               media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
               radio_mode: false
           - alias: Give playback a few seconds to start
-            wait_template: "{{ is_state('media_player.office_2', 'playing') }}"
+            wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
             timeout:
               seconds: 8
             continue_on_timeout: true
@@ -5026,7 +5029,8 @@
         - action: notify.mobile_app_pc_iphone
           data:
             title: Bedroom 2 sleep music didn't start
-            message: Office/Bedroom 2 speaker didn't start playing after two tries - speaker may be offline.
+            message: Office/Bedroom 2 speaker didn't start playing after two tries
+              - speaker may be offline.
       - alias: Let it play 40 minutes or until 11:15pm, whichever comes first
         wait_for_trigger:
         - trigger: time
@@ -5189,7 +5193,7 @@
     presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: 08:30:00
+    at: 07:00:00
     weekday:
     - mon
     - tue
@@ -5622,8 +5626,8 @@
     morning routine should have completed. Must stay after Good Morning's own trigger
     time or it clears the flag first and Good Morning's occupied condition fails,
     skipping the whole routine (outlets, fan, wake ramp, everything) - this happened
-    on weekdays from 2026-08-05 when Good Morning moved to 8:30am but this stayed at
-    8:00am.
+    on weekdays from 2026-08-05 when Good Morning moved to 8:30am but this stayed
+    at 8:00am.
   triggers:
   - trigger: time
     at: 09:00:00
@@ -8704,7 +8708,7 @@
               media_id: spotify:album:2yZ6zsOlJCxNevg1ASvsC2
               radio_mode: false
           - alias: Give playback a few seconds to start
-            wait_template: "{{ is_state('media_player.bedroom_2', 'playing') }}"
+            wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
             timeout:
               seconds: 8
             continue_on_timeout: true
@@ -8722,7 +8726,8 @@
         - action: notify.mobile_app_pc_iphone
           data:
             title: Fun Button music didn't start
-            message: Bedroom Sonos didn't start playing after two tries - speaker may be offline.
+            message: Bedroom Sonos didn't start playing after two tries - speaker
+              may be offline.
     default:
     - alias: Set Sonos volume to 18%
       action: media_player.volume_set
@@ -8742,7 +8747,7 @@
             media_id: spotify:playlist:12KOGu0kEhUorg2fkznylR
             radio_mode: false
         - alias: Give playback a few seconds to start
-          wait_template: "{{ is_state('media_player.bedroom_2', 'playing') }}"
+          wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
           timeout:
             seconds: 8
           continue_on_timeout: true
@@ -8760,7 +8765,8 @@
       - action: notify.mobile_app_pc_iphone
         data:
           title: Fun Button music didn't start
-          message: Bedroom Sonos didn't start playing after two tries - speaker may be offline.
+          message: Bedroom Sonos didn't start playing after two tries - speaker may
+            be offline.
   - alias: 60-minute timer before transitioning to Bedtime routine
     delay:
       minutes: 60
@@ -9186,7 +9192,8 @@
     minutes: /5
     id: periodic
   conditions:
-  - alias: Only during the overnight window the Smart Motion automation stands down for
+  - alias: Only during the overnight window the Smart Motion automation stands down
+      for
     condition: time
     after: '23:45:00'
     before: 07:00:00
@@ -9291,7 +9298,7 @@
   description: Restore Ring base station and keypad volume to 50% at 8AM Eastern.
   triggers:
   - trigger: time
-    at: '08:00:00'
+    at: 08:00:00
   conditions: []
   actions:
   - action: number.set_value
