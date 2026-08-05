@@ -5617,11 +5617,16 @@
   max: 2
 - id: '1776382720393'
   alias: '*Bedroom 2 Daily Reset'
-  description: Backstop reset at 8am daily. Turns off bedroom2_occupied if still on
-    after the good morning routine should have completed.
+  description: Backstop reset 30 min after Good Morning Routine's trigger time (9am
+    weekdays, 11am weekends). Turns off bedroom2_occupied if still on after the good
+    morning routine should have completed. Must stay after Good Morning's own trigger
+    time or it clears the flag first and Good Morning's occupied condition fails,
+    skipping the whole routine (outlets, fan, wake ramp, everything) - this happened
+    on weekdays from 2026-08-05 when Good Morning moved to 8:30am but this stayed at
+    8:00am.
   triggers:
   - trigger: time
-    at: 08:00:00
+    at: 09:00:00
     weekday:
     - mon
     - tue
