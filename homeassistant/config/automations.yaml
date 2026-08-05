@@ -4851,7 +4851,7 @@
     to 6am (no more hard 10:45pm cutoff on the initial trigger - a late bedtime no
     longer skips the whole routine). Sets bedroom2_occupied, starts fan (stays on
     until Good Morning turns it off) and sleep music (stops after 30-45 min or at
-    12:15am, whichever comes first). Lights dim red at 10:00pm, off at 10:30pm. All
+    11:15pm, whichever comes first). Lights dim red at 10:00pm, off at 10:30pm. All
     lights fade off at 10:45pm (but motion after that still turns them back on).
   triggers:
   - trigger: state
@@ -4883,7 +4883,7 @@
     at: '22:45:00'
     id: hard_lights_out
   - trigger: time
-    at: 00:15:00
+    at: '23:15:00'
     id: music_stop
   conditions: []
   actions:
@@ -4963,10 +4963,10 @@
           data:
             title: Bedroom 2 sleep music didn't start
             message: Office/Bedroom 2 speaker didn't start playing after two tries - speaker may be offline.
-      - alias: Let it play 40 minutes or until 12:15am, whichever comes first
+      - alias: Let it play 40 minutes or until 11:15pm, whichever comes first
         wait_for_trigger:
         - trigger: time
-          at: 00:15:00
+          at: '23:15:00'
         timeout:
           minutes: 40
       - alias: Stop sleep music
@@ -5027,10 +5027,10 @@
           data:
             title: Bedroom 2 sleep music didn't start
             message: Office/Bedroom 2 speaker didn't start playing after two tries - speaker may be offline.
-      - alias: Let it play 40 minutes or until 12:15am, whichever comes first
+      - alias: Let it play 40 minutes or until 11:15pm, whichever comes first
         wait_for_trigger:
         - trigger: time
-          at: 00:15:00
+          at: '23:15:00'
         timeout:
           minutes: 40
       - alias: Stop sleep music
@@ -5175,7 +5175,7 @@
       - condition: trigger
         id: music_stop
       sequence:
-      - alias: Hard music stop at 12:15am regardless of occupied or override state
+      - alias: Hard music stop at 11:15pm regardless of occupied or override state
         action: media_player.media_stop
         continue_on_error: true
         target:
