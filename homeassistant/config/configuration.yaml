@@ -25,7 +25,7 @@ http:
 logger:
   default: warning
   logs:
-    homeassistant: fatal
+    homeassistant: warning
     aiohomekit.controller.ip.connection: critical
     homeassistant.components.homekit_controller: critical
     asyncio: critical
