@@ -5649,7 +5649,7 @@
       entity_id: input_boolean.bedroom2_occupied
   mode: single
 - id: '1776382720394'
-  alias: '*Bedroom 2 Occupancy Latch'
+  alias: Bedroom 2 Occupancy Latch
   description: Sets bedroom2_occupied once per night when the sensor group detects
     presence between 22:00 and midnight. Single-fire - won't retrigger if already
     occupied. Cleared by Good Morning Routine and Daily Reset.
