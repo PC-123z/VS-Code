@@ -5620,8 +5620,8 @@
   mode: parallel
   max: 2
 - id: '1776382720393'
-  alias: '*Bedroom 2 Daily Reset'
-  description: Backstop reset 30 min after Good Morning Routine's trigger time (9am
+  alias: Bedroom 2 Daily Reset
+  description: Backstop reset 30 min after Good Morning Routine's trigger time (9:30am
     weekdays, 11am weekends). Turns off bedroom2_occupied if still on after the good
     morning routine should have completed. Must stay after Good Morning's own trigger
     time or it clears the flag first and Good Morning's occupied condition fails,
@@ -5630,7 +5630,7 @@
     at 8:00am.
   triggers:
   - trigger: time
-    at: 09:00:00
+    at: 09:30:00
     weekday:
     - mon
     - tue
