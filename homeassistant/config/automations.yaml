@@ -4824,12 +4824,12 @@
   mode: single
 - id: '1776378416550'
   alias: '*Bedroom 2 Bedtime Routine'
-  description: Triggers on motion or bedroom2_occupied turning on any time from 10:30pm
-    to 6am (no more hard 11:40pm cutoff on the initial trigger - a late bedtime no
+  description: Triggers on motion or bedroom2_occupied turning on any time from 10:00pm
+    to 6am (no more hard 10:45pm cutoff on the initial trigger - a late bedtime no
     longer skips the whole routine). Sets bedroom2_occupied, starts fan (stays on
     until Good Morning turns it off) and sleep music (stops after 30-45 min or at
-    12:15am, whichever comes first). Lights dim red at 10:30pm, off at 10:40pm. All
-    lights fade off at 11:40pm (but motion after that still turns them back on).
+    12:15am, whichever comes first). Lights dim red at 10:00pm, off at 10:30pm. All
+    lights fade off at 10:45pm (but motion after that still turns them back on).
   triggers:
   - trigger: state
     entity_id:
@@ -4848,16 +4848,16 @@
     to: 'on'
     id: occupied_set
   - trigger: time
-    at: '22:30:00'
+    at: '22:00:00'
     id: window_open_catchup
   - trigger: time
-    at: '22:30:00'
+    at: '22:00:00'
     id: lights_to_red
   - trigger: time
-    at: '22:40:00'
+    at: '22:30:00'
     id: lights_out
   - trigger: time
-    at: '23:40:00'
+    at: '22:45:00'
     id: hard_lights_out
   - trigger: time
     at: 00:15:00
@@ -4929,9 +4929,9 @@
     - conditions:
       - condition: trigger
         id: occupied_set
-      - alias: Bedtime Routine active window - 10:30pm to 6am
+      - alias: Bedtime Routine active window - 10:00pm to 6am
         condition: time
-        after: '22:30:00'
+        after: '22:00:00'
         before: 06:00:00
       sequence:
       - alias: Fan on - stays on until Good Morning routine turns it off
@@ -4972,9 +4972,9 @@
         condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'off'
-      - alias: Bedtime Routine active window - 10:30pm to 6am
+      - alias: Bedtime Routine active window - 10:00pm to 6am
         condition: time
-        after: '22:30:00'
+        after: '22:00:00'
         before: 06:00:00
       sequence:
       - alias: Set bedroom 2 occupied (fan and music start via occupied_set branch)
@@ -5007,9 +5007,9 @@
       - condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'on'
-      - alias: Bedtime Routine active window - 10:30pm to 6am
+      - alias: Bedtime Routine active window - 10:00pm to 6am
         condition: time
-        after: '22:30:00'
+        after: '22:00:00'
         before: 06:00:00
       - alias: Skip if dimmer override is active
         condition: state
@@ -5079,7 +5079,7 @@
       - condition: trigger
         id: hard_lights_out
       sequence:
-      - alias: All lights fade off at 11:40pm regardless of occupied or override state
+      - alias: All lights fade off at 10:45pm regardless of occupied or override state
         action: light.turn_off
         target:
           entity_id:
