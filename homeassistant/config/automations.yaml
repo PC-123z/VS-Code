@@ -4416,14 +4416,37 @@
       entity_id: media_player.bedroom_2
     data:
       volume_level: 0.15
-  - alias: Play Max Richter Sleep via Music Assistant
-    continue_on_error: true
-    action: music_assistant.play_media
-    target:
-      entity_id: media_player.bedroom_2
-    data:
-      media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
-      radio_mode: false
+  - alias: Play Max Richter Sleep via Music Assistant (with retry)
+    repeat:
+      count: 2
+      sequence:
+      - continue_on_error: true
+        action: music_assistant.play_media
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+          radio_mode: false
+      - alias: Give playback a few seconds to start
+        wait_template: "{{ is_state('media_player.bedroom_2', 'playing') }}"
+        timeout:
+          seconds: 8
+        continue_on_timeout: true
+      - alias: Stop repeating once it's actually playing
+        stop: Playback confirmed
+        enabled: '{{ is_state("media_player.bedroom_2", "playing") }}'
+  - alias: Notify if music still isn't playing after retry
+    if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.bedroom_2
+        state: playing
+    then:
+    - action: notify.mobile_app_pc_iphone
+      data:
+        title: Bedtime music didn't start
+        message: Bedroom Sonos didn't start playing after two tries - speaker may be offline.
   - alias: Run light stepdown, fan boost, audio stop and Nanoleaf off in parallel
     parallel:
     - sequence:
