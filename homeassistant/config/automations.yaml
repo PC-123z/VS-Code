@@ -9127,3 +9127,35 @@
       message: bcpro beacon was stuck unavailable for 15+ min; reloaded the iBeacon
         integration to recover tracking.
   mode: single
+- id: '1786000000001'
+  alias: Ring alarm volume - night quiet down
+  description: Lower Ring base station and keypad volume to 10% at 11PM Eastern.
+  triggers:
+  - trigger: time
+    at: '23:00:00'
+  conditions: []
+  actions:
+  - action: number.set_value
+    target:
+      entity_id:
+      - number.3302_base_station_volume
+      - number.keypad_volume
+    data:
+      value: 10
+  mode: single
+- id: '1786000000002'
+  alias: Ring alarm volume - morning restore
+  description: Restore Ring base station and keypad volume to 50% at 8AM Eastern.
+  triggers:
+  - trigger: time
+    at: '08:00:00'
+  conditions: []
+  actions:
+  - action: number.set_value
+    target:
+      entity_id:
+      - number.3302_base_station_volume
+      - number.keypad_volume
+    data:
+      value: 50
+  mode: single
