@@ -4225,14 +4225,37 @@
       entity_id: media_player.bedroom_2
     data:
       volume_level: 0.15
-  - alias: Play white noise via Music Assistant
-    continue_on_error: true
-    action: music_assistant.play_media
-    target:
-      entity_id: media_player.bedroom_2
-    data:
-      media_id: spotify:audiobook:03nDtt5fxux68gnwhNGWnB
-      radio_mode: false
+  - alias: Play white noise via Music Assistant (with retry)
+    repeat:
+      count: 2
+      sequence:
+      - continue_on_error: true
+        action: music_assistant.play_media
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          media_id: spotify:audiobook:03nDtt5fxux68gnwhNGWnB
+          radio_mode: false
+      - alias: Give playback a few seconds to start
+        wait_template: "{{ is_state('media_player.bedroom_2', 'playing') }}"
+        timeout:
+          seconds: 8
+        continue_on_timeout: true
+      - alias: Stop repeating once it's actually playing
+        stop: Playback confirmed
+        enabled: '{{ is_state("media_player.bedroom_2", "playing") }}'
+  - alias: Notify if white noise still isn't playing after retry
+    if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.bedroom_2
+        state: playing
+    then:
+    - action: notify.mobile_app_pc_iphone
+      data:
+        title: White noise didn't start
+        message: Bedroom Sonos didn't start playing after two tries - speaker may be offline.
   - alias: Run light stepdown, fan boost, audio stop and Nanoleaf off in parallel
     parallel:
     - sequence:
@@ -4909,12 +4932,37 @@
           entity_id: media_player.office_2
         data:
           volume_level: 0.15
-      - action: music_assistant.play_media
-        target:
-          entity_id: media_player.office_2
-        data:
-          media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
-          radio_mode: false
+      - alias: Play sleep music via Music Assistant (with retry)
+        repeat:
+          count: 2
+          sequence:
+          - continue_on_error: true
+            action: music_assistant.play_media
+            target:
+              entity_id: media_player.office_2
+            data:
+              media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+              radio_mode: false
+          - alias: Give playback a few seconds to start
+            wait_template: "{{ is_state('media_player.office_2', 'playing') }}"
+            timeout:
+              seconds: 8
+            continue_on_timeout: true
+          - alias: Stop repeating once it's actually playing
+            stop: Playback confirmed
+            enabled: '{{ is_state("media_player.office_2", "playing") }}'
+      - alias: Notify if sleep music still isn't playing after retry
+        if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: media_player.office_2
+            state: playing
+        then:
+        - action: notify.mobile_app_pc_iphone
+          data:
+            title: Bedroom 2 sleep music didn't start
+            message: Office/Bedroom 2 speaker didn't start playing after two tries - speaker may be offline.
       - alias: Let it play 40 minutes or until 12:15am, whichever comes first
         wait_for_trigger:
         - trigger: time
@@ -4948,12 +4996,37 @@
           entity_id: media_player.office_2
         data:
           volume_level: 0.15
-      - action: music_assistant.play_media
-        target:
-          entity_id: media_player.office_2
-        data:
-          media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
-          radio_mode: false
+      - alias: Play sleep music via Music Assistant (with retry)
+        repeat:
+          count: 2
+          sequence:
+          - continue_on_error: true
+            action: music_assistant.play_media
+            target:
+              entity_id: media_player.office_2
+            data:
+              media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+              radio_mode: false
+          - alias: Give playback a few seconds to start
+            wait_template: "{{ is_state('media_player.office_2', 'playing') }}"
+            timeout:
+              seconds: 8
+            continue_on_timeout: true
+          - alias: Stop repeating once it's actually playing
+            stop: Playback confirmed
+            enabled: '{{ is_state("media_player.office_2", "playing") }}'
+      - alias: Notify if sleep music still isn't playing after retry
+        if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: media_player.office_2
+            state: playing
+        then:
+        - action: notify.mobile_app_pc_iphone
+          data:
+            title: Bedroom 2 sleep music didn't start
+            message: Office/Bedroom 2 speaker didn't start playing after two tries - speaker may be offline.
       - alias: Let it play 40 minutes or until 12:15am, whichever comes first
         wait_for_trigger:
         - trigger: time
