@@ -4853,7 +4853,8 @@
     to 6am (no more hard 10:45pm cutoff on the initial trigger - a late bedtime no
     longer skips the whole routine). Sets bedroom2_occupied, starts fan (stays on
     until Good Morning turns it off) and sleep music (stops after 30-45 min or at
-    11:15pm, whichever comes first). Lights dim red at 10:00pm, off at 10:30pm. All
+    11:15pm, whichever comes first). Lights to burnt orange at setup (whenever bedtime
+    starts, or by 10:00pm at the latest as a catch-up), fully off at 10:30pm. All
     lights fade off at 10:45pm (but motion after that still turns them back on).
   triggers:
   - trigger: state
@@ -4875,9 +4876,6 @@
   - trigger: time
     at: '22:00:00'
     id: window_open_catchup
-  - trigger: time
-    at: '22:00:00'
-    id: lights_to_red
   - trigger: time
     at: '22:30:00'
     id: lights_out
@@ -5107,31 +5105,6 @@
           - 0
           brightness_pct: 3
           transition: 30
-    - conditions:
-      - condition: trigger
-        id: lights_to_red
-      - condition: state
-        entity_id: input_boolean.bedroom2_occupied
-        state: 'on'
-      - alias: Skip if dimmer override is active
-        condition: state
-        entity_id: input_boolean.bedroom2_manual_override
-        state: 'off'
-      sequence:
-      - alias: All lights to deep red at 2%
-        action: light.turn_on
-        target:
-          entity_id:
-          - light.ribbon
-          - light.fluttershy
-          - light.office
-        data:
-          rgb_color:
-          - 139
-          - 0
-          - 0
-          brightness_pct: 2
-          transition: 60
     - conditions:
       - condition: trigger
         id: lights_out
