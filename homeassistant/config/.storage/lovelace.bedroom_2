@@ -76,6 +76,14 @@
                   ],
                   "show_header_toggle": true,
                   "state_color": true
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.bedroom2_office_nano1"
+                },
+                {
+                  "type": "tile",
+                  "entity": "switch.nano2"
                 }
               ]
             },
