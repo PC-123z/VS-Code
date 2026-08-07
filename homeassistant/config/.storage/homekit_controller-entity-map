@@ -930,7 +930,7 @@
                       "ev"
                     ],
                     "format": "bool",
-                    "value": true,
+                    "value": false,
                     "description": "On"
                   },
                   {
@@ -953,7 +953,7 @@
                       "ev"
                     ],
                     "format": "float",
-                    "value": 50.0,
+                    "value": 0.0,
                     "description": "Rotation Speed",
                     "unit": "percentage",
                     "minValue": 0.0,
@@ -1255,7 +1255,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -51
+                    "value": 0
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
