@@ -5733,6 +5733,10 @@
   - condition: state
     entity_id: input_boolean.good_morning_active
     state: 'on'
+  - alias: Skip while Big Bedroom is asleep
+    condition: state
+    entity_id: input_boolean.big_bedroom_asleep
+    state: 'off'
   actions:
   - variables:
       already_joined: "{{ state_attr('media_player.bedroom_2', 'group_members') is
