@@ -79,12 +79,12 @@
     at: '17:15:00'
     weekday:
     - mon
-    enabled: true
-  - trigger: time
-    at: '18:05:00'
     enabled: false
+  - trigger: time
+    at: '18:20:00'
+    enabled: true
     weekday:
-    - wed
+    - sat
   conditions: []
   actions:
   - alias: Mark routine as active
