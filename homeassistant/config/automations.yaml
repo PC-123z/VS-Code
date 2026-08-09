@@ -7885,6 +7885,7 @@
     at: '10:05:00'
     weekday:
     - sat
+    - sun
   conditions: []
   actions:
   - alias: Mark routine as active
@@ -9292,10 +9293,10 @@
   mode: single
 - id: '1779800000001'
   alias: 'Welcome Home: Auto-Expire After 30 Minutes'
-  description: Safety net so the welcome home routine never runs longer than 30
-    minutes - turns off input_boolean.welcome_home_active 30 minutes after it's
-    set, unless it's already been turned off. It won't re-arm until the next real
-    departure + arrival cycle, since only the arrival automation turns it on.
+  description: Safety net so the welcome home routine never runs longer than 30 minutes
+    - turns off input_boolean.welcome_home_active 30 minutes after it's set, unless
+    it's already been turned off. It won't re-arm until the next real departure +
+    arrival cycle, since only the arrival automation turns it on.
   triggers:
   - trigger: state
     entity_id: input_boolean.welcome_home_active
@@ -9310,11 +9311,11 @@
   mode: single
 - id: '1779800000002'
   alias: 'Welcome Home: Disable Immediately if Music Pauses'
-  description: If any speaker involved in the welcome home group stops playing
-    for even a moment while welcome home is active, kill the routine right away.
-    Since welcome_home_active is only re-armed by an actual departure + arrival
-    (alarm must be armed away/home first), this keeps it off until the next real
-    cycle instead of it lingering or re-joining rooms after a manual pause.
+  description: If any speaker involved in the welcome home group stops playing for
+    even a moment while welcome home is active, kill the routine right away. Since
+    welcome_home_active is only re-armed by an actual departure + arrival (alarm must
+    be armed away/home first), this keeps it off until the next real cycle instead
+    of it lingering or re-joining rooms after a manual pause.
   triggers:
   - trigger: state
     entity_id:
@@ -9342,9 +9343,9 @@
   mode: single
 - id: '1779800000003'
   alias: 'Good Morning: Auto-Expire After 45 Minutes'
-  description: Safety net so the good morning routine never runs longer than 45
-    minutes - turns off input_boolean.good_morning_active 45 minutes after it's
-    set, unless it's already been turned off.
+  description: Safety net so the good morning routine never runs longer than 45 minutes
+    - turns off input_boolean.good_morning_active 45 minutes after it's set, unless
+    it's already been turned off.
   triggers:
   - trigger: state
     entity_id: input_boolean.good_morning_active
@@ -9359,10 +9360,10 @@
   mode: single
 - id: '1779800000004'
   alias: 'Big Bedroom: Sleep Cancels Welcome Home and Good Morning'
-  description: Whenever Big Bedroom goes to sleep (Hue Button 2/3 short or hold,
-    goodnight routines, or any other path that sets input_boolean.big_bedroom_asleep
-    on), immediately turn off welcome home and good morning so neither routine
-    can join speakers into or wake the bedroom while asleep.
+  description: Whenever Big Bedroom goes to sleep (Hue Button 2/3 short or hold, goodnight
+    routines, or any other path that sets input_boolean.big_bedroom_asleep on), immediately
+    turn off welcome home and good morning so neither routine can join speakers into
+    or wake the bedroom while asleep.
   triggers:
   - trigger: state
     entity_id: input_boolean.big_bedroom_asleep
