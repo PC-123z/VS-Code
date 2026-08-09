@@ -6835,8 +6835,8 @@
   mode: single
 - id: '1777221197720'
   alias: Bedroom 2 - Off When Empty
-  description: If bedroom 2 is unoccupied for 15 continuous minutes between 8pm and
-    10pm, turn off all lights, fan, and music, and clear the occupied boolean.
+  description: If bedroom 2 is unoccupied for 15 continuous minutes and no one is
+    sleeping there (bedroom2_occupied off), turn off all lights, fan, and music.
   triggers:
   - trigger: state
     entity_id:
@@ -6848,9 +6848,9 @@
       minutes: 15
       seconds: 0
   conditions:
-  - condition: time
-    after: '20:00:00'
-    before: '22:00:00'
+  - condition: state
+    entity_id: input_boolean.bedroom2_occupied
+    state: 'off'
   actions:
   - alias: Stop music
     action: media_player.media_stop
@@ -6868,11 +6868,6 @@
     action: fan.turn_off
     target:
       entity_id: fan.bedroom2_fan
-    data: {}
-  - alias: Clear occupied boolean
-    action: input_boolean.turn_off
-    target:
-      entity_id: input_boolean.bedroom2_occupied
     data: {}
   mode: single
 - id: '1777244189521'
