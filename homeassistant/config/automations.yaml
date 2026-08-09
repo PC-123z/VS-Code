@@ -9273,7 +9273,7 @@
       - number.3302_base_station_volume
       - number.keypad_volume
     data:
-      value: 10
+      value: 2
   mode: single
 - id: '1786000000002'
   alias: Ring alarm volume - morning restore
