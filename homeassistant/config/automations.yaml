@@ -6742,11 +6742,14 @@
     timeout:
       minutes: 15
     continue_on_timeout: false
-  - alias: Wait for motion to clear or timeout after 5 minutes
+  - alias: Wait for motion to clear or timeout after 1 minute
     wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'')
       }}'
     timeout:
-      minutes: 5
+      hours: 0
+      minutes: 1
+      seconds: 0
+      milliseconds: 0
     continue_on_timeout: true
   - alias: Check if motion was detected (someone home)
     if:
