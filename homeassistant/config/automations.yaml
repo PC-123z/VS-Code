@@ -4455,6 +4455,12 @@
         data:
           media_id: ytmusic:album:MPREb_A9AHzoUYd7b
           radio_mode: false
+      - continue_on_error: true
+        action: media_player.shuffle_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          shuffle: true
       - alias: Give playback a few seconds to start
         wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
         timeout:
@@ -4951,6 +4957,12 @@
             data:
               media_id: ytmusic:album:MPREb_A9AHzoUYd7b
               radio_mode: false
+          - continue_on_error: true
+            action: media_player.shuffle_set
+            target:
+              entity_id: media_player.office_2
+            data:
+              shuffle: true
           - alias: Give playback a few seconds to start
             wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
             timeout:
@@ -5020,6 +5032,12 @@
             data:
               media_id: ytmusic:album:MPREb_A9AHzoUYd7b
               radio_mode: false
+          - continue_on_error: true
+            action: media_player.shuffle_set
+            target:
+              entity_id: media_player.office_2
+            data:
+              shuffle: true
           - alias: Give playback a few seconds to start
             wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
             timeout:
@@ -7461,6 +7479,12 @@
           data:
             media_id: ytmusic://album/MPREb_Mxvr7f8ssSQ
             media_type: album
+        - continue_on_error: true
+          action: media_player.shuffle_set
+          target:
+            device_id: b42d3b4542fb52c759f5aef09d3f6dad
+          data:
+            shuffle: true
       - alias: Play afternoon music (12 PM - 5 PM)
         if:
         - condition: template
@@ -7473,6 +7497,12 @@
           data:
             media_id: ytmusic://album/MPREb_S3lOF926Vx1
             media_type: album
+        - continue_on_error: true
+          action: media_player.shuffle_set
+          target:
+            device_id: b42d3b4542fb52c759f5aef09d3f6dad
+          data:
+            shuffle: true
       - alias: Play evening music (5 PM - 8 PM)
         if:
         - condition: template
@@ -7483,7 +7513,7 @@
           target:
             device_id: b42d3b4542fb52c759f5aef09d3f6dad
           data:
-            media_id: spotify://album/3G6nqR94e5sVk67SXcKKsW
+            media_id: ytmusic://album/MPREb_di7Fj3Fiafj
             media_type: album
       - alias: Play late night music (8 PM - 10 PM)
         if:
@@ -7495,7 +7525,7 @@
           target:
             device_id: b42d3b4542fb52c759f5aef09d3f6dad
           data:
-            media_id: spotify://album/4ZIOCYviEphLj1EpwXXvHy
+            media_id: ytmusic://album/MPREb_VkHTY8TFW8V
             media_type: album
       continue_on_error: true
   mode: queued
@@ -8055,6 +8085,13 @@
         data:
           media_id: ytmusic://playlist/VLPLrALqIYcGkyQQVGQMsNp09LW2kQNVUFx1
           media_type: playlist
+      - alias: Shuffle morning playlist
+        continue_on_error: true
+        action: media_player.shuffle_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          shuffle: true
       - delay:
           seconds: 3
       - alias: Ensure playback is not paused after unjoin
@@ -8195,6 +8232,12 @@
                   data:
                     media_id: ytmusic://playlist/VLPLrALqIYcGkyQQVGQMsNp09LW2kQNVUFx1
                     media_type: playlist
+                - continue_on_error: true
+                  action: media_player.shuffle_set
+                  target:
+                    entity_id: media_player.bedroom_2
+                  data:
+                    shuffle: true
               - action: media_player.volume_set
                 target:
                   entity_id: media_player.bedroom
@@ -8746,6 +8789,12 @@
           data:
             media_id: ytmusic:playlist:VLPLLo-ilN4L7LZI_xFu2n_cl9G7tHY8Z-kg
             radio_mode: false
+        - continue_on_error: true
+          action: media_player.shuffle_set
+          target:
+            entity_id: media_player.bedroom_2
+          data:
+            shuffle: true
         - alias: Give playback a few seconds to start
           wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
           timeout:
