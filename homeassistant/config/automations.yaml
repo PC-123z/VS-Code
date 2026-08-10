@@ -7459,7 +7459,7 @@
           target:
             device_id: b42d3b4542fb52c759f5aef09d3f6dad
           data:
-            media_id: spotify://album/1dQDdZKvdJ5gNhUF56S8Qu
+            media_id: ytmusic://album/MPREb_Mxvr7f8ssSQ
             media_type: album
       - alias: Play afternoon music (12 PM - 5 PM)
         if:
@@ -7471,7 +7471,7 @@
           target:
             device_id: b42d3b4542fb52c759f5aef09d3f6dad
           data:
-            media_id: spotify://album/2Av4Xv5YejHwvSAnXpxKIt
+            media_id: ytmusic://album/MPREb_S3lOF926Vx1
             media_type: album
       - alias: Play evening music (5 PM - 8 PM)
         if:
