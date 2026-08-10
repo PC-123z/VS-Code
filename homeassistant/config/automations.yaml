@@ -7515,6 +7515,12 @@
           data:
             media_id: ytmusic://album/MPREb_di7Fj3Fiafj
             media_type: album
+        - continue_on_error: true
+          action: media_player.shuffle_set
+          target:
+            device_id: b42d3b4542fb52c759f5aef09d3f6dad
+          data:
+            shuffle: true
       - alias: Play late night music (8 PM - 10 PM)
         if:
         - condition: template
@@ -7527,6 +7533,12 @@
           data:
             media_id: ytmusic://album/MPREb_VkHTY8TFW8V
             media_type: album
+        - continue_on_error: true
+          action: media_player.shuffle_set
+          target:
+            device_id: b42d3b4542fb52c759f5aef09d3f6dad
+          data:
+            shuffle: true
       continue_on_error: true
   mode: queued
   max: 4
