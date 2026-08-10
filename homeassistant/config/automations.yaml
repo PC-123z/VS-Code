@@ -232,8 +232,15 @@
         target:
           entity_id: media_player.bedroom_2
         data:
-          media_id: '45'
+          media_id: ytmusic://playlist/VLPLRbcUrcJVEmVVwV-e_kcAxzDRowsLhtIN
           media_type: playlist
+      - alias: Shuffle nap wake up playlist
+        continue_on_error: true
+        action: media_player.shuffle_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          shuffle: true
       - alias: Wait 10 seconds then check if music is playing
         delay:
           seconds: 10
