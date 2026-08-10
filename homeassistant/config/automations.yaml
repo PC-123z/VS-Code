@@ -4234,7 +4234,7 @@
         target:
           entity_id: media_player.bedroom_2
         data:
-          media_id: spotify:audiobook:03nDtt5fxux68gnwhNGWnB
+          media_id: ytmusic:track:2y6zdAbN9o8
           radio_mode: false
       - alias: Give playback a few seconds to start
         wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
@@ -4453,7 +4453,7 @@
         target:
           entity_id: media_player.bedroom_2
         data:
-          media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+          media_id: ytmusic:album:MPREb_A9AHzoUYd7b
           radio_mode: false
       - alias: Give playback a few seconds to start
         wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
@@ -4949,7 +4949,7 @@
             target:
               entity_id: media_player.office_2
             data:
-              media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+              media_id: ytmusic:album:MPREb_A9AHzoUYd7b
               radio_mode: false
           - alias: Give playback a few seconds to start
             wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
@@ -5018,7 +5018,7 @@
             target:
               entity_id: media_player.office_2
             data:
-              media_id: spotify:album:0JLN7JryQ2T7lBEYIrSQF1
+              media_id: ytmusic:album:MPREb_A9AHzoUYd7b
               radio_mode: false
           - alias: Give playback a few seconds to start
             wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
@@ -8053,7 +8053,7 @@
         target:
           entity_id: media_player.bedroom_2
         data:
-          media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
+          media_id: ytmusic://playlist/VLPLrALqIYcGkyQQVGQMsNp09LW2kQNVUFx1
           media_type: playlist
       - delay:
           seconds: 3
@@ -8193,7 +8193,7 @@
                   target:
                     entity_id: media_player.bedroom_2
                   data:
-                    media_id: spotify://playlist/3IBrsav3Sh8AImtaGoaP07
+                    media_id: ytmusic://playlist/VLPLrALqIYcGkyQQVGQMsNp09LW2kQNVUFx1
                     media_type: playlist
               - action: media_player.volume_set
                 target:
@@ -8701,7 +8701,7 @@
             target:
               entity_id: media_player.bedroom_2
             data:
-              media_id: spotify:album:2yZ6zsOlJCxNevg1ASvsC2
+              media_id: ytmusic:track:ybkMi3R6xSY
               radio_mode: false
           - alias: Give playback a few seconds to start
             wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
@@ -8744,7 +8744,7 @@
           target:
             entity_id: media_player.bedroom_2
           data:
-            media_id: spotify:playlist:12KOGu0kEhUorg2fkznylR
+            media_id: ytmusic:playlist:VLPLLo-ilN4L7LZI_xFu2n_cl9G7tHY8Z-kg
             radio_mode: false
         - alias: Give playback a few seconds to start
           wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
