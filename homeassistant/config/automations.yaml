@@ -4242,8 +4242,12 @@
           seconds: 8
         continue_on_timeout: true
       - alias: Stop repeating once it's actually playing
-        stop: Playback confirmed
-        enabled: '{{ is_state("media_player.bedroom_2", "playing") }}'
+        if:
+        - condition: state
+          entity_id: media_player.bedroom_2
+          state: playing
+        then:
+        - stop: Playback confirmed
   - alias: Notify if white noise still isn't playing after retry
     if:
     - condition: not
@@ -4457,8 +4461,12 @@
           seconds: 8
         continue_on_timeout: true
       - alias: Stop repeating once it's actually playing
-        stop: Playback confirmed
-        enabled: '{{ is_state("media_player.bedroom_2", "playing") }}'
+        if:
+        - condition: state
+          entity_id: media_player.bedroom_2
+          state: playing
+        then:
+        - stop: Playback confirmed
   - alias: Notify if music still isn't playing after retry
     if:
     - condition: not
