@@ -11,17 +11,6 @@ automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
 
-http:
-  use_x_forwarded_for: true
-  trusted_proxies:
-    - 172.20.0.0/16
-    - 192.168.70.0/24
-    - 192.168.2.0/24
-    - 100.64.0.0/10
-    - 192.168.2.18
-    - 127.0.0.1
-  use_x_frame_options: false
-
 logger:
   default: warning
   logs:
