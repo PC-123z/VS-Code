@@ -8895,7 +8895,7 @@
       entity_id: automation.big_bedroom_bedtime_button_hue_button_2
     data:
       skip_conditions: true
-  mode: single
+  mode: restart
 - id: '1778302937144'
   alias: 'Pico Button 2 - Big Bedroom: Bright White Override'
   description: Pico 'raise' press sets Hue bulbs to bright white 6500K + Nanoleaf
