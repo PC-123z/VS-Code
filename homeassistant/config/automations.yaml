@@ -8690,6 +8690,13 @@
     type: press
     subtype: stop
     trigger: device
+    id: press
+  - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
+    domain: lutron_caseta
+    type: long_press
+    subtype: stop
+    trigger: device
+    id: hold
   conditions: []
   actions:
   - alias: Disable motion automation
@@ -8773,17 +8780,19 @@
       entity_id: media_player.bedroom_tv_2
   - alias: Choose music based on time of day
     choose:
-    - alias: After midnight - play chill album
+    - alias: After midnight - play chill album (or hold button to force it any time)
       conditions:
       - condition: template
-        value_template: '{{ now().hour >= 0 and now().hour < 6 }}'
+        value_template: '{{ (trigger.id == ''press'' and now().hour >= 0 and now().hour
+          < 6) or (trigger.id == ''hold'' and not (now().hour >= 0 and now().hour
+          < 6)) }}'
       sequence:
-      - alias: Set Sonos volume to 15%
+      - alias: Set Sonos volume to 10%
         action: media_player.volume_set
         target:
           entity_id: media_player.bedroom_2
         data:
-          volume_level: 0.15
+          volume_level: 0.1
       - alias: Play Chill Album via Music Assistant (with retry)
         repeat:
           count: 2
