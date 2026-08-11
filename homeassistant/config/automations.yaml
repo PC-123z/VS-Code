@@ -8271,8 +8271,21 @@
                   target:
                     entity_id: media_player.bedroom_2
                   data:
-                    media_id: ytmusic://playlist/VLPLrALqIYcGkyQQVGQMsNp09LW2kQNVUFx1
+                    media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
                     media_type: playlist
+                - continue_on_error: true
+                  action: media_player.shuffle_set
+                  target:
+                    entity_id: media_player.bedroom_2
+                  data:
+                    shuffle: false
+                - delay:
+                    seconds: 8
+                - wait_template: '{{ ''here comes the sun'' not in (state_attr(''media_player.bedroom_2'',
+                    ''media_title'') | default('''') | lower) }}'
+                  timeout:
+                    minutes: 5
+                  continue_on_timeout: true
                 - continue_on_error: true
                   action: media_player.shuffle_set
                   target:
