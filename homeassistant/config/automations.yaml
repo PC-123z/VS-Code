@@ -8837,12 +8837,12 @@
             message: Bedroom Sonos didn't start playing after two tries - speaker
               may be offline.
     default:
-    - alias: Set Sonos volume to 18%
+    - alias: Set Sonos volume to 10%
       action: media_player.volume_set
       target:
         entity_id: media_player.bedroom_2
       data:
-        volume_level: 0.18
+        volume_level: 0.1
     - alias: Play Fun Playlist via Music Assistant (with retry)
       repeat:
         count: 2
