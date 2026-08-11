@@ -8693,7 +8693,7 @@
     id: press
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
-    type: long_press
+    type: multi_tap
     subtype: stop
     trigger: device
     id: hold
