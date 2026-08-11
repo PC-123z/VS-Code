@@ -4466,7 +4466,7 @@
         target:
           entity_id: media_player.bedroom_2
         data:
-          media_id: ytmusic:album:MPREb_A9AHzoUYd7b
+          media_id: ytmusic:playlist:VLPLQ_PIlf6OzqIeQygYMd8DccQ3XnJlSGcG
           radio_mode: false
       - continue_on_error: true
         action: media_player.shuffle_set
