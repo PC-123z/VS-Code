@@ -4791,6 +4791,24 @@
     action: alarm_control_panel.alarm_arm_home
     target:
       entity_id: alarm_control_panel.3302_alarm
+  - alias: Stop bedroom audio (with verify and retry)
+    repeat:
+      count: 3
+      sequence:
+      - continue_on_error: true
+        action: media_player.media_stop
+        target:
+          entity_id: media_player.bedroom_2
+      - delay:
+          seconds: 5
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: media_player.bedroom_2
+            state: playing
+        then:
+        - stop: Stop confirmed
   - alias: Set bedroom fan to 50%
     action: fan.turn_on
     data:
@@ -4881,6 +4899,24 @@
     action: alarm_control_panel.alarm_arm_home
     target:
       entity_id: alarm_control_panel.3302_alarm
+  - alias: Stop bedroom audio (with verify and retry)
+    repeat:
+      count: 3
+      sequence:
+      - continue_on_error: true
+        action: media_player.media_stop
+        target:
+          entity_id: media_player.bedroom_2
+      - delay:
+          seconds: 5
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: media_player.bedroom_2
+            state: playing
+        then:
+        - stop: Stop confirmed
   - alias: Set bedroom fan to 50%
     action: fan.turn_on
     data:
