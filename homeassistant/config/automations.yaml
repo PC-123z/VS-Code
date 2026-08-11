@@ -4434,6 +4434,7 @@
     target:
       entity_id: alarm_control_panel.3302_alarm
   - alias: Set bedroom fan to 25%
+    continue_on_error: true
     action: fan.turn_on
     target:
       entity_id: fan.big_bedroom_fan
@@ -4441,12 +4442,14 @@
       percentage: 50
     enabled: true
   - alias: Turn on purifier at 25%
+    continue_on_error: true
     action: fan.turn_on
     target:
       entity_id: fan.bedroom_purifier
     data:
       percentage: 25
   - alias: Turn on air circulator at 25%
+    continue_on_error: true
     action: fan.turn_on
     target:
       entity_id: fan.air_circulator
