@@ -4242,6 +4242,7 @@
           entity_id: media_player.bedroom_2
         data:
           media_id: ytmusic:playlist:VLPLOS9HJPmm92-46p6EL6vUxfuZ6AGVDkRG
+          media_type: playlist
           radio_mode: false
       - continue_on_error: true
         action: media_player.shuffle_set
@@ -4467,6 +4468,7 @@
           entity_id: media_player.bedroom_2
         data:
           media_id: ytmusic:playlist:VLPLQ_PIlf6OzqIeQygYMd8DccQ3XnJlSGcG
+          media_type: playlist
           radio_mode: false
       - continue_on_error: true
         action: media_player.shuffle_set
@@ -8799,6 +8801,7 @@
               entity_id: media_player.bedroom_2
             data:
               media_id: ytmusic:playlist:VLPLV_q9IkDBBFKI-4jQfFG5KZaWanZgd3-r
+              media_type: playlist
               radio_mode: false
           - continue_on_error: true
             action: media_player.shuffle_set
@@ -8848,6 +8851,7 @@
             entity_id: media_player.bedroom_2
           data:
             media_id: ytmusic:playlist:VLPLiy0XOfUv4hHOC8nCojwvnOW2vpCrj8gM
+            media_type: playlist
             radio_mode: false
         - continue_on_error: true
           action: media_player.shuffle_set
