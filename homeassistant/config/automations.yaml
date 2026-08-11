@@ -4331,10 +4331,35 @@
           minutes: 55
           seconds: 0
           milliseconds: 0
-      - alias: Stop bedroom audio
-        action: media_player.media_stop
-        target:
+      - alias: Stop bedroom audio (with verify and retry)
+        repeat:
+          count: 3
+          sequence:
+          - continue_on_error: true
+            action: media_player.media_stop
+            target:
+              entity_id: media_player.bedroom_2
+          - delay:
+              seconds: 5
+          - if:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: media_player.bedroom_2
+                state: playing
+            then:
+            - stop: Stop confirmed
+      - alias: Notify if bedroom audio still didn't stop after retries
+        if:
+        - condition: state
           entity_id: media_player.bedroom_2
+          state: playing
+        then:
+        - action: notify.mobile_app_pc_iphone
+          data:
+            title: Bedroom audio didn't stop
+            message: Music was still playing after the 55-minute timer and 3 stop
+              attempts - Sonos may have lost connection to Music Assistant.
   mode: restart
 - id: '1776302554735'
   alias: 'Hue Button 2 - Big Bedroom: Bedtime Button - Hue Button 2'
@@ -4557,10 +4582,35 @@
       - alias: Wait 55 minutes then stop audio
         delay:
           minutes: 55
-      - alias: Stop bedroom audio
-        action: media_player.media_stop
-        target:
+      - alias: Stop bedroom audio (with verify and retry)
+        repeat:
+          count: 3
+          sequence:
+          - continue_on_error: true
+            action: media_player.media_stop
+            target:
+              entity_id: media_player.bedroom_2
+          - delay:
+              seconds: 5
+          - if:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: media_player.bedroom_2
+                state: playing
+            then:
+            - stop: Stop confirmed
+      - alias: Notify if bedroom audio still didn't stop after retries
+        if:
+        - condition: state
           entity_id: media_player.bedroom_2
+          state: playing
+        then:
+        - action: notify.mobile_app_pc_iphone
+          data:
+            title: Bedroom audio didn't stop
+            message: White noise was still playing after the 55-minute timer and
+              3 stop attempts - Sonos may have lost connection to Music Assistant.
   mode: restart
 - id: '1776307653783'
   alias: 'Hue Button 4 - Big Bedroom: Hue Switch Override - Button 4'
