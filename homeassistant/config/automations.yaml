@@ -4733,10 +4733,24 @@
         action: media_player.turn_off
         target:
           entity_id: media_player.bedroom_tv_2
-      - alias: Stop bedroom audio
-        action: media_player.media_stop
-        target:
-          entity_id: media_player.bedroom_2
+      - alias: Stop bedroom audio (with verify and retry)
+        repeat:
+          count: 3
+          sequence:
+          - continue_on_error: true
+            action: media_player.media_stop
+            target:
+              entity_id: media_player.bedroom_2
+          - delay:
+              seconds: 5
+          - if:
+            - condition: not
+              conditions:
+              - condition: state
+                entity_id: media_player.bedroom_2
+                state: playing
+            then:
+            - stop: Stop confirmed
       - alias: Reset scene mode
         action: input_select.select_option
         target:
