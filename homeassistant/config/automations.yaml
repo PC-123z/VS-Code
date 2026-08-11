@@ -8107,7 +8107,16 @@
           entity_id: media_player.bedroom
         data:
           volume_level: 0.05
-      - alias: Play morning playlist via Music Assistant
+      - alias: Play Here Comes The Sun first, explicitly
+        continue_on_error: true
+        action: music_assistant.play_media
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          media_id: ytmusic://track/xUNqsfFUwhY
+          media_type: track
+          enqueue: play
+      - alias: Queue the rest of the morning playlist right after it
         continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -8115,23 +8124,8 @@
         data:
           media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
           media_type: playlist
-      - alias: Ensure shuffle is off so the first track always plays first
-        continue_on_error: true
-        action: media_player.shuffle_set
-        target:
-          entity_id: media_player.bedroom_2
-        data:
-          shuffle: false
-      - alias: Wait a few seconds for the first track's title to register
-        delay:
-          seconds: 8
-      - alias: Wait for the first track to finish before shuffling the rest
-        wait_template: '{{ ''here comes the sun'' not in (state_attr(''media_player.bedroom_2'',
-          ''media_title'') | default('''') | lower) }}'
-        timeout:
-          minutes: 5
-        continue_on_timeout: true
-      - alias: Shuffle morning playlist after the first track
+          enqueue: next
+      - alias: Shuffle the queued playlist (doesn't affect the track already playing)
         continue_on_error: true
         action: media_player.shuffle_set
         target:
@@ -8276,21 +8270,17 @@
                   target:
                     entity_id: media_player.bedroom_2
                   data:
-                    media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
-                    media_type: playlist
+                    media_id: ytmusic://track/xUNqsfFUwhY
+                    media_type: track
+                    enqueue: play
                 - continue_on_error: true
-                  action: media_player.shuffle_set
+                  action: music_assistant.play_media
                   target:
                     entity_id: media_player.bedroom_2
                   data:
-                    shuffle: false
-                - delay:
-                    seconds: 8
-                - wait_template: '{{ ''here comes the sun'' not in (state_attr(''media_player.bedroom_2'',
-                    ''media_title'') | default('''') | lower) }}'
-                  timeout:
-                    minutes: 5
-                  continue_on_timeout: true
+                    media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
+                    media_type: playlist
+                    enqueue: next
                 - continue_on_error: true
                   action: media_player.shuffle_set
                   target:
