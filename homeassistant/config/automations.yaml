@@ -790,7 +790,7 @@
     data: {}
   mode: single
 - id: '1748800000001'
-  alias: '*Big Bedroom: Reset Override When Empty'
+  alias: 'Big Bedroom: Reset Override When Empty'
   description: After 30 min empty, turns lights off, clears manual override, and re-enables
     motion automation + AL so presence lighting resumes on next entry. Skipped while
     asleep (Hue button 2/3/4) - only Good Morning re-arms the room then.
@@ -9143,7 +9143,7 @@
       entity_id: input_boolean.office_pc_wake
   mode: single
 - id: '1775510700000'
-  alias: '*Big Bedroom: Nanoleaf stuck-on watchdog'
+  alias: 'Big Bedroom: Nanoleaf stuck-on watchdog'
   description: The Nanoleaf frequently drops offline (unavailable) and can miss the
     presence turn-off; when it reconnects it restores to its last on-state. This retries
     turning it off whenever the room is empty and presence lighting is in charge,
