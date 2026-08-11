@@ -8108,9 +8108,25 @@
         target:
           entity_id: media_player.bedroom_2
         data:
-          media_id: ytmusic://playlist/VLPLrALqIYcGkyQQVGQMsNp09LW2kQNVUFx1
+          media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
           media_type: playlist
-      - alias: Shuffle morning playlist
+      - alias: Ensure shuffle is off so the first track always plays first
+        continue_on_error: true
+        action: media_player.shuffle_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          shuffle: false
+      - alias: Wait a few seconds for the first track's title to register
+        delay:
+          seconds: 8
+      - alias: Wait for the first track to finish before shuffling the rest
+        wait_template: '{{ ''here comes the sun'' not in (state_attr(''media_player.bedroom_2'',
+          ''media_title'') | default('''') | lower) }}'
+        timeout:
+          minutes: 5
+        continue_on_timeout: true
+      - alias: Shuffle morning playlist after the first track
         continue_on_error: true
         action: media_player.shuffle_set
         target:
