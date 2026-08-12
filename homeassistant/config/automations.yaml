@@ -4609,8 +4609,8 @@
         - action: notify.mobile_app_pc_iphone
           data:
             title: Bedroom audio didn't stop
-            message: White noise was still playing after the 55-minute timer and
-              3 stop attempts - Sonos may have lost connection to Music Assistant.
+            message: White noise was still playing after the 55-minute timer and 3
+              stop attempts - Sonos may have lost connection to Music Assistant.
   mode: restart
 - id: '1776307653783'
   alias: 'Hue Button 4 - Big Bedroom: Hue Switch Override - Button 4'
@@ -5318,7 +5318,7 @@
     presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: 06:45:00
+    at: 06:30:00
     weekday:
     - mon
     - tue
