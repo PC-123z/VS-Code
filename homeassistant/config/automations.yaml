@@ -9426,11 +9426,15 @@
   mode: single
 - id: '1779800000002'
   alias: 'Welcome Home: Disable Immediately if Music Pauses'
-  description: If any speaker involved in the welcome home group stops playing for
-    even a moment while welcome home is active, kill the routine right away. Since
-    welcome_home_active is only re-armed by an actual departure + arrival (alarm must
-    be armed away/home first), this keeps it off until the next real cycle instead
-    of it lingering or re-joining rooms after a manual pause.
+  description: If any speaker involved in the welcome home group stops playing and
+    stays stopped for 10s while welcome home is active, kill the routine right away.
+    The 10s hold avoids a false trigger from the idle->paused->playing blip that
+    music_assistant.play_media goes through while it loads the queue on arrival
+    (was killing welcome_home_active ~8s after every arrival, before music even
+    started - see 2026-08-12 incident). Since welcome_home_active is only re-armed
+    by an actual departure + arrival (alarm must be armed away/home first), this
+    keeps it off until the next real cycle instead of it lingering or re-joining
+    rooms after a manual pause.
   triggers:
   - trigger: state
     entity_id:
@@ -9447,6 +9451,8 @@
     - idle
     - 'off'
     - standby
+    for:
+      seconds: 10
   conditions:
   - condition: state
     entity_id: input_boolean.welcome_home_active
