@@ -56,6 +56,11 @@ homekit:
 
 adaptive_lighting:
 
+timer:
+  bedroom_sleep_audio:
+    name: "Bedroom Sleep Audio Auto-Stop"
+    duration: "00:35:00"
+
 # Wake on LAN Switch
 switch:
   - platform: wake_on_lan

@@ -4345,41 +4345,13 @@
         data:
           percentage: 50
     - sequence:
-      - alias: Wait 55 minutes then stop audio
-        delay:
-          hours: 0
-          minutes: 55
-          seconds: 0
-          milliseconds: 0
-      - alias: Stop bedroom audio (with verify and retry)
-        repeat:
-          count: 3
-          sequence:
-          - continue_on_error: true
-            action: media_player.media_stop
-            target:
-              entity_id: media_player.bedroom_2
-          - delay:
-              seconds: 5
-          - if:
-            - condition: not
-              conditions:
-              - condition: state
-                entity_id: media_player.bedroom_2
-                state: playing
-            then:
-            - stop: Stop confirmed
-      - alias: Notify if bedroom audio still didn't stop after retries
-        if:
-        - condition: state
-          entity_id: media_player.bedroom_2
-          state: playing
-        then:
-        - action: notify.mobile_app_pc_iphone
-          data:
-            title: Bedroom audio didn't stop
-            message: Music was still playing after the 55-minute timer and 3 stop
-              attempts - Sonos may have lost connection to Music Assistant.
+      - alias: Start 35-minute auto-stop timer (survives automation reload/restart,
+          unlike a delay baked into this mode:restart automation)
+        action: timer.start
+        target:
+          entity_id: timer.bedroom_sleep_audio
+        data:
+          duration: "00:35:00"
   mode: restart
 - id: '1776302554735'
   alias: 'Hue Button 2 - Big Bedroom: Bedtime Button - Hue Button 2'
@@ -4599,38 +4571,13 @@
         data:
           percentage: 50
     - sequence:
-      - alias: Wait 55 minutes then stop audio
-        delay:
-          minutes: 55
-      - alias: Stop bedroom audio (with verify and retry)
-        repeat:
-          count: 3
-          sequence:
-          - continue_on_error: true
-            action: media_player.media_stop
-            target:
-              entity_id: media_player.bedroom_2
-          - delay:
-              seconds: 5
-          - if:
-            - condition: not
-              conditions:
-              - condition: state
-                entity_id: media_player.bedroom_2
-                state: playing
-            then:
-            - stop: Stop confirmed
-      - alias: Notify if bedroom audio still didn't stop after retries
-        if:
-        - condition: state
-          entity_id: media_player.bedroom_2
-          state: playing
-        then:
-        - action: notify.mobile_app_pc_iphone
-          data:
-            title: Bedroom audio didn't stop
-            message: White noise was still playing after the 55-minute timer and 3
-              stop attempts - Sonos may have lost connection to Music Assistant.
+      - alias: Start 35-minute auto-stop timer (survives automation reload/restart,
+          unlike a delay baked into this mode:restart automation)
+        action: timer.start
+        target:
+          entity_id: timer.bedroom_sleep_audio
+        data:
+          duration: "00:35:00"
   mode: restart
 - id: '1776307653783'
   alias: 'Hue Button 4 - Big Bedroom: Hue Switch Override - Button 4'
@@ -9543,4 +9490,67 @@
       entity_id:
       - input_boolean.welcome_home_active
       - input_boolean.good_morning_active
+  mode: single
+- id: '1779800000005'
+  alias: 'Big Bedroom: Sleep Audio Auto-Stop Timer Finished'
+  description: Stops bedroom audio 35 minutes after Bedtime Button or White Noise
+    Sleep starts timer.bedroom_sleep_audio. Runs independently of the Bedtime/White
+    Noise automations (which use mode:restart and would otherwise wipe an in-progress
+    delay on any re-trigger or automations.yaml reload) so the stop reliably fires
+    even if bedtime was re-pressed earlier or automations were reloaded mid-wind-down.
+    Stops both the Music Assistant entity and the Sonos entity directly, since Music
+    Assistant can reassert playback against a bare Sonos-side stop.
+  triggers:
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.bedroom_sleep_audio
+  conditions: []
+  actions:
+  - alias: Stop bedroom audio (with verify and retry, both entities)
+    repeat:
+      count: 3
+      sequence:
+      - continue_on_error: true
+        action: media_player.media_stop
+        target:
+          entity_id:
+          - media_player.bedroom_2
+          - media_player.bedroom
+      - delay:
+          seconds: 5
+      - if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: media_player.bedroom_2
+            state: playing
+        then:
+        - stop: Stop confirmed
+  - alias: Notify if bedroom audio still didn't stop after retries
+    if:
+    - condition: state
+      entity_id: media_player.bedroom_2
+      state: playing
+    then:
+    - action: notify.mobile_app_pc_iphone
+      data:
+        title: Bedroom audio didn't stop
+        message: Music was still playing after the 35-minute sleep timer and 3 stop
+          attempts on both entities - Sonos may have lost connection to Music Assistant.
+  mode: single
+- id: '1779800000006'
+  alias: 'Big Bedroom: Cancel Sleep Audio Timer on Wake'
+  description: Cancels timer.bedroom_sleep_audio whenever Good Morning or Nap Wake
+    Up starts, so a leftover bedtime auto-stop timer from earlier in the night can't
+    fire mid-routine and kill the wake-up music.
+  triggers:
+  - trigger: state
+    entity_id: input_boolean.good_morning_active
+    to: 'on'
+  conditions: []
+  actions:
+  - action: timer.cancel
+    target:
+      entity_id: timer.bedroom_sleep_audio
   mode: single
