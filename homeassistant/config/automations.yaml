@@ -1,8 +1,13 @@
 - id: '1773000000002'
   alias: Good Morning - Stop routine when music stopped from speaker
-  description: If the Sonos speaker is paused/stopped manually (sustained for 8+ seconds,
-    to avoid false triggers from the routine's own brief TTS-announcement pause) while
-    Good Morning is active, end that run only by clearing input_boolean.good_morning_active.
+  description: If the Sonos speaker is paused/stopped manually while Good Morning is
+    active, end that run by clearing input_boolean.good_morning_active. Watches the
+    Sonos entity (media_player.bedroom) with a short debounce since a physical
+    button press reliably shows there and the routine never pauses it directly -
+    Music Assistant (media_player.bedroom_2) can reassert playback almost instantly
+    after a physical stop, so relying on it alone let Music Assistant win the race
+    and made manual stops not stick. Kept the longer 8s debounce on bedroom_2 too,
+    to avoid false triggers from the routine's own brief TTS-announcement pause.
     Does not touch this automation's or the Good Morning Routine automation's enabled
     state, so scheduled/manual runs still work normally in the future.
   triggers:
@@ -18,6 +23,18 @@
     to: idle
     for:
       seconds: 8
+  - trigger: state
+    entity_id: media_player.bedroom
+    from: playing
+    to: paused
+    for:
+      seconds: 2
+  - trigger: state
+    entity_id: media_player.bedroom
+    from: playing
+    to: idle
+    for:
+      seconds: 2
   conditions:
   - condition: state
     entity_id: input_boolean.good_morning_active
@@ -8364,6 +8381,11 @@
                   state:
                   - idle
                   - 'off'
+                  for:
+                    seconds: 20
+                - condition: state
+                  entity_id: input_boolean.good_morning_active
+                  state: 'on'
                 then:
                 - continue_on_error: true
                   action: music_assistant.play_media
