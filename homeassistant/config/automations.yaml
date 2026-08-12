@@ -1540,9 +1540,12 @@
               adapt_color: true
               adapt_brightness: true
         - conditions:
+          - condition: state
+            entity_id: sun.sun
+            state: above_horizon
           - condition: time
-            after: 07:00:00
             before: '22:30:00'
+          alias: Daytime (sun up, before dishes/sleep window)
           sequence:
           - action: switch.turn_off
             target:
