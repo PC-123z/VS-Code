@@ -7609,6 +7609,11 @@
     arrival signals work as a fallback for each other, regardless of ordering with
     the garage - webhook isn't wired in directly because HA only allows one automation
     to register a given webhook_id, and the latch automation already owns paul_arrived_home.
+    Fixed 2026-08-13 - the smart garage cover entity silently failed to report "open"
+    on arrival, so the two-factor check waited forever even though the beacon confirmed
+    arrival and the security panel's own entry sensor tripped (went to "pending").
+    Now the panel's own pending/entry-delay state also satisfies the garage half of
+    the check, as a fallback for when the smart garage integration desyncs.
   triggers:
   - id: garage
     trigger: state
@@ -7619,6 +7624,10 @@
     trigger: state
     entity_id: input_boolean.arrival_recent
     to: 'on'
+  - id: entry_delay
+    trigger: state
+    entity_id: alarm_control_panel.3302_alarm
+    to: pending
   conditions:
   - alias: Alarm must be armed (confirms we departed, not just opening garage at home)
     condition: or
@@ -7629,14 +7638,19 @@
     - condition: state
       entity_id: alarm_control_panel.3302_alarm
       state: armed_home
+    - condition: state
+      entity_id: alarm_control_panel.3302_alarm
+      state: pending
   actions:
   - alias: Latch this signal; only fall through to disarm if the OTHER signal already
       fired
     choose:
-    - alias: Garage opened - if no arrival signal has confirmed yet, latch and wait
+    - alias: Garage opened (or panel's own entry-delay fired, in case the smart garage
+        entity missed reporting open) - if no arrival signal has confirmed yet, latch
+        and wait
       conditions:
       - condition: template
-        value_template: '{{ trigger.id == "garage" and is_state("input_boolean.arrival_recent",
+        value_template: '{{ trigger.id in ["garage", "entry_delay"] and is_state("input_boolean.arrival_recent",
           "off") }}'
       sequence:
       - alias: Set the garage-open latch
