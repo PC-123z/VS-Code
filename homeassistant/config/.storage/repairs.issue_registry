@@ -194,13 +194,6 @@
         "issue_id": "restart_required_1130928743_tags/v0.7.0"
       },
       {
-        "created": "2026-08-13T12:57:41.237211+00:00",
-        "dismissed_version": null,
-        "domain": "hacs",
-        "is_persistent": false,
-        "issue_id": "restart_required_697816279_tags/2.4.0"
-      },
-      {
         "created": "2026-08-13T12:57:52.723891+00:00",
         "dismissed_version": null,
         "domain": "hacs",
