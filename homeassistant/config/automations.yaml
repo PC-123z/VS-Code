@@ -126,6 +126,30 @@
       - switch.al_sleep_mode_kitchen_main
       - switch.al_sleep_mode_living_room
       - switch.adaptive_lighting_sleep_mode_office
+  - alias: Turn on bathroom main light softly for nap wake up
+    action: light.turn_on
+    target:
+      entity_id: light.bathroom_main_lights
+    data:
+      brightness_pct: 2
+      color_temp_kelvin: 2700
+      transition: 1
+  - alias: Clear manual control for bathroom main so AL can adapt it
+    action: adaptive_lighting.set_manual_control
+    continue_on_error: true
+    data:
+      entity_id: switch.al_bathroom_main
+      manual_control: false
+  - alias: Ramp bathroom main to Adaptive Lighting over 90 seconds
+    action: adaptive_lighting.apply
+    continue_on_error: true
+    data:
+      entity_id: switch.al_bathroom_main
+      lights:
+      - light.bathroom_main_lights
+      transition: 90
+      adapt_color: true
+      adapt_brightness: true
   - alias: Turn off bedroom AL switches and clear manual control
     action: switch.turn_off
     target:
