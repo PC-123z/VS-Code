@@ -3762,9 +3762,10 @@
   mode: single
 - id: '1776224561667'
   alias: 'Bedroom 2: Dimmer'
-  description: 'Button 1: Bright 100% with time-based color temp. Button 2: brightness
-    up (hold to repeat). Button 3: brightness down (hold to repeat). Button 4: off
-    and restore AL.
+  description: 'Button 1 press: restore AL and mirror presence-sensor lighting (time-of-day
+    AL, dimmed/red after 10pm if sleep mode). Button 1 hold: force bright 100% with
+    time-based color temp (old Button 1 behavior). Button 2: brightness up (hold to
+    repeat). Button 3: brightness down (hold to repeat). Button 4: off and restore AL.
 
     '
   triggers:
@@ -3772,9 +3773,16 @@
     domain: hue
     type: initial_press
     subtype: 1
-    unique_id: office-dimmer-btn1-bright-100
+    unique_id: office-dimmer-btn1-restore-al
     trigger: device
     id: btn1_press
+  - device_id: c6078582c306e2d78ad6c4e84d2b6e7c
+    domain: hue
+    type: long_release
+    subtype: 1
+    unique_id: office-dimmer-btn1-bright-100-hold
+    trigger: device
+    id: btn1_hold
   - device_id: c6078582c306e2d78ad6c4e84d2b6e7c
     domain: hue
     type: initial_press
@@ -3816,6 +3824,137 @@
     - conditions:
       - condition: trigger
         id: btn1_press
+      sequence:
+      - alias: Clear manual override - restore normal automatic behavior
+        action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.bedroom2_manual_override
+      - alias: Clear manual_control flag so AL can adapt freely
+        action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.adaptive_lighting_office
+          lights:
+          - light.office
+          manual_control: false
+      - alias: Re-enable AL switches
+        action: switch.turn_on
+        target:
+          entity_id:
+          - switch.adaptive_lighting_office
+          - switch.adaptive_lighting_adapt_color_office
+          - switch.adaptive_lighting_adapt_brightness_office
+      - alias: Set sleep mode based on time of day
+        if:
+        - condition: time
+          after: '22:00:00'
+          before: 07:00:00
+        then:
+        - alias: 10pm or later - turn sleep mode on
+          action: switch.turn_on
+          target:
+            entity_id: switch.adaptive_lighting_sleep_mode_office
+        else:
+        - alias: Day hours - keep sleep mode off
+          action: switch.turn_off
+          target:
+            entity_id: switch.adaptive_lighting_sleep_mode_office
+      - alias: Mirror presence-sensor lighting - AL for time of day, sleep mode respected
+          after 10pm
+        choose:
+        - alias: Sleep mode active - gentle red bump only, no bright flash
+          conditions:
+          - condition: state
+            entity_id: switch.adaptive_lighting_sleep_mode_office
+            state: 'on'
+          sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.ribbon
+            data:
+              brightness_pct: 8
+              rgb_color:
+              - 255
+              - 62
+              - 1
+              transition: 2
+          - action: light.turn_on
+            target:
+              entity_id: light.fluttershy
+            data:
+              brightness_pct: 8
+              rgb_color:
+              - 255
+              - 62
+              - 1
+              transition: 2
+        - conditions:
+          - condition: time
+            after: '15:30:00'
+            before: '19:30:00'
+            weekday:
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+          sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.office
+            data:
+              transition: 2
+          - action: adaptive_lighting.apply
+            continue_on_error: true
+            data:
+              entity_id: switch.adaptive_lighting_office
+              lights:
+              - light.office
+              transition: 2
+              adapt_color: true
+              adapt_brightness: true
+          - action: light.turn_on
+            target:
+              entity_id: light.ribbon
+            data:
+              effect: Jungle
+          - action: light.turn_on
+            target:
+              entity_id: light.fluttershy
+            data:
+              effect: Flow
+        - conditions:
+          - condition: time
+            after: 06:30:00
+            before: '22:00:00'
+          sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.office
+            data:
+              transition: 2
+          - action: adaptive_lighting.apply
+            continue_on_error: true
+            data:
+              entity_id: switch.adaptive_lighting_office
+              lights:
+              - light.office
+              transition: 2
+              adapt_color: true
+              adapt_brightness: true
+        - conditions: []
+          sequence:
+          - action: light.turn_off
+            target:
+              entity_id:
+              - light.ribbon
+              - light.fluttershy
+              - light.office_1
+              - light.office_2
+            data:
+              transition: 2
+    - conditions:
+      - condition: trigger
+        id: btn1_hold
       sequence:
       - alias: Set manual override - bright override
         action: input_boolean.turn_on
