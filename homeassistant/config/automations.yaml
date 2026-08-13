@@ -5040,7 +5040,7 @@
             target:
               entity_id: media_player.office_2
             data:
-              media_id: ytmusic:album:MPREb_A9AHzoUYd7b
+              media_id: ytmusic://album/MPREb_A9AHzoUYd7b
               radio_mode: false
           - continue_on_error: true
             action: media_player.shuffle_set
@@ -5115,7 +5115,7 @@
             target:
               entity_id: media_player.office_2
             data:
-              media_id: ytmusic:album:MPREb_A9AHzoUYd7b
+              media_id: ytmusic://album/MPREb_A9AHzoUYd7b
               radio_mode: false
           - continue_on_error: true
             action: media_player.shuffle_set
