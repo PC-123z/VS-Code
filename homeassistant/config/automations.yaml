@@ -8313,7 +8313,10 @@
           entity_id: media_player.bedroom
         data:
           volume_level: 0.05
-      - alias: Play Here Comes The Sun first, explicitly
+      - alias: Play Here Comes The Sun first, explicitly (replace clears any leftover
+          overnight queue - enqueue:play only inserts at the current position and
+          leaves stale tracks queued behind it, which is why the routine fell back
+          to sleep music once this track ended)
         continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -8321,7 +8324,7 @@
         data:
           media_id: ytmusic://track/xUNqsfFUwhY
           media_type: track
-          enqueue: play
+          enqueue: replace
       - alias: Queue the rest of the morning playlist right after it
         continue_on_error: true
         action: music_assistant.play_media
@@ -8483,7 +8486,7 @@
                   data:
                     media_id: ytmusic://track/xUNqsfFUwhY
                     media_type: track
-                    enqueue: play
+                    enqueue: replace
                 - continue_on_error: true
                   action: music_assistant.play_media
                   target:
