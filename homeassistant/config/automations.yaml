@@ -1,15 +1,15 @@
 - id: '1773000000002'
   alias: Good Morning - Stop routine when music stopped from speaker
-  description: If the Sonos speaker is paused/stopped manually while Good Morning is
-    active, end that run by clearing input_boolean.good_morning_active. Watches the
-    Sonos entity (media_player.bedroom) with a short debounce since a physical
-    button press reliably shows there and the routine never pauses it directly -
-    Music Assistant (media_player.bedroom_2) can reassert playback almost instantly
-    after a physical stop, so relying on it alone let Music Assistant win the race
-    and made manual stops not stick. Kept the longer 8s debounce on bedroom_2 too,
-    to avoid false triggers from the routine's own brief TTS-announcement pause.
-    Does not touch this automation's or the Good Morning Routine automation's enabled
-    state, so scheduled/manual runs still work normally in the future.
+  description: If the Sonos speaker is paused/stopped manually while Good Morning
+    is active, end that run by clearing input_boolean.good_morning_active. Watches
+    the Sonos entity (media_player.bedroom) with a short debounce since a physical
+    button press reliably shows there and the routine never pauses it directly - Music
+    Assistant (media_player.bedroom_2) can reassert playback almost instantly after
+    a physical stop, so relying on it alone let Music Assistant win the race and made
+    manual stops not stick. Kept the longer 8s debounce on bedroom_2 too, to avoid
+    false triggers from the routine's own brief TTS-announcement pause. Does not touch
+    this automation's or the Good Morning Routine automation's enabled state, so scheduled/manual
+    runs still work normally in the future.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
@@ -3789,7 +3789,8 @@
   description: 'Button 1 press: restore AL and mirror presence-sensor lighting (time-of-day
     AL, dimmed/red after 10pm if sleep mode). Button 1 hold: force bright 100% with
     time-based color temp (old Button 1 behavior). Button 2: brightness up (hold to
-    repeat). Button 3: brightness down (hold to repeat). Button 4: off and restore AL.
+    repeat). Button 3: brightness down (hold to repeat). Button 4: off and restore
+    AL.
 
     '
   triggers:
@@ -4514,7 +4515,7 @@
         target:
           entity_id: timer.bedroom_sleep_audio
         data:
-          duration: "00:35:00"
+          duration: 00:35:00
   mode: restart
 - id: '1776302554735'
   alias: 'Hue Button 2 - Big Bedroom: Bedtime Button - Hue Button 2'
@@ -4740,7 +4741,7 @@
         target:
           entity_id: timer.bedroom_sleep_audio
         data:
-          duration: "00:35:00"
+          duration: 00:35:00
   mode: restart
 - id: '1776307653783'
   alias: 'Hue Button 4 - Big Bedroom: Hue Switch Override - Button 4'
@@ -8192,7 +8193,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 06:45:00
+    at: 07:45:00
     weekday:
     - mon
     - tue
@@ -9632,13 +9633,12 @@
   alias: 'Welcome Home: Disable Immediately if Music Pauses'
   description: If any speaker involved in the welcome home group stops playing and
     stays stopped for 10s while welcome home is active, kill the routine right away.
-    The 10s hold avoids a false trigger from the idle->paused->playing blip that
-    music_assistant.play_media goes through while it loads the queue on arrival
-    (was killing welcome_home_active ~8s after every arrival, before music even
-    started - see 2026-08-12 incident). Since welcome_home_active is only re-armed
-    by an actual departure + arrival (alarm must be armed away/home first), this
-    keeps it off until the next real cycle instead of it lingering or re-joining
-    rooms after a manual pause.
+    The 10s hold avoids a false trigger from the idle->paused->playing blip that music_assistant.play_media
+    goes through while it loads the queue on arrival (was killing welcome_home_active
+    ~8s after every arrival, before music even started - see 2026-08-12 incident).
+    Since welcome_home_active is only re-armed by an actual departure + arrival (alarm
+    must be armed away/home first), this keeps it off until the next real cycle instead
+    of it lingering or re-joining rooms after a manual pause.
   triggers:
   - trigger: state
     entity_id:
