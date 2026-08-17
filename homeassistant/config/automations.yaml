@@ -4310,6 +4310,13 @@
     id: hold
   conditions: []
   actions:
+  - alias: Start 35-minute auto-stop timer immediately - set first so a re-trigger
+      or interruption later in this script can never prevent it from arming
+    action: timer.start
+    target:
+      entity_id: timer.bedroom_sleep_audio
+    data:
+      duration: 00:35:00
   - alias: Disable motion automation
     action: automation.turn_off
     target:
@@ -4508,14 +4515,6 @@
           entity_id: fan.air_circulator
         data:
           percentage: 50
-    - sequence:
-      - alias: Start 35-minute auto-stop timer (survives automation reload/restart,
-          unlike a delay baked into this mode:restart automation)
-        action: timer.start
-        target:
-          entity_id: timer.bedroom_sleep_audio
-        data:
-          duration: 00:35:00
   mode: restart
 - id: '1776302554735'
   alias: 'Hue Button 2 - Big Bedroom: Bedtime Button - Hue Button 2'
@@ -4533,6 +4532,13 @@
     entity_id: input_boolean.good_morning_active
     state: 'off'
   actions:
+  - alias: Start 35-minute auto-stop timer immediately - set first so a re-trigger
+      or interruption later in this script can never prevent it from arming
+    action: timer.start
+    target:
+      entity_id: timer.bedroom_sleep_audio
+    data:
+      duration: 00:35:00
   - alias: Disable motion automation
     action: automation.turn_off
     target:
@@ -4734,14 +4740,6 @@
           entity_id: fan.air_circulator
         data:
           percentage: 50
-    - sequence:
-      - alias: Start 35-minute auto-stop timer (survives automation reload/restart,
-          unlike a delay baked into this mode:restart automation)
-        action: timer.start
-        target:
-          entity_id: timer.bedroom_sleep_audio
-        data:
-          duration: 00:35:00
   mode: restart
 - id: '1776307653783'
   alias: 'Hue Button 4 - Big Bedroom: Hue Switch Override - Button 4'
@@ -6584,6 +6582,10 @@
     - conditions:
       - condition: trigger
         id: tv_off
+      - alias: Skip while Big Bedroom is asleep - only Good Morning re-arms lighting
+        condition: state
+        entity_id: input_boolean.big_bedroom_asleep
+        state: 'off'
       sequence:
       - action: adaptive_lighting.set_manual_control
         data:
