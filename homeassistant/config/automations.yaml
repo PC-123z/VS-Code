@@ -4404,7 +4404,7 @@
       entity_id: fan.big_bedroom_fan
     data:
       percentage: 50
-    enabled: true
+    enabled: false
   - alias: Turn on purifier at 25%
     action: fan.turn_on
     target:
@@ -4627,7 +4627,7 @@
       entity_id: fan.big_bedroom_fan
     data:
       percentage: 50
-    enabled: true
+    enabled: false
   - alias: Turn on purifier at 25%
     continue_on_error: true
     action: fan.turn_on
@@ -4958,7 +4958,7 @@
       percentage: 50
     target:
       entity_id: fan.big_bedroom_fan
-    enabled: true
+    enabled: false
   - alias: Set purifier to 50%
     action: fan.turn_on
     target:
@@ -5066,7 +5066,7 @@
       percentage: 50
     target:
       entity_id: fan.big_bedroom_fan
-    enabled: true
+    enabled: false
   - alias: Set purifier to 50%
     action: fan.turn_on
     target:
