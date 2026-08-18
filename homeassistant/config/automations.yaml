@@ -9751,6 +9751,42 @@
         message: Music was still playing after the 35-minute sleep timer and 3 stop
           attempts on both entities - Sonos may have lost connection to Music Assistant.
   mode: single
+- id: '1787057464833'
+  alias: 'Bedroom: Stuck Track Watchdog'
+  description: Music Assistant occasionally fails to advance the Bedroom queue when
+    a track ends (MA/Sonos end-of-track sync glitch) - repeat_mode all then just
+    restarts the same track from 0 instead of moving on, which looks like the same
+    song playing on a loop. Checks every minute whether the computed playback position
+    has run past the track's reported duration and, if so, forces a skip to unstick
+    it.
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+  conditions:
+  - condition: state
+    entity_id: media_player.bedroom_2
+    state: playing
+  - condition: template
+    value_template: '{{ state_attr(''media_player.bedroom_2'', ''media_duration'')
+      not in (none, 0) and state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')
+      is not none and (state_attr(''media_player.bedroom_2'', ''media_position'')
+      | float(0)) + (now() - state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')).total_seconds()
+      > (state_attr(''media_player.bedroom_2'', ''media_duration'') | float(0) +
+      5) }}'
+  actions:
+  - alias: Log which track was stuck
+    action: logbook.log
+    data:
+      name: Bedroom Stuck Track Watchdog
+      message: >-
+        Position ran past duration on "{{ state_attr('media_player.bedroom_2',
+        'media_title') }}" - forcing next track.
+      entity_id: media_player.bedroom_2
+  - alias: Force skip to next track to unstick the queue
+    action: media_player.media_next_track
+    target:
+      entity_id: media_player.bedroom_2
+  mode: single
 - id: '1779800000006'
   alias: 'Big Bedroom: Cancel Sleep Audio Timer on Wake'
   description: Cancels timer.bedroom_sleep_audio whenever Good Morning or Nap Wake
