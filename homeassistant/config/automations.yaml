@@ -5005,12 +5005,18 @@
       area_id: bathroom
     data:
       transition: 5
-  - action: light.turn_off
-    target:
-      entity_id: light.nano_sand_dune
-    data:
-      transition: 30
-    continue_on_error: true
+  - alias: Turn off Nanoleaf (retry - it frequently drops offline and misses commands)
+    repeat:
+      count: 3
+      sequence:
+      - continue_on_error: true
+        action: light.turn_off
+        target:
+          entity_id: light.nano_sand_dune
+        data:
+          transition: 5
+      - delay:
+          seconds: 5
   - alias: Turn off Nanoleaf after 15 minutes
     delay:
       minutes: 15
@@ -5115,12 +5121,18 @@
       area_id: bathroom
     data:
       transition: 5
-  - action: light.turn_off
-    target:
-      entity_id: light.nano_sand_dune
-    data:
-      transition: 30
-    continue_on_error: true
+  - alias: Turn off Nanoleaf (retry - it frequently drops offline and misses commands)
+    repeat:
+      count: 3
+      sequence:
+      - continue_on_error: true
+        action: light.turn_off
+        target:
+          entity_id: light.nano_sand_dune
+        data:
+          transition: 5
+      - delay:
+          seconds: 5
   - alias: Turn off Nanoleaf after 15 minutes
     delay:
       minutes: 15
