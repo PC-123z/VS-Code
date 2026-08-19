@@ -1284,10 +1284,9 @@
     AL. Manual override flag auto-clears 10 min after motion stops (kitchen_cleared).
     Late-night dishes mode (23:45–23:55) keeps lights warm/usable when motion is active,
     right as kitchen sleep mode (kitchen_sleep_on, 23:45) is applied. Main light stays
-    on normally from sun-down until 23:45. AL is disabled BEFORE manual
-    color changes in ALL paths to prevent manual_control flag from triggering the
-    override boolean spuriously. Mode is queued (max 10) so long transitions can''t
-    cause dropped triggers.
+    on normally from sun-down until 23:45. AL is disabled BEFORE manual color changes
+    in ALL paths to prevent manual_control flag from triggering the override boolean
+    spuriously. Mode is queued (max 10) so long transitions can''t cause dropped triggers.
 
     '
   triggers:
@@ -8224,7 +8223,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 08:30:00
+    at: 06:45:00
     weekday:
     - mon
     - tue
@@ -9783,11 +9782,10 @@
 - id: '1787057464833'
   alias: 'Bedroom: Stuck Track Watchdog'
   description: Music Assistant occasionally fails to advance the Bedroom queue when
-    a track ends (MA/Sonos end-of-track sync glitch) - repeat_mode all then just
-    restarts the same track from 0 instead of moving on, which looks like the same
-    song playing on a loop. Checks every minute whether the computed playback position
-    has run past the track's reported duration and, if so, forces a skip to unstick
-    it.
+    a track ends (MA/Sonos end-of-track sync glitch) - repeat_mode all then just restarts
+    the same track from 0 instead of moving on, which looks like the same song playing
+    on a loop. Checks every minute whether the computed playback position has run
+    past the track's reported duration and, if so, forces a skip to unstick it.
   triggers:
   - trigger: time_pattern
     minutes: /1
@@ -9800,15 +9798,14 @@
       not in (none, 0) and state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')
       is not none and (state_attr(''media_player.bedroom_2'', ''media_position'')
       | float(0)) + (now() - state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')).total_seconds()
-      > (state_attr(''media_player.bedroom_2'', ''media_duration'') | float(0) +
-      5) }}'
+      > (state_attr(''media_player.bedroom_2'', ''media_duration'') | float(0) + 5)
+      }}'
   actions:
   - alias: Log which track was stuck
     action: logbook.log
     data:
       name: Bedroom Stuck Track Watchdog
-      message: >-
-        Position ran past duration on "{{ state_attr('media_player.bedroom_2',
+      message: Position ran past duration on "{{ state_attr('media_player.bedroom_2',
         'media_title') }}" - forcing next track.
       entity_id: media_player.bedroom_2
   - alias: Force skip to next track to unstick the queue
