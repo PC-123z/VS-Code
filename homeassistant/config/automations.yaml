@@ -5186,6 +5186,13 @@
         target:
           entity_id: fan.bedroom2_fan
         enabled: true
+      - alias: Unjoin office_2 from any Music Assistant group before playing sleep
+          music - otherwise it plays to whatever it's currently grouped with (e.g.
+          the kitchen)
+        action: media_player.unjoin
+        continue_on_error: true
+        target:
+          entity_id: media_player.office_2
       - alias: Play sleep music regardless of dimmer override - a button press to
           adjust lights shouldn't silently skip the music too
         action: media_player.volume_set
@@ -5261,6 +5268,13 @@
         target:
           entity_id: fan.bedroom2_fan
         enabled: true
+      - alias: Unjoin office_2 from any Music Assistant group before playing sleep
+          music - otherwise it plays to whatever it's currently grouped with (e.g.
+          the kitchen)
+        action: media_player.unjoin
+        continue_on_error: true
+        target:
+          entity_id: media_player.office_2
       - alias: Play sleep music regardless of dimmer override - a button press to
           adjust lights shouldn't silently skip the music too
         action: media_player.volume_set
