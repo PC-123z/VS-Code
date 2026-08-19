@@ -1282,8 +1282,9 @@
   description: 'Hue sensors trigger lights on immediately. Frigate confirmed presence
     (3 min debounce) blocks shutoff while someone is sitting still. Sleep mode overrides
     AL. Manual override flag auto-clears 10 min after motion stops (kitchen_cleared).
-    Late-night dishes mode (22:30–23:55) keeps lights warm/usable when motion is active,
-    even after global sleep mode is applied at 22:45. AL is disabled BEFORE manual
+    Late-night dishes mode (23:45–23:55) keeps lights warm/usable when motion is active,
+    right as kitchen sleep mode (kitchen_sleep_on, 23:45) is applied. Main light stays
+    on normally from sun-down until 23:45. AL is disabled BEFORE manual
     color changes in ALL paths to prevent manual_control flag from triggering the
     override boolean spuriously. Mode is queued (max 10) so long transitions can''t
     cause dropped triggers.
@@ -1426,7 +1427,7 @@
       - choose:
         - conditions:
           - condition: time
-            after: '22:30:00'
+            after: '23:45:00'
             before: '23:55:00'
           sequence:
           - action: light.turn_off
@@ -1470,7 +1471,7 @@
       - choose:
         - conditions:
           - condition: time
-            after: '22:30:00'
+            after: '23:45:00'
             before: '23:55:00'
           sequence:
           - action: switch.turn_off
@@ -1568,7 +1569,7 @@
             entity_id: sun.sun
             state: above_horizon
           - condition: time
-            before: '22:30:00'
+            before: '23:45:00'
           alias: Daytime (sun up, before dishes/sleep window)
           sequence:
           - action: switch.turn_off
