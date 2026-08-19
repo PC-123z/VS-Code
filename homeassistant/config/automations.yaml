@@ -1705,8 +1705,12 @@
   max: 10
 - id: '1775368699660'
   alias: 'System: Global Sleep Mode Schedule'
-  description: 'Evening: enables sleep mode for Bedroom 2 / Office at 22:15 and the
-    rest of the house at 23:00. Morning: catch-all that disables sleep mode and re-enables
+  description: 'Evening: enables sleep mode for Bedroom 2 / Office at 22:15, the kitchen
+    at 23:45, and the rest of the house at 23:00. Kitchen is deliberately later than
+    the rest of the house so the main light stays on through late-night kitchen use;
+    it still turns off earlier on its own via the Kitchen automation''s occupancy-clear
+    triggers (kitchen_cleared/kitchen_cleared_hue) whenever the room actually clears,
+    independent of sleep mode. Morning: catch-all that disables sleep mode and re-enables
     AL everywhere, clearing manual_control. Big Bedroom is excluded from the morning
     branch because the Good Morning Routine owns it. Bedroom 2 / Office is included
     in the morning catch-all for simplicity - it''s redundant with "Office: Daily
@@ -1718,6 +1722,9 @@
   - trigger: time
     at: '23:00:00'
     id: house_sleep_on
+  - trigger: time
+    at: '23:45:00'
+    id: kitchen_sleep_on
   - trigger: time
     at: 07:15:00
     id: weekday_sleep_off
@@ -1754,8 +1761,6 @@
         target:
           entity_id:
           - switch.al_sleep_mode_hallway
-          - switch.al_sleep_mode_kitchen
-          - switch.al_sleep_mode_kitchen_main
           - switch.al_sleep_mode_big_bedroom
           - switch.al_sleep_mode_living_room
           - switch.al_sleep_mode_dining_room_bottom
@@ -1768,26 +1773,6 @@
           entity_id: switch.al_hallway
           lights:
           - light.hallway
-          transition: 150
-          adapt_color: true
-          adapt_brightness: true
-      - action: adaptive_lighting.apply
-        continue_on_error: true
-        data:
-          entity_id: switch.al_kitchen
-          lights:
-          - light.kitchen_1_color
-          - light.kitchen_2_color
-          - light.kitchen_lightstrip
-          transition: 150
-          adapt_color: true
-          adapt_brightness: true
-      - action: adaptive_lighting.apply
-        continue_on_error: true
-        data:
-          entity_id: switch.al_kitchen_main
-          lights:
-          - light.kitchen_main_lights
           transition: 150
           adapt_color: true
           adapt_brightness: true
@@ -1845,6 +1830,35 @@
           entity_id: switch.al_bathroom_main
           lights:
           - light.bathroom_main_lights
+          transition: 150
+          adapt_color: true
+          adapt_brightness: true
+    - conditions:
+      - condition: trigger
+        id: kitchen_sleep_on
+      sequence:
+      - action: switch.turn_on
+        target:
+          entity_id:
+          - switch.al_sleep_mode_kitchen
+          - switch.al_sleep_mode_kitchen_main
+      - action: adaptive_lighting.apply
+        continue_on_error: true
+        data:
+          entity_id: switch.al_kitchen
+          lights:
+          - light.kitchen_1_color
+          - light.kitchen_2_color
+          - light.kitchen_lightstrip
+          transition: 150
+          adapt_color: true
+          adapt_brightness: true
+      - action: adaptive_lighting.apply
+        continue_on_error: true
+        data:
+          entity_id: switch.al_kitchen_main
+          lights:
+          - light.kitchen_main_lights
           transition: 150
           adapt_color: true
           adapt_brightness: true
