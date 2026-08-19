@@ -4950,7 +4950,6 @@
       entity_id: alarm_control_panel.3302_alarm
   - alias: Stop bedroom audio (with verify and retry)
     repeat:
-      count: 3
       sequence:
       - continue_on_error: true
         action: media_player.media_stop
@@ -4958,14 +4957,16 @@
           entity_id: media_player.bedroom_2
       - delay:
           seconds: 5
-      - if:
+      until:
+      - condition: or
+        conditions:
+        - condition: template
+          value_template: '{{ repeat.index >= 3 }}'
         - condition: not
           conditions:
           - condition: state
             entity_id: media_player.bedroom_2
             state: playing
-        then:
-        - stop: Stop confirmed
   - alias: Set bedroom fan to 50%
     action: fan.turn_on
     data:
@@ -5009,6 +5010,7 @@
       entity_id: light.nano_sand_dune
     data:
       transition: 30
+    continue_on_error: true
   - alias: Turn off Nanoleaf after 15 minutes
     delay:
       minutes: 15
@@ -5058,7 +5060,6 @@
       entity_id: alarm_control_panel.3302_alarm
   - alias: Stop bedroom audio (with verify and retry)
     repeat:
-      count: 3
       sequence:
       - continue_on_error: true
         action: media_player.media_stop
@@ -5066,14 +5067,16 @@
           entity_id: media_player.bedroom_2
       - delay:
           seconds: 5
-      - if:
+      until:
+      - condition: or
+        conditions:
+        - condition: template
+          value_template: '{{ repeat.index >= 3 }}'
         - condition: not
           conditions:
           - condition: state
             entity_id: media_player.bedroom_2
             state: playing
-        then:
-        - stop: Stop confirmed
   - alias: Set bedroom fan to 50%
     action: fan.turn_on
     data:
@@ -5117,6 +5120,7 @@
       entity_id: light.nano_sand_dune
     data:
       transition: 30
+    continue_on_error: true
   - alias: Turn off Nanoleaf after 15 minutes
     delay:
       minutes: 15
