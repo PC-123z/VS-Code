@@ -8257,9 +8257,9 @@
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_active
-  - alias: Reset the per-cycle announcement count (max 2 announcements per morning,
-      enforced by this counter's max: 2 plus the arm conditions on both announcement
-      automations)
+  - alias: Reset the per-cycle announcement count (capped at 2 announcements per
+      morning, enforced by this counter's own maximum plus the arm conditions on
+      both announcement automations)
     action: counter.reset
     target:
       entity_id: counter.good_morning_announcements
@@ -9803,11 +9803,20 @@
   - condition: state
     entity_id: input_boolean.good_morning_active
     state: 'on'
+  - alias: Safety cap - never more than 2 announcements per cycle (belt-and-suspenders
+      alongside the counter's own maximum)
+    condition: numeric_state
+    entity_id: counter.good_morning_announcements
+    below: 2
   actions:
   - alias: Disarm immediately so this can't double-fire on the next track change
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.good_morning_announcement_pending
+  - alias: Count this announcement against the per-cycle cap
+    action: counter.increment
+    target:
+      entity_id: counter.good_morning_announcements
   - alias: Get today's daily forecast for the announcement
     continue_on_error: true
     action: weather.get_forecasts
@@ -9846,6 +9855,37 @@
       entity_id: media_player.bedroom
     data:
       volume_level: 0.2
+  mode: single
+- id: '1787224007804'
+  alias: 'Bedroom: Arm Second Good Morning Announcement'
+  description: The first announcement is armed by the Good Morning Routine itself
+    on the first motion of the morning. This automation arms the second (and
+    last) one - it fires on any later motion, but only once the first
+    announcement has actually played (counter at exactly 1) and only while
+    nothing is already armed, so it can't stack a second arm before the first
+    has fired or sneak in a third. The counter's own maximum plus the numeric_state
+    condition on the companion "Between Songs" automation are the hard stop past
+    two per cycle.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
+    to: 'on'
+  conditions:
+  - condition: state
+    entity_id: input_boolean.good_morning_active
+    state: 'on'
+  - condition: state
+    entity_id: counter.good_morning_announcements
+    state: '1'
+  - condition: state
+    entity_id: input_boolean.good_morning_announcement_pending
+    state: 'off'
+  actions:
+  - alias: Arm the second announcement - the Between Songs automation will fire
+      it at the next track change
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.good_morning_announcement_pending
   mode: single
 - id: '1787057464833'
   alias: 'Bedroom: Stuck Track Watchdog'
