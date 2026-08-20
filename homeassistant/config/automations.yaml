@@ -7359,7 +7359,7 @@
             target:
               entity_id: light.kitchen_main_lights
             data:
-              brightness_pct: 5
+              brightness_pct: 15
               transition: 3
         default:
         - action: light.turn_off
