@@ -33,6 +33,10 @@
         "id": "garage_auto_close_enabled",
         "name": "Garage Auto-Close Enabled",
         "icon": "mdi:garage-alert"
+      },
+      {
+        "id": "good_morning_announcement_pending",
+        "name": "Good Morning Announcement Pending"
       }
     ]
   }
