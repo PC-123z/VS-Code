@@ -8488,7 +8488,8 @@
             message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
               if (today_fc is defined and today_fc and ''weather.forecast_home'' in
               today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
-              Today is {{ now().strftime(''%A, %B %-d'') }}. Right now it''s {{ states(''weather.forecast_home'')
+              Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M %p'')
+              }}. Right now it''s {{ states(''weather.forecast_home'')
               | replace(''-'', '' '') }} and {{ (state_attr(''weather.forecast_home'',
               ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today
               will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{
@@ -9820,7 +9821,8 @@
       message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
         if (today_fc is defined and today_fc and ''weather.forecast_home''
         in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
-        Today is {{ now().strftime(''%A, %B %-d'') }}. Right now it''s {{
+        Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M %p'')
+        }}. Right now it''s {{
         states(''weather.forecast_home'') | replace(''-'', '' '') }} and {{
         (state_attr(''weather.forecast_home'', ''temperature'') | float(0))
         | round | int }} degrees. {% if f %}Today will be {{ f.condition |
