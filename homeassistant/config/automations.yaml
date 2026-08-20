@@ -8257,6 +8257,12 @@
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_active
+  - alias: Reset the per-cycle announcement count (max 2 announcements per morning,
+      enforced by this counter's max: 2 plus the arm conditions on both announcement
+      automations)
+    action: counter.reset
+    target:
+      entity_id: counter.good_morning_announcements
   - alias: Clear asleep flag - presence lighting allowed again
     action: input_boolean.turn_off
     target:
