@@ -453,6 +453,11 @@ welcome_home_routine:
             entity_id: media_player.kitchen
           data:
             shuffle: true
+      - alias: Start 45-minute music auto-stop timer
+        continue_on_error: true
+        action: script.turn_on
+        target:
+          entity_id: script.welcome_home_music_timeout
   - alias: Check if bedroom motion detected
     if:
     - condition: state
@@ -481,3 +486,31 @@ welcome_home_routine:
         - media_player.bedroom_2
   mode: single
   icon: mdi:human-greeting
+welcome_home_music_timeout:
+  alias: Welcome Home Music Timeout
+  description: Fades out and stops the kitchen speaker 45 minutes after Welcome
+    Home starts music, if it's still playing. Restarts the timer on every new
+    Welcome Home trigger.
+  sequence:
+  - delay:
+      minutes: 45
+  - condition: state
+    entity_id: media_player.kitchen
+    state: playing
+  - alias: Fade out over ~10 seconds
+    repeat:
+      count: 5
+      sequence:
+      - action: media_player.volume_set
+        target:
+          entity_id: media_player.kitchen
+        data:
+          volume_level: '{{ [(state_attr(''media_player.kitchen'', ''volume_level'')
+            | float(0)) - 0.02, 0] | max }}'
+      - delay:
+          seconds: 2
+  - action: media_player.media_pause
+    target:
+      entity_id: media_player.kitchen
+  mode: restart
+  icon: mdi:volume-off
