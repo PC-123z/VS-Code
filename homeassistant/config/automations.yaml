@@ -9708,6 +9708,35 @@
     target:
       entity_id: input_boolean.welcome_home_active
   mode: single
+- id: '1779800000007'
+  alias: 'Welcome Home: Unjoin All Satellites on Deactivation'
+  description: Catch-all so a satellite speaker can never stay stuck grouped with
+    the kitchen after welcome home ends. The per-room "unjoin after N min idle"
+    automations only run while welcome_home_active is still on, so any path that
+    clears the flag directly (30-min auto-expire, music-paused kill switch, Big
+    Bedroom sleep cancel) previously left whatever was still joined - joined,
+    with nothing left watching to split it. Fires on every deactivation path
+    uniformly and covers the _2 entities the older per-room unjoins miss.
+  triggers:
+  - trigger: state
+    entity_id: input_boolean.welcome_home_active
+    to: 'off'
+  conditions: []
+  actions:
+  - alias: Unjoin every satellite from the kitchen group
+    continue_on_error: true
+    action: media_player.unjoin
+    target:
+      entity_id:
+      - media_player.bedroom
+      - media_player.bedroom_2
+      - media_player.office
+      - media_player.office_2
+      - media_player.bathroom
+      - media_player.bathroom_2
+      - media_player.kitchen_2
+    data: {}
+  mode: single
 - id: '1779800000002'
   alias: 'Welcome Home: Disable Immediately if Music Pauses'
   description: If any speaker involved in the welcome home group stops playing and
