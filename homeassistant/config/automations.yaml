@@ -5223,6 +5223,12 @@
         continue_on_error: true
         target:
           entity_id: media_player.office_2
+      - alias: Wait for the unjoin to actually take effect before playing - otherwise
+          the play command can still land in the not-yet-split group (e.g. the kitchen)
+        wait_template: "{{ (state_attr('media_player.office_2', 'group_members') | default([]) | length) <= 1 }}"
+        timeout:
+          seconds: 5
+        continue_on_timeout: true
       - alias: Play sleep music regardless of dimmer override - a button press to
           adjust lights shouldn't silently skip the music too
         action: media_player.volume_set
@@ -5305,6 +5311,12 @@
         continue_on_error: true
         target:
           entity_id: media_player.office_2
+      - alias: Wait for the unjoin to actually take effect before playing - otherwise
+          the play command can still land in the not-yet-split group (e.g. the kitchen)
+        wait_template: "{{ (state_attr('media_player.office_2', 'group_members') | default([]) | length) <= 1 }}"
+        timeout:
+          seconds: 5
+        continue_on_timeout: true
       - alias: Play sleep music regardless of dimmer override - a button press to
           adjust lights shouldn't silently skip the music too
         action: media_player.volume_set
@@ -5726,17 +5738,26 @@
             target:
               entity_id: input_boolean.bedroom2_occupied
           - stop: Motion wait timed out - routine complete
-        - alias: Pause music for announcement
-          action: media_player.media_pause
-          target:
+        - alias: Wait for a natural track boundary before announcing - pausing
+            mid-track for tts.speak used to hang MA/Sonos playback afterward
+            (position would freeze and the routine looked like it was replaying
+            the same song), same failure the Big Bedroom routine hit. Speaking
+            only at a track change (never mid-play) avoids it entirely.
+          wait_for_trigger:
+          - trigger: state
             entity_id: media_player.office_2
+            attribute: media_title
+          timeout:
+            minutes: 3
+          continue_on_timeout: true
         - alias: Set volume for first announcement
           action: media_player.volume_set
           target:
             entity_id: media_player.office_2
           data:
             volume_level: 0.2
-        - alias: TTS good morning announcement
+        - alias: TTS good morning announcement, fired between tracks so it can't
+            hang mid-track playback
           action: tts.speak
           target:
             entity_id: tts.piper
@@ -5754,15 +5775,26 @@
               will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{
               (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow
               | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
-        - delay:
-            seconds: 12
+        - alias: Wait for the announcement to finish and music to resume
+          wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
+          timeout:
+            seconds: 30
+          continue_on_timeout: true
+        - alias: Wait for the next track boundary before the second announcement
+          wait_for_trigger:
+          - trigger: state
+            entity_id: media_player.office_2
+            attribute: media_title
+          timeout:
+            minutes: 3
+          continue_on_timeout: true
         - alias: Bump volume for second announcement
           action: media_player.volume_set
           target:
             entity_id: media_player.office_2
           data:
             volume_level: 0.25
-        - alias: TTS second announcement
+        - alias: TTS second announcement, also fired between tracks
           action: tts.speak
           target:
             entity_id: tts.piper
@@ -5781,10 +5813,11 @@
               will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{
               (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow
               | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
-        - alias: Resume music after announcements
-          action: media_player.media_play
-          target:
-            entity_id: media_player.office_2
+        - alias: Wait for the announcement to finish and music to resume
+          wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
+          timeout:
+            seconds: 30
+          continue_on_timeout: true
         - alias: Restore volume to 0.22 after announcements
           action: media_player.volume_set
           target:
