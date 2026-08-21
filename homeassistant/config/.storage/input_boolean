@@ -37,11 +37,6 @@
       {
         "id": "good_morning_announcement_pending",
         "name": "Good Morning Announcement Pending"
-      },
-      {
-        "id": "bedroom2_good_morning_announcement_pending",
-        "name": "Bedroom 2 Good Morning Announcement Pending",
-        "icon": "mdi:bullhorn-outline"
       }
     ]
   }
