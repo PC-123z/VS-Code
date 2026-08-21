@@ -5608,6 +5608,19 @@
     - sequence:
       - delay:
           seconds: 30
+      - alias: Unjoin office_2 from any Music Assistant group before playing wake
+          music - otherwise it plays to whatever it's currently grouped with (e.g.
+          the kitchen)
+        action: media_player.unjoin
+        continue_on_error: true
+        target:
+          entity_id: media_player.office_2
+      - alias: Wait for the unjoin to actually take effect before playing - otherwise
+          the play command can still land in the not-yet-split group (e.g. the kitchen)
+        wait_template: "{{ (state_attr('media_player.office_2', 'group_members') | default([]) | length) <= 1 }}"
+        timeout:
+          seconds: 5
+        continue_on_timeout: true
       - action: media_player.volume_set
         target:
           entity_id: media_player.office_2
