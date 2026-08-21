@@ -4431,12 +4431,12 @@
       entity_id: fan.air_circulator
     data:
       percentage: 25
-  - alias: Set Sonos volume to 12%
+  - alias: Set Sonos volume to 50%
     action: media_player.volume_set
     target:
       entity_id: media_player.bedroom_2
     data:
-      volume_level: 0.12
+      volume_level: 0.5
   - alias: Play white noise via Music Assistant (with retry)
     repeat:
       count: 2
@@ -4656,12 +4656,12 @@
       entity_id: fan.air_circulator
     data:
       percentage: 25
-  - alias: Set Sonos volume to 12%
+  - alias: Set Sonos volume to 50%
     action: media_player.volume_set
     target:
       entity_id: media_player.bedroom_2
     data:
-      volume_level: 0.12
+      volume_level: 0.5
   - alias: Play Max Richter Sleep via Music Assistant (with retry)
     repeat:
       count: 2
