@@ -10004,13 +10004,34 @@
       ((f.attributes.get('media_duration') | float(0)) * 0.6) and
       (t.attributes.get('media_position') | float(999)) < 10 }}
   actions:
-  - alias: Log the detected self-restart
+  - alias: Remember which track looked like it restarted
+    variables:
+      suspect_title: '{{ trigger.from_state.attributes.get(''media_title'') }}'
+  - alias: >-
+      Confirm before acting. At a NORMAL track boundary Home Assistant briefly
+      reports the new position (0) while media_title still holds the OLD track -
+      the title catches up a few milliseconds later. At trigger time that
+      artifact is indistinguishable from a real restart, so the first version of
+      this watchdog fired at every boundary and skipped ~2 seconds early, eating
+      the end of every song. Waiting lets the artifact resolve itself - a real
+      replay still has the same title playing after the pause, a normal boundary
+      does not.
+    delay:
+      seconds: 8
+  - alias: Only a genuine replay still shows the same title at a low position
+    condition: template
+    value_template: >-
+      {{ is_state('media_player.bedroom_2', 'playing') and
+      state_attr('media_player.bedroom_2', 'media_title') == suspect_title and
+      (state_attr('media_player.bedroom_2', 'media_position') | float(999)) < 30
+      }}
+  - alias: Log the confirmed self-restart
     action: logbook.log
     data:
       name: Bedroom Repeat-Track Watchdog
       message: >-
-        "{{ state_attr('media_player.bedroom_2', 'media_title') }}" restarted
-        itself instead of advancing - skipping to the next track.
+        "{{ suspect_title }}" restarted itself instead of advancing - confirmed
+        after 8s, skipping to the next track.
       entity_id: media_player.bedroom_2
   - alias: Skip forward so the song does not play twice
     action: media_player.media_next_track
