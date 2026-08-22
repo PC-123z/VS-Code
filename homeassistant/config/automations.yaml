@@ -7996,9 +7996,12 @@
   mode: single
 - id: '1777484175034'
   alias: Arrival Latch - Clear after 15 min or on Disarm
-  description: Clears both arrival latches (beacon/phone and garage-open) 15 minutes
-    after either was set, or as soon as the alarm is disarmed (so a stale latch never
-    lingers or wrongly satisfies the two-factor check on some unrelated future event).
+  description: Clears the arrival latches (beacon/phone, garage-open) and the
+    welcome_home_pending waiting state 15 minutes after any of them was set, or as soon
+    as the alarm is disarmed (so a stale latch never lingers or wrongly satisfies the
+    two-factor check on some unrelated future event). Clearing pending on disarm also
+    means that letting yourself in some other way - keypad, front door - cancels the
+    waiting routine instead of leaving it to fire the next time the garage opens.
   triggers:
   - alias: Arrival latch has been on for 15 minutes
     trigger: state
@@ -8012,18 +8015,25 @@
     to: 'on'
     for:
       minutes: 15
+  - alias: Welcome home pending has been waiting 15 minutes
+    trigger: state
+    entity_id: input_boolean.welcome_home_pending
+    to: 'on'
+    for:
+      minutes: 15
   - alias: Alarm disarmed
     trigger: state
     entity_id: alarm_control_panel.3302_alarm
     to: disarmed
   conditions: []
   actions:
-  - alias: Clear both arrival latches
+  - alias: Clear both arrival latches and the pending waiting state
     action: input_boolean.turn_off
     target:
       entity_id:
       - input_boolean.arrival_recent
       - input_boolean.garage_open_recent
+      - input_boolean.welcome_home_pending
   mode: single
 - id: '1748800000004'
   alias: 'Welcome Home: Stop All Music When Kitchen Unoccupied 15 Min'
