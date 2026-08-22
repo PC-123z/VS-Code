@@ -267,7 +267,13 @@
           entity_id: media_player.bedroom_2
         data:
           volume_level: 0.1
-      - alias: Play Dance Pop Hits playlist via Music Assistant
+      - alias: >-
+          Play Dance Pop Hits playlist via Music Assistant. enqueue is stated
+          explicitly rather than left to Music Assistant's own
+          default_enqueue_option_playlist setting - that setting currently
+          defaults to replace, which is what this routine needs to clear any
+          leftover queue, but it is user-configurable in MA and would silently
+          change this routine's behaviour if it were ever edited.
         continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -275,6 +281,7 @@
         data:
           media_id: ytmusic://playlist/VLPLRbcUrcJVEmVVwV-e_kcAxzDRowsLhtIN
           media_type: playlist
+          enqueue: replace
       - alias: Shuffle nap wake up playlist
         continue_on_error: true
         action: media_player.shuffle_set
@@ -568,8 +575,7 @@
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.good_morning_active
-  mode: parallel
-  max: 2
+  mode: single
 - id: '1774818998231'
   alias: 'Dining Room Button On '
   description: Bright override - disables AL/sleep mode, holds bright until sensor
