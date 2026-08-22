@@ -5816,25 +5816,14 @@
             entity_id: media_player.office_2
           data:
             volume_level: 0.25
-        - alias: TTS second announcement, also fired between tracks
+        - alias: TTS second announcement - time only, still fired at a track boundary
           action: tts.speak
           target:
             entity_id: tts.piper
           data:
             cache: false
             media_player_entity_id: media_player.office_2
-            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
-              if (today_fc is defined and today_fc and ''weather.forecast_home'' in
-              today_fc) else [] %} {% set f = fc[0] if fc else none %} In case you
-              missed it the first time, it seems you are really awake now. Good morning
-              Lily & Caylee! Today is {{ now().strftime(''%A, %B %-d'') }} and its
-              going to be a great day! The time is {{ now().strftime(''%-I:%M %p'')
-              }}. The current conditions are {{ states(''weather.forecast_home'')
-              | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'',
-              ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today
-              will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{
-              (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow
-              | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
+            message: 'The time is {{ now().strftime(''%-I:%M %p'') }}.'
         - alias: Wait for the announcement to finish and music to resume
           wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
           timeout:
