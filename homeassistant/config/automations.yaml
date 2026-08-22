@@ -98,7 +98,7 @@
     - wed
     enabled: true
   - trigger: time
-    at: '18:20:00'
+    at: '17:35:00'
     enabled: false
     weekday:
     - sat
@@ -267,13 +267,11 @@
           entity_id: media_player.bedroom_2
         data:
           volume_level: 0.1
-      - alias: >-
-          Play Dance Pop Hits playlist via Music Assistant. enqueue is stated
-          explicitly rather than left to Music Assistant's own
-          default_enqueue_option_playlist setting - that setting currently
-          defaults to replace, which is what this routine needs to clear any
-          leftover queue, but it is user-configurable in MA and would silently
-          change this routine's behaviour if it were ever edited.
+      - alias: Play Dance Pop Hits playlist via Music Assistant. enqueue is stated
+          explicitly rather than left to Music Assistant's own default_enqueue_option_playlist
+          setting - that setting currently defaults to replace, which is what this
+          routine needs to clear any leftover queue, but it is user-configurable in
+          MA and would silently change this routine's behaviour if it were ever edited.
         continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -5760,16 +5758,14 @@
             target:
               entity_id: input_boolean.bedroom2_occupied
           - stop: Motion wait timed out - routine complete
-        - alias: >-
-            No track-boundary wait before the first announcement - it is spoken
-            straight away on motion. Music Assistant pauses its queue for an
-            announcement and resumes at the SAME position, so speaking part-way
-            through a song just ducks it and picks it back up (verified on this
-            same office player, which resumed at 38 seconds rather than
-            restarting). Waiting for a boundary instead ducked the incoming song
-            at position zero, replaying its opening seconds and sounding like the
-            track restarting. The SECOND announcement below still waits for a
-            boundary.
+        - alias: No track-boundary wait before the first announcement - it is spoken
+            straight away on motion. Music Assistant pauses its queue for an announcement
+            and resumes at the SAME position, so speaking part-way through a song
+            just ducks it and picks it back up (verified on this same office player,
+            which resumed at 38 seconds rather than restarting). Waiting for a boundary
+            instead ducked the incoming song at position zero, replaying its opening
+            seconds and sounding like the track restarting. The SECOND announcement
+            below still waits for a boundary.
           delay:
             seconds: 1
         - alias: Set volume for first announcement
@@ -7702,26 +7698,26 @@
     BOTH the garage opening AND an arrival signal (BT beacon, iOS Shortcut webhook,
     or phone geofence - all three set input_boolean.arrival_recent via the companion
     "Arrival Latch - Set on Phone/Beacon Arrival" automation) while armed - whichever
-    happens first just latches its own flag (input_boolean.garage_open_recent or
-    input_boolean.arrival_recent) and stops; whichever happens second finds the other
-    flag already on. Changed 2026-08-22 - this automation NO LONGER disarms or plays
-    music. It only arms input_boolean.welcome_home_pending (the waiting state). The
-    Ring garage door sensor (binary_sensor.garage_door) is now the final gate: see
-    "Arrival (Welcome Home) - STAGE 2" which does the actual disarm + lights + music.
-    Alarm stays armed and the house stays silent until that sensor reports open.
+    happens first just latches its own flag (input_boolean.garage_open_recent or input_boolean.arrival_recent)
+    and stops; whichever happens second finds the other flag already on. Changed 2026-08-22
+    - this automation NO LONGER disarms or plays music. It only arms input_boolean.welcome_home_pending
+    (the waiting state). The Ring garage door sensor (binary_sensor.garage_door) is
+    now the final gate: see "Arrival (Welcome Home) - STAGE 2" which does the actual
+    disarm + lights + music. Alarm stays armed and the house stays silent until that
+    sensor reports open.
 
     History: Fixed 2026-07-22 - previously only triggered on garage-open and required
     the arrival latch to already be set, so a garage-open that beat the beacon update
-    by a few seconds silently did nothing. Triggers on arrival_recent turning on
-    (rather than duplicating the beacon/webhook triggers here) so all three arrival
-    signals work as a fallback for each other, regardless of ordering with the garage
-    - webhook isn''t wired in directly because HA only allows one automation to register
-    a given webhook_id, and the latch automation already owns paul_arrived_home.
-    Fixed 2026-08-13 - the smart garage cover entity silently failed to report "open"
-    on arrival, so the two-factor check waited forever even though the beacon confirmed
-    arrival and the security panel''s own entry sensor tripped (went to "pending").
-    Now the panel''s own pending/entry-delay state also satisfies the garage half of
-    the check, as a fallback for when the smart garage integration desyncs.'
+    by a few seconds silently did nothing. Triggers on arrival_recent turning on (rather
+    than duplicating the beacon/webhook triggers here) so all three arrival signals
+    work as a fallback for each other, regardless of ordering with the garage - webhook
+    isn''t wired in directly because HA only allows one automation to register a given
+    webhook_id, and the latch automation already owns paul_arrived_home. Fixed 2026-08-13
+    - the smart garage cover entity silently failed to report "open" on arrival, so
+    the two-factor check waited forever even though the beacon confirmed arrival and
+    the security panel''s own entry sensor tripped (went to "pending"). Now the panel''s
+    own pending/entry-delay state also satisfies the garage half of the check, as
+    a fallback for when the smart garage integration desyncs.'
   triggers:
   - id: garage
     trigger: state
@@ -7784,8 +7780,8 @@
     action: notify.mobile_app_pc_iphone
     data:
       title: Welcome Home armed
-      message: Arrival confirmed. Waiting on the garage door sensor to disarm and start
-        the routine.
+      message: Arrival confirmed. Waiting on the garage door sensor to disarm and
+        start the routine.
   mode: queued
   max: 4
 - id: '1777484175035'
@@ -7796,11 +7792,11 @@
     nothing here runs until that flag is on AND binary_sensor.garage_door is open,
     so the alarm stays armed and the house stays silent in the meantime.
 
-    Triggers on both the sensor opening and the pending flag turning on, with a
-    condition requiring both - the two are order-independent, because the Ring sensor
-    can report open a few seconds before the beacon latch lands (the garage physically
-    opens first). Requiring the sensor as a condition means it is still a hard gate
-    either way: the routine can never run with the door closed.'
+    Triggers on both the sensor opening and the pending flag turning on, with a condition
+    requiring both - the two are order-independent, because the Ring sensor can report
+    open a few seconds before the beacon latch lands (the garage physically opens
+    first). Requiring the sensor as a condition means it is still a hard gate either
+    way: the routine can never run with the door closed.'
   triggers:
   - alias: Ring garage door sensor reports open
     trigger: state
@@ -7996,12 +7992,12 @@
   mode: single
 - id: '1777484175034'
   alias: Arrival Latch - Clear after 15 min or on Disarm
-  description: Clears the arrival latches (beacon/phone, garage-open) and the
-    welcome_home_pending waiting state 15 minutes after any of them was set, or as soon
-    as the alarm is disarmed (so a stale latch never lingers or wrongly satisfies the
-    two-factor check on some unrelated future event). Clearing pending on disarm also
-    means that letting yourself in some other way - keypad, front door - cancels the
-    waiting routine instead of leaving it to fire the next time the garage opens.
+  description: Clears the arrival latches (beacon/phone, garage-open) and the welcome_home_pending
+    waiting state 15 minutes after any of them was set, or as soon as the alarm is
+    disarmed (so a stale latch never lingers or wrongly satisfies the two-factor check
+    on some unrelated future event). Clearing pending on disarm also means that letting
+    yourself in some other way - keypad, front door - cancels the waiting routine
+    instead of leaving it to fire the next time the garage opens.
   triggers:
   - alias: Arrival latch has been on for 15 minutes
     trigger: state
@@ -8559,14 +8555,13 @@
           shuffle: false
       - delay:
           seconds: 2
-      - alias: >-
-          Queue the morning playlist as ONE replace call. Here Comes The Sun is
-          already the playlist's own first track, so it plays first without being
+      - alias: Queue the morning playlist as ONE replace call. Here Comes The Sun
+          is already the playlist's own first track, so it plays first without being
           prepended separately. The old version enqueued that track explicitly and
           THEN appended the playlist, which put the same song at queue index 0 AND
-          index 1 - so it played, "advanced" straight into its own duplicate and
-          played again. That duplicate is the reason the routine kept repeating the
-          first song every morning.
+          index 1 - so it played, "advanced" straight into its own duplicate and played
+          again. That duplicate is the reason the routine kept repeating the first
+          song every morning.
         continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -8670,21 +8665,19 @@
               entity_id: input_boolean.good_morning_active
           - stop: Occupancy wait timed out - routine complete
           else:
-          - alias: >-
-              Count the first announcement before speaking it, so the Between Songs
-              automation knows the next one is number two and keeps it time-only.
+          - alias: Count the first announcement before speaking it, so the Between
+              Songs automation knows the next one is number two and keeps it time-only.
             action: counter.increment
             target:
               entity_id: counter.good_morning_announcements
-          - alias: >-
-              First announcement, spoken immediately on motion rather than waiting
-              for a track boundary. Music Assistant pauses its queue for an
-              announcement and resumes at the SAME position, so speaking part-way
-              through a song simply ducks it and picks it back up - verified on the
-              office player, which resumed at 38 seconds rather than restarting.
-              Announcing at a track boundary instead meant ducking the new song at
-              position zero, which replayed its first few seconds and sounded like
-              the track changing, restarting and skipping.
+          - alias: First announcement, spoken immediately on motion rather than waiting
+              for a track boundary. Music Assistant pauses its queue for an announcement
+              and resumes at the SAME position, so speaking part-way through a song
+              simply ducks it and picks it back up - verified on the office player,
+              which resumed at 38 seconds rather than restarting. Announcing at a
+              track boundary instead meant ducking the new song at position zero,
+              which replayed its first few seconds and sounded like the track changing,
+              restarting and skipping.
             action: tts.speak
             target:
               entity_id: tts.piper
@@ -8699,8 +8692,8 @@
                 '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'')
                 | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
                 | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
-                | round | int }} and a low of {{ (f.templow | float(0)) | round | int
-                }} degrees.{% endif %} Have a great day!'
+                | round | int }} and a low of {{ (f.templow | float(0)) | round |
+                int }} degrees.{% endif %} Have a great day!'
           - alias: Wait for the announcement to finish and music to resume
             wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
             timeout:
@@ -8731,8 +8724,7 @@
                   entity_id: input_boolean.good_morning_active
                   state: 'on'
                 then:
-                - alias: >-
-                    Re-queue the playlist in one replace call. Same fix as the
+                - alias: Re-queue the playlist in one replace call. Same fix as the
                     startup block - prepending the Here Comes The Sun track before
                     the playlist duplicated it at queue index 0 and 1 and made the
                     song replay itself. Shuffle is left ON here because a mid-routine
@@ -10003,14 +9995,13 @@
     action: counter.increment
     target:
       entity_id: counter.good_morning_announcements
-  - alias: >-
-      Short settle before speaking. This automation triggers on the media_title
+  - alias: Short settle before speaking. This automation triggers on the media_title
       change, which is the exact instant the next song starts - announcing at that
-      moment ducks the new song at position zero, so it replays its opening few
-      seconds and sounds like the track restarting. Music Assistant resumes an
-      announcement at the SAME position, so a brief wait means the song is properly
-      underway and simply picks up where it was ducked. Kept short so this still
-      lands right after the track change, as intended.
+      moment ducks the new song at position zero, so it replays its opening few seconds
+      and sounds like the track restarting. Music Assistant resumes an announcement
+      at the SAME position, so a brief wait means the song is properly underway and
+      simply picks up where it was ducked. Kept short so this still lands right after
+      the track change, as intended.
     delay:
       seconds: 10
   - alias: Get today's daily forecast (only needed for the full first announcement)
@@ -10041,7 +10032,8 @@
         | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'',
         '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and
         a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Have
-        a great day!{% else %}The time is {{ now().strftime(''%-I:%M %p'') }}.{% endif %}'
+        a great day!{% else %}The time is {{ now().strftime(''%-I:%M %p'') }}.{% endif
+        %}'
   - alias: Wait for the announcement to finish and music to resume
     wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
     timeout:
@@ -10086,15 +10078,14 @@
   mode: single
 - id: '1787404648055'
   alias: 'Bedroom: Repeat-Track Watchdog'
-  description: >-
-    Backstop for the morning routine replaying its first song. The older Stuck
-    Track Watchdog only fires when the reported position runs PAST the duration,
-    so it is blind to a clean restart - on 2026-08-22 the track ended at 179 of
-    185 seconds and cleanly reset to 0, and that watchdog never fired. This one
-    detects the restart itself - same track title, previous position well past
-    the end, new position back near zero - and skips forward, which also lets the
-    title-change announcement fire. Gated on the routine being active so a
-    deliberate replay outside the morning is left alone.
+  description: Backstop for the morning routine replaying its first song. The older
+    Stuck Track Watchdog only fires when the reported position runs PAST the duration,
+    so it is blind to a clean restart - on 2026-08-22 the track ended at 179 of 185
+    seconds and cleanly reset to 0, and that watchdog never fired. This one detects
+    the restart itself - same track title, previous position well past the end, new
+    position back near zero - and skips forward, which also lets the title-change
+    announcement fire. Gated on the routine being active so a deliberate replay outside
+    the morning is left alone.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
@@ -10104,43 +10095,36 @@
     entity_id: input_boolean.good_morning_active
     state: 'on'
   - condition: template
-    value_template: >-
-      {% set f = trigger.from_state %} {% set t = trigger.to_state %} {{ f is not
-      none and t is not none and f.attributes.get('media_title') is not none and
-      f.attributes.get('media_title') == t.attributes.get('media_title') and
-      (f.attributes.get('media_duration') | float(0)) > 0 and
-      (f.attributes.get('media_position') | float(0)) >
-      ((f.attributes.get('media_duration') | float(0)) * 0.6) and
-      (t.attributes.get('media_position') | float(999)) < 10 }}
+    value_template: '{% set f = trigger.from_state %} {% set t = trigger.to_state
+      %} {{ f is not none and t is not none and f.attributes.get(''media_title'')
+      is not none and f.attributes.get(''media_title'') == t.attributes.get(''media_title'')
+      and (f.attributes.get(''media_duration'') | float(0)) > 0 and (f.attributes.get(''media_position'')
+      | float(0)) > ((f.attributes.get(''media_duration'') | float(0)) * 0.6) and
+      (t.attributes.get(''media_position'') | float(999)) < 10 }}'
   actions:
   - alias: Remember which track looked like it restarted
     variables:
       suspect_title: '{{ trigger.from_state.attributes.get(''media_title'') }}'
-  - alias: >-
-      Confirm before acting. At a NORMAL track boundary Home Assistant briefly
-      reports the new position (0) while media_title still holds the OLD track -
-      the title catches up a few milliseconds later. At trigger time that
-      artifact is indistinguishable from a real restart, so the first version of
-      this watchdog fired at every boundary and skipped ~2 seconds early, eating
-      the end of every song. Waiting lets the artifact resolve itself - a real
-      replay still has the same title playing after the pause, a normal boundary
-      does not.
+  - alias: Confirm before acting. At a NORMAL track boundary Home Assistant briefly
+      reports the new position (0) while media_title still holds the OLD track - the
+      title catches up a few milliseconds later. At trigger time that artifact is
+      indistinguishable from a real restart, so the first version of this watchdog
+      fired at every boundary and skipped ~2 seconds early, eating the end of every
+      song. Waiting lets the artifact resolve itself - a real replay still has the
+      same title playing after the pause, a normal boundary does not.
     delay:
       seconds: 8
   - alias: Only a genuine replay still shows the same title at a low position
     condition: template
-    value_template: >-
-      {{ is_state('media_player.bedroom_2', 'playing') and
-      state_attr('media_player.bedroom_2', 'media_title') == suspect_title and
-      (state_attr('media_player.bedroom_2', 'media_position') | float(999)) < 30
-      }}
+    value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and state_attr(''media_player.bedroom_2'',
+      ''media_title'') == suspect_title and (state_attr(''media_player.bedroom_2'',
+      ''media_position'') | float(999)) < 30 }}'
   - alias: Log the confirmed self-restart
     action: logbook.log
     data:
       name: Bedroom Repeat-Track Watchdog
-      message: >-
-        "{{ suspect_title }}" restarted itself instead of advancing - confirmed
-        after 8s, skipping to the next track.
+      message: '"{{ suspect_title }}" restarted itself instead of advancing - confirmed
+        after 8s, skipping to the next track.'
       entity_id: media_player.bedroom_2
   - alias: Skip forward so the song does not play twice
     action: media_player.media_next_track
