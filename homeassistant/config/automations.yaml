@@ -7697,25 +7697,31 @@
           entity_id: script.goodbye_routine_main
   mode: restart
 - id: '1777484175032'
-  alias: Arrival (Welcome Home) - Disarm Alarm on Garage Cycle + Arrival Latch
-  description: Two-factor disarm, order-independent. Needs BOTH the garage opening
-    AND an arrival signal (BT beacon, iOS Shortcut webhook, or phone geofence - all
-    three set input_boolean.arrival_recent via the companion "Arrival Latch - Set
-    on Phone/Beacon Arrival" automation) while armed - whichever happens first just
-    latches its own flag (input_boolean.garage_open_recent or input_boolean.arrival_recent)
-    and stops; whichever happens second finds the other flag already on and disarms
-    and runs welcome home. Fixed 2026-07-22 - previously only triggered on garage-open
-    and required the arrival latch to already be set, so a garage-open that beat the
-    beacon update by a few seconds silently did nothing. Triggers on arrival_recent
-    turning on (rather than duplicating the beacon/webhook triggers here) so all three
-    arrival signals work as a fallback for each other, regardless of ordering with
-    the garage - webhook isn't wired in directly because HA only allows one automation
-    to register a given webhook_id, and the latch automation already owns paul_arrived_home.
+  alias: Arrival (Welcome Home) - STAGE 1 Two-Factor Arm to Pending
+  description: 'STAGE 1 of 2. Two-factor arrival detection, order-independent. Needs
+    BOTH the garage opening AND an arrival signal (BT beacon, iOS Shortcut webhook,
+    or phone geofence - all three set input_boolean.arrival_recent via the companion
+    "Arrival Latch - Set on Phone/Beacon Arrival" automation) while armed - whichever
+    happens first just latches its own flag (input_boolean.garage_open_recent or
+    input_boolean.arrival_recent) and stops; whichever happens second finds the other
+    flag already on. Changed 2026-08-22 - this automation NO LONGER disarms or plays
+    music. It only arms input_boolean.welcome_home_pending (the waiting state). The
+    Ring garage door sensor (binary_sensor.garage_door) is now the final gate: see
+    "Arrival (Welcome Home) - STAGE 2" which does the actual disarm + lights + music.
+    Alarm stays armed and the house stays silent until that sensor reports open.
+
+    History: Fixed 2026-07-22 - previously only triggered on garage-open and required
+    the arrival latch to already be set, so a garage-open that beat the beacon update
+    by a few seconds silently did nothing. Triggers on arrival_recent turning on
+    (rather than duplicating the beacon/webhook triggers here) so all three arrival
+    signals work as a fallback for each other, regardless of ordering with the garage
+    - webhook isn''t wired in directly because HA only allows one automation to register
+    a given webhook_id, and the latch automation already owns paul_arrived_home.
     Fixed 2026-08-13 - the smart garage cover entity silently failed to report "open"
     on arrival, so the two-factor check waited forever even though the beacon confirmed
-    arrival and the security panel's own entry sensor tripped (went to "pending").
-    Now the panel's own pending/entry-delay state also satisfies the garage half of
-    the check, as a fallback for when the smart garage integration desyncs.
+    arrival and the security panel''s own entry sensor tripped (went to "pending").
+    Now the panel''s own pending/entry-delay state also satisfies the garage half of
+    the check, as a fallback for when the smart garage integration desyncs.'
   triggers:
   - id: garage
     trigger: state
@@ -7768,6 +7774,56 @@
           "off") }}'
       sequence:
       - stop: Waiting for garage to open to confirm before disarming
+  - alias: Both factors confirmed - arm the pending state and wait for the Ring garage
+      door sensor
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.welcome_home_pending
+  - alias: Notify that welcome home is armed and waiting
+    continue_on_error: true
+    action: notify.mobile_app_pc_iphone
+    data:
+      title: Welcome Home armed
+      message: Arrival confirmed. Waiting on the garage door sensor to disarm and start
+        the routine.
+  mode: queued
+  max: 4
+- id: '1777484175035'
+  alias: Arrival (Welcome Home) - STAGE 2 Execute on Ring Garage Door Open
+  description: 'STAGE 2 of 2. Added 2026-08-22. Holds the whole welcome home routine
+    (disarm, hallway lights, music) until the Ring garage door sensor actually reports
+    open. STAGE 1 does the two-factor arrival detection and sets input_boolean.welcome_home_pending;
+    nothing here runs until that flag is on AND binary_sensor.garage_door is open,
+    so the alarm stays armed and the house stays silent in the meantime.
+
+    Triggers on both the sensor opening and the pending flag turning on, with a
+    condition requiring both - the two are order-independent, because the Ring sensor
+    can report open a few seconds before the beacon latch lands (the garage physically
+    opens first). Requiring the sensor as a condition means it is still a hard gate
+    either way: the routine can never run with the door closed.'
+  triggers:
+  - alias: Ring garage door sensor reports open
+    trigger: state
+    entity_id: binary_sensor.garage_door
+    to: 'on'
+  - alias: Pending flag armed (in case the door was already open when STAGE 1 finished)
+    trigger: state
+    entity_id: input_boolean.welcome_home_pending
+    to: 'on'
+  conditions:
+  - alias: STAGE 1 must have confirmed arrival
+    condition: state
+    entity_id: input_boolean.welcome_home_pending
+    state: 'on'
+  - alias: Ring garage door sensor must be open - the final piece of the puzzle
+    condition: state
+    entity_id: binary_sensor.garage_door
+    state: 'on'
+  actions:
+  - alias: Clear the pending flag so this only runs once per arrival
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.welcome_home_pending
   - alias: Disarm the security panel
     action: alarm_control_panel.alarm_disarm
     target:
