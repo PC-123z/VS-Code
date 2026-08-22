@@ -5225,7 +5225,8 @@
           entity_id: media_player.office_2
       - alias: Wait for the unjoin to actually take effect before playing - otherwise
           the play command can still land in the not-yet-split group (e.g. the kitchen)
-        wait_template: "{{ (state_attr('media_player.office_2', 'group_members') | default([]) | length) <= 1 }}"
+        wait_template: '{{ (state_attr(''media_player.office_2'', ''group_members'')
+          | default([]) | length) <= 1 }}'
         timeout:
           seconds: 5
         continue_on_timeout: true
@@ -5313,7 +5314,8 @@
           entity_id: media_player.office_2
       - alias: Wait for the unjoin to actually take effect before playing - otherwise
           the play command can still land in the not-yet-split group (e.g. the kitchen)
-        wait_template: "{{ (state_attr('media_player.office_2', 'group_members') | default([]) | length) <= 1 }}"
+        wait_template: '{{ (state_attr(''media_player.office_2'', ''group_members'')
+          | default([]) | length) <= 1 }}'
         timeout:
           seconds: 5
         continue_on_timeout: true
@@ -5617,7 +5619,8 @@
           entity_id: media_player.office_2
       - alias: Wait for the unjoin to actually take effect before playing - otherwise
           the play command can still land in the not-yet-split group (e.g. the kitchen)
-        wait_template: "{{ (state_attr('media_player.office_2', 'group_members') | default([]) | length) <= 1 }}"
+        wait_template: '{{ (state_attr(''media_player.office_2'', ''group_members'')
+          | default([]) | length) <= 1 }}'
         timeout:
           seconds: 5
         continue_on_timeout: true
@@ -5751,11 +5754,11 @@
             target:
               entity_id: input_boolean.bedroom2_occupied
           - stop: Motion wait timed out - routine complete
-        - alias: Wait for a natural track boundary before announcing - pausing
-            mid-track for tts.speak used to hang MA/Sonos playback afterward
-            (position would freeze and the routine looked like it was replaying
-            the same song), same failure the Big Bedroom routine hit. Speaking
-            only at a track change (never mid-play) avoids it entirely.
+        - alias: Wait for a natural track boundary before announcing - pausing mid-track
+            for tts.speak used to hang MA/Sonos playback afterward (position would
+            freeze and the routine looked like it was replaying the same song), same
+            failure the Big Bedroom routine hit. Speaking only at a track change (never
+            mid-play) avoids it entirely.
           wait_for_trigger:
           - trigger: state
             entity_id: media_player.office_2
@@ -5769,8 +5772,8 @@
             entity_id: media_player.office_2
           data:
             volume_level: 0.2
-        - alias: TTS good morning announcement, fired between tracks so it can't
-            hang mid-track playback
+        - alias: TTS good morning announcement, fired between tracks so it can't hang
+            mid-track playback
           action: tts.speak
           target:
             entity_id: tts.piper
@@ -8293,7 +8296,7 @@
     - thu
     - fri
   - trigger: time
-    at: '10:05:00'
+    at: 09:05:00
     weekday:
     - sat
     - sun
@@ -8303,9 +8306,9 @@
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_active
-  - alias: Reset the per-cycle announcement count (capped at 2 announcements per
-      morning, enforced by this counter's own maximum plus the arm conditions on
-      both announcement automations)
+  - alias: Reset the per-cycle announcement count (capped at 2 announcements per morning,
+      enforced by this counter's own maximum plus the arm conditions on both announcement
+      automations)
     action: counter.reset
     target:
       entity_id: counter.good_morning_announcements
@@ -8540,13 +8543,13 @@
             message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
               if (today_fc is defined and today_fc and ''weather.forecast_home'' in
               today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
-              Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M %p'')
-              }}. Right now it''s {{ states(''weather.forecast_home'')
-              | replace(''-'', '' '') }} and {{ (state_attr(''weather.forecast_home'',
-              ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today
-              will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{
-              (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow
-              | float(0)) | round | int }} degrees.{% endif %} Have a great day!'
+              Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M
+              %p'') }}. Right now it''s {{ states(''weather.forecast_home'') | replace(''-'',
+              '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'')
+              | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
+              | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
+              | round | int }} and a low of {{ (f.templow | float(0)) | round | int
+              }} degrees.{% endif %} Have a great day!'
         else:
         - alias: Ramp volume to 0.20 over ~2.5 minutes
           repeat:
@@ -8584,15 +8587,14 @@
               entity_id: input_boolean.good_morning_active
           - stop: Occupancy wait timed out - routine complete
           else:
-          - alias: >-
-              Arm the good-morning announcement (speaking mid-track via tts.speak
+          - alias: Arm the good-morning announcement (speaking mid-track via tts.speak
               on media_player.bedroom_2 used to hang MA's Sonos playback after the
               duck/resume - the queue would freeze at whatever position it paused
-              at and never advance again, which is why "Here Comes The Sun" kept
-              appearing to repeat. Instead, motion just arms this flag; the separate
-              Bedroom Play Good Morning Announcement Between Songs automation
-              fires it exactly when Music Assistant's queue naturally moves to the
-              next track, so the announcement never interrupts a track mid-play.)
+              at and never advance again, which is why "Here Comes The Sun" kept appearing
+              to repeat. Instead, motion just arms this flag; the separate Bedroom
+              Play Good Morning Announcement Between Songs automation fires it exactly
+              when Music Assistant's queue naturally moves to the next track, so the
+              announcement never interrupts a track mid-play.)
             action: input_boolean.turn_on
             target:
               entity_id: input_boolean.good_morning_announcement_pending
@@ -9711,12 +9713,12 @@
 - id: '1779800000007'
   alias: 'Welcome Home: Unjoin All Satellites on Deactivation'
   description: Catch-all so a satellite speaker can never stay stuck grouped with
-    the kitchen after welcome home ends. The per-room "unjoin after N min idle"
-    automations only run while welcome_home_active is still on, so any path that
-    clears the flag directly (30-min auto-expire, music-paused kill switch, Big
-    Bedroom sleep cancel) previously left whatever was still joined - joined,
-    with nothing left watching to split it. Fires on every deactivation path
-    uniformly and covers the _2 entities the older per-room unjoins miss.
+    the kitchen after welcome home ends. The per-room "unjoin after N min idle" automations
+    only run while welcome_home_active is still on, so any path that clears the flag
+    directly (30-min auto-expire, music-paused kill switch, Big Bedroom sleep cancel)
+    previously left whatever was still joined - joined, with nothing left watching
+    to split it. Fires on every deactivation path uniformly and covers the _2 entities
+    the older per-room unjoins miss.
   triggers:
   - trigger: state
     entity_id: input_boolean.welcome_home_active
@@ -9859,14 +9861,13 @@
   mode: single
 - id: '1787223476469'
   alias: 'Bedroom: Play Good Morning Announcement Between Songs'
-  description: Companion to the Good Morning Routine. That automation no longer
-    calls tts.speak on media_player.bedroom_2 directly on motion, because MA's
-    duck/pause-resume mid-track was hanging Sonos playback afterward (position
-    would freeze and the routine looked like it was replaying the same song).
-    Instead it just arms input_boolean.good_morning_announcement_pending. This
-    automation waits for the queue to naturally land on a new track (media_title
-    change = between songs) and speaks the announcement then, so it never
-    interrupts a track mid-play.
+  description: Companion to the Good Morning Routine. That automation no longer calls
+    tts.speak on media_player.bedroom_2 directly on motion, because MA's duck/pause-resume
+    mid-track was hanging Sonos playback afterward (position would freeze and the
+    routine looked like it was replaying the same song). Instead it just arms input_boolean.good_morning_announcement_pending.
+    This automation waits for the queue to naturally land on a new track (media_title
+    change = between songs) and speaks the announcement then, so it never interrupts
+    a track mid-play.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
@@ -9908,17 +9909,16 @@
     data:
       cache: false
       media_player_entity_id: media_player.bedroom_2
-      message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
-        if (today_fc is defined and today_fc and ''weather.forecast_home''
-        in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
-        Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M %p'')
-        }}. Right now it''s {{
-        states(''weather.forecast_home'') | replace(''-'', '' '') }} and {{
-        (state_attr(''weather.forecast_home'', ''temperature'') | float(0))
-        | round | int }} degrees. {% if f %}Today will be {{ f.condition |
-        replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
-        | round | int }} and a low of {{ (f.templow | float(0)) | round |
-        int }} degrees.{% endif %} Have a great day!'
+      message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc
+        is defined and today_fc and ''weather.forecast_home'' in today_fc) else []
+        %} {% set f = fc[0] if fc else none %} Good morning! Today is {{ now().strftime(''%A,
+        %B %-d'') }} and the time is {{ now().strftime(''%-I:%M %p'') }}. Right now
+        it''s {{ states(''weather.forecast_home'') | replace(''-'', '' '') }} and
+        {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round
+        | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'',
+        '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and
+        a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Have
+        a great day!'
   - alias: Wait for the announcement to finish and music to resume
     wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
     timeout:
@@ -9934,13 +9934,12 @@
 - id: '1787224007804'
   alias: 'Bedroom: Arm Second Good Morning Announcement'
   description: The first announcement is armed by the Good Morning Routine itself
-    on the first motion of the morning. This automation arms the second (and
-    last) one - it fires on any later motion, but only once the first
-    announcement has actually played (counter at exactly 1) and only while
-    nothing is already armed, so it can't stack a second arm before the first
-    has fired or sneak in a third. The counter's own maximum plus the numeric_state
-    condition on the companion "Between Songs" automation are the hard stop past
-    two per cycle.
+    on the first motion of the morning. This automation arms the second (and last)
+    one - it fires on any later motion, but only once the first announcement has actually
+    played (counter at exactly 1) and only while nothing is already armed, so it can't
+    stack a second arm before the first has fired or sneak in a third. The counter's
+    own maximum plus the numeric_state condition on the companion "Between Songs"
+    automation are the hard stop past two per cycle.
   triggers:
   - trigger: state
     entity_id: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
@@ -9956,8 +9955,8 @@
     entity_id: input_boolean.good_morning_announcement_pending
     state: 'off'
   actions:
-  - alias: Arm the second announcement - the Between Songs automation will fire
-      it at the next track change
+  - alias: Arm the second announcement - the Between Songs automation will fire it
+      at the next track change
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_announcement_pending
