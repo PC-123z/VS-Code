@@ -5760,18 +5760,18 @@
             target:
               entity_id: input_boolean.bedroom2_occupied
           - stop: Motion wait timed out - routine complete
-        - alias: Wait for a natural track boundary before announcing - pausing mid-track
-            for tts.speak used to hang MA/Sonos playback afterward (position would
-            freeze and the routine looked like it was replaying the same song), same
-            failure the Big Bedroom routine hit. Speaking only at a track change (never
-            mid-play) avoids it entirely.
-          wait_for_trigger:
-          - trigger: state
-            entity_id: media_player.office_2
-            attribute: media_title
-          timeout:
-            minutes: 3
-          continue_on_timeout: true
+        - alias: >-
+            No track-boundary wait before the first announcement - it is spoken
+            straight away on motion. Music Assistant pauses its queue for an
+            announcement and resumes at the SAME position, so speaking part-way
+            through a song just ducks it and picks it back up (verified on this
+            same office player, which resumed at 38 seconds rather than
+            restarting). Waiting for a boundary instead ducked the incoming song
+            at position zero, replaying its opening seconds and sounding like the
+            track restarting. The SECOND announcement below still waits for a
+            boundary.
+          delay:
+            seconds: 1
         - alias: Set volume for first announcement
           action: media_player.volume_set
           target:
@@ -9938,15 +9938,15 @@
     target:
       entity_id: counter.good_morning_announcements
   - alias: >-
-      Let the new track get properly underway before speaking. This automation
-      triggers on the media_title change, which is the exact instant the next song
-      starts - announcing right then meant the song played about three seconds, got
-      ducked, and then resumed from zero, which sounded like the track changing,
-      restarting and skipping. Music Assistant pauses its queue for an announcement
-      and resumes at the SAME position, so waiting here means the song is already
-      well underway and simply continues from where it was ducked.
+      Short settle before speaking. This automation triggers on the media_title
+      change, which is the exact instant the next song starts - announcing at that
+      moment ducks the new song at position zero, so it replays its opening few
+      seconds and sounds like the track restarting. Music Assistant resumes an
+      announcement at the SAME position, so a brief wait means the song is properly
+      underway and simply picks up where it was ducked. Kept short so this still
+      lands right after the track change, as intended.
     delay:
-      seconds: 25
+      seconds: 10
   - alias: Get today's daily forecast (only needed for the full first announcement)
     if:
     - condition: template
