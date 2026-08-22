@@ -8477,19 +8477,24 @@
           entity_id: media_player.bedroom
         data:
           volume_level: 0.05
-      - alias: Play Here Comes The Sun first, explicitly (replace clears any leftover
-          overnight queue - enqueue:play only inserts at the current position and
-          leaves stale tracks queued behind it, which is why the routine fell back
-          to sleep music once this track ended)
+      - alias: Shuffle OFF before queueing so the playlist loads in its natural order
+          and its first track (Here Comes The Sun) lands at queue index 0
         continue_on_error: true
-        action: music_assistant.play_media
+        action: media_player.shuffle_set
         target:
           entity_id: media_player.bedroom_2
         data:
-          media_id: ytmusic://track/xUNqsfFUwhY
-          media_type: track
-          enqueue: replace
-      - alias: Queue the rest of the morning playlist right after it
+          shuffle: false
+      - delay:
+          seconds: 2
+      - alias: >-
+          Queue the morning playlist as ONE replace call. Here Comes The Sun is
+          already the playlist's own first track, so it plays first without being
+          prepended separately. The old version enqueued that track explicitly and
+          THEN appended the playlist, which put the same song at queue index 0 AND
+          index 1 - so it played, "advanced" straight into its own duplicate and
+          played again. That duplicate is the reason the routine kept repeating the
+          first song every morning.
         continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -8497,8 +8502,14 @@
         data:
           media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
           media_type: playlist
-          enqueue: next
-      - alias: Shuffle the queued playlist (doesn't affect the track already playing)
+          enqueue: replace
+      - alias: Wait for the queue to actually start before shuffling
+        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
+        timeout:
+          seconds: 30
+        continue_on_timeout: true
+      - alias: Shuffle the rest of the queue (leaves the currently playing first track
+          in place)
         continue_on_error: true
         action: media_player.shuffle_set
         target:
@@ -8623,22 +8634,20 @@
                   entity_id: input_boolean.good_morning_active
                   state: 'on'
                 then:
-                - continue_on_error: true
-                  action: music_assistant.play_media
-                  target:
-                    entity_id: media_player.bedroom_2
-                  data:
-                    media_id: ytmusic://track/xUNqsfFUwhY
-                    media_type: track
-                    enqueue: replace
-                - continue_on_error: true
+                - alias: >-
+                    Re-queue the playlist in one replace call. Same fix as the
+                    startup block - prepending the Here Comes The Sun track before
+                    the playlist duplicated it at queue index 0 and 1 and made the
+                    song replay itself. Shuffle is left ON here because a mid-routine
+                    self-heal should resume shuffled, not restart from the top.
+                  continue_on_error: true
                   action: music_assistant.play_media
                   target:
                     entity_id: media_player.bedroom_2
                   data:
                     media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
                     media_type: playlist
-                    enqueue: next
+                    enqueue: replace
                 - continue_on_error: true
                   action: media_player.shuffle_set
                   target:
@@ -9960,6 +9969,51 @@
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_announcement_pending
+  mode: single
+- id: '1787404648055'
+  alias: 'Bedroom: Repeat-Track Watchdog'
+  description: >-
+    Backstop for the morning routine replaying its first song. The older Stuck
+    Track Watchdog only fires when the reported position runs PAST the duration,
+    so it is blind to a clean restart - on 2026-08-22 the track ended at 179 of
+    185 seconds and cleanly reset to 0, and that watchdog never fired. This one
+    detects the restart itself - same track title, previous position well past
+    the end, new position back near zero - and skips forward, which also lets the
+    title-change announcement fire. Gated on the routine being active so a
+    deliberate replay outside the morning is left alone.
+  triggers:
+  - trigger: state
+    entity_id: media_player.bedroom_2
+    attribute: media_position
+  conditions:
+  - condition: state
+    entity_id: input_boolean.good_morning_active
+    state: 'on'
+  - condition: template
+    value_template: >-
+      {% set f = trigger.from_state %} {% set t = trigger.to_state %} {{ f is not
+      none and t is not none and f.attributes.get('media_title') is not none and
+      f.attributes.get('media_title') == t.attributes.get('media_title') and
+      (f.attributes.get('media_duration') | float(0)) > 0 and
+      (f.attributes.get('media_position') | float(0)) >
+      ((f.attributes.get('media_duration') | float(0)) * 0.6) and
+      (t.attributes.get('media_position') | float(999)) < 10 }}
+  actions:
+  - alias: Log the detected self-restart
+    action: logbook.log
+    data:
+      name: Bedroom Repeat-Track Watchdog
+      message: >-
+        "{{ state_attr('media_player.bedroom_2', 'media_title') }}" restarted
+        itself instead of advancing - skipping to the next track.
+      entity_id: media_player.bedroom_2
+  - alias: Skip forward so the song does not play twice
+    action: media_player.media_next_track
+    target:
+      entity_id: media_player.bedroom_2
+  - alias: Cooldown so a burst of position updates cannot double-skip
+    delay:
+      seconds: 15
   mode: single
 - id: '1787057464833'
   alias: 'Bedroom: Stuck Track Watchdog'
