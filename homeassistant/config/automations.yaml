@@ -8776,8 +8776,7 @@
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.good_morning_active
-  mode: parallel
-  max: 2
+  mode: single
 - id: '1777890100001'
   alias: Heater Auto Off
   description: Keeps bathroom heater plug on all the time. Auto-shuts off for 5 seconds
