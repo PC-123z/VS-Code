@@ -5768,13 +5768,11 @@
             waits for a boundary.
           if:
           - condition: template
-            value_template: >-
-              {% set p = state_attr('media_player.office_2', 'media_position') |
-              float(0) %} {% set u = state_attr('media_player.office_2',
-              'media_position_updated_at') %} {% set d =
-              state_attr('media_player.office_2', 'media_duration') | float(0) %} {%
-              set el = p + ((now() - u).total_seconds() if u is not none else 0) %}
-              {{ d > 0 and (d - el) < 45 }}
+            value_template: '{% set p = state_attr(''media_player.office_2'', ''media_position'')
+              | float(0) %} {% set u = state_attr(''media_player.office_2'', ''media_position_updated_at'')
+              %} {% set d = state_attr(''media_player.office_2'', ''media_duration'')
+              | float(0) %} {% set el = p + ((now() - u).total_seconds() if u is not
+              none else 0) %} {{ d > 0 and (d - el) < 45 }}'
           then:
           - alias: Wait for the next track to start
             wait_for_trigger:
@@ -5825,11 +5823,10 @@
           timeout:
             minutes: 3
           continue_on_timeout: true
-        - alias: >-
-            Let the new track settle before speaking. The wait above fires at the
-            exact instant the next song starts, and announcing right then ducks it
-            at position zero, so it replays its opening seconds and sounds like the
-            track restarting. Matches the settle the Big Bedroom routine uses.
+        - alias: Let the new track settle before speaking. The wait above fires at
+            the exact instant the next song starts, and announcing right then ducks
+            it at position zero, so it replays its opening seconds and sounds like
+            the track restarting. Matches the settle the Big Bedroom routine uses.
           delay:
             seconds: 10
         - alias: Bump volume for second announcement
@@ -5983,10 +5980,9 @@
           entity_id: automation.office_bedroom_2_smart_motion_presence_2
         data: {}
     - sequence:
-      - alias: >-
-          30-minute hard cap timer. Clearing input_boolean.bedroom2_occupied is what
-          lets the occupancy-driven music loop above exit, so this branch is what
-          guarantees the run always terminates - which is in turn what makes
+      - alias: 30-minute hard cap timer. Clearing input_boolean.bedroom2_occupied
+          is what lets the occupancy-driven music loop above exit, so this branch
+          is what guarantees the run always terminates - which is in turn what makes
           mode:single safe here. The triggers are four hours apart (06:30 and 10:30)
           and a run can now last at most about half an hour, so a run can never still
           be alive when the next trigger fires and be dropped.
@@ -8412,14 +8408,13 @@
     action: counter.reset
     target:
       entity_id: counter.good_morning_announcements
-  - alias: >-
-      Clear any left-over armed announcement. Only Arm Second turns this flag on and
-      only Between Songs turns it off, so if a run ended after motion armed the
-      second announcement but before a track boundary arrived (occupancy timeout,
+  - alias: Clear any left-over armed announcement. Only Arm Second turns this flag
+      on and only Between Songs turns it off, so if a run ended after motion armed
+      the second announcement but before a track boundary arrived (occupancy timeout,
       music stopped at the speaker, or the hard cap), the flag stayed on overnight.
       The next morning the counter resets to zero, so the first track change would
-      then fire Between Songs as announcement number one - a full greeting at a
-      boundary, on top of the routine's own announcement on motion.
+      then fire Between Songs as announcement number one - a full greeting at a boundary,
+      on top of the routine's own announcement on motion.
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.good_morning_announcement_pending
@@ -8670,7 +8665,7 @@
               | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
               | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
               | round | int }} and a low of {{ (f.templow | float(0)) | round | int
-              }} degrees.{% endif %} Have a great day!'
+              }} degrees.{% endif %} I hope you have a wonderful day!'
         else:
         - alias: Ramp volume to 0.20 over ~2.5 minutes
           repeat:
@@ -8708,23 +8703,20 @@
               entity_id: input_boolean.good_morning_active
           - stop: Occupancy wait timed out - routine complete
           else:
-          - alias: >-
-              If the current song is nearly over, hold the announcement until the
-              next one is underway. Music Assistant plays an announcement over the
-              music rather than truly stopping the queue, so announcing with only a
-              few seconds of song left means the track changes the moment the
-              announcement ends, which sounds like the song being cut off or
-              skipped. On 2026-08-23 motion landed 159 seconds into a 185 second
-              track and the change followed 3 seconds after the announcement.
+          - alias: If the current song is nearly over, hold the announcement until
+              the next one is underway. Music Assistant plays an announcement over
+              the music rather than truly stopping the queue, so announcing with only
+              a few seconds of song left means the track changes the moment the announcement
+              ends, which sounds like the song being cut off or skipped. On 2026-08-23
+              motion landed 159 seconds into a 185 second track and the change followed
+              3 seconds after the announcement.
             if:
             - condition: template
-              value_template: >-
-                {% set p = state_attr('media_player.bedroom_2', 'media_position') |
-                float(0) %} {% set u = state_attr('media_player.bedroom_2',
-                'media_position_updated_at') %} {% set d =
-                state_attr('media_player.bedroom_2', 'media_duration') | float(0) %}
-                {% set el = p + ((now() - u).total_seconds() if u is not none else 0)
-                %} {{ d > 0 and (d - el) < 45 }}
+              value_template: '{% set p = state_attr(''media_player.bedroom_2'', ''media_position'')
+                | float(0) %} {% set u = state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')
+                %} {% set d = state_attr(''media_player.bedroom_2'', ''media_duration'')
+                | float(0) %} {% set el = p + ((now() - u).total_seconds() if u is
+                not none else 0) %} {{ d > 0 and (d - el) < 45 }}'
             then:
             - alias: Wait for the next track to start
               wait_for_trigger:
@@ -10231,9 +10223,8 @@
   - alias: Remember which track looked stuck
     variables:
       suspect_title: '{{ state_attr(''media_player.bedroom_2'', ''media_title'') }}'
-  - alias: >-
-      Confirm before skipping. Music Assistant plays a TTS announcement over the
-      queue and stops refreshing media_position while it speaks, so the computed
+  - alias: Confirm before skipping. Music Assistant plays a TTS announcement over
+      the queue and stops refreshing media_position while it speaks, so the computed
       elapsed time keeps climbing and can cross the track duration on its own - which
       looks identical to a stall at trigger time and would skip a perfectly healthy
       song. A real stall persists; an announcement resolves itself within seconds.
@@ -10241,15 +10232,13 @@
       seconds: 12
   - alias: Only a genuine stall is still overrunning the same track
     condition: template
-    value_template: >-
-      {{ is_state('media_player.bedroom_2', 'playing') and
-      state_attr('media_player.bedroom_2', 'media_title') == suspect_title and
-      state_attr('media_player.bedroom_2', 'media_duration') not in (none, 0) and
-      state_attr('media_player.bedroom_2', 'media_position_updated_at') is not none
-      and (state_attr('media_player.bedroom_2', 'media_position') | float(0)) +
-      (now() - state_attr('media_player.bedroom_2',
-      'media_position_updated_at')).total_seconds() >
-      (state_attr('media_player.bedroom_2', 'media_duration') | float(0) + 5) }}
+    value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and state_attr(''media_player.bedroom_2'',
+      ''media_title'') == suspect_title and state_attr(''media_player.bedroom_2'',
+      ''media_duration'') not in (none, 0) and state_attr(''media_player.bedroom_2'',
+      ''media_position_updated_at'') is not none and (state_attr(''media_player.bedroom_2'',
+      ''media_position'') | float(0)) + (now() - state_attr(''media_player.bedroom_2'',
+      ''media_position_updated_at'')).total_seconds() > (state_attr(''media_player.bedroom_2'',
+      ''media_duration'') | float(0) + 5) }}'
   - alias: Log which track was stuck
     action: logbook.log
     data:
