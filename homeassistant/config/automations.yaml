@@ -5983,7 +5983,14 @@
           entity_id: automation.office_bedroom_2_smart_motion_presence_2
         data: {}
     - sequence:
-      - delay:
+      - alias: >-
+          30-minute hard cap timer. Clearing input_boolean.bedroom2_occupied is what
+          lets the occupancy-driven music loop above exit, so this branch is what
+          guarantees the run always terminates - which is in turn what makes
+          mode:single safe here. The triggers are four hours apart (06:30 and 10:30)
+          and a run can now last at most about half an hour, so a run can never still
+          be alive when the next trigger fires and be dropped.
+        delay:
           minutes: 30
       - continue_on_error: true
         action: media_player.media_stop
@@ -5992,8 +5999,7 @@
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.bedroom2_occupied
-  mode: parallel
-  max: 2
+  mode: single
 - id: '1776382720393'
   alias: Bedroom 2 Daily Reset
   description: Backstop reset 30 min after Good Morning Routine's trigger time (9:30am
