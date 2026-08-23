@@ -8697,6 +8697,19 @@
             target:
               entity_id: counter.good_morning_announcements
           - alias: >-
+              Turn shuffle on BEFORE speaking. The player is idle here - the opening
+              track has finished and the playlist has not been loaded yet - so there
+              is no playback and no pre-buffered next track to invalidate, which is
+              the mistake that used to put the same song second every morning. Doing
+              it now rather than after the announcement gives it the entire spoken
+              message to take effect, so no delay is needed before the music starts.
+            continue_on_error: true
+            action: media_player.shuffle_set
+            target:
+              entity_id: media_player.bedroom_2
+            data:
+              shuffle: true
+          - alias: >-
               First announcement, spoken into the gap after the opening track has
               finished. No pause or resume is needed any more because nothing is
               playing - which is the whole point of splitting the morning into two
@@ -8730,35 +8743,14 @@
             timeout:
               seconds: 120
             continue_on_timeout: true
-          - delay:
-              seconds: 2
           - alias: >-
-              PHASE 2 - now set shuffle and repeat while the player is IDLE, before
-              any playlist exists. Setting shuffle after playback had already begun
-              is exactly what broke the mornings: Music Assistant had already
-              pre-buffered the next track from the unshuffled order, the reshuffle
-              invalidated it, and the boundary played a few seconds of one song
-              before jumping to the buffered one. Nothing is playing here, so there
-              is no buffer to invalidate.
-            continue_on_error: true
-            action: media_player.shuffle_set
-            target:
-              entity_id: media_player.bedroom_2
-            data:
-              shuffle: true
-          - alias: Repeat back on now that the queue will hold the full playlist
-            continue_on_error: true
-            action: media_player.repeat_set
-            target:
-              entity_id: media_player.bedroom_2
-            data:
-              repeat: all
-          - delay:
-              seconds: 2
-          - alias: >-
-              Load the shuffled morning playlist. Shuffle is already active, so the
-              queue is built shuffled from the outset and is never reordered
-              mid-playback.
+              PHASE 2 - load the shuffled playlist the moment the announcement stops,
+              with no padding in between. Shuffle was already switched on before the
+              announcement, so it has had the whole spoken message to take effect and
+              the queue is built shuffled from the very first item. Shuffle is never
+              toggled once playback is under way, which is what used to invalidate
+              Music Assistant's pre-buffered next track and make the first boundary
+              play a few seconds of one song before jumping to another.
             continue_on_error: true
             action: music_assistant.play_media
             target:
@@ -8767,6 +8759,17 @@
               media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
               media_type: playlist
               enqueue: replace
+          - alias: >-
+              Repeat back on. Deliberately set AFTER the playlist loads rather than
+              before: it only matters once all 770 tracks have played, so it needs no
+              settling time, and leaving it until now means nothing has to be waited
+              on between the announcement ending and the music starting.
+            continue_on_error: true
+            action: media_player.repeat_set
+            target:
+              entity_id: media_player.bedroom_2
+            data:
+              repeat: all
           - alias: Wait for the playlist to start
             wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
             timeout:
