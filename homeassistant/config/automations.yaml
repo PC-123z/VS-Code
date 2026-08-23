@@ -8703,45 +8703,30 @@
               entity_id: input_boolean.good_morning_active
           - stop: Occupancy wait timed out - routine complete
           else:
-          - alias: If the current song is nearly over, hold the announcement until
-              the next one is underway. Music Assistant plays an announcement over
-              the music rather than truly stopping the queue, so announcing with only
-              a few seconds of song left means the track changes the moment the announcement
-              ends, which sounds like the song being cut off or skipped. On 2026-08-23
-              motion landed 159 seconds into a 185 second track and the change followed
-              3 seconds after the announcement.
-            if:
-            - condition: template
-              value_template: '{% set p = state_attr(''media_player.bedroom_2'', ''media_position'')
-                | float(0) %} {% set u = state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')
-                %} {% set d = state_attr(''media_player.bedroom_2'', ''media_duration'')
-                | float(0) %} {% set el = p + ((now() - u).total_seconds() if u is
-                not none else 0) %} {{ d > 0 and (d - el) < 45 }}'
-            then:
-            - alias: Wait for the next track to start
-              wait_for_trigger:
-              - trigger: state
-                entity_id: media_player.bedroom_2
-                attribute: media_title
-              timeout:
-                minutes: 2
-              continue_on_timeout: true
-            - alias: Let the new track settle so it is not ducked at position zero
-              delay:
-                seconds: 10
           - alias: Count the first announcement before speaking it, so the Between
               Songs automation knows the next one is number two and keeps it time-only.
             action: counter.increment
             target:
               entity_id: counter.good_morning_announcements
-          - alias: First announcement, spoken immediately on motion rather than waiting
-              for a track boundary. Music Assistant pauses its queue for an announcement
-              and resumes at the SAME position, so speaking part-way through a song
-              simply ducks it and picks it back up - verified on the office player,
-              which resumed at 38 seconds rather than restarting. Announcing at a
-              track boundary instead meant ducking the new song at position zero,
-              which replayed its first few seconds and sounded like the track changing,
-              restarting and skipping.
+          - alias: >-
+              Pause the music properly before speaking. Music Assistant does NOT stop
+              the queue for an announcement - it keeps the stream running underneath
+              and only stops refreshing the reported position. Measured on 2026-08-23:
+              the song was at 10 seconds when the announcement began, the position
+              froze there for about 16 seconds, then jumped straight to 30 - so
+              roughly 20 seconds of that song were played under the announcement and
+              never heard. Resuming that far in sounds like a completely different
+              song. An explicit pause holds the song where it is so it carries on
+              from the same place afterwards, and it also parks the player in
+              'paused', which both track watchdogs ignore.
+            continue_on_error: true
+            action: media_player.media_pause
+            target:
+              entity_id: media_player.bedroom_2
+          - alias: Give the pause a moment to take effect on the Sonos side
+            delay:
+              seconds: 2
+          - alias: First announcement, spoken immediately on motion
             action: tts.speak
             target:
               entity_id: tts.piper
@@ -8757,12 +8742,22 @@
                 | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
                 | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
                 | round | int }} and a low of {{ (f.templow | float(0)) | round |
-                int }} degrees.{% endif %} Have a great day!'
-          - alias: Wait for the announcement to finish and music to resume
-            wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
+                int }} degrees.{% endif %} I hope you have a wonderful day!'
+          - alias: >-
+              Wait for the announcement to finish, rather than guessing with a fixed
+              delay. Music Assistant reports 'playing' while it speaks and restores
+              the player to the paused state it found afterwards, so waiting for
+              'paused' to come back is what actually marks the end of the
+              announcement. The timeout is generous and simply falls through.
+            wait_template: '{{ is_state(''media_player.bedroom_2'', ''paused'') }}'
             timeout:
-              seconds: 30
+              seconds: 90
             continue_on_timeout: true
+          - alias: Resume the song from exactly where it was paused
+            continue_on_error: true
+            action: media_player.media_play
+            target:
+              entity_id: media_player.bedroom_2
         - alias: Occupancy-driven music loop using Sensor Group
           repeat:
             while:
@@ -10080,6 +10075,20 @@
       data:
         type: daily
       response_variable: today_fc
+  - alias: >-
+      Pause the music properly before speaking. Music Assistant keeps the stream
+      running underneath an announcement and only stops refreshing the reported
+      position, so roughly twenty seconds of song get played unheard and it resumes
+      far further in, sounding like a different song. An explicit pause holds the
+      song in place, and parks the player in 'paused' which both track watchdogs
+      ignore.
+    continue_on_error: true
+    action: media_player.media_pause
+    target:
+      entity_id: media_player.bedroom_2
+  - alias: Give the pause a moment to take effect on the Sonos side
+    delay:
+      seconds: 2
   - alias: Announcement - full greeting the first time, time only the second time
     action: tts.speak
     target:
@@ -10098,11 +10107,20 @@
         a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Have
         a great day!{% else %}The time is now {{ now().strftime(''%-I:%M %p'') }}.{%
         endif %}'
-  - alias: Wait for the announcement to finish and music to resume
-    wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
+  - alias: >-
+      Wait for the announcement to finish rather than guessing with a fixed delay.
+      Music Assistant reports 'playing' while it speaks and restores the paused
+      state it found afterwards, so waiting for 'paused' to return is what actually
+      marks the end of the announcement.
+    wait_template: '{{ is_state(''media_player.bedroom_2'', ''paused'') }}'
     timeout:
-      seconds: 30
+      seconds: 90
     continue_on_timeout: true
+  - alias: Resume the song from exactly where it was paused
+    continue_on_error: true
+    action: media_player.media_play
+    target:
+      entity_id: media_player.bedroom_2
   - alias: Restore listening volume after announcement
     action: media_player.volume_set
     target:
