@@ -10080,8 +10080,8 @@
         | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'',
         '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and
         a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Have
-        a great day!{% else %}Today is {{ now().strftime(''%A, %B %-d'') }} and the
-        time is {{ now().strftime(''%-I:%M %p'') }}.{% endif %}'
+        a great day!{% else %}The time is now {{ now().strftime(''%-I:%M %p'') }}.{%
+        endif %}'
   - alias: Wait for the announcement to finish and music to resume
     wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
     timeout:
