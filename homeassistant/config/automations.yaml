@@ -5825,6 +5825,13 @@
           timeout:
             minutes: 3
           continue_on_timeout: true
+        - alias: >-
+            Let the new track settle before speaking. The wait above fires at the
+            exact instant the next song starts, and announcing right then ducks it
+            at position zero, so it replays its opening seconds and sounds like the
+            track restarting. Matches the settle the Big Bedroom routine uses.
+          delay:
+            seconds: 10
         - alias: Bump volume for second announcement
           action: media_player.volume_set
           target:
