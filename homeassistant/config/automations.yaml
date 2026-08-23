@@ -8568,9 +8568,19 @@
           entity_id: media_player.bedroom
         data:
           volume_level: 0.05
-      - alias: Shuffle OFF before queueing so the playlist loads in its natural order
-          and its first track (Here Comes The Sun) lands at queue index 0
+      - alias: >-
+          PHASE 1 - Here Comes The Sun on its own. Repeat MUST be off here: it is
+          persistent queue state and is normally left on 'all', and an all-repeat
+          on a one-track queue replays the same song forever, which is the original
+          failure from 2026-08-18. Shuffle off too, so nothing reorders a single
+          item.
         continue_on_error: true
+        action: media_player.repeat_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          repeat: 'off'
+      - continue_on_error: true
         action: media_player.shuffle_set
         target:
           entity_id: media_player.bedroom_2
@@ -8578,34 +8588,28 @@
           shuffle: false
       - delay:
           seconds: 2
-      - alias: Queue the morning playlist as ONE replace call. Here Comes The Sun
-          is already the playlist's own first track, so it plays first without being
-          prepended separately. The old version enqueued that track explicitly and
-          THEN appended the playlist, which put the same song at queue index 0 AND
-          index 1 - so it played, "advanced" straight into its own duplicate and played
-          again. That duplicate is the reason the routine kept repeating the first
-          song every morning.
+      - alias: >-
+          Queue ONLY the opening track. A single-item queue gives Music Assistant no
+          next item to pre-buffer, which is what used to go wrong: the playlist was
+          loaded unshuffled so MA buffered its natural track 2 (Jack Johnson - Better
+          Together), the routine then switched shuffle on, and at the boundary Sonos
+          started the newly shuffled track while MA's stream still delivered the
+          buffered one - a few seconds of one song, then Better Together, every
+          single morning. Nothing is pre-buffered here, so there is nothing to
+          mismatch.
         continue_on_error: true
         action: music_assistant.play_media
         target:
           entity_id: media_player.bedroom_2
         data:
-          media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
-          media_type: playlist
+          media_id: ytmusic://track/xUNqsfFUwhY
+          media_type: track
           enqueue: replace
-      - alias: Wait for the queue to actually start before shuffling
+      - alias: Wait for the opening track to actually start
         wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
         timeout:
           seconds: 30
         continue_on_timeout: true
-      - alias: Shuffle the rest of the queue (leaves the currently playing first track
-          in place)
-        continue_on_error: true
-        action: media_player.shuffle_set
-        target:
-          entity_id: media_player.bedroom_2
-        data:
-          shuffle: true
       - delay:
           seconds: 3
       - alias: Ensure playback is not paused after unjoin
@@ -8664,29 +8668,28 @@
               data:
                 volume_level: '{{ [0.05 + (repeat.index * 0.019), 0.20] | min | round(3)
                   }}'
-        - alias: Wait for bedroom motion before announcement
-          wait_for_trigger:
-          - trigger: state
-            entity_id: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
-            to: 'on'
+        - alias: >-
+            Wait for the opening track to finish rather than for motion. With a
+            one-track queue and repeat off, Music Assistant goes idle when the song
+            ends, so idle is the reliable "track finished" signal. The announcement
+            then lands in real silence between the two phases - nothing to duck,
+            nothing to pause and resume, and no part of a song lost underneath it.
+            Timeout is generously longer than the track and simply falls through.
+          wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') }}'
           timeout:
-            minutes: 60
-        - alias: Check if occupancy wait timed out
+            minutes: 8
+          continue_on_timeout: true
+        - alias: >-
+            Bail out if the routine was cancelled while the opening track played -
+            Goodbye, the sleep flag, or the hard cap can all clear good_morning_active
+            mid-run, and without this check the announcement and the whole shuffled
+            playlist would still start up afterwards.
           if:
-          - condition: template
-            value_template: '{{ wait.completed == false }}'
+          - condition: state
+            entity_id: input_boolean.good_morning_active
+            state: 'off'
           then:
-          - action: media_player.media_stop
-            target:
-              entity_id: media_player.bedroom
-          - continue_on_error: true
-            action: media_player.unjoin
-            target:
-              entity_id: media_player.bathroom_2
-          - action: input_boolean.turn_off
-            target:
-              entity_id: input_boolean.good_morning_active
-          - stop: Occupancy wait timed out - routine complete
+          - stop: Routine was cancelled during the opening track
           else:
           - alias: Count the first announcement before speaking it, so the Between
               Songs automation knows the next one is number two and keeps it time-only.
@@ -8694,24 +8697,14 @@
             target:
               entity_id: counter.good_morning_announcements
           - alias: >-
-              Pause the music properly before speaking. Music Assistant does NOT stop
-              the queue for an announcement - it keeps the stream running underneath
-              and only stops refreshing the reported position. Measured on 2026-08-23:
-              the song was at 10 seconds when the announcement began, the position
-              froze there for about 16 seconds, then jumped straight to 30 - so
-              roughly 20 seconds of that song were played under the announcement and
-              never heard. Resuming that far in sounds like a completely different
-              song. An explicit pause holds the song where it is so it carries on
-              from the same place afterwards, and it also parks the player in
-              'paused', which both track watchdogs ignore.
-            continue_on_error: true
-            action: media_player.media_pause
-            target:
-              entity_id: media_player.bedroom_2
-          - alias: Give the pause a moment to take effect on the Sonos side
-            delay:
-              seconds: 2
-          - alias: First announcement, spoken immediately on motion
+              First announcement, spoken into the gap after the opening track has
+              finished. No pause or resume is needed any more because nothing is
+              playing - which is the whole point of splitting the morning into two
+              phases. Speaking over music never worked properly: Music Assistant
+              keeps the stream running underneath an announcement and only stops
+              refreshing the reported position, so roughly twenty seconds of song
+              played unheard and it picked up far further in, sounding like a
+              different song.
             action: tts.speak
             target:
               entity_id: tts.piper
@@ -8729,20 +8722,56 @@
                 | round | int }} and a low of {{ (f.templow | float(0)) | round |
                 int }} degrees.{% endif %} I hope you have a wonderful day!'
           - alias: >-
-              Wait for the announcement to finish, rather than guessing with a fixed
-              delay. Music Assistant reports 'playing' while it speaks and restores
-              the player to the paused state it found afterwards, so waiting for
-              'paused' to come back is what actually marks the end of the
-              announcement. The timeout is generous and simply falls through.
-            wait_template: '{{ is_state(''media_player.bedroom_2'', ''paused'') }}'
+              Wait for the announcement to finish speaking. The player reports
+              'playing' while Piper talks and drops back to 'idle' when it is done,
+              so idle returning is the end-of-announcement signal. Generous timeout
+              that simply falls through.
+            wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') }}'
             timeout:
-              seconds: 90
+              seconds: 120
             continue_on_timeout: true
-          - alias: Resume the song from exactly where it was paused
+          - delay:
+              seconds: 2
+          - alias: >-
+              PHASE 2 - now set shuffle and repeat while the player is IDLE, before
+              any playlist exists. Setting shuffle after playback had already begun
+              is exactly what broke the mornings: Music Assistant had already
+              pre-buffered the next track from the unshuffled order, the reshuffle
+              invalidated it, and the boundary played a few seconds of one song
+              before jumping to the buffered one. Nothing is playing here, so there
+              is no buffer to invalidate.
             continue_on_error: true
-            action: media_player.media_play
+            action: media_player.shuffle_set
             target:
               entity_id: media_player.bedroom_2
+            data:
+              shuffle: true
+          - alias: Repeat back on now that the queue will hold the full playlist
+            continue_on_error: true
+            action: media_player.repeat_set
+            target:
+              entity_id: media_player.bedroom_2
+            data:
+              repeat: all
+          - delay:
+              seconds: 2
+          - alias: >-
+              Load the shuffled morning playlist. Shuffle is already active, so the
+              queue is built shuffled from the outset and is never reordered
+              mid-playback.
+            continue_on_error: true
+            action: music_assistant.play_media
+            target:
+              entity_id: media_player.bedroom_2
+            data:
+              media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
+              media_type: playlist
+              enqueue: replace
+          - alias: Wait for the playlist to start
+            wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
+            timeout:
+              seconds: 30
+            continue_on_timeout: true
         - alias: Occupancy-driven music loop using Sensor Group
           repeat:
             while:
@@ -8768,11 +8797,19 @@
                   entity_id: input_boolean.good_morning_active
                   state: 'on'
                 then:
-                - alias: Re-queue the playlist in one replace call. Same fix as the
-                    startup block - prepending the Here Comes The Sun track before
-                    the playlist duplicated it at queue index 0 and 1 and made the
-                    song replay itself. Shuffle is left ON here because a mid-routine
-                    self-heal should resume shuffled, not restart from the top.
+                - alias: >-
+                    Set shuffle BEFORE re-queueing, never after. The player is idle
+                    at this point (that is what triggered the self-heal), so there is
+                    no pre-buffered next track to invalidate. Setting it after
+                    play_media is what used to make the boundary play a few seconds
+                    of one song before jumping to a different one.
+                  continue_on_error: true
+                  action: media_player.shuffle_set
+                  target:
+                    entity_id: media_player.bedroom_2
+                  data:
+                    shuffle: true
+                - alias: Re-queue the playlist, already shuffled, in one replace call
                   continue_on_error: true
                   action: music_assistant.play_media
                   target:
@@ -8781,12 +8818,6 @@
                     media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
                     media_type: playlist
                     enqueue: replace
-                - continue_on_error: true
-                  action: media_player.shuffle_set
-                  target:
-                    entity_id: media_player.bedroom_2
-                  data:
-                    shuffle: true
               - action: media_player.volume_set
                 target:
                   entity_id: media_player.bedroom
