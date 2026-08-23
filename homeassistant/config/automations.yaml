@@ -4971,7 +4971,7 @@
           - condition: state
             entity_id: media_player.bedroom_2
             state: playing
-  - alias: Set bedroom fan to 50%
+  - alias: Set bedroom fan to 25%
     action: fan.turn_on
     data:
       percentage: 25
@@ -5001,7 +5001,7 @@
       - 0
       brightness_pct: 2
       transition: 1
-    enabled: false
+    enabled: true
   - alias: Fade all Hue lights off over 5 seconds
     action: light.turn_off
     target:
@@ -5024,7 +5024,7 @@
   - alias: Turn off Nanoleaf after 15 minutes
     delay:
       minutes: 15
-    enabled: false
+    enabled: true
   mode: single
 - id: '1776310243676'
   alias: 'Hue Button 3 - Big Bedroom: Goodnight Button Hold - Hue Button 3'
@@ -5087,13 +5087,13 @@
           - condition: state
             entity_id: media_player.bedroom_2
             state: playing
-  - alias: Set bedroom fan to 50%
+  - alias: Set bedroom fan to 25%
     action: fan.turn_on
     data:
-      percentage: 50
+      percentage: 25
     target:
       entity_id: fan.big_bedroom_fan
-    enabled: false
+    enabled: true
   - alias: Set purifier to 50%
     action: fan.turn_on
     target:
@@ -5117,7 +5117,7 @@
       - 0
       brightness_pct: 2
       transition: 1
-    enabled: false
+    enabled: true
   - alias: Fade all Hue lights off over 5 seconds
     action: light.turn_off
     target:
@@ -5140,7 +5140,7 @@
   - alias: Turn off Nanoleaf after 15 minutes
     delay:
       minutes: 15
-    enabled: false
+    enabled: true
   mode: single
 - id: '1776378416550'
   alias: '*Bedroom 2 Bedtime Routine'
