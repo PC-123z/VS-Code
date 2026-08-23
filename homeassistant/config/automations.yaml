@@ -5759,15 +5759,34 @@
               entity_id: input_boolean.bedroom2_occupied
           - stop: Motion wait timed out - routine complete
         - alias: No track-boundary wait before the first announcement - it is spoken
-            straight away on motion. Music Assistant pauses its queue for an announcement
-            and resumes at the SAME position, so speaking part-way through a song
-            just ducks it and picks it back up (verified on this same office player,
-            which resumed at 38 seconds rather than restarting). Waiting for a boundary
-            instead ducked the incoming song at position zero, replaying its opening
-            seconds and sounding like the track restarting. The SECOND announcement
-            below still waits for a boundary.
-          delay:
-            seconds: 1
+            straight away on motion so it lands mid-song and is simply ducked over.
+            Waiting for a boundary instead ducked the incoming song at position zero
+            and replayed its opening seconds, which sounded like the track restarting.
+            The one exception is handled here - if the current song is nearly over
+            the announcement would collide with the track change, so in that case
+            wait for the next song first. The SECOND announcement further down still
+            waits for a boundary.
+          if:
+          - condition: template
+            value_template: >-
+              {% set p = state_attr('media_player.office_2', 'media_position') |
+              float(0) %} {% set u = state_attr('media_player.office_2',
+              'media_position_updated_at') %} {% set d =
+              state_attr('media_player.office_2', 'media_duration') | float(0) %} {%
+              set el = p + ((now() - u).total_seconds() if u is not none else 0) %}
+              {{ d > 0 and (d - el) < 45 }}
+          then:
+          - alias: Wait for the next track to start
+            wait_for_trigger:
+            - trigger: state
+              entity_id: media_player.office_2
+              attribute: media_title
+            timeout:
+              minutes: 2
+            continue_on_timeout: true
+          - alias: Let the new track settle so it is not ducked at position zero
+            delay:
+              seconds: 10
         - alias: Set volume for first announcement
           action: media_player.volume_set
           target:
@@ -8665,6 +8684,35 @@
               entity_id: input_boolean.good_morning_active
           - stop: Occupancy wait timed out - routine complete
           else:
+          - alias: >-
+              If the current song is nearly over, hold the announcement until the
+              next one is underway. Music Assistant plays an announcement over the
+              music rather than truly stopping the queue, so announcing with only a
+              few seconds of song left means the track changes the moment the
+              announcement ends, which sounds like the song being cut off or
+              skipped. On 2026-08-23 motion landed 159 seconds into a 185 second
+              track and the change followed 3 seconds after the announcement.
+            if:
+            - condition: template
+              value_template: >-
+                {% set p = state_attr('media_player.bedroom_2', 'media_position') |
+                float(0) %} {% set u = state_attr('media_player.bedroom_2',
+                'media_position_updated_at') %} {% set d =
+                state_attr('media_player.bedroom_2', 'media_duration') | float(0) %}
+                {% set el = p + ((now() - u).total_seconds() if u is not none else 0)
+                %} {{ d > 0 and (d - el) < 45 }}
+            then:
+            - alias: Wait for the next track to start
+              wait_for_trigger:
+              - trigger: state
+                entity_id: media_player.bedroom_2
+                attribute: media_title
+              timeout:
+                minutes: 2
+              continue_on_timeout: true
+            - alias: Let the new track settle so it is not ducked at position zero
+              delay:
+                seconds: 10
           - alias: Count the first announcement before speaking it, so the Between
               Songs automation knows the next one is number two and keeps it time-only.
             action: counter.increment
@@ -10032,8 +10080,8 @@
         | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'',
         '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and
         a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Have
-        a great day!{% else %}The time is {{ now().strftime(''%-I:%M %p'') }}.{% endif
-        %}'
+        a great day!{% else %}Today is {{ now().strftime(''%A, %B %-d'') }} and the
+        time is {{ now().strftime(''%-I:%M %p'') }}.{% endif %}'
   - alias: Wait for the announcement to finish and music to resume
     wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
     timeout:
