@@ -8412,6 +8412,17 @@
     action: counter.reset
     target:
       entity_id: counter.good_morning_announcements
+  - alias: >-
+      Clear any left-over armed announcement. Only Arm Second turns this flag on and
+      only Between Songs turns it off, so if a run ended after motion armed the
+      second announcement but before a track boundary arrived (occupancy timeout,
+      music stopped at the speaker, or the hard cap), the flag stayed on overnight.
+      The next morning the counter resets to zero, so the first track change would
+      then fire Between Songs as announcement number one - a full greeting at a
+      boundary, on top of the routine's own announcement on motion.
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.good_morning_announcement_pending
   - alias: Clear asleep flag - presence lighting allowed again
     action: input_boolean.turn_off
     target:
@@ -10217,12 +10228,34 @@
       > (state_attr(''media_player.bedroom_2'', ''media_duration'') | float(0) + 5)
       }}'
   actions:
+  - alias: Remember which track looked stuck
+    variables:
+      suspect_title: '{{ state_attr(''media_player.bedroom_2'', ''media_title'') }}'
+  - alias: >-
+      Confirm before skipping. Music Assistant plays a TTS announcement over the
+      queue and stops refreshing media_position while it speaks, so the computed
+      elapsed time keeps climbing and can cross the track duration on its own - which
+      looks identical to a stall at trigger time and would skip a perfectly healthy
+      song. A real stall persists; an announcement resolves itself within seconds.
+    delay:
+      seconds: 12
+  - alias: Only a genuine stall is still overrunning the same track
+    condition: template
+    value_template: >-
+      {{ is_state('media_player.bedroom_2', 'playing') and
+      state_attr('media_player.bedroom_2', 'media_title') == suspect_title and
+      state_attr('media_player.bedroom_2', 'media_duration') not in (none, 0) and
+      state_attr('media_player.bedroom_2', 'media_position_updated_at') is not none
+      and (state_attr('media_player.bedroom_2', 'media_position') | float(0)) +
+      (now() - state_attr('media_player.bedroom_2',
+      'media_position_updated_at')).total_seconds() >
+      (state_attr('media_player.bedroom_2', 'media_duration') | float(0) + 5) }}
   - alias: Log which track was stuck
     action: logbook.log
     data:
       name: Bedroom Stuck Track Watchdog
-      message: Position ran past duration on "{{ state_attr('media_player.bedroom_2',
-        'media_title') }}" - forcing next track.
+      message: Position ran past duration on "{{ suspect_title }}" - confirmed after
+        12s, forcing next track.
       entity_id: media_player.bedroom_2
   - alias: Force skip to next track to unstick the queue
     action: media_player.media_next_track
