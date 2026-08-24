@@ -8692,7 +8692,7 @@
               target:
                 entity_id: media_player.bedroom
               data:
-                volume_level: '{{ [0.05 + (repeat.index * 0.019), 0.20] | min | round(3)
+                volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3)
                   }}'
         - alias: Wait for the opening track to finish rather than for motion. With
             a one-track queue and repeat off, Music Assistant goes idle when the song
@@ -8843,7 +8843,7 @@
                 target:
                   entity_id: media_player.bedroom
                 data:
-                  volume_level: 0.2
+                  volume_level: 0.15
               - delay:
                   seconds: 30
               else:
@@ -8863,7 +8863,7 @@
                   target:
                     entity_id: media_player.bedroom
                   data:
-                    volume_level: 0.2
+                    volume_level: 0.15
                 else:
                 - alias: Ramp volume down over 2 minutes
                   repeat:
@@ -8873,7 +8873,7 @@
                       target:
                         entity_id: media_player.bedroom
                       data:
-                        volume_level: '{{ [0.20 - (repeat.index * 0.019), 0.05] |
+                        volume_level: '{{ [0.15 - (repeat.index * 0.0125), 0.05] |
                           max | round(3) }}'
                     - delay:
                         seconds: 15
@@ -10160,7 +10160,7 @@
     target:
       entity_id: media_player.bedroom
     data:
-      volume_level: 0.2
+      volume_level: 0.15
   mode: single
 - id: '1787224007804'
   alias: 'Bedroom: Arm Second Good Morning Announcement'
