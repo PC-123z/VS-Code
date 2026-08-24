@@ -5186,12 +5186,18 @@
     - conditions:
       - condition: trigger
         id: window_open_catchup
-      - alias: Occupied was latched on before the window opened (e.g. by the Occupancy
-          Latch automation) - occupied_set never fired inside the window, so run setup
-          now
-        condition: state
-        entity_id: input_boolean.bedroom2_occupied
-        state: 'on'
+      - alias: Someone is in the room as the window opens - either occupied was latched
+          on before 10pm (occupied_set never fired inside the window), or the sensors
+          show presence right now but never produced a fresh off->on edge to latch it
+          (e.g. already lying still in bed since before 10pm)
+        condition: or
+        conditions:
+        - condition: state
+          entity_id: input_boolean.bedroom2_occupied
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.bedroom_2_sensor_group
+          state: 'on'
       sequence:
       - alias: Skip if dimmer override is active
         if:
@@ -5213,6 +5219,17 @@
             - 0
             brightness_pct: 10
             transition: 3
+      - alias: Presence without a latch - set occupied and let the occupied_set branch
+          run fan and music, so they can't both start it
+        if:
+        - condition: state
+          entity_id: input_boolean.bedroom2_occupied
+          state: 'off'
+        then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.bedroom2_occupied
+        - stop: Occupied set - occupied_set branch handles fan and music
       - alias: Fan on - stays on until Good Morning routine turns it off
         action: fan.turn_on
         data:
