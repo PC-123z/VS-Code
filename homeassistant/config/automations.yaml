@@ -5442,10 +5442,12 @@
       - condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'on'
-      - alias: Bedtime Routine active window - 10:00pm to 6am
+      - alias: Dim-down window - 10:00pm to 11:30pm only. After 11:30pm the room stays
+          dark until the Good Morning Routine restores the lights, so a motion-clear
+          can no longer relight the room after hard lights out.
         condition: time
         after: '22:00:00'
-        before: 06:00:00
+        before: '23:30:00'
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.bedroom2_manual_override
@@ -6065,15 +6067,15 @@
       entity_id: input_boolean.bedroom2_occupied
   mode: single
 - id: '1781237174423'
-  alias: '*Bedroom 2 After Midnight Lights Out'
-  description: After midnight while bedroom2_occupied is on, any Bedroom 2 / Office
-    light that stays on for 60 seconds fades back off. Ignores the dimmer manual override
-    (same as the 11:40pm hard cutoff) so the kids can't defeat it from the wall dimmer.
-    The midnight sweep trigger catches lights turned on between the 11:40pm cutoff
-    and midnight, and the startup sweep catches lights already on when HA restarts
-    overnight (restored states don't fire the state trigger). Window ends before the
-    Good Morning sunrise ramp starts; bedroom2_occupied being cleared by Good Morning
-    or Daily Reset also disables it.
+  alias: '*Bedroom 2 Late Night Lights Out'
+  description: From 11:30pm onward, while bedroom2_occupied is on, any Bedroom 2 /
+    Office light that stays on for 60 seconds fades back off - the room stays dark until
+    the Good Morning Routine restores the lights. Ignores the dimmer manual override
+    so the kids can't defeat it from the wall dimmer. The 11:30pm and midnight sweeps
+    catch lights already on when the window opens, and the startup sweep catches lights
+    already on when HA restarts overnight (restored states don't fire the state trigger).
+    Window ends before the Good Morning sunrise ramp starts; bedroom2_occupied being
+    cleared by Good Morning or Daily Reset also disables it.
   triggers:
   - trigger: state
     entity_id:
@@ -6085,6 +6087,10 @@
     for:
       seconds: 60
     id: light_on
+  - alias: Sweep as the window opens at 11:30pm
+    trigger: time
+    at: '23:30:00'
+    id: sweep
   - trigger: time
     at: 00:00:30
     id: sweep
@@ -6095,9 +6101,13 @@
   - condition: state
     entity_id: input_boolean.bedroom2_occupied
     state: 'on'
-  - alias: After midnight, before the morning sunrise ramp starts
+  - alias: From 11:30pm until the morning sunrise ramp starts
     condition: or
     conditions:
+    - alias: Late evening - 11:30pm to midnight, every night
+      condition: time
+      after: '23:30:00'
+      before: 00:00:00
     - condition: time
       after: 00:00:00
       before: 07:45:00
