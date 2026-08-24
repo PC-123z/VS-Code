@@ -5188,8 +5188,8 @@
         id: window_open_catchup
       - alias: Someone is in the room as the window opens - either occupied was latched
           on before 10pm (occupied_set never fired inside the window), or the sensors
-          show presence right now but never produced a fresh off->on edge to latch it
-          (e.g. already lying still in bed since before 10pm)
+          show presence right now but never produced a fresh off->on edge to latch
+          it (e.g. already lying still in bed since before 10pm)
         condition: or
         conditions:
         - condition: state
@@ -5325,7 +5325,7 @@
           percentage: 25
         target:
           entity_id: fan.bedroom2_fan
-        enabled: true
+        enabled: false
       - alias: Unjoin office_2 from any Music Assistant group before playing sleep
           music - otherwise it plays to whatever it's currently grouped with (e.g.
           the kitchen)
@@ -8585,12 +8585,10 @@
           entity_id: media_player.bedroom
         data:
           volume_level: 0.05
-      - alias: >-
-          PHASE 1 - Here Comes The Sun on its own. Repeat MUST be off here: it is
-          persistent queue state and is normally left on 'all', and an all-repeat
+      - alias: 'PHASE 1 - Here Comes The Sun on its own. Repeat MUST be off here:
+          it is persistent queue state and is normally left on ''all'', and an all-repeat
           on a one-track queue replays the same song forever, which is the original
-          failure from 2026-08-18. Shuffle off too, so nothing reorders a single
-          item.
+          failure from 2026-08-18. Shuffle off too, so nothing reorders a single item.'
         continue_on_error: true
         action: media_player.repeat_set
         target:
@@ -8605,15 +8603,13 @@
           shuffle: false
       - delay:
           seconds: 2
-      - alias: >-
-          Queue ONLY the opening track. A single-item queue gives Music Assistant no
-          next item to pre-buffer, which is what used to go wrong: the playlist was
-          loaded unshuffled so MA buffered its natural track 2 (Jack Johnson - Better
-          Together), the routine then switched shuffle on, and at the boundary Sonos
-          started the newly shuffled track while MA's stream still delivered the
-          buffered one - a few seconds of one song, then Better Together, every
-          single morning. Nothing is pre-buffered here, so there is nothing to
-          mismatch.
+      - alias: 'Queue ONLY the opening track. A single-item queue gives Music Assistant
+          no next item to pre-buffer, which is what used to go wrong: the playlist
+          was loaded unshuffled so MA buffered its natural track 2 (Jack Johnson -
+          Better Together), the routine then switched shuffle on, and at the boundary
+          Sonos started the newly shuffled track while MA''s stream still delivered
+          the buffered one - a few seconds of one song, then Better Together, every
+          single morning. Nothing is pre-buffered here, so there is nothing to mismatch.'
         continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -8685,20 +8681,18 @@
               data:
                 volume_level: '{{ [0.05 + (repeat.index * 0.019), 0.20] | min | round(3)
                   }}'
-        - alias: >-
-            Wait for the opening track to finish rather than for motion. With a
-            one-track queue and repeat off, Music Assistant goes idle when the song
+        - alias: Wait for the opening track to finish rather than for motion. With
+            a one-track queue and repeat off, Music Assistant goes idle when the song
             ends, so idle is the reliable "track finished" signal. The announcement
-            then lands in real silence between the two phases - nothing to duck,
-            nothing to pause and resume, and no part of a song lost underneath it.
-            Timeout is generously longer than the track and simply falls through.
+            then lands in real silence between the two phases - nothing to duck, nothing
+            to pause and resume, and no part of a song lost underneath it. Timeout
+            is generously longer than the track and simply falls through.
           wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') }}'
           timeout:
             minutes: 8
           continue_on_timeout: true
-        - alias: >-
-            Bail out if the routine was cancelled while the opening track played -
-            Goodbye, the sleep flag, or the hard cap can all clear good_morning_active
+        - alias: Bail out if the routine was cancelled while the opening track played
+            - Goodbye, the sleep flag, or the hard cap can all clear good_morning_active
             mid-run, and without this check the announcement and the whole shuffled
             playlist would still start up afterwards.
           if:
@@ -8713,28 +8707,26 @@
             action: counter.increment
             target:
               entity_id: counter.good_morning_announcements
-          - alias: >-
-              Turn shuffle on BEFORE speaking. The player is idle here - the opening
-              track has finished and the playlist has not been loaded yet - so there
-              is no playback and no pre-buffered next track to invalidate, which is
-              the mistake that used to put the same song second every morning. Doing
-              it now rather than after the announcement gives it the entire spoken
-              message to take effect, so no delay is needed before the music starts.
+          - alias: Turn shuffle on BEFORE speaking. The player is idle here - the
+              opening track has finished and the playlist has not been loaded yet
+              - so there is no playback and no pre-buffered next track to invalidate,
+              which is the mistake that used to put the same song second every morning.
+              Doing it now rather than after the announcement gives it the entire
+              spoken message to take effect, so no delay is needed before the music
+              starts.
             continue_on_error: true
             action: media_player.shuffle_set
             target:
               entity_id: media_player.bedroom_2
             data:
               shuffle: true
-          - alias: >-
-              First announcement, spoken into the gap after the opening track has
-              finished. No pause or resume is needed any more because nothing is
-              playing - which is the whole point of splitting the morning into two
-              phases. Speaking over music never worked properly: Music Assistant
-              keeps the stream running underneath an announcement and only stops
-              refreshing the reported position, so roughly twenty seconds of song
-              played unheard and it picked up far further in, sounding like a
-              different song.
+          - alias: 'First announcement, spoken into the gap after the opening track
+              has finished. No pause or resume is needed any more because nothing
+              is playing - which is the whole point of splitting the morning into
+              two phases. Speaking over music never worked properly: Music Assistant
+              keeps the stream running underneath an announcement and only stops refreshing
+              the reported position, so roughly twenty seconds of song played unheard
+              and it picked up far further in, sounding like a different song.'
             action: tts.speak
             target:
               entity_id: tts.piper
@@ -8751,8 +8743,7 @@
                 | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
                 | round | int }} and a low of {{ (f.templow | float(0)) | round |
                 int }} degrees.{% endif %} I hope you have a wonderful day!'
-          - alias: >-
-              Wait for the announcement to finish speaking. The player reports
+          - alias: Wait for the announcement to finish speaking. The player reports
               'playing' while Piper talks and drops back to 'idle' when it is done,
               so idle returning is the end-of-announcement signal. Generous timeout
               that simply falls through.
@@ -8760,12 +8751,11 @@
             timeout:
               seconds: 120
             continue_on_timeout: true
-          - alias: >-
-              PHASE 2 - load the shuffled playlist the moment the announcement stops,
-              with no padding in between. Shuffle was already switched on before the
-              announcement, so it has had the whole spoken message to take effect and
-              the queue is built shuffled from the very first item. Shuffle is never
-              toggled once playback is under way, which is what used to invalidate
+          - alias: PHASE 2 - load the shuffled playlist the moment the announcement
+              stops, with no padding in between. Shuffle was already switched on before
+              the announcement, so it has had the whole spoken message to take effect
+              and the queue is built shuffled from the very first item. Shuffle is
+              never toggled once playback is under way, which is what used to invalidate
               Music Assistant's pre-buffered next track and make the first boundary
               play a few seconds of one song before jumping to another.
             continue_on_error: true
@@ -8776,11 +8766,10 @@
               media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
               media_type: playlist
               enqueue: replace
-          - alias: >-
-              Repeat back on. Deliberately set AFTER the playlist loads rather than
-              before: it only matters once all 770 tracks have played, so it needs no
-              settling time, and leaving it until now means nothing has to be waited
-              on between the announcement ending and the music starting.
+          - alias: 'Repeat back on. Deliberately set AFTER the playlist loads rather
+              than before: it only matters once all 770 tracks have played, so it
+              needs no settling time, and leaving it until now means nothing has to
+              be waited on between the announcement ending and the music starting.'
             continue_on_error: true
             action: media_player.repeat_set
             target:
@@ -8817,12 +8806,11 @@
                   entity_id: input_boolean.good_morning_active
                   state: 'on'
                 then:
-                - alias: >-
-                    Set shuffle BEFORE re-queueing, never after. The player is idle
-                    at this point (that is what triggered the self-heal), so there is
-                    no pre-buffered next track to invalidate. Setting it after
-                    play_media is what used to make the boundary play a few seconds
-                    of one song before jumping to a different one.
+                - alias: Set shuffle BEFORE re-queueing, never after. The player is
+                    idle at this point (that is what triggered the self-heal), so
+                    there is no pre-buffered next track to invalidate. Setting it
+                    after play_media is what used to make the boundary play a few
+                    seconds of one song before jumping to a different one.
                   continue_on_error: true
                   action: media_player.shuffle_set
                   target:
@@ -10111,13 +10099,11 @@
       data:
         type: daily
       response_variable: today_fc
-  - alias: >-
-      Pause the music properly before speaking. Music Assistant keeps the stream
-      running underneath an announcement and only stops refreshing the reported
-      position, so roughly twenty seconds of song get played unheard and it resumes
-      far further in, sounding like a different song. An explicit pause holds the
-      song in place, and parks the player in 'paused' which both track watchdogs
-      ignore.
+  - alias: Pause the music properly before speaking. Music Assistant keeps the stream
+      running underneath an announcement and only stops refreshing the reported position,
+      so roughly twenty seconds of song get played unheard and it resumes far further
+      in, sounding like a different song. An explicit pause holds the song in place,
+      and parks the player in 'paused' which both track watchdogs ignore.
     continue_on_error: true
     action: media_player.media_pause
     target:
@@ -10143,11 +10129,10 @@
         a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Have
         a great day!{% else %}The time is now {{ now().strftime(''%-I:%M %p'') }}.{%
         endif %}'
-  - alias: >-
-      Wait for the announcement to finish rather than guessing with a fixed delay.
-      Music Assistant reports 'playing' while it speaks and restores the paused
-      state it found afterwards, so waiting for 'paused' to return is what actually
-      marks the end of the announcement.
+  - alias: Wait for the announcement to finish rather than guessing with a fixed delay.
+      Music Assistant reports 'playing' while it speaks and restores the paused state
+      it found afterwards, so waiting for 'paused' to return is what actually marks
+      the end of the announcement.
     wait_template: '{{ is_state(''media_player.bedroom_2'', ''paused'') }}'
     timeout:
       seconds: 90
