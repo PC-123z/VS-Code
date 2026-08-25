@@ -4443,7 +4443,6 @@
       volume_level: 0.12
   - alias: Play white noise via Music Assistant (with retry)
     repeat:
-      count: 2
       sequence:
       - continue_on_error: true
         action: music_assistant.play_media
@@ -4464,13 +4463,17 @@
         timeout:
           seconds: 8
         continue_on_timeout: true
-      - alias: Stop repeating once it's actually playing
-        if:
+      until:
+      - alias: Exit the loop once it is playing, or after two attempts. Must be an
+          until condition, not a stop action - stop would end the whole automation
+          run and skip every step after this repeat.
+        condition: or
+        conditions:
         - condition: state
           entity_id: media_player.bedroom_2
           state: playing
-        then:
-        - stop: Playback confirmed
+        - condition: template
+          value_template: '{{ repeat.index >= 2 }}'
   - alias: Notify if white noise still isn't playing after retry
     if:
     - condition: not
@@ -4668,7 +4671,6 @@
       volume_level: 0.12
   - alias: Play Max Richter Sleep via Music Assistant (with retry)
     repeat:
-      count: 2
       sequence:
       - continue_on_error: true
         action: music_assistant.play_media
@@ -4689,13 +4691,17 @@
         timeout:
           seconds: 8
         continue_on_timeout: true
-      - alias: Stop repeating once it's actually playing
-        if:
+      until:
+      - alias: Exit the loop once it is playing, or after two attempts. Must be an
+          until condition, not a stop action - stop would end the whole automation
+          run and skip every step after this repeat.
+        condition: or
+        conditions:
         - condition: state
           entity_id: media_player.bedroom_2
           state: playing
-        then:
-        - stop: Playback confirmed
+        - condition: template
+          value_template: '{{ repeat.index >= 2 }}'
   - alias: Notify if music still isn't playing after retry
     if:
     - condition: not
@@ -5265,7 +5271,6 @@
           volume_level: 0.15
       - alias: Play sleep music via Music Assistant (with retry)
         repeat:
-          count: 2
           sequence:
           - continue_on_error: true
             action: music_assistant.play_media
@@ -5285,16 +5290,17 @@
             timeout:
               seconds: 8
             continue_on_timeout: true
-          - alias: Playback confirmed - note this ends the whole run, not just the
-              repeat (HA's stop action is not a loop break). Fine because the only
-              step after this is the did-not-start notification, which is exactly what
-              we want to skip. Do not add steps after the repeat without reworking this.
-            if:
+          until:
+          - alias: Exit the loop once it is playing, or after two attempts. Must be an
+              until condition, not a stop action - stop would end the whole automation
+              run and skip every step after this repeat.
+            condition: or
+            conditions:
             - condition: state
               entity_id: media_player.office_2
               state: playing
-            then:
-            - stop: Playback confirmed
+            - condition: template
+              value_template: '{{ repeat.index >= 2 }}'
       - alias: Notify if sleep music still isn't playing after retry
         if:
         - condition: not
@@ -5346,7 +5352,6 @@
           volume_level: 0.15
       - alias: Play sleep music via Music Assistant (with retry)
         repeat:
-          count: 2
           sequence:
           - continue_on_error: true
             action: music_assistant.play_media
@@ -5366,16 +5371,17 @@
             timeout:
               seconds: 8
             continue_on_timeout: true
-          - alias: Playback confirmed - note this ends the whole run, not just the
-              repeat (HA's stop action is not a loop break). Fine because the only
-              step after this is the did-not-start notification, which is exactly what
-              we want to skip. Do not add steps after the repeat without reworking this.
-            if:
+          until:
+          - alias: Exit the loop once it is playing, or after two attempts. Must be an
+              until condition, not a stop action - stop would end the whole automation
+              run and skip every step after this repeat.
+            condition: or
+            conditions:
             - condition: state
               entity_id: media_player.office_2
               state: playing
-            then:
-            - stop: Playback confirmed
+            - condition: template
+              value_template: '{{ repeat.index >= 2 }}'
       - alias: Notify if sleep music still isn't playing after retry
         if:
         - condition: not
@@ -9372,7 +9378,6 @@
           volume_level: 0.1
       - alias: Play Chill Album via Music Assistant (with retry)
         repeat:
-          count: 2
           sequence:
           - continue_on_error: true
             action: music_assistant.play_media
@@ -9393,13 +9398,17 @@
             timeout:
               seconds: 8
             continue_on_timeout: true
-          - alias: Stop repeating once it's actually playing
-            if:
+          until:
+          - alias: Exit the loop once it is playing, or after two attempts. Must be an
+              until condition, not a stop action - stop would end the whole automation
+              run and skip every step after this repeat.
+            condition: or
+            conditions:
             - condition: state
               entity_id: media_player.bedroom_2
               state: playing
-            then:
-            - stop: Playback confirmed
+            - condition: template
+              value_template: '{{ repeat.index >= 2 }}'
       - alias: Notify if music still isn't playing after retry
         if:
         - condition: not
@@ -9422,7 +9431,6 @@
         volume_level: 0.1
     - alias: Play Fun Playlist via Music Assistant (with retry)
       repeat:
-        count: 2
         sequence:
         - continue_on_error: true
           action: music_assistant.play_media
@@ -9443,13 +9451,17 @@
           timeout:
             seconds: 8
           continue_on_timeout: true
-        - alias: Stop repeating once it's actually playing
-          if:
+        until:
+        - alias: Exit the loop once it is playing, or after two attempts. Must be an
+            until condition, not a stop action - stop would end the whole automation
+            run and skip every step after this repeat.
+          condition: or
+          conditions:
           - condition: state
             entity_id: media_player.bedroom_2
             state: playing
-          then:
-          - stop: Playback confirmed
+          - condition: template
+            value_template: '{{ repeat.index >= 2 }}'
     - alias: Notify if music still isn't playing after retry
       if:
       - condition: not
