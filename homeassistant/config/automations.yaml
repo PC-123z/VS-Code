@@ -5147,10 +5147,11 @@
   description: Triggers on motion or bedroom2_occupied turning on any time from 10:00pm
     to 6am (no more hard 10:45pm cutoff on the initial trigger - a late bedtime no
     longer skips the whole routine). Sets bedroom2_occupied, starts fan (stays on
-    until Good Morning turns it off) and sleep music (stops after 30-45 min or at
-    11:15pm, whichever comes first). Lights to burnt orange at setup (whenever bedtime
-    starts, or by 10:00pm at the latest as a catch-up), fully off at 10:30pm. All
-    lights fade off at 10:45pm (but motion after that still turns them back on).
+    until Good Morning turns it off) and sleep music (volume fades to silence over
+    5 minutes starting at 11:00pm, hard stop at 11:05pm). Lights to burnt orange at
+    setup (whenever bedtime starts, or by 10:00pm at the latest as a catch-up), fully
+    off at 10:30pm. All lights fade off at 10:45pm and the room stays dark from then
+    on - see *Bedroom 2 Late Night Lights Out.
   triggers:
   - trigger: state
     entity_id:
@@ -5177,8 +5178,12 @@
   - trigger: time
     at: '22:45:00'
     id: hard_lights_out
+  - alias: Begin the sleep-music volume fade at 11:00pm
+    trigger: time
+    at: '23:00:00'
+    id: music_fade
   - trigger: time
-    at: '23:15:00'
+    at: '23:05:00'
     id: music_stop
   conditions: []
   actions:
@@ -5280,7 +5285,10 @@
             timeout:
               seconds: 8
             continue_on_timeout: true
-          - alias: Stop repeating once it's actually playing
+          - alias: Playback confirmed - note this ends the whole run, not just the
+              repeat (HA's stop action is not a loop break). Fine because the only
+              step after this is the did-not-start notification, which is exactly what
+              we want to skip. Do not add steps after the repeat without reworking this.
             if:
             - condition: state
               entity_id: media_player.office_2
@@ -5300,17 +5308,6 @@
             title: Bedroom 2 sleep music didn't start
             message: Office/Bedroom 2 speaker didn't start playing after two tries
               - speaker may be offline.
-      - alias: Let it play 40 minutes or until 11:15pm, whichever comes first
-        wait_for_trigger:
-        - trigger: time
-          at: '23:15:00'
-        timeout:
-          minutes: 40
-      - alias: Stop sleep music
-        action: media_player.media_stop
-        continue_on_error: true
-        target:
-          entity_id: media_player.office_2
     - conditions:
       - condition: trigger
         id: occupied_set
@@ -5369,7 +5366,10 @@
             timeout:
               seconds: 8
             continue_on_timeout: true
-          - alias: Stop repeating once it's actually playing
+          - alias: Playback confirmed - note this ends the whole run, not just the
+              repeat (HA's stop action is not a loop break). Fine because the only
+              step after this is the did-not-start notification, which is exactly what
+              we want to skip. Do not add steps after the repeat without reworking this.
             if:
             - condition: state
               entity_id: media_player.office_2
@@ -5389,17 +5389,6 @@
             title: Bedroom 2 sleep music didn't start
             message: Office/Bedroom 2 speaker didn't start playing after two tries
               - speaker may be offline.
-      - alias: Let it play 40 minutes or until 11:15pm, whichever comes first
-        wait_for_trigger:
-        - trigger: time
-          at: '23:15:00'
-        timeout:
-          minutes: 40
-      - alias: Stop sleep music
-        action: media_player.media_stop
-        continue_on_error: true
-        target:
-          entity_id: media_player.office_2
     - conditions:
       - condition: trigger
         id: motion_detected
@@ -5512,13 +5501,48 @@
           - switch.nano2
     - conditions:
       - condition: trigger
+        id: music_fade
+      - alias: Only fade if something is actually playing
+        condition: state
+        entity_id: media_player.office_2
+        state: playing
+      sequence:
+      - alias: Capture whatever volume it is playing at now, so the fade still works
+          if the volume was changed by hand during the night
+        variables:
+          start_volume: '{{ state_attr(''media_player.office_2'', ''volume_level'')
+            | float(0.15) }}'
+      - alias: Fade to silence over 5 minutes in 20 steps, landing at 0 just as the
+          11:05pm hard stop fires
+        repeat:
+          count: 20
+          sequence:
+          - action: media_player.volume_set
+            continue_on_error: true
+            target:
+              entity_id: media_player.office_2
+            data:
+              volume_level: '{{ [start_volume * (1 - repeat.index / 20), 0] | max |
+                round(3) }}'
+          - delay:
+              seconds: 15
+    - conditions:
+      - condition: trigger
         id: music_stop
       sequence:
-      - alias: Hard music stop at 11:15pm regardless of occupied or override state
+      - alias: Hard music stop at 11:05pm regardless of occupied or override state
         action: media_player.media_stop
         continue_on_error: true
         target:
           entity_id: media_player.office_2
+      - alias: Restore the normal sleep-music volume so the fade's silence doesn't
+          carry over to the next thing played on this speaker
+        action: media_player.volume_set
+        continue_on_error: true
+        target:
+          entity_id: media_player.office_2
+        data:
+          volume_level: 0.15
   mode: parallel
   max: 3
 - id: '1776378473889'
