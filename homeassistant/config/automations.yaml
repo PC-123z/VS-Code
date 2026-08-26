@@ -1,12 +1,15 @@
 - id: '1773000000002'
   alias: Good Morning - Stop routine when music stopped from speaker
-  description: If the Sonos speaker is paused/stopped manually while Good Morning is active, end that run by clearing input_boolean.good_morning_active.
-    Watches the Sonos entity (media_player.bedroom) with a short debounce since a physical button press reliably shows there
-    and the routine never pauses it directly - Music Assistant (media_player.bedroom_2) can reassert playback almost instantly
-    after a physical stop, so relying on it alone let Music Assistant win the race and made manual stops not stick. Kept the
-    longer 8s debounce on bedroom_2 too, to avoid false triggers from the routine's own brief TTS-announcement pause. Does
-    not touch this automation's or the Good Morning Routine automation's enabled state, so scheduled/manual runs still work
-    normally in the future.
+  description: If the Sonos speaker is paused/stopped manually while Good Morning
+    is active, end that run by clearing input_boolean.good_morning_active. Watches
+    the Sonos entity (media_player.bedroom) with a short debounce since a physical
+    button press reliably shows there and the routine never pauses it directly - Music
+    Assistant (media_player.bedroom_2) can reassert playback almost instantly after
+    a physical stop, so relying on it alone let Music Assistant win the race and made
+    manual stops not stick. Kept the longer 8s debounce on bedroom_2 too, to avoid
+    false triggers from the routine's own brief TTS-announcement pause. Does not touch
+    this automation's or the Good Morning Routine automation's enabled state, so scheduled/manual
+    runs still work normally in the future.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
@@ -49,10 +52,11 @@
   mode: single
 - id: '1772505504350'
   alias: Kitchen Off Switch
-  description: 'Kills all kitchen lights when the Pico OFF button is pressed. Presence-based shutoff (main at 60s, Hue at
-    3:30 after the room clears) is owned by the Kitchen: Smart Motion & Presence automation, so the old "main turned off externally"
-    trigger was removed - it killed the Hue lights 2:30 after any main-off even if someone had walked back in. Uses explicit
-    entity IDs to avoid registry-UUID drift.
+  description: 'Kills all kitchen lights when the Pico OFF button is pressed. Presence-based
+    shutoff (main at 60s, Hue at 3:30 after the room clears) is owned by the Kitchen:
+    Smart Motion & Presence automation, so the old "main turned off externally" trigger
+    was removed - it killed the Hue lights 2:30 after any main-off even if someone
+    had walked back in. Uses explicit entity IDs to avoid registry-UUID drift.
 
     '
   triggers:
@@ -81,16 +85,18 @@
   mode: restart
 - id: '1772717730627'
   alias: '*Nap Wake Up Routine v3'
-  description: 'Staged sunrise wake-up with 3-min light ramp. Music ramps to 0.30, then waits for motion in bedroom/bathroom/hallway/kitchen
-    before announcing. If no motion within 5 minutes of routine start, escalates: music to 0.40, 40-second pause, insistent
-    TTS naming the alarm time and current time, then music resumes at 0.45 while waiting for motion. Occupancy-driven music
-    tail uses 30-min clear grace. 60-minute hard cap from routine start.'
+  description: 'Staged sunrise wake-up with 3-min light ramp. Music ramps to 0.30,
+    then waits for motion in bedroom/bathroom/hallway/kitchen before announcing. If
+    no motion within 5 minutes of routine start, escalates: music to 0.40, 40-second
+    pause, insistent TTS naming the alarm time and current time, then music resumes
+    at 0.45 while waiting for motion. Occupancy-driven music tail uses 30-min clear
+    grace. 60-minute hard cap from routine start.'
   triggers:
   - trigger: time
     at: '18:30:00'
     weekday:
     - wed
-    enabled: true
+    enabled: false
   - trigger: time
     at: '17:35:00'
     enabled: true
@@ -104,8 +110,8 @@
       entity_id: input_boolean.good_morning_active
   - alias: Capture alarm time for escalation TTS
     variables:
-      alarm_time: '{{ trigger.now.strftime(''%-I:%M %p'') if trigger is defined and trigger.now is defined else ''5:25 PM''
-        }}'
+      alarm_time: '{{ trigger.now.strftime(''%-I:%M %p'') if trigger is defined and
+        trigger.now is defined else ''5:25 PM'' }}'
   - alias: Turn off all sleep modes
     action: switch.turn_off
     target:
@@ -155,7 +161,8 @@
             target:
               entity_id: light.nano_sand_dune
             data:
-              brightness_pct: '{{ [5 + (repeat.index * 4.75), 100] | min | round(0) }}'
+              brightness_pct: '{{ [5 + (repeat.index * 4.75), 100] | min | round(0)
+                }}'
               transition: 3
           - delay:
               seconds: 9
@@ -183,7 +190,8 @@
               - light.bedroom_ceiling_1
               - light.bedroom_ceiling_2
             data:
-              brightness_pct: '{{ [1 + (repeat.index * 4.3), 70] | min | round(0) }}'
+              brightness_pct: '{{ [1 + (repeat.index * 4.3), 70] | min | round(0)
+                }}'
               color_temp_kelvin: 2700
               transition: 3
           - delay:
@@ -220,7 +228,8 @@
               - light.bedroom_lamp_1
               - light.bedroom_lamp_2
             data:
-              brightness_pct: '{{ [1 + (repeat.index * 6.6), 94] | min | round(0) }}'
+              brightness_pct: '{{ [1 + (repeat.index * 6.6), 94] | min | round(0)
+                }}'
               color_temp_kelvin: 2700
               transition: 3
           - delay:
@@ -234,10 +243,11 @@
           entity_id: media_player.bedroom_2
         data:
           volume_level: 0.1
-      - alias: Play Dance Pop Hits playlist via Music Assistant. enqueue is stated explicitly rather than left to Music Assistant's
-          own default_enqueue_option_playlist setting - that setting currently defaults to replace, which is what this routine
-          needs to clear any leftover queue, but it is user-configurable in MA and would silently change this routine's behaviour
-          if it were ever edited.
+      - alias: Play Dance Pop Hits playlist via Music Assistant. enqueue is stated
+          explicitly rather than left to Music Assistant's own default_enqueue_option_playlist
+          setting - that setting currently defaults to replace, which is what this
+          routine needs to clear any leftover queue, but it is user-configurable in
+          MA and would silently change this routine's behaviour if it were ever edited.
         continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -273,9 +283,10 @@
           data:
             cache: true
             media_player_entity_id: media_player.bedroom_2
-            message: 'Time to wake up! Today is {{ now().strftime(''%A, %B %-d'') }}. The current conditions are {{ states(''weather.forecast_home'')
-              }}, with a temperature of {{ state_attr(''weather.forecast_home'', ''temperature'') }} degrees. Have a great
-              evening!
+            message: 'Time to wake up! Today is {{ now().strftime(''%A, %B %-d'')
+              }}. The current conditions are {{ states(''weather.forecast_home'')
+              }}, with a temperature of {{ state_attr(''weather.forecast_home'', ''temperature'')
+              }} degrees. Have a great evening!
 
               '
         else:
@@ -289,8 +300,10 @@
               target:
                 entity_id: media_player.bedroom_2
               data:
-                volume_level: '{{ [0.1 + (repeat.index * 0.025), 0.30] | min | round(3) }}'
-        - alias: Wait for motion in bedroom/bathroom/hallway/kitchen (up to ~5 min from routine start)
+                volume_level: '{{ [0.1 + (repeat.index * 0.025), 0.30] | min | round(3)
+                  }}'
+        - alias: Wait for motion in bedroom/bathroom/hallway/kitchen (up to ~5 min
+            from routine start)
           wait_for_trigger:
           - trigger: state
             entity_id:
@@ -328,8 +341,9 @@
             data:
               cache: false
               media_player_entity_id: media_player.bedroom_2
-              message: 'Your wake up alarm was scheduled to start at {{ alarm_time }}. The time is now {{ now().strftime(''%-I:%M
-                %p'') }}. Please wake up.
+              message: 'Your wake up alarm was scheduled to start at {{ alarm_time
+                }}. The time is now {{ now().strftime(''%-I:%M %p'') }}. Please wake
+                up.
 
                 '
           - alias: Short pause for TTS to finish
@@ -388,8 +402,9 @@
               data:
                 cache: true
                 media_player_entity_id: media_player.bedroom_2
-                message: 'Time to wake up! The time is now {{ now().strftime(''%-I:%M %p'') }}. The current conditions are
-                  {{ states(''weather.forecast_home'') }}, with a temperature of {{ state_attr(''weather.forecast_home'',
+                message: 'Time to wake up! The time is now {{ now().strftime(''%-I:%M
+                  %p'') }}. The current conditions are {{ states(''weather.forecast_home'')
+                  }}, with a temperature of {{ state_attr(''weather.forecast_home'',
                   ''temperature'') }} degrees. Have a great evening!
 
                   '
@@ -446,7 +461,8 @@
                       target:
                         entity_id: media_player.bedroom_2
                       data:
-                        volume_level: '{{ [0.30 - (repeat.index * 0.031), 0.05] | max | round(3) }}'
+                        volume_level: '{{ [0.30 - (repeat.index * 0.031), 0.05] |
+                          max | round(3) }}'
                     - delay:
                         seconds: 15
                 - action: media_player.media_stop
@@ -536,7 +552,8 @@
   mode: single
 - id: '1774818998231'
   alias: 'Dining Room Button On '
-  description: Bright override - disables AL/sleep mode, holds bright until sensor clears for 30 min.
+  description: Bright override - disables AL/sleep mode, holds bright until sensor
+    clears for 30 min.
   triggers:
   - device_id: b553d4e94880b54012c3c4fbdec5c988
     domain: hue
@@ -795,8 +812,9 @@
   mode: single
 - id: '1748800000001'
   alias: 'Big Bedroom: Reset Override When Empty'
-  description: After 30 min empty, turns lights off, clears manual override, and re-enables motion automation + AL so presence
-    lighting resumes on next entry. Skipped while asleep (Hue button 2/3/4) - only Good Morning re-arms the room then.
+  description: After 30 min empty, turns lights off, clears manual override, and re-enables
+    motion automation + AL so presence lighting resumes on next entry. Skipped while
+    asleep (Hue button 2/3/4) - only Good Morning re-arms the room then.
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
@@ -804,7 +822,8 @@
     for:
       minutes: 30
   conditions:
-  - alias: Skip if asleep - goodnight/bedtime pressed, lights stay off until Good Morning
+  - alias: Skip if asleep - goodnight/bedtime pressed, lights stay off until Good
+      Morning
     condition: state
     entity_id: input_boolean.big_bedroom_asleep
     state: 'off'
@@ -868,8 +887,8 @@
   mode: single
 - id: '1774970377473'
   alias: 'Pico Button 1 - Big Bedroom: Bright/Mood Override'
-  description: 'Press: time-based bright/functional scene. Hold: time-based cozy/mood scene. Both override AL/sleep until
-    sensor clears for 10 min.'
+  description: 'Press: time-based bright/functional scene. Hold: time-based cozy/mood
+    scene. Both override AL/sleep until sensor clears for 10 min.'
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
@@ -1201,7 +1220,8 @@
             transition: 2
         - if:
           - condition: template
-            value_template: "{{ 'light.hallway' not in\n   state_attr('switch.al_hallway', 'manual_control') }}\n"
+            value_template: "{{ 'light.hallway' not in\n   state_attr('switch.al_hallway',
+              'manual_control') }}\n"
           then:
           - action: adaptive_lighting.apply
             continue_on_error: true
@@ -1239,12 +1259,14 @@
   mode: restart
 - id: '1775348628799'
   alias: 'Kitchen: Smart Motion & Presence (Split Color/White)'
-  description: 'Hue sensors trigger lights on immediately. Frigate confirmed presence (3 min debounce) blocks shutoff while
-    someone is sitting still. Sleep mode overrides AL. Manual override flag auto-clears 10 min after motion stops (kitchen_cleared).
-    Late-night dishes mode (23:45–23:55) keeps lights warm/usable when motion is active, right as kitchen sleep mode (kitchen_sleep_on,
-    23:45) is applied. Main light stays on normally from sun-down until 23:45. AL is disabled BEFORE manual color changes
-    in ALL paths to prevent manual_control flag from triggering the override boolean spuriously. Mode is queued (max 10) so
-    long transitions can''t cause dropped triggers.
+  description: 'Hue sensors trigger lights on immediately. Frigate confirmed presence
+    (3 min debounce) blocks shutoff while someone is sitting still. Sleep mode overrides
+    AL. Manual override flag auto-clears 10 min after motion stops (kitchen_cleared).
+    Late-night dishes mode (23:45–23:55) keeps lights warm/usable when motion is active,
+    right as kitchen sleep mode (kitchen_sleep_on, 23:45) is applied. Main light stays
+    on normally from sun-down until 23:45. AL is disabled BEFORE manual color changes
+    in ALL paths to prevent manual_control flag from triggering the override boolean
+    spuriously. Mode is queued (max 10) so long transitions can''t cause dropped triggers.
 
     '
   triggers:
@@ -1280,10 +1302,12 @@
     to: 'on'
     id: sleep_on
   - trigger: template
-    value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control') | default([], true) %} {% set mc_main\
-      \ = state_attr('switch.al_kitchen_main', 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in mc_color\n\
-      \      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip' in mc_color)\n     and is_state('switch.al_kitchen',\
-      \ 'on') )\n   or\n   ( 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main', 'on') ) }}\n"
+    value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')
+      | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',
+      'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in mc_color\n
+      \     or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'
+      in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   ( 'light.kitchen_main_lights'
+      in mc_main\n     and is_state('switch.al_kitchen_main', 'on') ) }}\n"
     id: al_manual_control_changed
   - device_id: 864fec31db3ec90f02e244eb717c9cd4
     domain: lutron_caseta
@@ -1334,11 +1358,13 @@
       - condition: trigger
         id: al_manual_control_changed
       - condition: template
-        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control') | default([], true) %} {% set\
-          \ mc_main = state_attr('switch.al_kitchen_main', 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color'\
-          \ in mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip' in mc_color)\n\
-          \     and is_state('switch.al_kitchen', 'on') )\n   or\n   ( 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',\
-          \ 'on') ) }}\n"
+        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')
+          | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',
+          'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in
+          mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'
+          in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   (
+          'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',
+          'on') ) }}\n"
       sequence:
       - delay:
           seconds: 2
@@ -1346,11 +1372,13 @@
         entity_id: binary_sensor.kitchen_sensor_group
         state: 'on'
       - condition: template
-        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control') | default([], true) %} {% set\
-          \ mc_main = state_attr('switch.al_kitchen_main', 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color'\
-          \ in mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip' in mc_color)\n\
-          \     and is_state('switch.al_kitchen', 'on') )\n   or\n   ( 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',\
-          \ 'on') ) }}\n"
+        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')
+          | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',
+          'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in
+          mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'
+          in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   (
+          'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',
+          'on') ) }}\n"
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.kitchen_manual_override
@@ -1657,12 +1685,15 @@
   max: 10
 - id: '1775368699660'
   alias: 'System: Global Sleep Mode Schedule'
-  description: 'Evening: enables sleep mode for Bedroom 2 / Office at 22:15, the kitchen at 23:45, and the rest of the house
-    at 23:00. Kitchen is deliberately later than the rest of the house so the main light stays on through late-night kitchen
-    use; it still turns off earlier on its own via the Kitchen automation''s occupancy-clear triggers (kitchen_cleared/kitchen_cleared_hue)
-    whenever the room actually clears, independent of sleep mode. Morning: catch-all that disables sleep mode and re-enables
-    AL everywhere, clearing manual_control. Big Bedroom is excluded from the morning branch because the Good Morning Routine
-    owns it. Bedroom 2 / Office is included in the morning catch-all for simplicity - it''s redundant with "Office: Daily
+  description: 'Evening: enables sleep mode for Bedroom 2 / Office at 22:15, the kitchen
+    at 23:45, and the rest of the house at 23:00. Kitchen is deliberately later than
+    the rest of the house so the main light stays on through late-night kitchen use;
+    it still turns off earlier on its own via the Kitchen automation''s occupancy-clear
+    triggers (kitchen_cleared/kitchen_cleared_hue) whenever the room actually clears,
+    independent of sleep mode. Morning: catch-all that disables sleep mode and re-enables
+    AL everywhere, clearing manual_control. Big Bedroom is excluded from the morning
+    branch because the Good Morning Routine owns it. Bedroom 2 / Office is included
+    in the morning catch-all for simplicity - it''s redundant with "Office: Daily
     AL Reset" but harmless.'
   triggers:
   - trigger: time
@@ -1847,7 +1878,8 @@
           - switch.al_sleep_mode_bathroom
           - switch.al_sleep_mode_bathroom_main
           - switch.adaptive_lighting_sleep_mode_office
-      - alias: Re-enable AL switches (Big Bedroom excluded - Good Morning Routine owns it)
+      - alias: Re-enable AL switches (Big Bedroom excluded - Good Morning Routine
+          owns it)
         action: switch.turn_on
         target:
           entity_id:
@@ -1996,7 +2028,8 @@
   mode: single
 - id: '1778500000000'
   alias: 'System: Global Daily Automation Reset'
-  description: 'Daily safety-net reset that runs after the morning sleep mode unwind. Clears
+  description: 'Daily safety-net reset that runs after the morning sleep mode unwind.
+    Clears
 
     all manual override flags, ensures motion/presence automations are enabled,
 
@@ -2158,7 +2191,8 @@
     action: notify.mobile_app_pc_iphone
     data:
       title: Daily Automation Reset
-      message: 'House-wide reset complete: overrides cleared, motion automations enabled, AL restored.'
+      message: 'House-wide reset complete: overrides cleared, motion automations enabled,
+        AL restored.'
     enabled: false
   mode: single
 - id: '1775373515241'
@@ -2202,9 +2236,9 @@
         id: detected
       sequence:
       - condition: template
-        value_template: "{% set lights = [\n  'light.bathroom_shower',\n  'light.bathroom_tub_1',\n  'light.bathroom_tub_2',\n\
-          \  'light.bathroom_back',\n  'light.bathroom_main_lights'\n] %} {{ lights | select('is_state', 'on') | list | count\
-          \ == 0 }}\n"
+        value_template: "{% set lights = [\n  'light.bathroom_shower',\n  'light.bathroom_tub_1',\n
+          \ 'light.bathroom_tub_2',\n  'light.bathroom_back',\n  'light.bathroom_main_lights'\n]
+          %} {{ lights | select('is_state', 'on') | list | count == 0 }}\n"
       - choose:
         - conditions:
           - condition: state
@@ -2241,8 +2275,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main', 'manual_control')\
-              \ }}\n"
+            value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2268,7 +2302,8 @@
               brightness_pct: 2
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom', 'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2297,7 +2332,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom', 'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2318,8 +2354,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main', 'manual_control')\
-              \ }}\n"
+            value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2339,7 +2375,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom', 'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2369,7 +2406,8 @@
         - trigger: state
           entity_id: binary_sensor.bathroom_motion
           to: 'on'
-        timeout: "{{ '00:10:00' if (now().hour >= 23 or now().hour < 7)\n   else '00:15:00' }}\n"
+        timeout: "{{ '00:10:00' if (now().hour >= 23 or now().hour < 7)\n   else '00:15:00'
+          }}\n"
         continue_on_timeout: true
       - condition: state
         entity_id: binary_sensor.bathroom_motion
@@ -2433,8 +2471,8 @@
   max: 10
 - id: '1775434776744'
   alias: 'Kitchen: Purifier Auto Control'
-  description: 'Runs overnight 12AM-6AM. Also runs when kitchen is vacant for 15+ minutes. Turns off when motion is detected
-    outside overnight window.
+  description: 'Runs overnight 12AM-6AM. Also runs when kitchen is vacant for 15+
+    minutes. Turns off when motion is detected outside overnight window.
 
     '
   triggers:
@@ -2500,7 +2538,8 @@
   mode: single
 - id: '1775471409248'
   alias: '*Big Bedroom: Smart Motion & Presence'
-  description: Presence-based lighting with time-based Nanoleaf scenes and 30-minute timeout.
+  description: Presence-based lighting with time-based Nanoleaf scenes and 30-minute
+    timeout.
   triggers:
   - trigger: state
     entity_id:
@@ -2855,12 +2894,14 @@
                 - 255
                 - 30
                 - 0
-                brightness_pct: '{{ [50 - ((now().hour * 60 + now().minute - 23 * 60) / 60 * 48) | round(0), 2] | max }}'
+                brightness_pct: '{{ [50 - ((now().hour * 60 + now().minute - 23 *
+                  60) / 60 * 48) | round(0), 2] | max }}'
                 transition: 30
     - conditions:
       - condition: trigger
         id: stopped
-      - alias: Skip if override is active - overridden lights hold until the 30-min reset
+      - alias: Skip if override is active - overridden lights hold until the 30-min
+          reset
         condition: state
         entity_id: input_boolean.big_bedroom_manual_override
         state: 'off'
@@ -2914,7 +2955,8 @@
   mode: restart
 - id: '1775504917028'
   alias: 'Living Room: Smart Motion & Presence'
-  description: Presence-based lighting with AL day, moonlight evening, deep red night mode, and sleep mode override.
+  description: Presence-based lighting with AL day, moonlight evening, deep red night
+    mode, and sleep mode override.
   triggers:
   - trigger: state
     entity_id:
@@ -3031,7 +3073,8 @@
         target:
           entity_id: switch.al_living_room
       - condition: template
-        value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room', 'manual_control') }}\n"
+        value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',
+          'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3120,7 +3163,8 @@
             data:
               transition: 5
           - condition: template
-            value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room', 'manual_control') }}\n"
+            value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3168,8 +3212,8 @@
   mode: restart
 - id: '1775505707980'
   alias: 'Dining Room: Smart Motion & Presence'
-  description: Presence-based lighting with AL day, dinner, late evening, night mode, and off after midnight. Sleep mode always
-    overrides.
+  description: Presence-based lighting with AL day, dinner, late evening, night mode,
+    and off after midnight. Sleep mode always overrides.
   triggers:
   - trigger: state
     entity_id: binary_sensor.dining_room_sensor_group
@@ -3279,7 +3323,8 @@
           lights:
           - light.dining_room_top
           manual_control: false
-      - alias: Turn off lights before re-enabling AL (avoid AL flashing them back on)
+      - alias: Turn off lights before re-enabling AL (avoid AL flashing them back
+          on)
         action: light.turn_off
         target:
           label_id: dining_room_bottom
@@ -3382,8 +3427,8 @@
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
       - condition: template
-        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom', 'manual_control')\
-          \ }}\n"
+        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
+          'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3394,7 +3439,8 @@
           adapt_color: true
           adapt_brightness: true
       - condition: template
-        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top', 'manual_control') }}\n"
+        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
+          'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3571,8 +3617,8 @@
             data:
               transition: 5
           - condition: template
-            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom', 'manual_control')\
-              \ }}\n"
+            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3583,8 +3629,8 @@
               adapt_color: true
               adapt_brightness: true
           - condition: template
-            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top', 'manual_control')\
-              \ }}\n"
+            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3689,7 +3735,8 @@
   mode: restart
 - id: '1776009870388'
   alias: 'Big Bedroom: Disable Presence When TV On'
-  description: Disables bedroom presence automation when TV is on, re-enables when off or paused
+  description: Disables bedroom presence automation when TV is on, re-enables when
+    off or paused
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_tv_2
@@ -3733,9 +3780,11 @@
   mode: single
 - id: '1776224561667'
   alias: 'Bedroom 2: Dimmer'
-  description: 'Button 1 press: restore AL and mirror presence-sensor lighting (time-of-day AL, dimmed/red after 10pm if sleep
-    mode). Button 1 hold: force bright 100% with time-based color temp (old Button 1 behavior). Button 2: brightness up (hold
-    to repeat). Button 3: brightness down (hold to repeat). Button 4: off and restore AL.
+  description: 'Button 1 press: restore AL and mirror presence-sensor lighting (time-of-day
+    AL, dimmed/red after 10pm if sleep mode). Button 1 hold: force bright 100% with
+    time-based color temp (old Button 1 behavior). Button 2: brightness up (hold to
+    repeat). Button 3: brightness down (hold to repeat). Button 4: off and restore
+    AL.
 
     '
   triggers:
@@ -3828,7 +3877,8 @@
           action: switch.turn_off
           target:
             entity_id: switch.adaptive_lighting_sleep_mode_office
-      - alias: Mirror presence-sensor lighting - AL for time of day, sleep mode respected after 10pm
+      - alias: Mirror presence-sensor lighting - AL for time of day, sleep mode respected
+          after 10pm
         choose:
         - alias: Sleep mode active - gentle red bump only, no bright flash
           conditions:
@@ -4182,8 +4232,8 @@
   max: 10
 - id: '1776224619528'
   alias: 'Office: Daily AL Reset'
-  description: Every morning at 7AM M-F and 10AM Sat-Sun, restore AL switches to default on state. Also re-enables Smart Motion
-    & Presence automation.
+  description: Every morning at 7AM M-F and 10AM Sat-Sun, restore AL switches to default
+    on state. Also re-enables Smart Motion & Presence automation.
   triggers:
   - trigger: time
     at: 07:00:00
@@ -4254,8 +4304,8 @@
     id: hold
   conditions: []
   actions:
-  - alias: Start 35-minute auto-stop timer immediately - set first so a re-trigger or interruption later in this script can
-      never prevent it from arming
+  - alias: Start 35-minute auto-stop timer immediately - set first so a re-trigger
+      or interruption later in this script can never prevent it from arming
     action: timer.start
     target:
       entity_id: timer.bedroom_sleep_audio
@@ -4390,8 +4440,9 @@
           seconds: 8
         continue_on_timeout: true
       until:
-      - alias: Exit the loop once it is playing, or after two attempts. Must be an until condition, not a stop action - stop
-          would end the whole automation run and skip every step after this repeat.
+      - alias: Exit the loop once it is playing, or after two attempts. Must be an
+          until condition, not a stop action - stop would end the whole automation
+          run and skip every step after this repeat.
         condition: or
         conditions:
         - condition: state
@@ -4410,7 +4461,8 @@
     - action: notify.mobile_app_pc_iphone
       data:
         title: White noise didn't start
-        message: Bedroom Sonos didn't start playing after two tries - speaker may be offline.
+        message: Bedroom Sonos didn't start playing after two tries - speaker may
+          be offline.
   - alias: Run light stepdown, fan boost, audio stop and Nanoleaf off in parallel
     parallel:
     - sequence:
@@ -4477,8 +4529,8 @@
     entity_id: input_boolean.good_morning_active
     state: 'off'
   actions:
-  - alias: Start 35-minute auto-stop timer immediately - set first so a re-trigger or interruption later in this script can
-      never prevent it from arming
+  - alias: Start 35-minute auto-stop timer immediately - set first so a re-trigger
+      or interruption later in this script can never prevent it from arming
     action: timer.start
     target:
       entity_id: timer.bedroom_sleep_audio
@@ -4616,8 +4668,9 @@
           seconds: 8
         continue_on_timeout: true
       until:
-      - alias: Exit the loop once it is playing, or after two attempts. Must be an until condition, not a stop action - stop
-          would end the whole automation run and skip every step after this repeat.
+      - alias: Exit the loop once it is playing, or after two attempts. Must be an
+          until condition, not a stop action - stop would end the whole automation
+          run and skip every step after this repeat.
         condition: or
         conditions:
         - condition: state
@@ -4636,7 +4689,8 @@
     - action: notify.mobile_app_pc_iphone
       data:
         title: Bedtime music didn't start
-        message: Bedroom Sonos didn't start playing after two tries - speaker may be offline.
+        message: Bedroom Sonos didn't start playing after two tries - speaker may
+          be offline.
   - alias: Run light stepdown, fan boost, audio stop and Nanoleaf off in parallel
     parallel:
     - sequence:
@@ -5072,12 +5126,14 @@
   mode: single
 - id: '1776378416550'
   alias: '*Bedroom 2 Bedtime Routine'
-  description: Triggers on motion or bedroom2_occupied turning on any time from 10:00pm to 6am (no more hard 10:45pm cutoff
-    on the initial trigger - a late bedtime no longer skips the whole routine). Sets bedroom2_occupied, starts fan (stays
-    on until Good Morning turns it off) and sleep music (volume fades to silence over 5 minutes starting at 11:00pm, hard
-    stop at 11:05pm). Lights to burnt orange at setup (whenever bedtime starts, or by 10:00pm at the latest as a catch-up),
-    fully off at 10:30pm. All lights fade off at 10:45pm and the room stays dark from then on - see *Bedroom 2 Late Night
-    Lights Out.
+  description: Triggers on motion or bedroom2_occupied turning on any time from 10:00pm
+    to 6am (no more hard 10:45pm cutoff on the initial trigger - a late bedtime no
+    longer skips the whole routine). Sets bedroom2_occupied, starts fan (stays on
+    until Good Morning turns it off) and sleep music (volume fades to silence over
+    5 minutes starting at 11:00pm, hard stop at 11:05pm). Lights to burnt orange at
+    setup (whenever bedtime starts, or by 10:00pm at the latest as a catch-up), fully
+    off at 10:30pm. All lights fade off at 10:45pm and the room stays dark from then
+    on - see *Bedroom 2 Late Night Lights Out.
   triggers:
   - trigger: state
     entity_id:
@@ -5117,8 +5173,9 @@
     - conditions:
       - condition: trigger
         id: window_open_catchup
-      - alias: Someone is in the room as the window opens - either occupied was latched on before 10pm (occupied_set never
-          fired inside the window), or the sensors show presence right now but never produced a fresh off->on edge to latch
+      - alias: Someone is in the room as the window opens - either occupied was latched
+          on before 10pm (occupied_set never fired inside the window), or the sensors
+          show presence right now but never produced a fresh off->on edge to latch
           it (e.g. already lying still in bed since before 10pm)
         condition: or
         conditions:
@@ -5149,8 +5206,8 @@
             - 0
             brightness_pct: 10
             transition: 3
-      - alias: Presence without a latch - set occupied and let the occupied_set branch run fan and music, so they can't both
-          start it
+      - alias: Presence without a latch - set occupied and let the occupied_set branch
+          run fan and music, so they can't both start it
         if:
         - condition: state
           entity_id: input_boolean.bedroom2_occupied
@@ -5167,20 +5224,22 @@
         target:
           entity_id: fan.bedroom2_fan
         enabled: true
-      - alias: Unjoin office_2 from any Music Assistant group before playing sleep music - otherwise it plays to whatever
-          it's currently grouped with (e.g. the kitchen)
+      - alias: Unjoin office_2 from any Music Assistant group before playing sleep
+          music - otherwise it plays to whatever it's currently grouped with (e.g.
+          the kitchen)
         action: media_player.unjoin
         continue_on_error: true
         target:
           entity_id: media_player.office_2
-      - alias: Wait for the unjoin to actually take effect before playing - otherwise the play command can still land in the
-          not-yet-split group (e.g. the kitchen)
-        wait_template: '{{ (state_attr(''media_player.office_2'', ''group_members'') | default([]) | length) <= 1 }}'
+      - alias: Wait for the unjoin to actually take effect before playing - otherwise
+          the play command can still land in the not-yet-split group (e.g. the kitchen)
+        wait_template: '{{ (state_attr(''media_player.office_2'', ''group_members'')
+          | default([]) | length) <= 1 }}'
         timeout:
           seconds: 5
         continue_on_timeout: true
-      - alias: Play sleep music regardless of dimmer override - a button press to adjust lights shouldn't silently skip the
-          music too
+      - alias: Play sleep music regardless of dimmer override - a button press to
+          adjust lights shouldn't silently skip the music too
         action: media_player.volume_set
         target:
           entity_id: media_player.office_2
@@ -5208,8 +5267,9 @@
               seconds: 8
             continue_on_timeout: true
           until:
-          - alias: Exit the loop once it is playing, or after two attempts. Must be an until condition, not a stop action
-              - stop would end the whole automation run and skip every step after this repeat.
+          - alias: Exit the loop once it is playing, or after two attempts. Must be
+              an until condition, not a stop action - stop would end the whole automation
+              run and skip every step after this repeat.
             condition: or
             conditions:
             - condition: state
@@ -5228,7 +5288,8 @@
         - action: notify.mobile_app_pc_iphone
           data:
             title: Bedroom 2 sleep music didn't start
-            message: Office/Bedroom 2 speaker didn't start playing after two tries - speaker may be offline.
+            message: Office/Bedroom 2 speaker didn't start playing after two tries
+              - speaker may be offline.
     - conditions:
       - condition: trigger
         id: occupied_set
@@ -5244,20 +5305,22 @@
         target:
           entity_id: fan.bedroom2_fan
         enabled: false
-      - alias: Unjoin office_2 from any Music Assistant group before playing sleep music - otherwise it plays to whatever
-          it's currently grouped with (e.g. the kitchen)
+      - alias: Unjoin office_2 from any Music Assistant group before playing sleep
+          music - otherwise it plays to whatever it's currently grouped with (e.g.
+          the kitchen)
         action: media_player.unjoin
         continue_on_error: true
         target:
           entity_id: media_player.office_2
-      - alias: Wait for the unjoin to actually take effect before playing - otherwise the play command can still land in the
-          not-yet-split group (e.g. the kitchen)
-        wait_template: '{{ (state_attr(''media_player.office_2'', ''group_members'') | default([]) | length) <= 1 }}'
+      - alias: Wait for the unjoin to actually take effect before playing - otherwise
+          the play command can still land in the not-yet-split group (e.g. the kitchen)
+        wait_template: '{{ (state_attr(''media_player.office_2'', ''group_members'')
+          | default([]) | length) <= 1 }}'
         timeout:
           seconds: 5
         continue_on_timeout: true
-      - alias: Play sleep music regardless of dimmer override - a button press to adjust lights shouldn't silently skip the
-          music too
+      - alias: Play sleep music regardless of dimmer override - a button press to
+          adjust lights shouldn't silently skip the music too
         action: media_player.volume_set
         target:
           entity_id: media_player.office_2
@@ -5285,8 +5348,9 @@
               seconds: 8
             continue_on_timeout: true
           until:
-          - alias: Exit the loop once it is playing, or after two attempts. Must be an until condition, not a stop action
-              - stop would end the whole automation run and skip every step after this repeat.
+          - alias: Exit the loop once it is playing, or after two attempts. Must be
+              an until condition, not a stop action - stop would end the whole automation
+              run and skip every step after this repeat.
             condition: or
             conditions:
             - condition: state
@@ -5305,7 +5369,8 @@
         - action: notify.mobile_app_pc_iphone
           data:
             title: Bedroom 2 sleep music didn't start
-            message: Office/Bedroom 2 speaker didn't start playing after two tries - speaker may be offline.
+            message: Office/Bedroom 2 speaker didn't start playing after two tries
+              - speaker may be offline.
     - conditions:
       - condition: trigger
         id: motion_detected
@@ -5348,8 +5413,9 @@
       - condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'on'
-      - alias: Dim-down window - 10:00pm to 10:45pm only. From hard lights out at 10:45pm the room stays dark until the Good
-          Morning Routine restores the lights, so a motion-clear can no longer relight the room.
+      - alias: Dim-down window - 10:00pm to 10:45pm only. From hard lights out at
+          10:45pm the room stays dark until the Good Morning Routine restores the
+          lights, so a motion-clear can no longer relight the room.
         condition: time
         after: '22:00:00'
         before: '22:45:00'
@@ -5408,8 +5474,8 @@
           transition: 60
       - delay:
           minutes: 5
-      - alias: Cut power to the Nanoleaf P115 outlets so a WiFi-reconnect glitch can't bring Ribbon/Fluttershy back on overnight
-          - restored by Good Morning Routine
+      - alias: Cut power to the Nanoleaf P115 outlets so a WiFi-reconnect glitch can't
+          bring Ribbon/Fluttershy back on overnight - restored by Good Morning Routine
         action: switch.turn_off
         target:
           entity_id:
@@ -5423,11 +5489,13 @@
         entity_id: media_player.office_2
         state: playing
       sequence:
-      - alias: Capture whatever volume it is playing at now, so the fade still works if the volume was changed by hand during
-          the night
+      - alias: Capture whatever volume it is playing at now, so the fade still works
+          if the volume was changed by hand during the night
         variables:
-          start_volume: '{{ state_attr(''media_player.office_2'', ''volume_level'') | float(0.15) }}'
-      - alias: Fade to silence over 5 minutes in 20 steps, landing at 0 just as the 11:05pm hard stop fires
+          start_volume: '{{ state_attr(''media_player.office_2'', ''volume_level'')
+            | float(0.15) }}'
+      - alias: Fade to silence over 5 minutes in 20 steps, landing at 0 just as the
+          11:05pm hard stop fires
         repeat:
           count: 20
           sequence:
@@ -5436,7 +5504,8 @@
             target:
               entity_id: media_player.office_2
             data:
-              volume_level: '{{ [start_volume * (1 - repeat.index / 20), 0] | max | round(3) }}'
+              volume_level: '{{ [start_volume * (1 - repeat.index / 20), 0] | max
+                | round(3) }}'
           - delay:
               seconds: 15
     - conditions:
@@ -5448,8 +5517,8 @@
         continue_on_error: true
         target:
           entity_id: media_player.office_2
-      - alias: Restore the normal sleep-music volume so the fade's silence doesn't carry over to the next thing played on
-          this speaker
+      - alias: Restore the normal sleep-music volume so the fade's silence doesn't
+          carry over to the next thing played on this speaker
         action: media_player.volume_set
         continue_on_error: true
         target:
@@ -5460,8 +5529,9 @@
   max: 3
 - id: '1776378473889'
   alias: '*Bedroom 2 Good Morning Routine'
-  description: Triggers at 6:50am only if bedroom2_occupied is on. Pre-staged lights to prevent flash. Staged ramp, wake album,
-    TTS on motion, fans off. Music until presence clears or 7:30am.
+  description: Triggers at 6:50am only if bedroom2_occupied is on. Pre-staged lights
+    to prevent flash. Staged ramp, wake album, TTS on motion, fans off. Music until
+    presence clears or 7:30am.
   triggers:
   - trigger: time
     at: 06:30:00
@@ -5481,8 +5551,9 @@
     entity_id: input_boolean.bedroom2_occupied
     state: 'on'
   actions:
-  - alias: Power the Nanoleaf P115 outlets back on first so the panels have time to reboot/rejoin WiFi before being commanded
-      (see Bedtime Routine's hard_lights_out for where they get cut)
+  - alias: Power the Nanoleaf P115 outlets back on first so the panels have time to
+      reboot/rejoin WiFi before being commanded (see Bedtime Routine's hard_lights_out
+      for where they get cut)
     action: switch.turn_on
     target:
       entity_id:
@@ -5537,7 +5608,8 @@
               - light.ribbon
               - light.fluttershy
             data:
-              brightness_pct: '{{ [1 + (repeat.index * 4.4), 80] | min | round(0) }}'
+              brightness_pct: '{{ [1 + (repeat.index * 4.4), 80] | min | round(0)
+                }}'
               transition: 3
           - delay:
               seconds: 10
@@ -5553,7 +5625,8 @@
             target:
               entity_id: light.office
             data:
-              brightness_pct: '{{ [1 + (repeat.index * 6.6), 100] | min | round(0) }}'
+              brightness_pct: '{{ [1 + (repeat.index * 6.6), 100] | min | round(0)
+                }}'
               color_temp_kelvin: 2700
               transition: 3
           - delay:
@@ -5566,15 +5639,17 @@
     - sequence:
       - delay:
           seconds: 30
-      - alias: Unjoin office_2 from any Music Assistant group before playing wake music - otherwise it plays to whatever it's
-          currently grouped with (e.g. the kitchen)
+      - alias: Unjoin office_2 from any Music Assistant group before playing wake
+          music - otherwise it plays to whatever it's currently grouped with (e.g.
+          the kitchen)
         action: media_player.unjoin
         continue_on_error: true
         target:
           entity_id: media_player.office_2
-      - alias: Wait for the unjoin to actually take effect before playing - otherwise the play command can still land in the
-          not-yet-split group (e.g. the kitchen)
-        wait_template: '{{ (state_attr(''media_player.office_2'', ''group_members'') | default([]) | length) <= 1 }}'
+      - alias: Wait for the unjoin to actually take effect before playing - otherwise
+          the play command can still land in the not-yet-split group (e.g. the kitchen)
+        wait_template: '{{ (state_attr(''media_player.office_2'', ''group_members'')
+          | default([]) | length) <= 1 }}'
         timeout:
           seconds: 5
         continue_on_timeout: true
@@ -5639,13 +5714,17 @@
           data:
             cache: false
             media_player_entity_id: media_player.office_2
-            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and
-              ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning Lily & Caylee!
-              Today is {{ now().strftime(''%A, %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M
-              %p'') }}. The current conditions are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a
-              temperature of {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round | int }} degrees.
-              {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
-              | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
+            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
+              if (today_fc is defined and today_fc and ''weather.forecast_home'' in
+              today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning
+              Lily & Caylee! Today is {{ now().strftime(''%A, %B %-d'') }} and its
+              going to be a great day! The time is {{ now().strftime(''%-I:%M %p'')
+              }}. The current conditions are {{ states(''weather.forecast_home'')
+              | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'',
+              ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today
+              will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{
+              (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow
+              | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
         - delay:
             seconds: 12
         - alias: Bump volume for second announcement
@@ -5661,14 +5740,18 @@
           data:
             cache: false
             media_player_entity_id: media_player.office_2
-            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and
-              ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} In case you missed it
-              the first time, it seems you are really awake now. Good morning Lily & Caylee! Today is {{ now().strftime(''%A,
-              %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M %p'') }}. The current conditions
-              are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'',
-              ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'',
-              '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0))
-              | round | int }} degrees.{% endif %} Let''s go!!!!!'
+            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
+              if (today_fc is defined and today_fc and ''weather.forecast_home'' in
+              today_fc) else [] %} {% set f = fc[0] if fc else none %} In case you
+              missed it the first time, it seems you are really awake now. Good morning
+              Lily & Caylee! Today is {{ now().strftime(''%A, %B %-d'') }} and its
+              going to be a great day! The time is {{ now().strftime(''%-I:%M %p'')
+              }}. The current conditions are {{ states(''weather.forecast_home'')
+              | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'',
+              ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today
+              will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{
+              (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow
+              | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
         else:
         - alias: Ramp volume to 0.5
           repeat:
@@ -5680,7 +5763,8 @@
               target:
                 entity_id: media_player.office_2
               data:
-                volume_level: '{{ [0.05 + (repeat.index * 0.05625), 0.5] | min | round(3) }}'
+                volume_level: '{{ [0.05 + (repeat.index * 0.05625), 0.5] | min | round(3)
+                  }}'
         - alias: Wait for moving target before announcement
           wait_for_trigger:
           - trigger: state
@@ -5699,17 +5783,21 @@
             target:
               entity_id: input_boolean.bedroom2_occupied
           - stop: Motion wait timed out - routine complete
-        - alias: No track-boundary wait before the first announcement - it is spoken straight away on motion so it lands mid-song
-            and is simply ducked over. Waiting for a boundary instead ducked the incoming song at position zero and replayed
-            its opening seconds, which sounded like the track restarting. The one exception is handled here - if the current
-            song is nearly over the announcement would collide with the track change, so in that case wait for the next song
-            first. The SECOND announcement further down still waits for a boundary.
+        - alias: No track-boundary wait before the first announcement - it is spoken
+            straight away on motion so it lands mid-song and is simply ducked over.
+            Waiting for a boundary instead ducked the incoming song at position zero
+            and replayed its opening seconds, which sounded like the track restarting.
+            The one exception is handled here - if the current song is nearly over
+            the announcement would collide with the track change, so in that case
+            wait for the next song first. The SECOND announcement further down still
+            waits for a boundary.
           if:
           - condition: template
-            value_template: '{% set p = state_attr(''media_player.office_2'', ''media_position'') | float(0) %} {% set u =
-              state_attr(''media_player.office_2'', ''media_position_updated_at'') %} {% set d = state_attr(''media_player.office_2'',
-              ''media_duration'') | float(0) %} {% set el = p + ((now() - u).total_seconds() if u is not none else 0) %} {{
-              d > 0 and (d - el) < 45 }}'
+            value_template: '{% set p = state_attr(''media_player.office_2'', ''media_position'')
+              | float(0) %} {% set u = state_attr(''media_player.office_2'', ''media_position_updated_at'')
+              %} {% set d = state_attr(''media_player.office_2'', ''media_duration'')
+              | float(0) %} {% set el = p + ((now() - u).total_seconds() if u is not
+              none else 0) %} {{ d > 0 and (d - el) < 45 }}'
           then:
           - alias: Wait for the next track to start
             wait_for_trigger:
@@ -5728,20 +5816,25 @@
             entity_id: media_player.office_2
           data:
             volume_level: 0.2
-        - alias: TTS good morning announcement, fired between tracks so it can't hang mid-track playback
+        - alias: TTS good morning announcement, fired between tracks so it can't hang
+            mid-track playback
           action: tts.speak
           target:
             entity_id: tts.piper
           data:
             cache: false
             media_player_entity_id: media_player.office_2
-            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and
-              ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning Lily & Caylee!
-              Today is {{ now().strftime(''%A, %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M
-              %p'') }}. The current conditions are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a
-              temperature of {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round | int }} degrees.
-              {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
-              | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
+            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
+              if (today_fc is defined and today_fc and ''weather.forecast_home'' in
+              today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning
+              Lily & Caylee! Today is {{ now().strftime(''%A, %B %-d'') }} and its
+              going to be a great day! The time is {{ now().strftime(''%-I:%M %p'')
+              }}. The current conditions are {{ states(''weather.forecast_home'')
+              | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'',
+              ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today
+              will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{
+              (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow
+              | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
         - alias: Wait for the announcement to finish and music to resume
           wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
           timeout:
@@ -5755,9 +5848,10 @@
           timeout:
             minutes: 3
           continue_on_timeout: true
-        - alias: Let the new track settle before speaking. The wait above fires at the exact instant the next song starts,
-            and announcing right then ducks it at position zero, so it replays its opening seconds and sounds like the track
-            restarting. Matches the settle the Big Bedroom routine uses.
+        - alias: Let the new track settle before speaking. The wait above fires at
+            the exact instant the next song starts, and announcing right then ducks
+            it at position zero, so it replays its opening seconds and sounds like
+            the track restarting. Matches the settle the Big Bedroom routine uses.
           delay:
             seconds: 10
         - alias: Bump volume for second announcement
@@ -5773,14 +5867,18 @@
           data:
             cache: false
             media_player_entity_id: media_player.office_2
-            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and
-              ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} In case you missed it
-              the first time, it seems you are really awake now. Good morning Lily & Caylee! Today is {{ now().strftime(''%A,
-              %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M %p'') }}. The current conditions
-              are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'',
-              ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'',
-              '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0))
-              | round | int }} degrees.{% endif %} Let''s go!!!!!'
+            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
+              if (today_fc is defined and today_fc and ''weather.forecast_home'' in
+              today_fc) else [] %} {% set f = fc[0] if fc else none %} In case you
+              missed it the first time, it seems you are really awake now. Good morning
+              Lily & Caylee! Today is {{ now().strftime(''%A, %B %-d'') }} and its
+              going to be a great day! The time is {{ now().strftime(''%-I:%M %p'')
+              }}. The current conditions are {{ states(''weather.forecast_home'')
+              | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'',
+              ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today
+              will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{
+              (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow
+              | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
         - alias: Wait for the announcement to finish and music to resume
           wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
           timeout:
@@ -5827,7 +5925,8 @@
                     target:
                       entity_id: media_player.office_2
                     data:
-                      volume_level: '{{ [0.5 - (repeat.index * 0.06), 0.02] | max | round(3) }}'
+                      volume_level: '{{ [0.5 - (repeat.index * 0.06), 0.02] | max
+                        | round(3) }}'
                   - delay:
                       seconds: 15
                   - if:
@@ -5906,10 +6005,12 @@
           entity_id: automation.office_bedroom_2_smart_motion_presence_2
         data: {}
     - sequence:
-      - alias: 30-minute hard cap timer. Clearing input_boolean.bedroom2_occupied is what lets the occupancy-driven music
-          loop above exit, so this branch is what guarantees the run always terminates - which is in turn what makes mode:single
-          safe here. The triggers are four hours apart (06:30 and 10:30) and a run can now last at most about half an hour,
-          so a run can never still be alive when the next trigger fires and be dropped.
+      - alias: 30-minute hard cap timer. Clearing input_boolean.bedroom2_occupied
+          is what lets the occupancy-driven music loop above exit, so this branch
+          is what guarantees the run always terminates - which is in turn what makes
+          mode:single safe here. The triggers are four hours apart (06:30 and 10:30)
+          and a run can now last at most about half an hour, so a run can never still
+          be alive when the next trigger fires and be dropped.
         delay:
           minutes: 30
       - continue_on_error: true
@@ -5922,10 +6023,12 @@
   mode: single
 - id: '1776382720393'
   alias: Bedroom 2 Daily Reset
-  description: Backstop reset 30 min after Good Morning Routine's trigger time (9:30am weekdays, 11am weekends). Turns off
-    bedroom2_occupied if still on after the good morning routine should have completed. Must stay after Good Morning's own
-    trigger time or it clears the flag first and Good Morning's occupied condition fails, skipping the whole routine (outlets,
-    fan, wake ramp, everything) - this happened on weekdays from 2026-08-05 when Good Morning moved to 8:30am but this stayed
+  description: Backstop reset 30 min after Good Morning Routine's trigger time (9:30am
+    weekdays, 11am weekends). Turns off bedroom2_occupied if still on after the good
+    morning routine should have completed. Must stay after Good Morning's own trigger
+    time or it clears the flag first and Good Morning's occupied condition fails,
+    skipping the whole routine (outlets, fan, wake ramp, everything) - this happened
+    on weekdays from 2026-08-05 when Good Morning moved to 8:30am but this stayed
     at 8:00am.
   triggers:
   - trigger: time
@@ -5949,8 +6052,9 @@
   mode: single
 - id: '1776382720394'
   alias: Bedroom 2 Occupancy Latch
-  description: Sets bedroom2_occupied once per night when the sensor group detects presence between 22:00 and midnight. Single-fire
-    - won't retrigger if already occupied. Cleared by Good Morning Routine and Daily Reset.
+  description: Sets bedroom2_occupied once per night when the sensor group detects
+    presence between 22:00 and midnight. Single-fire - won't retrigger if already
+    occupied. Cleared by Good Morning Routine and Daily Reset.
   triggers:
   - trigger: state
     entity_id:
@@ -5970,13 +6074,16 @@
   mode: single
 - id: '1781237174423'
   alias: '*Bedroom 2 Late Night Lights Out'
-  description: From 10:45pm onward - the Bedtime Routine's hard lights out - while bedroom2_occupied is on, any Bedroom 2
-    / Office light that stays on for 60 seconds fades back off, so the room stays dark until the Good Morning Routine restores
-    the lights. Ignores the dimmer manual override so the kids can't defeat it from the wall dimmer. The 10:46:30pm and midnight
-    sweeps catch lights already on when the window opens (10:46:30 rather than 10:45 so it doesn't cut short hard lights out's
-    own 60-second fade), and the startup sweep catches lights already on when HA restarts overnight (restored states don't
-    fire the state trigger). Window ends before the Good Morning sunrise ramp starts; bedroom2_occupied being cleared by Good
-    Morning or Daily Reset also disables it.
+  description: From 10:45pm onward - the Bedtime Routine's hard lights out - while
+    bedroom2_occupied is on, any Bedroom 2 / Office light that stays on for 60 seconds
+    fades back off, so the room stays dark until the Good Morning Routine restores
+    the lights. Ignores the dimmer manual override so the kids can't defeat it from
+    the wall dimmer. The 10:46:30pm and midnight sweeps catch lights already on when
+    the window opens (10:46:30 rather than 10:45 so it doesn't cut short hard lights
+    out's own 60-second fade), and the startup sweep catches lights already on when
+    HA restarts overnight (restored states don't fire the state trigger). Window ends
+    before the Good Morning sunrise ramp starts; bedroom2_occupied being cleared by
+    Good Morning or Daily Reset also disables it.
   triggers:
   - trigger: state
     entity_id:
@@ -5988,8 +6095,8 @@
     for:
       seconds: 60
     id: light_on
-  - alias: Sweep just after the window opens - 10:45pm hard lights out plus its 60-second fade, so this doesn't shorten that
-      fade with its own 30s transition
+  - alias: Sweep just after the window opens - 10:45pm hard lights out plus its 60-second
+      fade, so this doesn't shorten that fade with its own 30s transition
     trigger: time
     at: '22:46:30'
     id: sweep
@@ -6055,8 +6162,9 @@
   max: 6
 - id: '1776427656334'
   alias: Good Morning - Kitchen Speaker Join
-  description: During the good morning routine, joins kitchen speaker on first motion detection and ramps to 0.15. Stays grouped
-    until bedroom music stops or routine ends. Unjoins when music stops or good morning deactivates.
+  description: During the good morning routine, joins kitchen speaker on first motion
+    detection and ramps to 0.15. Stays grouped until bedroom music stops or routine
+    ends. Unjoins when music stops or good morning deactivates.
   triggers:
   - trigger: state
     entity_id: binary_sensor.kitchen_sensor_group
@@ -6071,9 +6179,11 @@
     state: 'off'
   actions:
   - variables:
-      already_joined: "{{ state_attr('media_player.bedroom_2', 'group_members') is not none and\n   'media_player.kitchen'\
-        \ in\n   state_attr('media_player.bedroom_2', 'group_members') | default([]) }}"
-      kitchen_vol_before: '{{ state_attr(''media_player.kitchen'', ''volume_level'') | default(0.10) }}'
+      already_joined: "{{ state_attr('media_player.bedroom_2', 'group_members') is
+        not none and\n   'media_player.kitchen' in\n   state_attr('media_player.bedroom_2',
+        'group_members') | default([]) }}"
+      kitchen_vol_before: '{{ state_attr(''media_player.kitchen'', ''volume_level'')
+        | default(0.10) }}'
   - alias: Join and ramp only if not already in group
     if:
     - condition: template
@@ -6102,7 +6212,8 @@
           target:
             entity_id: media_player.kitchen
           data:
-            volume_level: '{{ [0.05 + (repeat.index * 0.022), 0.15] | min | round(3) }}'
+            volume_level: '{{ [0.05 + (repeat.index * 0.022), 0.15] | min | round(3)
+              }}'
   - alias: Wait for routine to end or music stops
     wait_for_trigger:
     - trigger: state
@@ -6147,8 +6258,8 @@
     action: light.turn_off
 - id: '1747180000001'
   alias: Sonos Portable - Battery Monitor
-  description: When Sonos Roam is idle/paused for 5 min, snapshot battery, alert if below 30%, then turn the device off. Avoids
-    polling the battery sensor.
+  description: When Sonos Roam is idle/paused for 5 min, snapshot battery, alert if
+    below 30%, then turn the device off. Avoids polling the battery sensor.
   triggers:
   - trigger: state
     entity_id: media_player.portable
@@ -6179,7 +6290,8 @@
       action: notify.mobile_app_pc_iphone
       data:
         title: Sonos Roam Battery Low
-        message: Sonos Portable battery is at {{ states('input_number.portable_battery_last_seen') | int }}% — Please Charge.
+        message: Sonos Portable battery is at {{ states('input_number.portable_battery_last_seen')
+          | int }}% — Please Charge.
     - alias: Pulse bedroom light
       action: light.turn_on
       target:
@@ -6199,8 +6311,8 @@
   mode: single
 - id: '1776722406866'
   alias: Garage Door Auto-Close
-  description: Close garage after 5 min of no person occupancy, if enabled. Uses person-only occupancy group (ignores parked
-    cars).
+  description: Close garage after 5 min of no person occupancy, if enabled. Uses person-only
+    occupancy group (ignores parked cars).
   triggers:
   - trigger: state
     entity_id:
@@ -6247,13 +6359,14 @@
     data: {}
   - action: notify.mobile_app_pc_iphone
     data:
-      message: Garage was open at 10PM and auto-closed. Check why earlier automations didn't catch this.
+      message: Garage was open at 10PM and auto-closed. Check why earlier automations
+        didn't catch this.
       title: Auto Close
   mode: single
 - id: '1776828862786'
   alias: 'Hue Button 1 - Big Bedroom: Restore AL'
-  description: Pico 'on' press clears all overrides, re-enables AL switches and motion automation, clears manual_control,
-    and applies adaptive lighting.
+  description: Pico 'on' press clears all overrides, re-enables AL switches and motion
+    automation, clears manual_control, and applies adaptive lighting.
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
@@ -6343,8 +6456,8 @@
   mode: single
 - id: '1776829563318'
   alias: 'Pico Button 3 - Dim - Big Bedroom: TV Mode'
-  description: Time-of-day adaptive TV watching lights. Hue + Nanoleaf color-matched, Nanoleaf brightness capped at 20%. Fan
-    to 25%. Disables AL and presence.
+  description: Time-of-day adaptive TV watching lights. Hue + Nanoleaf color-matched,
+    Nanoleaf brightness capped at 20%. Fan to 25%. Disables AL and presence.
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
@@ -6373,8 +6486,10 @@
       manual_control: true
   - variables:
       sun_elev: '{{ state_attr(''sun.sun'', ''elevation'') | float(0) }}'
-      tv_brightness: '{% if sun_elev > 10 %}60 {% elif sun_elev > -6 %}35 {% else %}15 {% endif %}'
-      tv_kelvin: '{% if sun_elev > 10 %}4000 {% elif sun_elev > -6 %}2700 {% else %}2200 {% endif %}'
+      tv_brightness: '{% if sun_elev > 10 %}60 {% elif sun_elev > -6 %}35 {% else
+        %}15 {% endif %}'
+      tv_kelvin: '{% if sun_elev > 10 %}4000 {% elif sun_elev > -6 %}2700 {% else
+        %}2200 {% endif %}'
       nano_brightness: '{{ [tv_brightness | int, 20] | min }}'
   - alias: Pre-stage Nanoleaf at 1% to avoid flash-to-white
     action: light.turn_on
@@ -6410,8 +6525,8 @@
   mode: single
 - id: '1778600000000'
   alias: 'Pico Button 4 - Off - Big Bedroom: Sleep Mode'
-  description: Pico 'off' press sets bedroom lights to red 2%, turns on air circulator/purifier/fan at 50%, and arms alarm
-    to home mode.
+  description: Pico 'off' press sets bedroom lights to red 2%, turns on air circulator/purifier/fan
+    at 50%, and arms alarm to home mode.
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
@@ -6485,8 +6600,9 @@
   mode: single
 - id: '1776830103632'
   alias: 'Big Bedroom: TV Mode (Unified)'
-  description: TV state drives bedroom lighting with time-of-day palette. Playing = deep dim scaled to daylight. Paused =
-    TV setup palette. Off = restore AL and presence. Fan 25% during TV activity. Nanoleaf color-matched, brightness-capped
+  description: TV state drives bedroom lighting with time-of-day palette. Playing
+    = deep dim scaled to daylight. Paused = TV setup palette. Off = restore AL and
+    presence. Fan 25% during TV activity. Nanoleaf color-matched, brightness-capped
     at 20%.
   triggers:
   - trigger: state
@@ -6668,16 +6784,20 @@
           transition: 3
   variables:
     sun_elev: '{{ state_attr(''sun.sun'', ''elevation'') | float(0) }}'
-    tv_kelvin: '{% if sun_elev > 10 %}4000 {% elif sun_elev > -6 %}2700 {% else %}2200 {% endif %}'
-    paused_brightness: '{% if sun_elev > 10 %}60 {% elif sun_elev > -6 %}35 {% else %}15 {% endif %}'
-    playing_brightness: '{% if sun_elev > 10 %}15 {% elif sun_elev > -6 %}5 {% else %}2 {% endif %}'
+    tv_kelvin: '{% if sun_elev > 10 %}4000 {% elif sun_elev > -6 %}2700 {% else %}2200
+      {% endif %}'
+    paused_brightness: '{% if sun_elev > 10 %}60 {% elif sun_elev > -6 %}35 {% else
+      %}15 {% endif %}'
+    playing_brightness: '{% if sun_elev > 10 %}15 {% elif sun_elev > -6 %}5 {% else
+      %}2 {% endif %}'
     paused_nano_brightness: '{{ [paused_brightness | int, 20] | min }}'
     playing_nano_brightness: '{{ [playing_brightness | int, 20] | min }}'
   mode: restart
 - id: '1776965023589'
   alias: 'Office/Bedroom 2: Smart Motion & Presence'
-  description: AL daytime, sleep mode evening. Handles motion 07:00-22:30 only. Stands down when bedroom2_occupied is on (Bedtime
-    Routine has taken over). Hard cutoff at 22:30 - no motion response after that until 07:00.
+  description: AL daytime, sleep mode evening. Handles motion 07:00-22:30 only. Stands
+    down when bedroom2_occupied is on (Bedtime Routine has taken over). Hard cutoff
+    at 22:30 - no motion response after that until 07:00.
   triggers:
   - trigger: state
     entity_id:
@@ -6817,8 +6937,8 @@
           lights:
           - light.office
           manual_control: false
-      - alias: Do NOT re-enable AL here — it would immediately turn ribbon/fluttershy back on. Good Morning routine handles
-          re-enabling AL at wake time.
+      - alias: Do NOT re-enable AL here — it would immediately turn ribbon/fluttershy
+          back on. Good Morning routine handles re-enabling AL at wake time.
         action: light.turn_off
         target:
           entity_id:
@@ -6914,8 +7034,8 @@
               entity_id: switch.adaptive_lighting_office
               state: 'on'
             - condition: template
-              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office', 'manual_control')\
-                \ | default([])) }}\n"
+              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',
+                'manual_control') | default([])) }}\n"
             then:
             - action: adaptive_lighting.apply
               continue_on_error: true
@@ -6951,8 +7071,8 @@
               entity_id: switch.adaptive_lighting_office
               state: 'on'
             - condition: template
-              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office', 'manual_control')\
-                \ | default([])) }}\n"
+              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',
+                'manual_control') | default([])) }}\n"
             then:
             - action: adaptive_lighting.apply
               continue_on_error: true
@@ -6977,7 +7097,8 @@
     - conditions:
       - condition: trigger
         id: stopped
-      - alias: Skip if hard-off window (11:45 PM - 7 AM) - let Bedtime/Morning routines own this
+      - alias: Skip if hard-off window (11:45 PM - 7 AM) - let Bedtime/Morning routines
+          own this
         condition: time
         after: 07:00:00
         before: '23:45:00'
@@ -7021,7 +7142,8 @@
   mode: restart
 - id: '1776981794880'
   alias: Departure - Start Window on Climatization
-  description: Opens a 15-minute departure window when the climatization button is pressed.
+  description: Opens a 15-minute departure window when the climatization button is
+    pressed.
   triggers:
   - trigger: state
     entity_id: button.volvo_xc60_start_climatization
@@ -7040,8 +7162,8 @@
   mode: restart
 - id: '1776981901284'
   alias: Departure - Monitor Garage and Arm Based on Occupancy
-  description: When Volvo cable is disconnected during departure window and Paul or the car leaves, check for motion and arm
-    accordingly.
+  description: When Volvo cable is disconnected during departure window and Paul or
+    the car leaves, check for motion and arm accordingly.
   triggers:
   - trigger: state
     entity_id: sensor.volvo_xc60_charging_connection_status
@@ -7065,7 +7187,8 @@
       minutes: 15
     continue_on_timeout: false
   - alias: Wait for motion to clear or timeout after 1 minute
-    wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'') }}'
+    wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'')
+      }}'
     timeout:
       hours: 0
       minutes: 1
@@ -7102,7 +7225,8 @@
   mode: single
 - id: '1776983486842'
   alias: Volvo XC60 - Plug In Reminder
-  description: Turns on bedroom Apollo light red when the XC60 is home, not charging, and battery is below 50%.
+  description: Turns on bedroom Apollo light red when the XC60 is home, not charging,
+    and battery is below 50%.
   triggers:
   - trigger: state
     entity_id: device_tracker.bcpro_204982_08b8
@@ -7155,8 +7279,8 @@
   mode: single
 - id: '1777221197720'
   alias: Bedroom 2 - Off When Empty
-  description: If bedroom 2 is unoccupied for 15 continuous minutes and no one is sleeping there (bedroom2_occupied off),
-    turn off all lights, fan, and music.
+  description: If bedroom 2 is unoccupied for 15 continuous minutes and no one is
+    sleeping there (bedroom2_occupied off), turn off all lights, fan, and music.
   triggers:
   - trigger: state
     entity_id:
@@ -7209,8 +7333,9 @@
   mode: single
 - id: '1777251099134'
   alias: 'Living Room: TV Mode (Unified)'
-  description: TV state drives living room lighting with time-of-day palette. Playing = deep dim scaled to daylight. Paused/Off
-    = restore AL and presence. Dining room dims during playback if occupied. Galaxy projector off during playback, on when
+  description: TV state drives living room lighting with time-of-day palette. Playing
+    = deep dim scaled to daylight. Paused/Off = restore AL and presence. Dining room
+    dims during playback if occupied. Galaxy projector off during playback, on when
     paused/off.
   triggers:
   - trigger: state
@@ -7454,8 +7579,10 @@
             transition: 3
   variables:
     sun_elev: '{{ state_attr(''sun.sun'', ''elevation'') | float(0) }}'
-    tv_kelvin: '{% if sun_elev > 10 %}4000 {% elif sun_elev > -6 %}2700 {% else %}2200 {% endif %}'
-    playing_brightness: '{% if sun_elev > 10 %}15 {% elif sun_elev > -6 %}5 {% else %}2 {% endif %}'
+    tv_kelvin: '{% if sun_elev > 10 %}4000 {% elif sun_elev > -6 %}2700 {% else %}2200
+      {% endif %}'
+    playing_brightness: '{% if sun_elev > 10 %}15 {% elif sun_elev > -6 %}5 {% else
+      %}2 {% endif %}'
   mode: restart
 - id: '1777317910121'
   alias: Office Fan Alexa Control
@@ -7495,18 +7622,19 @@
     trigger: mqtt
   conditions:
   - condition: template
-    value_template: '{{ trigger.payload_json.type == ''new'' and trigger.payload_json.after.label in [''person'', ''car'']
-      and trigger.payload_json.after.camera in [''driveway'', ''front_door'', ''garage''] and (trigger.payload_json.after.data.score
-      if trigger.payload_json.after.data is defined and trigger.payload_json.after.data.score is not none else trigger.payload_json.after.score)
+    value_template: '{{ trigger.payload_json.type == ''new'' and trigger.payload_json.after.label
+      in [''person'', ''car''] and trigger.payload_json.after.camera in [''driveway'',
+      ''front_door'', ''garage''] and (trigger.payload_json.after.data.score if trigger.payload_json.after.data
+      is defined and trigger.payload_json.after.data.score is not none else trigger.payload_json.after.score)
       | float(0) >= 0.75 }}'
   actions:
   - data:
       title: '{{ trigger.payload_json.after.label | capitalize }} Detected
 
         '
-      message: '{{ trigger.payload_json.after.label | capitalize }} detected at {% if trigger.payload_json.after.camera ==
-        ''driveway'' %}Driveway {% elif trigger.payload_json.after.camera == ''front_door'' %}Front Door {% else %}Garage{%
-        endif %}
+      message: '{{ trigger.payload_json.after.label | capitalize }} detected at {%
+        if trigger.payload_json.after.camera == ''driveway'' %}Driveway {% elif trigger.payload_json.after.camera
+        == ''front_door'' %}Front Door {% else %}Garage{% endif %}
 
         '
       data:
@@ -7515,12 +7643,13 @@
         tag: frigate-{{ trigger.payload_json.after.camera }}
     action: notify.mobile_app_pc_iphone
   - data:
-      title: '{{ trigger.payload_json.after.label | capitalize }} at {% if trigger.payload_json.after.camera == ''driveway''
-        %}Driveway {% elif trigger.payload_json.after.camera == ''front_door'' %}Front Door {% else %}Garage{% endif %}
+      title: '{{ trigger.payload_json.after.label | capitalize }} at {% if trigger.payload_json.after.camera
+        == ''driveway'' %}Driveway {% elif trigger.payload_json.after.camera == ''front_door''
+        %}Front Door {% else %}Garage{% endif %}
 
         '
-      message: '{{ trigger.payload_json.after.label | capitalize }} detected — [View Clip](/api/frigate/notifications/{{ trigger.payload_json.after.id
-        }}/clip.mp4)
+      message: '{{ trigger.payload_json.after.label | capitalize }} detected — [View
+        Clip](/api/frigate/notifications/{{ trigger.payload_json.after.id }}/clip.mp4)
 
         '
       notification_id: frigate_{{ trigger.payload_json.after.camera }}
@@ -7541,8 +7670,9 @@
     entity_id: switch.al_sleep_mode_big_bedroom
     state: 'off'
   - data:
-      message: 'Alert: {{ trigger.payload_json.after.label | capitalize }} detected at {% if trigger.payload_json.after.camera
-        == ''driveway'' %}Driveway {% elif trigger.payload_json.after.camera == ''front_door'' %}Front Door {% else %}Garage{%
+      message: 'Alert: {{ trigger.payload_json.after.label | capitalize }} detected
+        at {% if trigger.payload_json.after.camera == ''driveway'' %}Driveway {% elif
+        trigger.payload_json.after.camera == ''front_door'' %}Front Door {% else %}Garage{%
         endif %}.
 
         '
@@ -7551,8 +7681,9 @@
       entity_id: notify.bedroom_dot_announce
 - id: '1777484048364'
   alias: 'AUTO AWAY: Departure - Monitor Garage and Arm Based on Occupancy'
-  description: When garage opens and Paul or the car is detected away, wait for motion sensors to clear, then check if someone's
-    home. If motion detected, set alarm to home. If empty, run goodbye routine.
+  description: When garage opens and Paul or the car is detected away, wait for motion
+    sensors to clear, then check if someone's home. If motion detected, set alarm
+    to home. If empty, run goodbye routine.
   triggers:
   - trigger: state
     entity_id: cover.garage
@@ -7573,7 +7704,8 @@
     - 'off'
     enabled: false
   actions:
-  - alias: Confirm departure (skip wait when geofence webhook already confirmed Paul left)
+  - alias: Confirm departure (skip wait when geofence webhook already confirmed Paul
+      left)
     if:
     - condition: template
       value_template: '{{ trigger.id != ''webhook'' }}'
@@ -7595,7 +7727,8 @@
         milliseconds: 0
       continue_on_timeout: false
   - alias: Wait for motion to clear or timeout after 5 minutes
-    wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'') }}'
+    wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'')
+      }}'
     timeout:
       minutes: 5
     continue_on_timeout: true
@@ -7625,24 +7758,30 @@
   mode: restart
 - id: '1777484175032'
   alias: Arrival (Welcome Home) - STAGE 1 Two-Factor Arm to Pending
-  description: 'STAGE 1 of 2. Two-factor arrival detection, order-independent. Needs BOTH the garage opening AND an arrival
-    signal (BT beacon, iOS Shortcut webhook, or phone geofence - all three set input_boolean.arrival_recent via the companion
-    "Arrival Latch - Set on Phone/Beacon Arrival" automation) while armed - whichever happens first just latches its own flag
-    (input_boolean.garage_open_recent or input_boolean.arrival_recent) and stops; whichever happens second finds the other
-    flag already on. Changed 2026-08-22 - this automation NO LONGER disarms or plays music. It only arms input_boolean.welcome_home_pending
-    (the waiting state). The Ring garage door sensor (binary_sensor.garage_door) is now the final gate: see "Arrival (Welcome
-    Home) - STAGE 2" which does the actual disarm + lights + music. Alarm stays armed and the house stays silent until that
+  description: 'STAGE 1 of 2. Two-factor arrival detection, order-independent. Needs
+    BOTH the garage opening AND an arrival signal (BT beacon, iOS Shortcut webhook,
+    or phone geofence - all three set input_boolean.arrival_recent via the companion
+    "Arrival Latch - Set on Phone/Beacon Arrival" automation) while armed - whichever
+    happens first just latches its own flag (input_boolean.garage_open_recent or input_boolean.arrival_recent)
+    and stops; whichever happens second finds the other flag already on. Changed 2026-08-22
+    - this automation NO LONGER disarms or plays music. It only arms input_boolean.welcome_home_pending
+    (the waiting state). The Ring garage door sensor (binary_sensor.garage_door) is
+    now the final gate: see "Arrival (Welcome Home) - STAGE 2" which does the actual
+    disarm + lights + music. Alarm stays armed and the house stays silent until that
     sensor reports open.
 
-    History: Fixed 2026-07-22 - previously only triggered on garage-open and required the arrival latch to already be set,
-    so a garage-open that beat the beacon update by a few seconds silently did nothing. Triggers on arrival_recent turning
-    on (rather than duplicating the beacon/webhook triggers here) so all three arrival signals work as a fallback for each
-    other, regardless of ordering with the garage - webhook isn''t wired in directly because HA only allows one automation
-    to register a given webhook_id, and the latch automation already owns paul_arrived_home. Fixed 2026-08-13 - the smart
-    garage cover entity silently failed to report "open" on arrival, so the two-factor check waited forever even though the
-    beacon confirmed arrival and the security panel''s own entry sensor tripped (went to "pending"). Now the panel''s own
-    pending/entry-delay state also satisfies the garage half of the check, as a fallback for when the smart garage integration
-    desyncs.'
+    History: Fixed 2026-07-22 - previously only triggered on garage-open and required
+    the arrival latch to already be set, so a garage-open that beat the beacon update
+    by a few seconds silently did nothing. Triggers on arrival_recent turning on (rather
+    than duplicating the beacon/webhook triggers here) so all three arrival signals
+    work as a fallback for each other, regardless of ordering with the garage - webhook
+    isn''t wired in directly because HA only allows one automation to register a given
+    webhook_id, and the latch automation already owns paul_arrived_home. Fixed 2026-08-13
+    - the smart garage cover entity silently failed to report "open" on arrival, so
+    the two-factor check waited forever even though the beacon confirmed arrival and
+    the security panel''s own entry sensor tripped (went to "pending"). Now the panel''s
+    own pending/entry-delay state also satisfies the garage half of the check, as
+    a fallback for when the smart garage integration desyncs.'
   triggers:
   - id: garage
     trigger: state
@@ -7671,26 +7810,32 @@
       entity_id: alarm_control_panel.3302_alarm
       state: pending
   actions:
-  - alias: Latch this signal; only fall through to disarm if the OTHER signal already fired
+  - alias: Latch this signal; only fall through to disarm if the OTHER signal already
+      fired
     choose:
-    - alias: Garage opened (or panel's own entry-delay fired, in case the smart garage entity missed reporting open) - if
-        no arrival signal has confirmed yet, latch and wait
+    - alias: Garage opened (or panel's own entry-delay fired, in case the smart garage
+        entity missed reporting open) - if no arrival signal has confirmed yet, latch
+        and wait
       conditions:
       - condition: template
-        value_template: '{{ trigger.id in ["garage", "entry_delay"] and is_state("input_boolean.arrival_recent", "off") }}'
+        value_template: '{{ trigger.id in ["garage", "entry_delay"] and is_state("input_boolean.arrival_recent",
+          "off") }}'
       sequence:
       - alias: Set the garage-open latch
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.garage_open_recent
-      - stop: Waiting for an arrival signal (beacon/phone/webhook) to confirm before disarming
+      - stop: Waiting for an arrival signal (beacon/phone/webhook) to confirm before
+          disarming
     - alias: Arrival signal fired - if garage hasn't opened yet, wait
       conditions:
       - condition: template
-        value_template: '{{ trigger.id == "arrival" and is_state("input_boolean.garage_open_recent", "off") }}'
+        value_template: '{{ trigger.id == "arrival" and is_state("input_boolean.garage_open_recent",
+          "off") }}'
       sequence:
       - stop: Waiting for garage to open to confirm before disarming
-  - alias: Both factors confirmed - arm the pending state and wait for the Ring garage door sensor
+  - alias: Both factors confirmed - arm the pending state and wait for the Ring garage
+      door sensor
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.welcome_home_pending
@@ -7699,20 +7844,23 @@
     action: notify.mobile_app_pc_iphone
     data:
       title: Welcome Home armed
-      message: Arrival confirmed. Waiting on the garage door sensor to disarm and start the routine.
+      message: Arrival confirmed. Waiting on the garage door sensor to disarm and
+        start the routine.
   mode: queued
   max: 4
 - id: '1777484175035'
   alias: Arrival (Welcome Home) - STAGE 2 Execute on Ring Garage Door Open
-  description: 'STAGE 2 of 2. Added 2026-08-22. Holds the whole welcome home routine (disarm, hallway lights, music) until
-    the Ring garage door sensor actually reports open. STAGE 1 does the two-factor arrival detection and sets input_boolean.welcome_home_pending;
-    nothing here runs until that flag is on AND binary_sensor.garage_door is open, so the alarm stays armed and the house
-    stays silent in the meantime.
+  description: 'STAGE 2 of 2. Added 2026-08-22. Holds the whole welcome home routine
+    (disarm, hallway lights, music) until the Ring garage door sensor actually reports
+    open. STAGE 1 does the two-factor arrival detection and sets input_boolean.welcome_home_pending;
+    nothing here runs until that flag is on AND binary_sensor.garage_door is open,
+    so the alarm stays armed and the house stays silent in the meantime.
 
-    Triggers on both the sensor opening and the pending flag turning on, with a condition requiring both - the two are order-independent,
-    because the Ring sensor can report open a few seconds before the beacon latch lands (the garage physically opens first).
-    Requiring the sensor as a condition means it is still a hard gate either way: the routine can never run with the door
-    closed.'
+    Triggers on both the sensor opening and the pending flag turning on, with a condition
+    requiring both - the two are order-independent, because the Ring sensor can report
+    open a few seconds before the beacon latch lands (the garage physically opens
+    first). Requiring the sensor as a condition means it is still a hard gate either
+    way: the routine can never run with the door closed.'
   triggers:
   - alias: Ring garage door sensor reports open
     trigger: state
@@ -7876,9 +8024,10 @@
   max: 4
 - id: '1777484175033'
   alias: Arrival Latch - Set on Phone/Beacon Arrival
-  description: Sets the arrival latch when any early arrival signal fires (phone geofence, iOS Shortcut webhook, or BT beacon
-    going home). These fire ~15-25s before the garage opens, so the latch captures them so the garage-open automation can
-    read them later. Auto-clears after 15 min or on disarm (see companion automation).
+  description: Sets the arrival latch when any early arrival signal fires (phone geofence,
+    iOS Shortcut webhook, or BT beacon going home). These fire ~15-25s before the
+    garage opens, so the latch captures them so the garage-open automation can read
+    them later. Auto-clears after 15 min or on disarm (see companion automation).
   triggers:
   - alias: iPhone app person.paul arrives home
     trigger: state
@@ -7907,10 +8056,12 @@
   mode: single
 - id: '1777484175034'
   alias: Arrival Latch - Clear after 15 min or on Disarm
-  description: Clears the arrival latches (beacon/phone, garage-open) and the welcome_home_pending waiting state 15 minutes
-    after any of them was set, or as soon as the alarm is disarmed (so a stale latch never lingers or wrongly satisfies the
-    two-factor check on some unrelated future event). Clearing pending on disarm also means that letting yourself in some
-    other way - keypad, front door - cancels the waiting routine instead of leaving it to fire the next time the garage opens.
+  description: Clears the arrival latches (beacon/phone, garage-open) and the welcome_home_pending
+    waiting state 15 minutes after any of them was set, or as soon as the alarm is
+    disarmed (so a stale latch never lingers or wrongly satisfies the two-factor check
+    on some unrelated future event). Clearing pending on disarm also means that letting
+    yourself in some other way - keypad, front door - cancels the waiting routine
+    instead of leaving it to fire the next time the garage opens.
   triggers:
   - alias: Arrival latch has been on for 15 minutes
     trigger: state
@@ -7946,8 +8097,9 @@
   mode: single
 - id: '1748800000004'
   alias: 'Welcome Home: Stop All Music When Kitchen Unoccupied 15 Min'
-  description: Kitchen is the anchor for the welcome home session. When it has been empty for 15 minutes, stop all music,
-    unjoin satellite rooms, and clear the active flag. Bathroom handles itself via its own kitchen_stopped trigger.
+  description: Kitchen is the anchor for the welcome home session. When it has been
+    empty for 15 minutes, stop all music, unjoin satellite rooms, and clear the active
+    flag. Bathroom handles itself via its own kitchen_stopped trigger.
   triggers:
   - trigger: state
     entity_id: binary_sensor.kitchen_sensor_group
@@ -7981,8 +8133,9 @@
   mode: single
 - id: '1748800000002'
   alias: 'Welcome Home: Unjoin Bedroom When Unoccupied 10 Min'
-  description: While welcome home is active, unjoin the bedroom speaker when the room has been empty for 10 minutes. The auto-join
-    automation handles re-joining if someone returns.
+  description: While welcome home is active, unjoin the bedroom speaker when the room
+    has been empty for 10 minutes. The auto-join automation handles re-joining if
+    someone returns.
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
@@ -8003,8 +8156,9 @@
   mode: single
 - id: '1748800000003'
   alias: 'Welcome Home: Unjoin Office When Unoccupied 10 Min'
-  description: While welcome home is active, unjoin the office speaker when the room has been empty for 10 minutes. The auto-join
-    automation handles re-joining if someone returns.
+  description: While welcome home is active, unjoin the office speaker when the room
+    has been empty for 10 minutes. The auto-join automation handles re-joining if
+    someone returns.
   triggers:
   - trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
@@ -8025,7 +8179,8 @@
   mode: single
 - id: '1777890200001'
   alias: 'Welcome Home: Auto Join Bedroom Speakers on Motion'
-  description: While welcome home music is playing in kitchen, joins bedroom speakers when motion is detected in those rooms.
+  description: While welcome home music is playing in kitchen, joins bedroom speakers
+    when motion is detected in those rooms.
   triggers:
   - trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
@@ -8071,8 +8226,8 @@
   mode: single
 - id: '1777520160440'
   alias: 'Living Room: Unoccupied Shutoff'
-  description: After 15 min of no living room presence (with dining room also empty), warn with color-changing lights then
-    shut down TV, fan, and lights.
+  description: After 15 min of no living room presence (with dining room also empty),
+    warn with color-changing lights then shut down TV, fan, and lights.
   triggers:
   - trigger: state
     entity_id: binary_sensor.living_room_sensor_group
@@ -8212,7 +8367,8 @@
   mode: single
 - id: '1777696670196'
   alias: Volvo XC60 - Auto Lock If Left Unlocked
-  description: Locks the Volvo XC60 if engine is off and doors remain unlocked for 2 minutes.
+  description: Locks the Volvo XC60 if engine is off and doors remain unlocked for
+    2 minutes.
   triggers:
   - alias: Doors unlocked for 2 minutes (engine may have been off the whole time)
     trigger: state
@@ -8260,8 +8416,8 @@
   mode: single
 - id: '1777796510473'
   alias: '*Good Morning Routine'
-  description: Staged sunrise wake-up with 3-min light ramp, occupancy-driven music tail, bathroom speaker grouping on motion,
-    and 60-min hard cap from routine start.
+  description: Staged sunrise wake-up with 3-min light ramp, occupancy-driven music
+    tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
     at: 06:45:00
@@ -8282,15 +8438,18 @@
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_active
-  - alias: Reset the per-cycle announcement count (capped at 2 announcements per morning, enforced by this counter's own maximum
-      plus the arm conditions on both announcement automations)
+  - alias: Reset the per-cycle announcement count (capped at 2 announcements per morning,
+      enforced by this counter's own maximum plus the arm conditions on both announcement
+      automations)
     action: counter.reset
     target:
       entity_id: counter.good_morning_announcements
-  - alias: Clear any left-over armed announcement. Only Arm Second turns this flag on and only Between Songs turns it off,
-      so if a run ended after motion armed the second announcement but before a track boundary arrived (occupancy timeout,
-      music stopped at the speaker, or the hard cap), the flag stayed on overnight. The next morning the counter resets to
-      zero, so the first track change would then fire Between Songs as announcement number one - a full greeting at a boundary,
+  - alias: Clear any left-over armed announcement. Only Arm Second turns this flag
+      on and only Between Songs turns it off, so if a run ended after motion armed
+      the second announcement but before a track boundary arrived (occupancy timeout,
+      music stopped at the speaker, or the hard cap), the flag stayed on overnight.
+      The next morning the counter resets to zero, so the first track change would
+      then fire Between Songs as announcement number one - a full greeting at a boundary,
       on top of the routine's own announcement on motion.
     action: input_boolean.turn_off
     target:
@@ -8313,8 +8472,9 @@
       - switch.al_sleep_mode_kitchen_main
       - switch.al_sleep_mode_living_room
       - switch.adaptive_lighting_sleep_mode_office
-  - alias: Clear manual control for bathroom main so Adaptive Lighting adapts it to the daytime profile the next time motion
-      turns it on. The routine deliberately does NOT turn the bathroom light on itself - lighting the bathroom is left to
+  - alias: Clear manual control for bathroom main so Adaptive Lighting adapts it to
+      the daytime profile the next time motion turns it on. The routine deliberately
+      does NOT turn the bathroom light on itself - lighting the bathroom is left to
       Bathroom Smart Motion & Presence.
     action: adaptive_lighting.set_manual_control
     continue_on_error: true
@@ -8356,7 +8516,8 @@
             target:
               entity_id: light.nano_sand_dune
             data:
-              brightness_pct: '{{ [5 + (repeat.index * 4.75), 100] | min | round(0) }}'
+              brightness_pct: '{{ [5 + (repeat.index * 4.75), 100] | min | round(0)
+                }}'
               transition: 3
           - delay:
               seconds: 9
@@ -8384,7 +8545,8 @@
               - light.bedroom_ceiling_1
               - light.bedroom_ceiling_2
             data:
-              brightness_pct: '{{ [1 + (repeat.index * 4.3), 70] | min | round(0) }}'
+              brightness_pct: '{{ [1 + (repeat.index * 4.3), 70] | min | round(0)
+                }}'
               color_temp_kelvin: 2700
               transition: 3
           - delay:
@@ -8420,7 +8582,8 @@
               - light.bedroom_lamp_1
               - light.bedroom_lamp_2
             data:
-              brightness_pct: '{{ [1 + (repeat.index * 6.6), 94] | min | round(0) }}'
+              brightness_pct: '{{ [1 + (repeat.index * 6.6), 94] | min | round(0)
+                }}'
               color_temp_kelvin: 2700
               transition: 3
           - delay:
@@ -8441,9 +8604,10 @@
           entity_id: media_player.bedroom
         data:
           volume_level: 0.05
-      - alias: 'PHASE 1 - Here Comes The Sun on its own. Repeat MUST be off here: it is persistent queue state and is normally
-          left on ''all'', and an all-repeat on a one-track queue replays the same song forever, which is the original failure
-          from 2026-08-18. Shuffle off too, so nothing reorders a single item.'
+      - alias: 'PHASE 1 - Here Comes The Sun on its own. Repeat MUST be off here:
+          it is persistent queue state and is normally left on ''all'', and an all-repeat
+          on a one-track queue replays the same song forever, which is the original
+          failure from 2026-08-18. Shuffle off too, so nothing reorders a single item.'
         continue_on_error: true
         action: media_player.repeat_set
         target:
@@ -8458,11 +8622,13 @@
           shuffle: false
       - delay:
           seconds: 2
-      - alias: 'Queue ONLY the opening track. A single-item queue gives Music Assistant no next item to pre-buffer, which
-          is what used to go wrong: the playlist was loaded unshuffled so MA buffered its natural track 2 (Jack Johnson -
-          Better Together), the routine then switched shuffle on, and at the boundary Sonos started the newly shuffled track
-          while MA''s stream still delivered the buffered one - a few seconds of one song, then Better Together, every single
-          morning. Nothing is pre-buffered here, so there is nothing to mismatch.'
+      - alias: 'Queue ONLY the opening track. A single-item queue gives Music Assistant
+          no next item to pre-buffer, which is what used to go wrong: the playlist
+          was loaded unshuffled so MA buffered its natural track 2 (Jack Johnson -
+          Better Together), the routine then switched shuffle on, and at the boundary
+          Sonos started the newly shuffled track while MA''s stream still delivered
+          the buffered one - a few seconds of one song, then Better Together, every
+          single morning. Nothing is pre-buffered here, so there is nothing to mismatch.'
         continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -8511,12 +8677,15 @@
           data:
             cache: false
             media_player_entity_id: media_player.bedroom
-            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and
-              ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning! Today is
-              {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M %p'') }}. Right now it''s {{
-              states(''weather.forecast_home'') | replace(''-'', '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'')
-              | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with
-              a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int
+            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
+              if (today_fc is defined and today_fc and ''weather.forecast_home'' in
+              today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
+              Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M
+              %p'') }}. Right now it''s {{ states(''weather.forecast_home'') | replace(''-'',
+              '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'')
+              | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
+              | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
+              | round | int }} and a low of {{ (f.templow | float(0)) | round | int
               }} degrees.{% endif %} I hope you have a wonderful day!'
         else:
         - alias: Ramp volume to 0.20 over ~2.5 minutes
@@ -8529,17 +8698,21 @@
               target:
                 entity_id: media_player.bedroom
               data:
-                volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3) }}'
-        - alias: Wait for the opening track to finish rather than for motion. With a one-track queue and repeat off, Music
-            Assistant goes idle when the song ends, so idle is the reliable "track finished" signal. The announcement then
-            lands in real silence between the two phases - nothing to duck, nothing to pause and resume, and no part of a
-            song lost underneath it. Timeout is generously longer than the track and simply falls through.
+                volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3)
+                  }}'
+        - alias: Wait for the opening track to finish rather than for motion. With
+            a one-track queue and repeat off, Music Assistant goes idle when the song
+            ends, so idle is the reliable "track finished" signal. The announcement
+            then lands in real silence between the two phases - nothing to duck, nothing
+            to pause and resume, and no part of a song lost underneath it. Timeout
+            is generously longer than the track and simply falls through.
           wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') }}'
           timeout:
             minutes: 8
           continue_on_timeout: true
-        - alias: Bail out if the routine was cancelled while the opening track played - Goodbye, the sleep flag, or the hard
-            cap can all clear good_morning_active mid-run, and without this check the announcement and the whole shuffled
+        - alias: Bail out if the routine was cancelled while the opening track played
+            - Goodbye, the sleep flag, or the hard cap can all clear good_morning_active
+            mid-run, and without this check the announcement and the whole shuffled
             playlist would still start up afterwards.
           if:
           - condition: state
@@ -8548,51 +8721,62 @@
           then:
           - stop: Routine was cancelled during the opening track
           else:
-          - alias: Count the first announcement before speaking it, so the Between Songs automation knows the next one is
-              number two and keeps it time-only.
+          - alias: Count the first announcement before speaking it, so the Between
+              Songs automation knows the next one is number two and keeps it time-only.
             action: counter.increment
             target:
               entity_id: counter.good_morning_announcements
-          - alias: Turn shuffle on BEFORE speaking. The player is idle here - the opening track has finished and the playlist
-              has not been loaded yet - so there is no playback and no pre-buffered next track to invalidate, which is the
-              mistake that used to put the same song second every morning. Doing it now rather than after the announcement
-              gives it the entire spoken message to take effect, so no delay is needed before the music starts.
+          - alias: Turn shuffle on BEFORE speaking. The player is idle here - the
+              opening track has finished and the playlist has not been loaded yet
+              - so there is no playback and no pre-buffered next track to invalidate,
+              which is the mistake that used to put the same song second every morning.
+              Doing it now rather than after the announcement gives it the entire
+              spoken message to take effect, so no delay is needed before the music
+              starts.
             continue_on_error: true
             action: media_player.shuffle_set
             target:
               entity_id: media_player.bedroom_2
             data:
               shuffle: true
-          - alias: 'First announcement, spoken into the gap after the opening track has finished. No pause or resume is needed
-              any more because nothing is playing - which is the whole point of splitting the morning into two phases. Speaking
-              over music never worked properly: Music Assistant keeps the stream running underneath an announcement and only
-              stops refreshing the reported position, so roughly twenty seconds of song played unheard and it picked up far
-              further in, sounding like a different song.'
+          - alias: 'First announcement, spoken into the gap after the opening track
+              has finished. No pause or resume is needed any more because nothing
+              is playing - which is the whole point of splitting the morning into
+              two phases. Speaking over music never worked properly: Music Assistant
+              keeps the stream running underneath an announcement and only stops refreshing
+              the reported position, so roughly twenty seconds of song played unheard
+              and it picked up far further in, sounding like a different song.'
             action: tts.speak
             target:
               entity_id: tts.piper
             data:
               cache: false
               media_player_entity_id: media_player.bedroom_2
-              message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc
-                and ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning! Today
-                is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M %p'') }}. Right now it''s
-                {{ states(''weather.forecast_home'') | replace(''-'', '' '') }} and {{ (state_attr(''weather.forecast_home'',
-                ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'',
-                '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0))
-                | round | int }} degrees.{% endif %} I hope you have a wonderful day!'
-          - alias: Wait for the announcement to finish speaking. The player reports 'playing' while Piper talks and drops
-              back to 'idle' when it is done, so idle returning is the end-of-announcement signal. Generous timeout that simply
-              falls through.
+              message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
+                if (today_fc is defined and today_fc and ''weather.forecast_home''
+                in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
+                Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M
+                %p'') }}. Right now it''s {{ states(''weather.forecast_home'') | replace(''-'',
+                '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'')
+                | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
+                | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
+                | round | int }} and a low of {{ (f.templow | float(0)) | round |
+                int }} degrees.{% endif %} I hope you have a wonderful day!'
+          - alias: Wait for the announcement to finish speaking. The player reports
+              'playing' while Piper talks and drops back to 'idle' when it is done,
+              so idle returning is the end-of-announcement signal. Generous timeout
+              that simply falls through.
             wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') }}'
             timeout:
               seconds: 120
             continue_on_timeout: true
-          - alias: PHASE 2 - load the shuffled playlist the moment the announcement stops, with no padding in between. Shuffle
-              was already switched on before the announcement, so it has had the whole spoken message to take effect and the
-              queue is built shuffled from the very first item. Shuffle is never toggled once playback is under way, which
-              is what used to invalidate Music Assistant's pre-buffered next track and make the first boundary play a few
-              seconds of one song before jumping to another.
+          - alias: PHASE 2 - load the shuffled playlist the moment the announcement
+              stops, with no padding in between. Shuffle was already switched on before
+              the announcement, so it has had the whole spoken message to take effect
+              and the queue is built shuffled from the very first item. Shuffle is
+              never toggled once playback is under way, which is what used to invalidate
+              Music Assistant's pre-buffered next track and make the first boundary
+              play a few seconds of one song before jumping to another.
             continue_on_error: true
             action: music_assistant.play_media
             target:
@@ -8601,9 +8785,10 @@
               media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
               media_type: playlist
               enqueue: replace
-          - alias: 'Repeat back on. Deliberately set AFTER the playlist loads rather than before: it only matters once all
-              770 tracks have played, so it needs no settling time, and leaving it until now means nothing has to be waited
-              on between the announcement ending and the music starting.'
+          - alias: 'Repeat back on. Deliberately set AFTER the playlist loads rather
+              than before: it only matters once all 770 tracks have played, so it
+              needs no settling time, and leaving it until now means nothing has to
+              be waited on between the announcement ending and the music starting.'
             continue_on_error: true
             action: media_player.repeat_set
             target:
@@ -8640,9 +8825,11 @@
                   entity_id: input_boolean.good_morning_active
                   state: 'on'
                 then:
-                - alias: Set shuffle BEFORE re-queueing, never after. The player is idle at this point (that is what triggered
-                    the self-heal), so there is no pre-buffered next track to invalidate. Setting it after play_media is what
-                    used to make the boundary play a few seconds of one song before jumping to a different one.
+                - alias: Set shuffle BEFORE re-queueing, never after. The player is
+                    idle at this point (that is what triggered the self-heal), so
+                    there is no pre-buffered next track to invalidate. Setting it
+                    after play_media is what used to make the boundary play a few
+                    seconds of one song before jumping to a different one.
                   continue_on_error: true
                   action: media_player.shuffle_set
                   target:
@@ -8692,7 +8879,8 @@
                       target:
                         entity_id: media_player.bedroom
                       data:
-                        volume_level: '{{ [0.15 - (repeat.index * 0.0125), 0.05] | max | round(3) }}'
+                        volume_level: '{{ [0.15 - (repeat.index * 0.0125), 0.05] |
+                          max | round(3) }}'
                     - delay:
                         seconds: 15
                 - action: media_player.media_stop
@@ -8782,8 +8970,8 @@
   mode: single
 - id: '1777890100001'
   alias: Heater Auto Off
-  description: Keeps bathroom heater plug on all the time. Auto-shuts off for 5 seconds after  30 minutes of continuous use
-    (>100W), then re-enables automatically.
+  description: Keeps bathroom heater plug on all the time. Auto-shuts off for 5 seconds
+    after  30 minutes of continuous use (>100W), then re-enables automatically.
   triggers:
   - trigger: time
     at: 06:00:00
@@ -8838,8 +9026,8 @@
   mode: single
 - id: '1778020278429'
   alias: Elgato Light Auto Off on PC Shutdown
-  description: Turns off the Elgato Showtime light when office PC plug wattage drops below 20W, indicating the computer has
-    shut down.
+  description: Turns off the Elgato Showtime light when office PC plug wattage drops
+    below 20W, indicating the computer has shut down.
   triggers:
   - trigger: numeric_state
     entity_id:
@@ -8857,10 +9045,12 @@
   mode: single
 - id: '1778194432803'
   alias: Bathroom Speaker Join on Motion v2
-  description: 'Joins bathroom Sonos to the active source on motion. During welcome_home_active the source is the kitchen;
-    otherwise it''s the bedroom Arc. Matches source volume, ramping in gracefully. Uses timer.bathroom_join_idle to track
-    15-minute motion-clear window: motion off starts the timer, motion on cancels it, timer finish ungroups. Also ungroups
-    if either source goes idle/paused/off. Skipped while Good Morning routine is active.'
+  description: 'Joins bathroom Sonos to the active source on motion. During welcome_home_active
+    the source is the kitchen; otherwise it''s the bedroom Arc. Matches source volume,
+    ramping in gracefully. Uses timer.bathroom_join_idle to track 15-minute motion-clear
+    window: motion off starts the timer, motion on cancels it, timer finish ungroups.
+    Also ungroups if either source goes idle/paused/off. Skipped while Good Morning
+    routine is active.'
   triggers:
   - trigger: state
     entity_id: binary_sensor.bathroom_motion
@@ -8894,13 +9084,14 @@
   conditions: []
   actions:
   - variables:
-      welcome_home_on: '{{ is_state(''input_boolean.welcome_home_active'', ''on'') }}'
-      bedroom_active: "{{ states('media_player.bedroom') not in\n   ['off','idle','paused','standby','unavailable','unknown']\
-        \ }}"
-      kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']\
-        \ }}"
-      source_player: '{% if welcome_home_on and kitchen_active %} media_player.kitchen {% elif bedroom_active %} media_player.bedroom
-        {% else %} none {% endif %}'
+      welcome_home_on: '{{ is_state(''input_boolean.welcome_home_active'', ''on'')
+        }}'
+      bedroom_active: "{{ states('media_player.bedroom') not in\n   ['off','idle','paused','standby','unavailable','unknown']
+        }}"
+      kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']
+        }}"
+      source_player: '{% if welcome_home_on and kitchen_active %} media_player.kitchen
+        {% elif bedroom_active %} media_player.bedroom {% else %} none {% endif %}'
   - choose:
     - alias: Motion detected - join if eligible
       conditions:
@@ -8921,11 +9112,14 @@
         enabled: false
       - alias: Skip if bathroom already in the source group
         condition: template
-        value_template: "{{ state_attr(source_player, 'group_members') is not none and\n   'media_player.bathroom' not in\n\
-          \   (state_attr(source_player, 'group_members') | default([])) }}"
+        value_template: "{{ state_attr(source_player, 'group_members') is not none
+          and\n   'media_player.bathroom' not in\n   (state_attr(source_player, 'group_members')
+          | default([])) }}"
       - variables:
-          bathroom_vol_before: '{{ state_attr(''media_player.bathroom'', ''volume_level'') | default(0.30) }}'
-          target_vol: '{{ state_attr(source_player, ''volume_level'') | default(0.20) | float }}'
+          bathroom_vol_before: '{{ state_attr(''media_player.bathroom'', ''volume_level'')
+            | default(0.30) }}'
+          target_vol: '{{ state_attr(source_player, ''volume_level'') | default(0.20)
+            | float }}'
       - alias: Store pre-join volume for later restore
         action: input_number.set_value
         target:
@@ -8969,16 +9163,18 @@
             target:
               entity_id: media_player.bathroom
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n    target_vol] | min | round(3) }}"
+              volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n
+                \   target_vol] | min | round(3) }}"
     - alias: Motion cleared - start idle timer (only if grouped)
       conditions:
       - condition: trigger
         id: motion_off
       - alias: Bathroom is currently in any active source group
         condition: template
-        value_template: "{{ ('media_player.bathroom' in\n    (state_attr('media_player.bedroom', 'group_members') | default([])))\n\
-          \   or\n   ('media_player.bathroom' in\n    (state_attr('media_player.kitchen', 'group_members') | default([])))\
-          \ }}"
+        value_template: "{{ ('media_player.bathroom' in\n    (state_attr('media_player.bedroom',
+          'group_members') | default([])))\n   or\n   ('media_player.bathroom' in\n
+          \   (state_attr('media_player.kitchen', 'group_members') | default([])))
+          }}"
       sequence:
       - alias: Start/restart the 10-minute idle timer
         action: timer.start
@@ -9005,7 +9201,8 @@
         target:
           entity_id: media_player.bathroom
         data:
-          volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30) }}'
+          volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30)
+            }}'
     - alias: Source stopped - ungroup immediately
       conditions:
       - condition: trigger
@@ -9014,8 +9211,9 @@
         - kitchen_stopped
       - alias: Bathroom is currently in the stopped source's group
         condition: template
-        value_template: "{% set stopped = 'media_player.bedroom' if trigger.id == 'bedroom_stopped'\n   else 'media_player.kitchen'\
-          \ %}\n{{ 'media_player.bathroom' in\n   (state_attr(stopped, 'group_members') | default([])) }}"
+        value_template: "{% set stopped = 'media_player.bedroom' if trigger.id ==
+          'bedroom_stopped'\n   else 'media_player.kitchen' %}\n{{ 'media_player.bathroom'
+          in\n   (state_attr(stopped, 'group_members') | default([])) }}"
       sequence:
       - alias: Cancel idle timer if running
         action: timer.cancel
@@ -9033,15 +9231,18 @@
         target:
           entity_id: media_player.bathroom
         data:
-          volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30) }}'
+          volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30)
+            }}'
   mode: queued
   max: 10
 - id: '1778197535595'
   alias: 'Pico Center - Big Bedroom: Fun Button / Sexy Time'
-  description: 'Center circle press sets mood mode: deep red lighting at 40% (matching Bedtime Button), bedroom fan to 50%,
-    alarm to home, TV off. Music plays based on time of day (before midnight = upbeat playlist, after midnight = chill album).
-    Raise button forces the opposite time-of-day playlist instead (was previously Bright White Override - removed since this
-    remote can''t reliably do hold/multi-tap). After 60 minutes, automatically triggers the Bedtime Button routine for wind-down.'
+  description: 'Center circle press sets mood mode: deep red lighting at 40% (matching
+    Bedtime Button), bedroom fan to 50%, alarm to home, TV off. Music plays based
+    on time of day (before midnight = upbeat playlist, after midnight = chill album).
+    Raise button forces the opposite time-of-day playlist instead (was previously
+    Bright White Override - removed since this remote can''t reliably do hold/multi-tap).
+    After 60 minutes, automatically triggers the Bedtime Button routine for wind-down.'
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
@@ -9141,8 +9342,9 @@
     - alias: After midnight - play chill album (or hold button to force it any time)
       conditions:
       - condition: template
-        value_template: '{{ (trigger.id == ''press'' and now().hour >= 0 and now().hour < 6) or (trigger.id == ''hold'' and
-          not (now().hour >= 0 and now().hour < 6)) }}'
+        value_template: '{{ (trigger.id == ''press'' and now().hour >= 0 and now().hour
+          < 6) or (trigger.id == ''hold'' and not (now().hour >= 0 and now().hour
+          < 6)) }}'
       sequence:
       - alias: Set Sonos volume to 10%
         action: media_player.volume_set
@@ -9173,8 +9375,9 @@
               seconds: 8
             continue_on_timeout: true
           until:
-          - alias: Exit the loop once it is playing, or after two attempts. Must be an until condition, not a stop action
-              - stop would end the whole automation run and skip every step after this repeat.
+          - alias: Exit the loop once it is playing, or after two attempts. Must be
+              an until condition, not a stop action - stop would end the whole automation
+              run and skip every step after this repeat.
             condition: or
             conditions:
             - condition: state
@@ -9193,7 +9396,8 @@
         - action: notify.mobile_app_pc_iphone
           data:
             title: Fun Button music didn't start
-            message: Bedroom Sonos didn't start playing after two tries - speaker may be offline.
+            message: Bedroom Sonos didn't start playing after two tries - speaker
+              may be offline.
     default:
     - alias: Set Sonos volume to 10%
       action: media_player.volume_set
@@ -9224,8 +9428,9 @@
             seconds: 8
           continue_on_timeout: true
         until:
-        - alias: Exit the loop once it is playing, or after two attempts. Must be an until condition, not a stop action -
-            stop would end the whole automation run and skip every step after this repeat.
+        - alias: Exit the loop once it is playing, or after two attempts. Must be
+            an until condition, not a stop action - stop would end the whole automation
+            run and skip every step after this repeat.
           condition: or
           conditions:
           - condition: state
@@ -9244,7 +9449,8 @@
       - action: notify.mobile_app_pc_iphone
         data:
           title: Fun Button music didn't start
-          message: Bedroom Sonos didn't start playing after two tries - speaker may be offline.
+          message: Bedroom Sonos didn't start playing after two tries - speaker may
+            be offline.
   - alias: 60-minute timer before transitioning to Bedtime routine
     delay:
       minutes: 60
@@ -9257,8 +9463,9 @@
   mode: restart
 - id: '1747200000001'
   alias: Good Morning Active - Watchdog Shutoff
-  description: Safety net in case HA restarts mid-routine and leaves good_morning_active stuck on. Turns everything off after
-    45 minutes regardless. Also runs 2 minutes after HA start, because a restored 'on' state never fires the 45-minute state
+  description: Safety net in case HA restarts mid-routine and leaves good_morning_active
+    stuck on. Turns everything off after 45 minutes regardless. Also runs 2 minutes
+    after HA start, because a restored 'on' state never fires the 45-minute state
     trigger.
   triggers:
   - trigger: state
@@ -9282,8 +9489,9 @@
         minutes: 2
     - if:
       - condition: template
-        value_template: '{{ is_state(''input_boolean.good_morning_active'', ''off'') or (state_attr(''automation.good_morning_routine'',
-          ''current'') or 0) > 0 }}'
+        value_template: '{{ is_state(''input_boolean.good_morning_active'', ''off'')
+          or (state_attr(''automation.good_morning_routine'', ''current'') or 0) >
+          0 }}'
       then:
       - stop: Flag cleared or wake routine actively running - nothing to clean up
   - continue_on_error: true
@@ -9318,7 +9526,8 @@
   mode: single
 - id: '1749150000000'
   alias: 'Living Room: Turn off TV when PS5 and Apple TV both off'
-  description: When PS5 turns off and no Apple TV is playing, announce and turn off the TV after 30 seconds.
+  description: When PS5 turns off and no Apple TV is playing, announce and turn off
+    the TV after 30 seconds.
   triggers:
   - trigger: state
     entity_id: binary_sensor.ps5_living_room
@@ -9330,8 +9539,8 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: "{{ states('media_player.appletv_5') != 'playing'\n   and states('media_player.appletv_6') != 'playing'\n\
-      \   and states('media_player.appletv_14') != 'playing' }}\n"
+    value_template: "{{ states('media_player.appletv_5') != 'playing'\n   and states('media_player.appletv_6')
+      != 'playing'\n   and states('media_player.appletv_14') != 'playing' }}\n"
   - condition: state
     entity_id: media_player.living_room_tv_2
     state: 'on'
@@ -9352,8 +9561,8 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: "{{ states('media_player.appletv_5') != 'playing'\n   and states('media_player.appletv_6') != 'playing'\n\
-      \   and states('media_player.appletv_14') != 'playing' }}\n"
+    value_template: "{{ states('media_player.appletv_5') != 'playing'\n   and states('media_player.appletv_6')
+      != 'playing'\n   and states('media_player.appletv_14') != 'playing' }}\n"
   - action: media_player.turn_off
     target:
       entity_id: media_player.living_room_tv_2
@@ -9365,9 +9574,10 @@
   triggers:
   - trigger: template
     id: five_minutes
-    value_template: "{{ states('sensor.washer_machine_state') == 'run'\n   and states('sensor.washer_completion_time') not\
-      \ in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.washer_completion_time')) - as_timestamp(now()))\
-      \ | int <= 300\n   and (as_timestamp(states('sensor.washer_completion_time')) - as_timestamp(now())) | int > 0 }}"
+    value_template: "{{ states('sensor.washer_machine_state') == 'run'\n   and states('sensor.washer_completion_time')
+      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.washer_completion_time'))
+      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.washer_completion_time'))
+      - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.washer_machine_state
@@ -9424,9 +9634,10 @@
   triggers:
   - trigger: template
     id: five_minutes
-    value_template: "{{ states('sensor.dryer_machine_state') == 'run'\n   and states('sensor.dryer_completion_time') not in\
-      \ ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.dryer_completion_time')) - as_timestamp(now()))\
-      \ | int <= 300\n   and (as_timestamp(states('sensor.dryer_completion_time')) - as_timestamp(now())) | int > 0 }}"
+    value_template: "{{ states('sensor.dryer_machine_state') == 'run'\n   and states('sensor.dryer_completion_time')
+      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.dryer_completion_time'))
+      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.dryer_completion_time'))
+      - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.dryer_machine_state
@@ -9496,8 +9707,9 @@
   mode: single
 - id: '1775510700000'
   alias: 'Big Bedroom: Nanoleaf stuck-on watchdog'
-  description: The Nanoleaf frequently drops offline (unavailable) and can miss the presence turn-off; when it reconnects
-    it restores to its last on-state. This retries turning it off whenever the room is empty and presence lighting is in charge,
+  description: The Nanoleaf frequently drops offline (unavailable) and can miss the
+    presence turn-off; when it reconnects it restores to its last on-state. This retries
+    turning it off whenever the room is empty and presence lighting is in charge,
     so a single missed command no longer leaves it on all day.
   triggers:
   - alias: Fires when the Nanoleaf reconnects into an on-state
@@ -9548,10 +9760,11 @@
   mode: single
 - id: '1785884136035'
   alias: '*Bedroom 2: Nanoleaf stuck-on watchdog'
-  description: Ribbon and Fluttershy (the two Bedroom 2/Office Nanoleaf Shapes panels) frequently drop offline and reconnect
-    back into an on-state overnight, when the Smart Motion & Presence automation is hard-blocked (23:45-07:00) and Bedtime/Morning
-    routines own the lights instead. This retries turning them off during that quiet window so a reconnect glitch doesn't
-    leave them lit all night.
+  description: Ribbon and Fluttershy (the two Bedroom 2/Office Nanoleaf Shapes panels)
+    frequently drop offline and reconnect back into an on-state overnight, when the
+    Smart Motion & Presence automation is hard-blocked (23:45-07:00) and Bedtime/Morning
+    routines own the lights instead. This retries turning them off during that quiet
+    window so a reconnect glitch doesn't leave them lit all night.
   triggers:
   - alias: Fires when either panel reconnects into an on-state
     trigger: state
@@ -9567,7 +9780,8 @@
     minutes: /5
     id: periodic
   conditions:
-  - alias: Only during the overnight window the Smart Motion automation stands down for
+  - alias: Only during the overnight window the Smart Motion automation stands down
+      for
     condition: time
     after: '23:45:00'
     before: 07:00:00
@@ -9608,10 +9822,11 @@
   mode: single
 - id: '1784100000001'
   alias: iBeacon integration - reload on HA start
-  description: HA restarts have left the iBeacon platform unable to resume tracking device_tracker.bcpro_204982_08b8 (car
-    beacon) even though both MSR-2 bluetooth proxies reconnect fine within a second. Proactively reload the iBeacon config
-    entry ~90s after HA starts (after Bluetooth/ESPHome integrations have settled) so beacon tracking resumes cleanly instead
-    of getting stuck unavailable for hours.
+  description: HA restarts have left the iBeacon platform unable to resume tracking
+    device_tracker.bcpro_204982_08b8 (car beacon) even though both MSR-2 bluetooth
+    proxies reconnect fine within a second. Proactively reload the iBeacon config
+    entry ~90s after HA starts (after Bluetooth/ESPHome integrations have settled)
+    so beacon tracking resumes cleanly instead of getting stuck unavailable for hours.
   triggers:
   - trigger: homeassistant
     event: start
@@ -9626,10 +9841,12 @@
   mode: single
 - id: '1784100000002'
   alias: Beacon watchdog - reload iBeacon if bcpro stuck unavailable
-  description: Car BT beacon (device_tracker.bcpro_204982_08b8) is the authoritative presence signal (see person.paul is unreliable
-    while away). It has been observed to get stuck 'unavailable' for hours after an HA restart even while both MSR-2 proxies
-    show online and reporting RSSI. If it stays unavailable for 15+ minutes, reload the iBeacon integration to force re-detection
-    and notify so this doesn't silently break presence-based automations again.
+  description: Car BT beacon (device_tracker.bcpro_204982_08b8) is the authoritative
+    presence signal (see person.paul is unreliable while away). It has been observed
+    to get stuck 'unavailable' for hours after an HA restart even while both MSR-2
+    proxies show online and reporting RSSI. If it stays unavailable for 15+ minutes,
+    reload the iBeacon integration to force re-detection and notify so this doesn't
+    silently break presence-based automations again.
   triggers:
   - trigger: state
     entity_id: device_tracker.bcpro_204982_08b8
@@ -9645,7 +9862,8 @@
     action: notify.mobile_app_pc_iphone
     data:
       title: Car beacon watchdog
-      message: bcpro beacon was stuck unavailable for 15+ min; reloaded the iBeacon integration to recover tracking.
+      message: bcpro beacon was stuck unavailable for 15+ min; reloaded the iBeacon
+        integration to recover tracking.
   mode: single
 - id: '1786000000001'
   alias: Ring alarm volume - night quiet down
@@ -9681,9 +9899,10 @@
   mode: single
 - id: '1779800000001'
   alias: 'Welcome Home: Auto-Expire After 30 Minutes'
-  description: Safety net so the welcome home routine never runs longer than 30 minutes - turns off input_boolean.welcome_home_active
-    30 minutes after it's set, unless it's already been turned off. It won't re-arm until the next real departure + arrival
-    cycle, since only the arrival automation turns it on.
+  description: Safety net so the welcome home routine never runs longer than 30 minutes
+    - turns off input_boolean.welcome_home_active 30 minutes after it's set, unless
+    it's already been turned off. It won't re-arm until the next real departure +
+    arrival cycle, since only the arrival automation turns it on.
   triggers:
   - trigger: state
     entity_id: input_boolean.welcome_home_active
@@ -9698,11 +9917,13 @@
   mode: single
 - id: '1779800000007'
   alias: 'Welcome Home: Unjoin All Satellites on Deactivation'
-  description: Catch-all so a satellite speaker can never stay stuck grouped with the kitchen after welcome home ends. The
-    per-room "unjoin after N min idle" automations only run while welcome_home_active is still on, so any path that clears
-    the flag directly (30-min auto-expire, music-paused kill switch, Big Bedroom sleep cancel) previously left whatever was
-    still joined - joined, with nothing left watching to split it. Fires on every deactivation path uniformly and covers the
-    _2 entities the older per-room unjoins miss.
+  description: Catch-all so a satellite speaker can never stay stuck grouped with
+    the kitchen after welcome home ends. The per-room "unjoin after N min idle" automations
+    only run while welcome_home_active is still on, so any path that clears the flag
+    directly (30-min auto-expire, music-paused kill switch, Big Bedroom sleep cancel)
+    previously left whatever was still joined - joined, with nothing left watching
+    to split it. Fires on every deactivation path uniformly and covers the _2 entities
+    the older per-room unjoins miss.
   triggers:
   - trigger: state
     entity_id: input_boolean.welcome_home_active
@@ -9725,12 +9946,14 @@
   mode: single
 - id: '1779800000002'
   alias: 'Welcome Home: Disable Immediately if Music Pauses'
-  description: If any speaker involved in the welcome home group stops playing and stays stopped for 10s while welcome home
-    is active, kill the routine right away. The 10s hold avoids a false trigger from the idle->paused->playing blip that music_assistant.play_media
-    goes through while it loads the queue on arrival (was killing welcome_home_active ~8s after every arrival, before music
-    even started - see 2026-08-12 incident). Since welcome_home_active is only re-armed by an actual departure + arrival (alarm
-    must be armed away/home first), this keeps it off until the next real cycle instead of it lingering or re-joining rooms
-    after a manual pause.
+  description: If any speaker involved in the welcome home group stops playing and
+    stays stopped for 10s while welcome home is active, kill the routine right away.
+    The 10s hold avoids a false trigger from the idle->paused->playing blip that music_assistant.play_media
+    goes through while it loads the queue on arrival (was killing welcome_home_active
+    ~8s after every arrival, before music even started - see 2026-08-12 incident).
+    Since welcome_home_active is only re-armed by an actual departure + arrival (alarm
+    must be armed away/home first), this keeps it off until the next real cycle instead
+    of it lingering or re-joining rooms after a manual pause.
   triggers:
   - trigger: state
     entity_id:
@@ -9760,8 +9983,9 @@
   mode: single
 - id: '1779800000003'
   alias: 'Good Morning: Auto-Expire After 45 Minutes'
-  description: Safety net so the good morning routine never runs longer than 45 minutes - turns off input_boolean.good_morning_active
-    45 minutes after it's set, unless it's already been turned off.
+  description: Safety net so the good morning routine never runs longer than 45 minutes
+    - turns off input_boolean.good_morning_active 45 minutes after it's set, unless
+    it's already been turned off.
   triggers:
   - trigger: state
     entity_id: input_boolean.good_morning_active
@@ -9776,9 +10000,10 @@
   mode: single
 - id: '1779800000004'
   alias: 'Big Bedroom: Sleep Cancels Welcome Home and Good Morning'
-  description: Whenever Big Bedroom goes to sleep (Hue Button 2/3 short or hold, goodnight routines, or any other path that
-    sets input_boolean.big_bedroom_asleep on), immediately turn off welcome home and good morning so neither routine can join
-    speakers into or wake the bedroom while asleep.
+  description: Whenever Big Bedroom goes to sleep (Hue Button 2/3 short or hold, goodnight
+    routines, or any other path that sets input_boolean.big_bedroom_asleep on), immediately
+    turn off welcome home and good morning so neither routine can join speakers into
+    or wake the bedroom while asleep.
   triggers:
   - trigger: state
     entity_id: input_boolean.big_bedroom_asleep
@@ -9793,11 +10018,13 @@
   mode: single
 - id: '1779800000005'
   alias: 'Big Bedroom: Sleep Audio Auto-Stop Timer Finished'
-  description: Stops bedroom audio 35 minutes after Bedtime Button or White Noise Sleep starts timer.bedroom_sleep_audio.
-    Runs independently of the Bedtime/White Noise automations (which use mode:restart and would otherwise wipe an in-progress
-    delay on any re-trigger or automations.yaml reload) so the stop reliably fires even if bedtime was re-pressed earlier
-    or automations were reloaded mid-wind-down. Stops both the Music Assistant entity and the Sonos entity directly, since
-    Music Assistant can reassert playback against a bare Sonos-side stop.
+  description: Stops bedroom audio 35 minutes after Bedtime Button or White Noise
+    Sleep starts timer.bedroom_sleep_audio. Runs independently of the Bedtime/White
+    Noise automations (which use mode:restart and would otherwise wipe an in-progress
+    delay on any re-trigger or automations.yaml reload) so the stop reliably fires
+    even if bedtime was re-pressed earlier or automations were reloaded mid-wind-down.
+    Stops both the Music Assistant entity and the Sonos entity directly, since Music
+    Assistant can reassert playback against a bare Sonos-side stop.
   triggers:
   - trigger: event
     event_type: timer.finished
@@ -9834,16 +10061,18 @@
     - action: notify.mobile_app_pc_iphone
       data:
         title: Bedroom audio didn't stop
-        message: Music was still playing after the 35-minute sleep timer and 3 stop attempts on both entities - Sonos may
-          have lost connection to Music Assistant.
+        message: Music was still playing after the 35-minute sleep timer and 3 stop
+          attempts on both entities - Sonos may have lost connection to Music Assistant.
   mode: single
 - id: '1787223476469'
   alias: 'Bedroom: Play Good Morning Announcement Between Songs'
-  description: Companion to the Good Morning Routine. That automation no longer calls tts.speak on media_player.bedroom_2
-    directly on motion, because MA's duck/pause-resume mid-track was hanging Sonos playback afterward (position would freeze
-    and the routine looked like it was replaying the same song). Instead it just arms input_boolean.good_morning_announcement_pending.
-    This automation waits for the queue to naturally land on a new track (media_title change = between songs) and speaks the
-    announcement then, so it never interrupts a track mid-play.
+  description: Companion to the Good Morning Routine. That automation no longer calls
+    tts.speak on media_player.bedroom_2 directly on motion, because MA's duck/pause-resume
+    mid-track was hanging Sonos playback afterward (position would freeze and the
+    routine looked like it was replaying the same song). Instead it just arms input_boolean.good_morning_announcement_pending.
+    This automation waits for the queue to naturally land on a new track (media_title
+    change = between songs) and speaks the announcement then, so it never interrupts
+    a track mid-play.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
@@ -9855,14 +10084,17 @@
   - condition: state
     entity_id: input_boolean.good_morning_active
     state: 'on'
-  - alias: Safety cap - never more than 2 announcements per cycle (belt-and-suspenders alongside the counter's own maximum)
+  - alias: Safety cap - never more than 2 announcements per cycle (belt-and-suspenders
+      alongside the counter's own maximum)
     condition: numeric_state
     entity_id: counter.good_morning_announcements
     below: 2
   actions:
-  - alias: Remember whether this is the first or the second announcement, before the counter is incremented
+  - alias: Remember whether this is the first or the second announcement, before the
+      counter is incremented
     variables:
-      announcement_number: '{{ (states(''counter.good_morning_announcements'') | int(0)) + 1 }}'
+      announcement_number: '{{ (states(''counter.good_morning_announcements'') | int(0))
+        + 1 }}'
   - alias: Disarm immediately so this can't double-fire on the next track change
     action: input_boolean.turn_off
     target:
@@ -9871,10 +10103,12 @@
     action: counter.increment
     target:
       entity_id: counter.good_morning_announcements
-  - alias: Short settle before speaking. This automation triggers on the media_title change, which is the exact instant the
-      next song starts - announcing at that moment ducks the new song at position zero, so it replays its opening few seconds
-      and sounds like the track restarting. Music Assistant resumes an announcement at the SAME position, so a brief wait
-      means the song is properly underway and simply picks up where it was ducked. Kept short so this still lands right after
+  - alias: Short settle before speaking. This automation triggers on the media_title
+      change, which is the exact instant the next song starts - announcing at that
+      moment ducks the new song at position zero, so it replays its opening few seconds
+      and sounds like the track restarting. Music Assistant resumes an announcement
+      at the SAME position, so a brief wait means the song is properly underway and
+      simply picks up where it was ducked. Kept short so this still lands right after
       the track change, as intended.
     delay:
       seconds: 10
@@ -9890,10 +10124,11 @@
       data:
         type: daily
       response_variable: today_fc
-  - alias: Pause the music properly before speaking. Music Assistant keeps the stream running underneath an announcement and
-      only stops refreshing the reported position, so roughly twenty seconds of song get played unheard and it resumes far
-      further in, sounding like a different song. An explicit pause holds the song in place, and parks the player in 'paused'
-      which both track watchdogs ignore.
+  - alias: Pause the music properly before speaking. Music Assistant keeps the stream
+      running underneath an announcement and only stops refreshing the reported position,
+      so roughly twenty seconds of song get played unheard and it resumes far further
+      in, sounding like a different song. An explicit pause holds the song in place,
+      and parks the player in 'paused' which both track watchdogs ignore.
     continue_on_error: true
     action: media_player.media_pause
     target:
@@ -9908,17 +10143,21 @@
     data:
       cache: false
       media_player_entity_id: media_player.bedroom_2
-      message: '{% if announcement_number == 1 %}{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc
-        is defined and today_fc and ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %}
-        Good morning! Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M %p'') }}. Right
-        now it''s {{ states(''weather.forecast_home'') | replace(''-'', '' '') }} and {{ (state_attr(''weather.forecast_home'',
-        ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'', ''
-        '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round
-        | int }} degrees.{% endif %} Have a great day!{% else %}The time is now {{ now().strftime(''%-I:%M %p'') }}.{% endif
-        %}'
-  - alias: Wait for the announcement to finish rather than guessing with a fixed delay. Music Assistant reports 'playing'
-      while it speaks and restores the paused state it found afterwards, so waiting for 'paused' to return is what actually
-      marks the end of the announcement.
+      message: '{% if announcement_number == 1 %}{% set fc = today_fc[''weather.forecast_home''][''forecast'']
+        if (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc)
+        else [] %} {% set f = fc[0] if fc else none %} Good morning! Today is {{ now().strftime(''%A,
+        %B %-d'') }} and the time is {{ now().strftime(''%-I:%M %p'') }}. Right now
+        it''s {{ states(''weather.forecast_home'') | replace(''-'', '' '') }} and
+        {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round
+        | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'',
+        '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and
+        a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Have
+        a great day!{% else %}The time is now {{ now().strftime(''%-I:%M %p'') }}.{%
+        endif %}'
+  - alias: Wait for the announcement to finish rather than guessing with a fixed delay.
+      Music Assistant reports 'playing' while it speaks and restores the paused state
+      it found afterwards, so waiting for 'paused' to return is what actually marks
+      the end of the announcement.
     wait_template: '{{ is_state(''media_player.bedroom_2'', ''paused'') }}'
     timeout:
       seconds: 90
@@ -9937,10 +10176,12 @@
   mode: single
 - id: '1787224007804'
   alias: 'Bedroom: Arm Second Good Morning Announcement'
-  description: The first announcement is armed by the Good Morning Routine itself on the first motion of the morning. This
-    automation arms the second (and last) one - it fires on any later motion, but only once the first announcement has actually
-    played (counter at exactly 1) and only while nothing is already armed, so it can't stack a second arm before the first
-    has fired or sneak in a third. The counter's own maximum plus the numeric_state condition on the companion "Between Songs"
+  description: The first announcement is armed by the Good Morning Routine itself
+    on the first motion of the morning. This automation arms the second (and last)
+    one - it fires on any later motion, but only once the first announcement has actually
+    played (counter at exactly 1) and only while nothing is already armed, so it can't
+    stack a second arm before the first has fired or sneak in a third. The counter's
+    own maximum plus the numeric_state condition on the companion "Between Songs"
     automation are the hard stop past two per cycle.
   triggers:
   - trigger: state
@@ -9957,18 +10198,22 @@
     entity_id: input_boolean.good_morning_announcement_pending
     state: 'off'
   actions:
-  - alias: Arm the second announcement - the Between Songs automation will fire it at the next track change
+  - alias: Arm the second announcement - the Between Songs automation will fire it
+      at the next track change
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_announcement_pending
   mode: single
 - id: '1787404648055'
   alias: 'Bedroom: Repeat-Track Watchdog'
-  description: Backstop for the morning routine replaying its first song. The older Stuck Track Watchdog only fires when the
-    reported position runs PAST the duration, so it is blind to a clean restart - on 2026-08-22 the track ended at 179 of
-    185 seconds and cleanly reset to 0, and that watchdog never fired. This one detects the restart itself - same track title,
-    previous position well past the end, new position back near zero - and skips forward, which also lets the title-change
-    announcement fire. Gated on the routine being active so a deliberate replay outside the morning is left alone.
+  description: Backstop for the morning routine replaying its first song. The older
+    Stuck Track Watchdog only fires when the reported position runs PAST the duration,
+    so it is blind to a clean restart - on 2026-08-22 the track ended at 179 of 185
+    seconds and cleanly reset to 0, and that watchdog never fired. This one detects
+    the restart itself - same track title, previous position well past the end, new
+    position back near zero - and skips forward, which also lets the title-change
+    announcement fire. Gated on the routine being active so a deliberate replay outside
+    the morning is left alone.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
@@ -9978,30 +10223,36 @@
     entity_id: input_boolean.good_morning_active
     state: 'on'
   - condition: template
-    value_template: '{% set f = trigger.from_state %} {% set t = trigger.to_state %} {{ f is not none and t is not none and
-      f.attributes.get(''media_title'') is not none and f.attributes.get(''media_title'') == t.attributes.get(''media_title'')
-      and (f.attributes.get(''media_duration'') | float(0)) > 0 and (f.attributes.get(''media_position'') | float(0)) > ((f.attributes.get(''media_duration'')
-      | float(0)) * 0.6) and (t.attributes.get(''media_position'') | float(999)) < 10 }}'
+    value_template: '{% set f = trigger.from_state %} {% set t = trigger.to_state
+      %} {{ f is not none and t is not none and f.attributes.get(''media_title'')
+      is not none and f.attributes.get(''media_title'') == t.attributes.get(''media_title'')
+      and (f.attributes.get(''media_duration'') | float(0)) > 0 and (f.attributes.get(''media_position'')
+      | float(0)) > ((f.attributes.get(''media_duration'') | float(0)) * 0.6) and
+      (t.attributes.get(''media_position'') | float(999)) < 10 }}'
   actions:
   - alias: Remember which track looked like it restarted
     variables:
       suspect_title: '{{ trigger.from_state.attributes.get(''media_title'') }}'
-  - alias: Confirm before acting. At a NORMAL track boundary Home Assistant briefly reports the new position (0) while media_title
-      still holds the OLD track - the title catches up a few milliseconds later. At trigger time that artifact is indistinguishable
-      from a real restart, so the first version of this watchdog fired at every boundary and skipped ~2 seconds early, eating
-      the end of every song. Waiting lets the artifact resolve itself - a real replay still has the same title playing after
-      the pause, a normal boundary does not.
+  - alias: Confirm before acting. At a NORMAL track boundary Home Assistant briefly
+      reports the new position (0) while media_title still holds the OLD track - the
+      title catches up a few milliseconds later. At trigger time that artifact is
+      indistinguishable from a real restart, so the first version of this watchdog
+      fired at every boundary and skipped ~2 seconds early, eating the end of every
+      song. Waiting lets the artifact resolve itself - a real replay still has the
+      same title playing after the pause, a normal boundary does not.
     delay:
       seconds: 8
   - alias: Only a genuine replay still shows the same title at a low position
     condition: template
-    value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and state_attr(''media_player.bedroom_2'', ''media_title'')
-      == suspect_title and (state_attr(''media_player.bedroom_2'', ''media_position'') | float(999)) < 30 }}'
+    value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and state_attr(''media_player.bedroom_2'',
+      ''media_title'') == suspect_title and (state_attr(''media_player.bedroom_2'',
+      ''media_position'') | float(999)) < 30 }}'
   - alias: Log the confirmed self-restart
     action: logbook.log
     data:
       name: Bedroom Repeat-Track Watchdog
-      message: '"{{ suspect_title }}" restarted itself instead of advancing - confirmed after 8s, skipping to the next track.'
+      message: '"{{ suspect_title }}" restarted itself instead of advancing - confirmed
+        after 8s, skipping to the next track.'
       entity_id: media_player.bedroom_2
   - alias: Skip forward so the song does not play twice
     action: media_player.media_next_track
@@ -10013,10 +10264,11 @@
   mode: single
 - id: '1787057464833'
   alias: 'Bedroom: Stuck Track Watchdog'
-  description: Music Assistant occasionally fails to advance the Bedroom queue when a track ends (MA/Sonos end-of-track sync
-    glitch) - repeat_mode all then just restarts the same track from 0 instead of moving on, which looks like the same song
-    playing on a loop. Checks every minute whether the computed playback position has run past the track's reported duration
-    and, if so, forces a skip to unstick it.
+  description: Music Assistant occasionally fails to advance the Bedroom queue when
+    a track ends (MA/Sonos end-of-track sync glitch) - repeat_mode all then just restarts
+    the same track from 0 instead of moving on, which looks like the same song playing
+    on a loop. Checks every minute whether the computed playback position has run
+    past the track's reported duration and, if so, forces a skip to unstick it.
   triggers:
   - trigger: time_pattern
     minutes: /1
@@ -10025,32 +10277,38 @@
     entity_id: media_player.bedroom_2
     state: playing
   - condition: template
-    value_template: '{{ state_attr(''media_player.bedroom_2'', ''media_duration'') not in (none, 0) and state_attr(''media_player.bedroom_2'',
-      ''media_position_updated_at'') is not none and (state_attr(''media_player.bedroom_2'', ''media_position'') | float(0))
-      + (now() - state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')).total_seconds() > (state_attr(''media_player.bedroom_2'',
-      ''media_duration'') | float(0) + 5) }}'
+    value_template: '{{ state_attr(''media_player.bedroom_2'', ''media_duration'')
+      not in (none, 0) and state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')
+      is not none and (state_attr(''media_player.bedroom_2'', ''media_position'')
+      | float(0)) + (now() - state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')).total_seconds()
+      > (state_attr(''media_player.bedroom_2'', ''media_duration'') | float(0) + 5)
+      }}'
   actions:
   - alias: Remember which track looked stuck
     variables:
       suspect_title: '{{ state_attr(''media_player.bedroom_2'', ''media_title'') }}'
-  - alias: Confirm before skipping. Music Assistant plays a TTS announcement over the queue and stops refreshing media_position
-      while it speaks, so the computed elapsed time keeps climbing and can cross the track duration on its own - which looks
-      identical to a stall at trigger time and would skip a perfectly healthy song. A real stall persists; an announcement
-      resolves itself within seconds.
+  - alias: Confirm before skipping. Music Assistant plays a TTS announcement over
+      the queue and stops refreshing media_position while it speaks, so the computed
+      elapsed time keeps climbing and can cross the track duration on its own - which
+      looks identical to a stall at trigger time and would skip a perfectly healthy
+      song. A real stall persists; an announcement resolves itself within seconds.
     delay:
       seconds: 12
   - alias: Only a genuine stall is still overrunning the same track
     condition: template
-    value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and state_attr(''media_player.bedroom_2'', ''media_title'')
-      == suspect_title and state_attr(''media_player.bedroom_2'', ''media_duration'') not in (none, 0) and state_attr(''media_player.bedroom_2'',
-      ''media_position_updated_at'') is not none and (state_attr(''media_player.bedroom_2'', ''media_position'') | float(0))
-      + (now() - state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')).total_seconds() > (state_attr(''media_player.bedroom_2'',
+    value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and state_attr(''media_player.bedroom_2'',
+      ''media_title'') == suspect_title and state_attr(''media_player.bedroom_2'',
+      ''media_duration'') not in (none, 0) and state_attr(''media_player.bedroom_2'',
+      ''media_position_updated_at'') is not none and (state_attr(''media_player.bedroom_2'',
+      ''media_position'') | float(0)) + (now() - state_attr(''media_player.bedroom_2'',
+      ''media_position_updated_at'')).total_seconds() > (state_attr(''media_player.bedroom_2'',
       ''media_duration'') | float(0) + 5) }}'
   - alias: Log which track was stuck
     action: logbook.log
     data:
       name: Bedroom Stuck Track Watchdog
-      message: Position ran past duration on "{{ suspect_title }}" - confirmed after 12s, forcing next track.
+      message: Position ran past duration on "{{ suspect_title }}" - confirmed after
+        12s, forcing next track.
       entity_id: media_player.bedroom_2
   - alias: Force skip to next track to unstick the queue
     action: media_player.media_next_track
@@ -10059,8 +10317,9 @@
   mode: single
 - id: '1779800000006'
   alias: 'Big Bedroom: Cancel Sleep Audio Timer on Wake'
-  description: Cancels timer.bedroom_sleep_audio whenever Good Morning or Nap Wake Up starts, so a leftover bedtime auto-stop
-    timer from earlier in the night can't fire mid-routine and kill the wake-up music.
+  description: Cancels timer.bedroom_sleep_audio whenever Good Morning or Nap Wake
+    Up starts, so a leftover bedtime auto-stop timer from earlier in the night can't
+    fire mid-routine and kill the wake-up music.
   triggers:
   - trigger: state
     entity_id: input_boolean.good_morning_active
