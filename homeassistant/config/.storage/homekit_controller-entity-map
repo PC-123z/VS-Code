@@ -761,7 +761,7 @@
                       "pr"
                     ],
                     "format": "int",
-                    "value": 10467,
+                    "value": 11863,
                     "unit": "seconds",
                     "minValue": -1,
                     "maxValue": 86400,
@@ -827,7 +827,7 @@
                       "pr"
                     ],
                     "format": "int",
-                    "value": 10466,
+                    "value": 11862,
                     "unit": "seconds",
                     "minValue": -1,
                     "maxValue": 86400,
@@ -1255,7 +1255,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -51
+                    "value": -52
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
@@ -2026,7 +2026,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -59
+                    "value": -60
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
@@ -2797,7 +2797,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -61
+                    "value": -59
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
