@@ -9861,7 +9861,7 @@
       seconds: 30
   - action: homeassistant.reload_config_entry
     data:
-      entry_id: 01KPCMN52QH2YGAC4WCM2JM3NV
+      entry_id: 01KY3TV7YZQ70Z1SZFQG00XBNX
   mode: single
 - id: '1784100000002'
   alias: Beacon watchdog - reload iBeacon if bcpro stuck unavailable
@@ -9881,7 +9881,7 @@
   actions:
   - action: homeassistant.reload_config_entry
     data:
-      entry_id: 01KPCMN52QH2YGAC4WCM2JM3NV
+      entry_id: 01KY3TV7YZQ70Z1SZFQG00XBNX
   - alias: Notify that the beacon watchdog fired
     action: notify.mobile_app_pc_iphone
     data:
