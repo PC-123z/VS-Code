@@ -7,9 +7,13 @@
     Assistant (media_player.bedroom_2) can reassert playback almost instantly after
     a physical stop, so relying on it alone let Music Assistant win the race and made
     manual stops not stick. Kept the longer 8s debounce on bedroom_2 too, to avoid
-    false triggers from the routine's own brief TTS-announcement pause. Does not touch
-    this automation's or the Good Morning Routine automation's enabled state, so scheduled/manual
-    runs still work normally in the future.
+    false triggers from the routine's own brief TTS-announcement pause. Gated on
+    input_boolean.good_morning_expected_pause: the routine and its announcement
+    companions turn that on for every deliberate pause/idle window they create
+    (opening-track-finished silence, between-songs TTS pause) and off again once
+    playback resumes, so this automation only reacts to a stop it didn't cause.
+    Does not touch this automation's or the Good Morning Routine automation's enabled
+    state, so scheduled/manual runs still work normally in the future.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
@@ -17,48 +21,31 @@
     to: paused
     for:
       seconds: 8
-    id: bedroom2_paused
-  - alias: Bedroom_2 going idle is also how the routine itself detects "opening track
-      finished" while it waits to speak the first announcement (idle can persist for
-      up to several minutes there) - this trigger must not treat that expected idle
-      as a manual stop, so it's gated below on the announcement counter having reached
-      its cap (both announcements already delivered, so a later idle really does mean
-      done/stopped).
-    trigger: state
+  - trigger: state
     entity_id: media_player.bedroom_2
     from: playing
     to: idle
     for:
       seconds: 8
-    id: bedroom2_idle
   - trigger: state
     entity_id: media_player.bedroom
     from: playing
     to: paused
     for:
       seconds: 2
-    id: bedroom_paused
   - trigger: state
     entity_id: media_player.bedroom
     from: playing
     to: idle
     for:
       seconds: 2
-    id: bedroom_idle
   conditions:
   - condition: state
     entity_id: input_boolean.good_morning_active
     state: 'on'
-  - alias: Only let the bedroom_2 idle trigger stop the routine once both announcements
-      are done - otherwise it's just the routine's own opening-track-finished pause,
-      not a manual stop.
-    condition: or
-    conditions:
-    - condition: template
-      value_template: '{{ trigger.id != ''bedroom2_idle'' }}'
-    - condition: numeric_state
-      entity_id: counter.good_morning_announcements
-      above: 1
+  - condition: state
+    entity_id: input_boolean.good_morning_expected_pause
+    state: 'off'
   actions:
   - alias: Stop the music player explicitly
     action: media_player.media_stop
@@ -8458,6 +8445,10 @@
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_active
+  - alias: Reset the expected-pause flag in case a previous run left it armed
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.good_morning_expected_pause
   - alias: Reset the per-cycle announcement count (capped at 2 announcements per morning,
       enforced by this counter's own maximum plus the arm conditions on both announcement
       automations)
@@ -8707,6 +8698,10 @@
               | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
               | round | int }} and a low of {{ (f.templow | float(0)) | round | int
               }} degrees.{% endif %} I hope you have a wonderful day!'
+        - alias: Disarm the expected-pause flag - nothing left to wait on in this branch
+          action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.good_morning_expected_pause
         else:
         - alias: Ramp volume to 0.20 over ~2.5 minutes
           repeat:
@@ -8739,6 +8734,9 @@
             entity_id: input_boolean.good_morning_active
             state: 'off'
           then:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.good_morning_expected_pause
           - stop: Routine was cancelled during the opening track
           else:
           - alias: Count the first announcement before speaking it, so the Between
@@ -8820,6 +8818,11 @@
             timeout:
               seconds: 30
             continue_on_timeout: true
+          - alias: Disarm the expected-pause flag - phase 2 is underway (or we gave up
+              waiting), so a later stop should be treated as real again
+            action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.good_morning_expected_pause
         - alias: Occupancy-driven music loop using Sensor Group
           repeat:
             while:
@@ -10144,6 +10147,11 @@
       data:
         type: daily
       response_variable: today_fc
+  - alias: Arm the expected-pause flag so the stop-on-idle/paused watchdog doesn't
+      treat this deliberate announcement pause as a manual stop
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.good_morning_expected_pause
   - alias: Pause the music properly before speaking. Music Assistant keeps the stream
       running underneath an announcement and only stops refreshing the reported position,
       so roughly twenty seconds of song get played unheard and it resumes far further
@@ -10187,6 +10195,10 @@
     action: media_player.media_play
     target:
       entity_id: media_player.bedroom_2
+  - alias: Disarm the expected-pause flag now that playback has resumed
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.good_morning_expected_pause
   - alias: Restore listening volume after announcement
     action: media_player.volume_set
     target:
