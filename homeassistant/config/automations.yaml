@@ -8663,6 +8663,13 @@
       - alias: Wait 10 seconds then check if music is playing
         delay:
           seconds: 10
+      - alias: Arm the expected-pause flag - everything from here through the shuffled
+          playlist starting is a deliberate silence/idle window (waiting for the opener
+          to finish, then the announcement), not a manual stop. Cleared again once
+          phase 2 is underway or the music-failed branch has spoken.
+        action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.good_morning_expected_pause
       - alias: Get today's daily forecast (high/low/expected condition) for the announcement
         continue_on_error: true
         action: weather.get_forecasts
