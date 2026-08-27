@@ -8445,8 +8445,12 @@
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_active
-  - alias: Reset the expected-pause flag in case a previous run left it armed
-    action: input_boolean.turn_off
+  - alias: Arm the expected-pause flag for the whole run - the routine's own unjoin/track-swap
+      at start, the opener-finished silence, and the between-songs pauses all cause
+      brief idle/paused blips on the Sonos entity that the stop-on-idle watchdog would
+      otherwise treat as a manual stop. Disarmed once phase 2 (the shuffled playlist)
+      is solidly underway, and re-armed/disarmed around each later announcement pause.
+    action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_expected_pause
   - alias: Reset the per-cycle announcement count (capped at 2 announcements per morning,
