@@ -17,28 +17,48 @@
     to: paused
     for:
       seconds: 8
-  - trigger: state
+    id: bedroom2_paused
+  - alias: Bedroom_2 going idle is also how the routine itself detects "opening track
+      finished" while it waits to speak the first announcement (idle can persist for
+      up to several minutes there) - this trigger must not treat that expected idle
+      as a manual stop, so it's gated below on the announcement counter having reached
+      its cap (both announcements already delivered, so a later idle really does mean
+      done/stopped).
+    trigger: state
     entity_id: media_player.bedroom_2
     from: playing
     to: idle
     for:
       seconds: 8
+    id: bedroom2_idle
   - trigger: state
     entity_id: media_player.bedroom
     from: playing
     to: paused
     for:
       seconds: 2
+    id: bedroom_paused
   - trigger: state
     entity_id: media_player.bedroom
     from: playing
     to: idle
     for:
       seconds: 2
+    id: bedroom_idle
   conditions:
   - condition: state
     entity_id: input_boolean.good_morning_active
     state: 'on'
+  - alias: Only let the bedroom_2 idle trigger stop the routine once both announcements
+      are done - otherwise it's just the routine's own opening-track-finished pause,
+      not a manual stop.
+    condition: or
+    conditions:
+    - condition: template
+      value_template: '{{ trigger.id != ''bedroom2_idle'' }}'
+    - condition: numeric_state
+      entity_id: counter.good_morning_announcements
+      above: 1
   actions:
   - alias: Stop the music player explicitly
     action: media_player.media_stop
