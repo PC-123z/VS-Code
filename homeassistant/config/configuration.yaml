@@ -73,6 +73,9 @@ switch:
     host: "192.168.70.203"
 
 input_boolean:
+  good_morning_expected_pause:
+    name: "Good Morning Expected Pause"
+    icon: mdi:pause-circle
   volvo_trigger:
     name: "Volvo Trigger"
     initial: off
