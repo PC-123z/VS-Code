@@ -8,7 +8,7 @@
     a physical stop, so relying on it alone let Music Assistant win the race and made
     manual stops not stick. Kept the longer 8s debounce on bedroom_2 too, to avoid
     false triggers from the routine's own brief TTS-announcement pause. Gated on
-    input_boolean.good_morning_expected_pause: the routine and its announcement
+    input_boolean.good_morning_expected_pause - the routine and its announcement
     companions turn that on for every deliberate pause/idle window they create
     (opening-track-finished silence, between-songs TTS pause) and off again once
     playback resumes, so this automation only reacts to a stop it didn't cause.

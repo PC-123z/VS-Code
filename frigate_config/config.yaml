@@ -107,6 +107,12 @@ go2rtc:
 cameras:
   driveway:
     ffmpeg:
+      global_args:
+        - -hide_banner
+        - -loglevel
+        - warning
+        - -threads
+        - "4"
       inputs:
         - path: rtsp://127.0.0.1:8554/driveway_main
           roles: [record]
@@ -123,7 +129,7 @@ cameras:
             -fflags +genpts+discardcorrupt
             -flags low_delay
       output_args:
-        record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -preset superfast -crf 23 -an
+        record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -vf scale=2560:776 -c:v libx264 -threads 0 -preset ultrafast -crf 28 -an
     detect:
       width: 1920
       height: 576
