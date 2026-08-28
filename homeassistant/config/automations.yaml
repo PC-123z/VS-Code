@@ -4666,8 +4666,8 @@
     repeat:
       sequence:
       - alias: Set shuffle before starting playback - setting it after play_media
-          starts causes Music Assistant to reshuffle the already-playing queue
-          and jump to a different track a couple seconds in
+          starts causes Music Assistant to reshuffle the already-playing queue and
+          jump to a different track a couple seconds in
         continue_on_error: true
         action: media_player.shuffle_set
         target:
@@ -6111,8 +6111,8 @@
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.bedroom2_occupied
-  - alias: Re-arm Late Night Lights Out for the night - Good Morning disables it
-      when it runs, whatever time that ends up being
+  - alias: Re-arm Late Night Lights Out for the night - Good Morning disables it when
+      it runs, whatever time that ends up being
     action: automation.turn_on
     target:
       entity_id: automation.bedroom_2_after_midnight_lights_out
@@ -6130,10 +6130,9 @@
     stopped by Good Morning turning this automation off the moment it runs (see its
     first action) - that's what actually needs to track Good Morning's trigger time,
     not a hardcoded cutoff here, since that trigger time changes. Re-armed nightly
-    by the Occupancy Latch. The time window below is just a generous fallback in
-    case Good Morning never fires one morning; bedroom2_occupied being force-cleared
-    by Daily Reset (9:30am weekdays/11am weekends) is the ultimate backstop either
-    way.
+    by the Occupancy Latch. The time window below is just a generous fallback in case
+    Good Morning never fires one morning; bedroom2_occupied being force-cleared by
+    Daily Reset (9:30am weekdays/11am weekends) is the ultimate backstop either way.
   triggers:
   - trigger: state
     entity_id:
@@ -7896,6 +7895,7 @@
       title: Welcome Home armed
       message: Arrival confirmed. Waiting on the garage door sensor to disarm and
         start the routine.
+    enabled: false
   mode: queued
   max: 4
 - id: '1777484175035'
