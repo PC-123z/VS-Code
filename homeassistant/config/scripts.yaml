@@ -41,10 +41,29 @@ script_volvo_start_core:
     Alexa feedback.
   icon: mdi:car
   sequence:
+  - alias: Verify car is home before proceeding
+    if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: device_tracker.bcpro_204982_08b8
+        state: home
+    then:
+    - alias: Notify car not home error
+      action: notify.mobile_app_pc_iphone
+      data:
+        title: Volvo Start Error
+        message: Volvo start aborted - car is not detected as home.
+    - stop: Car is not home
   - alias: Press climatization button
     action: button.press
     target:
       entity_id: button.volvo_xc60_start_climatization
+    data: {}
+  - alias: Unlock doors
+    action: lock.unlock
+    target:
+      entity_id: lock.volvo_xc60_lock
     data: {}
   - alias: Run main sequence and garage in parallel
     parallel:
