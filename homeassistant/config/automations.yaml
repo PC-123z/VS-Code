@@ -100,10 +100,10 @@
     grace. 60-minute hard cap from routine start.'
   triggers:
   - trigger: time
-    at: '18:30:00'
+    at: '18:00:00'
     weekday:
-    - wed
-    enabled: false
+    - fri
+    enabled: true
   - trigger: time
     at: '17:35:00'
     enabled: true
