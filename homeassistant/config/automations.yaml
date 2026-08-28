@@ -6105,6 +6105,11 @@
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.bedroom2_occupied
+  - alias: Re-arm Late Night Lights Out for the night - Good Morning disables it
+      when it runs, whatever time that ends up being
+    action: automation.turn_on
+    target:
+      entity_id: automation.bedroom_2_after_midnight_lights_out
   mode: single
 - id: '1781237174423'
   alias: '*Bedroom 2 Late Night Lights Out'
@@ -6115,9 +6120,14 @@
     the wall dimmer. The 10:46:30pm and midnight sweeps catch lights already on when
     the window opens (10:46:30 rather than 10:45 so it doesn't cut short hard lights
     out's own 60-second fade), and the startup sweep catches lights already on when
-    HA restarts overnight (restored states don't fire the state trigger). Window ends
-    before the Good Morning sunrise ramp starts; bedroom2_occupied being cleared by
-    Good Morning or Daily Reset also disables it.
+    HA restarts overnight (restored states don't fire the state trigger). Primarily
+    stopped by Good Morning turning this automation off the moment it runs (see its
+    first action) - that's what actually needs to track Good Morning's trigger time,
+    not a hardcoded cutoff here, since that trigger time changes. Re-armed nightly
+    by the Occupancy Latch. The time window below is just a generous fallback in
+    case Good Morning never fires one morning; bedroom2_occupied being force-cleared
+    by Daily Reset (9:30am weekdays/11am weekends) is the ultimate backstop either
+    way.
   triggers:
   - trigger: state
     entity_id:
@@ -6153,7 +6163,7 @@
       before: 00:00:00
     - condition: time
       after: 00:00:00
-      before: 06:30:00
+      before: 09:30:00
       weekday:
       - mon
       - tue
@@ -6162,7 +6172,7 @@
       - fri
     - condition: time
       after: 00:00:00
-      before: 09:10:00
+      before: 11:00:00
       weekday:
       - sat
       - sun
