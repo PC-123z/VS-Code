@@ -5585,6 +5585,12 @@
     entity_id: input_boolean.bedroom2_occupied
     state: 'on'
   actions:
+  - alias: Disable Late Night Lights Out immediately so it can't fade this routine's
+      lights back off - re-armed nightly by the Occupancy Latch. Done first, before
+      anything else, so there's no race with the outlet/light commands below.
+    action: automation.turn_off
+    target:
+      entity_id: automation.bedroom_2_after_midnight_lights_out
   - alias: Power the Nanoleaf P115 outlets back on first so the panels have time to
       reboot/rejoin WiFi before being commanded (see Bedtime Routine's hard_lights_out
       for where they get cut)
