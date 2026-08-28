@@ -7,13 +7,13 @@
     Assistant (media_player.bedroom_2) can reassert playback almost instantly after
     a physical stop, so relying on it alone let Music Assistant win the race and made
     manual stops not stick. Kept the longer 8s debounce on bedroom_2 too, to avoid
-    false triggers from the routine's own brief TTS-announcement pause. Gated on
-    input_boolean.good_morning_expected_pause - the routine and its announcement
-    companions turn that on for every deliberate pause/idle window they create
-    (opening-track-finished silence, between-songs TTS pause) and off again once
-    playback resumes, so this automation only reacts to a stop it didn't cause.
-    Does not touch this automation's or the Good Morning Routine automation's enabled
-    state, so scheduled/manual runs still work normally in the future.
+    false triggers from the routine's own brief TTS-announcement pause. Gated on input_boolean.good_morning_expected_pause
+    - the routine and its announcement companions turn that on for every deliberate
+    pause/idle window they create (opening-track-finished silence, between-songs TTS
+    pause) and off again once playback resumes, so this automation only reacts to
+    a stop it didn't cause. Does not touch this automation's or the Good Morning Routine
+    automation's enabled state, so scheduled/manual runs still work normally in the
+    future.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
@@ -4405,7 +4405,7 @@
       entity_id: fan.big_bedroom_fan
     data:
       percentage: 50
-    enabled: false
+    enabled: true
   - alias: Turn on purifier at 25%
     action: fan.turn_on
     target:
@@ -4480,7 +4480,8 @@
         repeat:
           count: 4
           sequence:
-          - action: light.turn_on
+          - continue_on_error: true
+            action: light.turn_on
             target:
               entity_id: light.bedroom
             data:
@@ -4489,6 +4490,7 @@
           - delay:
               seconds: 15
       - alias: Turn off bedroom lights
+        continue_on_error: true
         action: light.turn_off
         target:
           entity_id: light.bedroom
@@ -4519,6 +4521,14 @@
           entity_id: fan.air_circulator
         data:
           percentage: 50
+    - sequence:
+      - alias: Fade bathroom lights off over 3 minutes
+        continue_on_error: true
+        action: light.turn_off
+        target:
+          area_id: bathroom
+        data:
+          transition: 180
   mode: restart
 - id: '1776302554735'
   alias: 'Hue Button 2 - Big Bedroom: Bedtime Button - Hue Button 2'
@@ -4631,7 +4641,7 @@
       entity_id: fan.big_bedroom_fan
     data:
       percentage: 50
-    enabled: false
+    enabled: true
   - alias: Turn on purifier at 25%
     continue_on_error: true
     action: fan.turn_on
@@ -4655,6 +4665,15 @@
   - alias: Play Max Richter Sleep via Music Assistant (with retry)
     repeat:
       sequence:
+      - alias: Set shuffle before starting playback - setting it after play_media
+          starts causes Music Assistant to reshuffle the already-playing queue
+          and jump to a different track a couple seconds in
+        continue_on_error: true
+        action: media_player.shuffle_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          shuffle: true
       - continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -4663,12 +4682,6 @@
           media_id: ytmusic://playlist/VLPLQ_PIlf6OzqIeQygYMd8DccQ3XnJlSGcG
           media_type: playlist
           radio_mode: false
-      - continue_on_error: true
-        action: media_player.shuffle_set
-        target:
-          entity_id: media_player.bedroom_2
-        data:
-          shuffle: true
       - alias: Give playback a few seconds to start
         wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
         timeout:
@@ -4708,7 +4721,8 @@
         repeat:
           count: 4
           sequence:
-          - action: light.turn_on
+          - continue_on_error: true
+            action: light.turn_on
             target:
               entity_id: light.bedroom
             data:
@@ -4717,6 +4731,7 @@
           - delay:
               seconds: 15
       - alias: Turn off bedroom lights
+        continue_on_error: true
         action: light.turn_off
         target:
           entity_id: light.bedroom
@@ -4747,6 +4762,14 @@
           entity_id: fan.air_circulator
         data:
           percentage: 50
+    - sequence:
+      - alias: Fade bathroom lights off over 3 minutes
+        continue_on_error: true
+        action: light.turn_off
+        target:
+          area_id: bathroom
+        data:
+          transition: 180
   mode: restart
 - id: '1776307653783'
   alias: 'Hue Button 4 - Big Bedroom: Hue Switch Override - Button 4'
@@ -4857,6 +4880,10 @@
           - light.nano_sand_dune
         data:
           transition: 1
+      - action: light.turn_off
+        target:
+          area_id: bathroom
+        data: {}
       - alias: Turn off all bedroom fans
         action: fan.turn_off
         target:
@@ -5760,7 +5787,7 @@
               (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow
               | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
         else:
-        - alias: Ramp volume to 0.5
+        - alias: Ramp volume to 0.2
           repeat:
             count: 8
             sequence:
@@ -5770,7 +5797,7 @@
               target:
                 entity_id: media_player.office_2
               data:
-                volume_level: '{{ [0.05 + (repeat.index * 0.05625), 0.5] | min | round(3)
+                volume_level: '{{ [0.05 + (repeat.index * 0.01875), 0.2] | min | round(3)
                   }}'
         - alias: Wait for moving target before announcement
           wait_for_trigger:
@@ -5891,12 +5918,12 @@
           timeout:
             seconds: 30
           continue_on_timeout: true
-        - alias: Restore volume to 0.5 after announcements
+        - alias: Restore volume to 0.2 after announcements
           action: media_player.volume_set
           target:
             entity_id: media_player.office_2
           data:
-            volume_level: 0.5
+            volume_level: 0.2
         - alias: Occupancy-driven music loop
           repeat:
             while:
@@ -5921,7 +5948,7 @@
                 target:
                   entity_id: media_player.office_2
                 data:
-                  volume_level: 0.5
+                  volume_level: 0.2
               - delay:
                   seconds: 30
               else:
@@ -5932,7 +5959,7 @@
                     target:
                       entity_id: media_player.office_2
                     data:
-                      volume_level: '{{ [0.5 - (repeat.index * 0.06), 0.02] | max
+                      volume_level: '{{ [0.2 - (repeat.index * 0.0225), 0.02] | max
                         | round(3) }}'
                   - delay:
                       seconds: 15
@@ -5953,7 +5980,7 @@
                       target:
                         entity_id: media_player.office_2
                       data:
-                        volume_level: 0.5
+                        volume_level: 0.2
                     - stop: Occupancy returned during ramp-down
               - action: media_player.media_stop
                 target:
@@ -8427,7 +8454,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 07:45:00
+    at: 06:45:00
     weekday:
     - mon
     - tue
@@ -8709,7 +8736,8 @@
               | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
               | round | int }} and a low of {{ (f.templow | float(0)) | round | int
               }} degrees.{% endif %} I hope you have a wonderful day!'
-        - alias: Disarm the expected-pause flag - nothing left to wait on in this branch
+        - alias: Disarm the expected-pause flag - nothing left to wait on in this
+            branch
           action: input_boolean.turn_off
           target:
             entity_id: input_boolean.good_morning_expected_pause
@@ -8829,8 +8857,8 @@
             timeout:
               seconds: 30
             continue_on_timeout: true
-          - alias: Disarm the expected-pause flag - phase 2 is underway (or we gave up
-              waiting), so a later stop should be treated as real again
+          - alias: Disarm the expected-pause flag - phase 2 is underway (or we gave
+              up waiting), so a later stop should be treated as real again
             action: input_boolean.turn_off
             target:
               entity_id: input_boolean.good_morning_expected_pause
