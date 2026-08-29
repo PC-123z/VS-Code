@@ -115,6 +115,9 @@ cameras:
             -use_wallclock_as_timestamps 1
             -fflags +genpts+discardcorrupt
             -flags low_delay
+      output_args:
+        record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1
+          -strftime 1 -c:v copy -c:a aac
     detect:
       width: 1920
       height: 576
@@ -166,6 +169,9 @@ cameras:
             -use_wallclock_as_timestamps 1
             -fflags +genpts+discardcorrupt
             -flags low_delay
+      output_args:
+        record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1
+          -strftime 1 -c:v copy -c:a aac
     detect:
       width: 640
       height: 480
@@ -191,6 +197,9 @@ cameras:
             -use_wallclock_as_timestamps 1
             -fflags +genpts+discardcorrupt
             -flags low_delay
+      output_args:
+        record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1
+          -strftime 1 -c:v copy -c:a aac
     detect:
       width: 1280
       height: 720
