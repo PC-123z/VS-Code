@@ -4382,6 +4382,18 @@
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
       manual_control: true
+  - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
+      Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
+      to know we're going to bed, so they'd light both rooms at normal
+      daytime/evening brightness on the next motion instead of dim red sleep
+      lighting, and Good Morning turns these switches back off assuming bedtime
+      turned them on
+    action: switch.turn_on
+    target:
+      entity_id:
+      - switch.al_sleep_mode_bathroom
+      - switch.al_sleep_mode_bathroom_main
+      - switch.al_sleep_mode_big_bedroom
   - alias: Set bedroom color to deep red (preserve brightness if already on)
     choose:
     - conditions:
@@ -4465,6 +4477,15 @@
   - alias: Play white noise via Music Assistant (with retry)
     repeat:
       sequence:
+      - alias: Set shuffle before starting playback - setting it after play_media
+          starts causes Music Assistant to reshuffle the already-playing queue and
+          jump to a different track a couple seconds in
+        continue_on_error: true
+        action: media_player.shuffle_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          shuffle: true
       - continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -4473,12 +4494,6 @@
           media_id: ytmusic://playlist/VLPLOS9HJPmm92-46p6EL6vUxfuZ6AGVDkRG
           media_type: playlist
           radio_mode: false
-      - continue_on_error: true
-        action: media_player.shuffle_set
-        target:
-          entity_id: media_player.bedroom_2
-        data:
-          shuffle: true
       - alias: Give playback a few seconds to start
         wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
         timeout:
@@ -4617,6 +4632,18 @@
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
       manual_control: true
+  - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
+      Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
+      to know we're going to bed, so they'd light both rooms at normal
+      daytime/evening brightness on the next motion instead of dim red sleep
+      lighting, and Good Morning turns these switches back off assuming bedtime
+      turned them on
+    action: switch.turn_on
+    target:
+      entity_id:
+      - switch.al_sleep_mode_bathroom
+      - switch.al_sleep_mode_bathroom_main
+      - switch.al_sleep_mode_big_bedroom
   - alias: Set bedroom color to deep red (preserve brightness if already on)
     choose:
     - conditions:
@@ -5002,6 +5029,18 @@
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
       manual_control: true
+  - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
+      Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
+      to know we're going to bed, so they'd light both rooms at normal
+      daytime/evening brightness on the next motion instead of dim red sleep
+      lighting, and Good Morning turns these switches back off assuming bedtime
+      turned them on
+    action: switch.turn_on
+    target:
+      entity_id:
+      - switch.al_sleep_mode_bathroom
+      - switch.al_sleep_mode_bathroom_main
+      - switch.al_sleep_mode_big_bedroom
   - alias: Set alarm to Home/Stay
     action: alarm_control_panel.alarm_arm_home
     target:
@@ -5118,6 +5157,18 @@
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
       manual_control: true
+  - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
+      Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
+      to know we're going to bed, so they'd light both rooms at normal
+      daytime/evening brightness on the next motion instead of dim red sleep
+      lighting, and Good Morning turns these switches back off assuming bedtime
+      turned them on
+    action: switch.turn_on
+    target:
+      entity_id:
+      - switch.al_sleep_mode_bathroom
+      - switch.al_sleep_mode_bathroom_main
+      - switch.al_sleep_mode_big_bedroom
   - alias: Set alarm to Home/Stay
     action: alarm_control_panel.alarm_arm_home
     target:
@@ -9182,6 +9233,51 @@
     target:
       entity_id: light.showtime_light
   mode: single
+- id: '1778300000001'
+  alias: Bathroom Volume Manual Override - Set on manual change
+  description: If someone changes media_player.bathroom's volume by hand (Sonos
+    app, physical control, or the HA UI/voice - anything that carries a user context,
+    as opposed to an automation's own volume_set calls), latch input_boolean.bathroom_volume_manual_override
+    on. Bathroom Speaker Join on Motion v2 checks this before forcing bathroom volume
+    on join/ungroup, so a manual bump sticks instead of getting reset on the next
+    motion trigger. Cleared by the companion "Clear on stop" automation once the
+    bathroom actually stops playing.
+  triggers:
+  - trigger: state
+    entity_id: media_player.bathroom
+    attribute: volume_level
+  conditions:
+  - alias: Only a person-initiated change carries a user context - automation-driven
+      volume_set calls do not
+    condition: template
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.bathroom_volume_manual_override
+  mode: single
+- id: '1778300000002'
+  alias: Bathroom Volume Manual Override - Clear on stop
+  description: Clears input_boolean.bathroom_volume_manual_override once bathroom
+    playback actually stops (idle/paused/off/standby), so the override persists
+    only while the music is playing, as intended.
+  triggers:
+  - trigger: state
+    entity_id: media_player.bathroom
+    to:
+    - idle
+    - paused
+    - 'off'
+    - standby
+  conditions:
+  - condition: state
+    entity_id: input_boolean.bathroom_volume_manual_override
+    state: 'on'
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.bathroom_volume_manual_override
+  mode: single
 - id: '1778194432803'
   alias: Bathroom Speaker Join on Motion v2
   description: 'Joins bathroom Sonos to the active source on motion. During welcome_home_active
@@ -9277,12 +9373,20 @@
           entity_id: media_player.bathroom
         data:
           is_volume_muted: false
-      - alias: Set bathroom volume low before joining
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.bathroom
-        data:
-          volume_level: 0.05
+      - alias: Skip the forced low-then-ramp volume dance if a manual override is active
+          - the whole point of the override is that motion-triggered joins stop touching
+          bathroom volume until the music stops
+        if:
+        - condition: state
+          entity_id: input_boolean.bathroom_volume_manual_override
+          state: 'off'
+        then:
+        - alias: Set bathroom volume low before joining
+          action: media_player.volume_set
+          target:
+            entity_id: media_player.bathroom
+          data:
+            volume_level: 0.05
       - alias: Join bathroom to source group
         action: media_player.join
         target:
@@ -9297,18 +9401,24 @@
           entity_id: media_player.bathroom
         data:
           is_volume_muted: false
-      - alias: Ramp bathroom volume up to match source
-        repeat:
-          count: 5
-          sequence:
-          - delay:
-              seconds: 6
-          - action: media_player.volume_set
-            target:
-              entity_id: media_player.bathroom
-            data:
-              volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n
-                \   target_vol] | min | round(3) }}"
+      - alias: Ramp bathroom volume up to match source, unless a manual override is
+          active
+        if:
+        - condition: state
+          entity_id: input_boolean.bathroom_volume_manual_override
+          state: 'off'
+        then:
+        - repeat:
+            count: 5
+            sequence:
+            - delay:
+                seconds: 6
+            - action: media_player.volume_set
+              target:
+                entity_id: media_player.bathroom
+              data:
+                volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n
+                  \   target_vol] | min | round(3) }}"
     - alias: Motion cleared - start idle timer (only if grouped)
       conditions:
       - condition: trigger
@@ -9340,13 +9450,20 @@
         target:
           entity_id: media_player.bathroom
         data: {}
-      - alias: Restore bathroom volume
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.bathroom
-        data:
-          volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30)
-            }}'
+      - alias: Restore bathroom volume, unless a manual override is active - the
+          override should hold the volume the way it was left, not snap it back to
+          the pre-join level
+        if:
+        - condition: state
+          entity_id: input_boolean.bathroom_volume_manual_override
+          state: 'off'
+        then:
+        - action: media_player.volume_set
+          target:
+            entity_id: media_player.bathroom
+          data:
+            volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30)
+              }}'
     - alias: Source stopped - ungroup immediately
       conditions:
       - condition: trigger
@@ -9370,13 +9487,18 @@
         target:
           entity_id: media_player.bathroom
         data: {}
-      - alias: Restore bathroom volume
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.bathroom
-        data:
-          volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30)
-            }}'
+      - alias: Restore bathroom volume, unless a manual override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.bathroom_volume_manual_override
+          state: 'off'
+        then:
+        - action: media_player.volume_set
+          target:
+            entity_id: media_player.bathroom
+          data:
+            volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30)
+              }}'
   mode: queued
   max: 10
 - id: '1778197535595'
@@ -9746,6 +9868,14 @@
         entity_id: notify.echo_show_kitchen_announce
       data:
         message: The washer will be done in 5 minutes.
+    - condition: template
+      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual
+        bedtime flag or its nightly schedule switch, or Bedroom 2 / Office's
+        sleep mode switch. tts.piper on media_player.bedroom would otherwise
+        duck/interrupt sleep music and audibly announce into both rooms.
+      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'',
+        ''on'') or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'')
+        or is_state(''switch.adaptive_lighting_sleep_mode_office'', ''on'')) }}'
     - action: tts.speak
       target:
         entity_id: tts.piper
@@ -9764,6 +9894,14 @@
         entity_id: notify.echo_show_kitchen_announce
       data:
         message: The washer is done!
+    - condition: template
+      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual
+        bedtime flag or its nightly schedule switch, or Bedroom 2 / Office's
+        sleep mode switch. tts.piper on media_player.bedroom would otherwise
+        duck/interrupt sleep music and audibly announce into both rooms.
+      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'',
+        ''on'') or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'')
+        or is_state(''switch.adaptive_lighting_sleep_mode_office'', ''on'')) }}'
     - action: tts.speak
       target:
         entity_id: tts.piper
@@ -9806,6 +9944,14 @@
         entity_id: notify.echo_show_kitchen_announce
       data:
         message: The dryer will be done in 5 minutes.
+    - condition: template
+      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual
+        bedtime flag or its nightly schedule switch, or Bedroom 2 / Office's
+        sleep mode switch. tts.piper on media_player.bedroom would otherwise
+        duck/interrupt sleep music and audibly announce into both rooms.
+      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'',
+        ''on'') or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'')
+        or is_state(''switch.adaptive_lighting_sleep_mode_office'', ''on'')) }}'
     - action: tts.speak
       target:
         entity_id: tts.piper
@@ -9824,6 +9970,14 @@
         entity_id: notify.echo_show_kitchen_announce
       data:
         message: The dryer is done!
+    - condition: template
+      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual
+        bedtime flag or its nightly schedule switch, or Bedroom 2 / Office's
+        sleep mode switch. tts.piper on media_player.bedroom would otherwise
+        duck/interrupt sleep music and audibly announce into both rooms.
+      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'',
+        ''on'') or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'')
+        or is_state(''switch.adaptive_lighting_sleep_mode_office'', ''on'')) }}'
     - action: tts.speak
       target:
         entity_id: tts.piper
