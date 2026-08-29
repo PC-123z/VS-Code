@@ -9189,7 +9189,11 @@
     ramping in gracefully. Uses timer.bathroom_join_idle to track 15-minute motion-clear
     window: motion off starts the timer, motion on cancels it, timer finish ungroups.
     Also ungroups if either source goes idle/paused/off. Skipped while Good Morning
-    routine is active.'
+    routine is active. Joins/group-checks target the Music Assistant entities (bedroom_2/kitchen_2)
+    rather than the raw Sonos entities (bedroom/kitchen) - grouping the raw Sonos
+    entity natively while MA is actively streaming to it made MA detect an untracked
+    topology change and kill playback on both sides (was cutting music in big bedroom
+    and bathroom the instant bathroom motion fired).'
   triggers:
   - trigger: state
     entity_id: binary_sensor.bathroom_motion
@@ -9229,8 +9233,8 @@
         }}"
       kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']
         }}"
-      source_player: '{% if welcome_home_on and kitchen_active %} media_player.kitchen
-        {% elif bedroom_active %} media_player.bedroom {% else %} none {% endif %}'
+      source_player: '{% if welcome_home_on and kitchen_active %} media_player.kitchen_2
+        {% elif bedroom_active %} media_player.bedroom_2 {% else %} none {% endif %}'
   - choose:
     - alias: Motion detected - join if eligible
       conditions:
@@ -9310,9 +9314,9 @@
         id: motion_off
       - alias: Bathroom is currently in any active source group
         condition: template
-        value_template: "{{ ('media_player.bathroom' in\n    (state_attr('media_player.bedroom',
+        value_template: "{{ ('media_player.bathroom' in\n    (state_attr('media_player.bedroom_2',
           'group_members') | default([])))\n   or\n   ('media_player.bathroom' in\n
-          \   (state_attr('media_player.kitchen', 'group_members') | default([])))
+          \   (state_attr('media_player.kitchen_2', 'group_members') | default([])))
           }}"
       sequence:
       - alias: Start/restart the 10-minute idle timer
@@ -9350,8 +9354,8 @@
         - kitchen_stopped
       - alias: Bathroom is currently in the stopped source's group
         condition: template
-        value_template: "{% set stopped = 'media_player.bedroom' if trigger.id ==
-          'bedroom_stopped'\n   else 'media_player.kitchen' %}\n{{ 'media_player.bathroom'
+        value_template: "{% set stopped = 'media_player.bedroom_2' if trigger.id ==
+          'bedroom_stopped'\n   else 'media_player.kitchen_2' %}\n{{ 'media_player.bathroom'
           in\n   (state_attr(stopped, 'group_members') | default([])) }}"
       sequence:
       - alias: Cancel idle timer if running
