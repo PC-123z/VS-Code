@@ -9305,7 +9305,7 @@
       entity_id: timer.bathroom_join_idle
     id: idle_timer_done
   - trigger: state
-    entity_id: media_player.bedroom
+    entity_id: media_player.bedroom_2
     to:
     - idle
     - paused
@@ -9313,7 +9313,7 @@
     - standby
     id: bedroom_stopped
   - trigger: state
-    entity_id: media_player.kitchen
+    entity_id: media_player.kitchen_2
     to:
     - idle
     - paused
