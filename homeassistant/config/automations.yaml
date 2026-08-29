@@ -9759,6 +9759,14 @@
         entity_id: notify.echo_show_kitchen_announce
       data:
         message: The washer will be done in 5 minutes.
+    - condition: template
+      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual
+        bedtime flag or its nightly schedule switch, or Bedroom 2 / Office's
+        sleep mode switch. tts.piper on media_player.bedroom would otherwise
+        duck/interrupt sleep music and audibly announce into both rooms.
+      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'',
+        ''on'') or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'')
+        or is_state(''switch.adaptive_lighting_sleep_mode_office'', ''on'')) }}'
     - action: tts.speak
       target:
         entity_id: tts.piper
@@ -9777,6 +9785,14 @@
         entity_id: notify.echo_show_kitchen_announce
       data:
         message: The washer is done!
+    - condition: template
+      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual
+        bedtime flag or its nightly schedule switch, or Bedroom 2 / Office's
+        sleep mode switch. tts.piper on media_player.bedroom would otherwise
+        duck/interrupt sleep music and audibly announce into both rooms.
+      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'',
+        ''on'') or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'')
+        or is_state(''switch.adaptive_lighting_sleep_mode_office'', ''on'')) }}'
     - action: tts.speak
       target:
         entity_id: tts.piper
@@ -9819,6 +9835,14 @@
         entity_id: notify.echo_show_kitchen_announce
       data:
         message: The dryer will be done in 5 minutes.
+    - condition: template
+      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual
+        bedtime flag or its nightly schedule switch, or Bedroom 2 / Office's
+        sleep mode switch. tts.piper on media_player.bedroom would otherwise
+        duck/interrupt sleep music and audibly announce into both rooms.
+      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'',
+        ''on'') or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'')
+        or is_state(''switch.adaptive_lighting_sleep_mode_office'', ''on'')) }}'
     - action: tts.speak
       target:
         entity_id: tts.piper
@@ -9837,6 +9861,14 @@
         entity_id: notify.echo_show_kitchen_announce
       data:
         message: The dryer is done!
+    - condition: template
+      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual
+        bedtime flag or its nightly schedule switch, or Bedroom 2 / Office's
+        sleep mode switch. tts.piper on media_player.bedroom would otherwise
+        duck/interrupt sleep music and audibly announce into both rooms.
+      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'',
+        ''on'') or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'')
+        or is_state(''switch.adaptive_lighting_sleep_mode_office'', ''on'')) }}'
     - action: tts.speak
       target:
         entity_id: tts.piper
