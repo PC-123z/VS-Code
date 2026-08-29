@@ -4570,11 +4570,23 @@
         data:
           percentage: 50
     - sequence:
-      - alias: Fade bathroom lights off over 3 minutes
+      - alias: Shift any already-on bathroom lights to sleep red, preserving brightness
+        continue_on_error: true
+        action: light.turn_on
+        target:
+          entity_id: "{{ area_entities('bathroom') | select('is_state', 'on') | list }}"
+        data:
+          rgb_color:
+          - 255
+          - 30
+          - 0
+          transition: 2
+      - alias: Fade bathroom lights off over 3 minutes - only touches lights that
+          were already on, no point turning one on just to fade it back off
         continue_on_error: true
         action: light.turn_off
         target:
-          area_id: bathroom
+          entity_id: "{{ area_entities('bathroom') | select('is_state', 'on') | list }}"
         data:
           transition: 180
   mode: restart
@@ -4818,11 +4830,23 @@
         data:
           percentage: 50
     - sequence:
-      - alias: Fade bathroom lights off over 3 minutes
+      - alias: Shift any already-on bathroom lights to sleep red, preserving brightness
+        continue_on_error: true
+        action: light.turn_on
+        target:
+          entity_id: "{{ area_entities('bathroom') | select('is_state', 'on') | list }}"
+        data:
+          rgb_color:
+          - 255
+          - 30
+          - 0
+          transition: 2
+      - alias: Fade bathroom lights off over 3 minutes - only touches lights that
+          were already on, no point turning one on just to fade it back off
         continue_on_error: true
         action: light.turn_off
         target:
-          area_id: bathroom
+          entity_id: "{{ area_entities('bathroom') | select('is_state', 'on') | list }}"
         data:
           transition: 180
   mode: restart
