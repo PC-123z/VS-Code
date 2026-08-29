@@ -100,6 +100,10 @@ input_boolean:
   big_bedroom_manual_override:
     name: "Big Bedroom Manual Override"
     initial: off
+  bathroom_volume_manual_override:
+    name: "Bathroom Volume Manual Override"
+    icon: mdi:volume-high
+    initial: off
   big_bedroom_asleep:
     name: "Big Bedroom Asleep"
   arrival_recent:

@@ -9182,6 +9182,51 @@
     target:
       entity_id: light.showtime_light
   mode: single
+- id: '1778300000001'
+  alias: Bathroom Volume Manual Override - Set on manual change
+  description: If someone changes media_player.bathroom's volume by hand (Sonos
+    app, physical control, or the HA UI/voice - anything that carries a user context,
+    as opposed to an automation's own volume_set calls), latch input_boolean.bathroom_volume_manual_override
+    on. Bathroom Speaker Join on Motion v2 checks this before forcing bathroom volume
+    on join/ungroup, so a manual bump sticks instead of getting reset on the next
+    motion trigger. Cleared by the companion "Clear on stop" automation once the
+    bathroom actually stops playing.
+  triggers:
+  - trigger: state
+    entity_id: media_player.bathroom
+    attribute: volume_level
+  conditions:
+  - alias: Only a person-initiated change carries a user context - automation-driven
+      volume_set calls do not
+    condition: template
+    value_template: '{{ trigger.to_state.context.user_id is not none }}'
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.bathroom_volume_manual_override
+  mode: single
+- id: '1778300000002'
+  alias: Bathroom Volume Manual Override - Clear on stop
+  description: Clears input_boolean.bathroom_volume_manual_override once bathroom
+    playback actually stops (idle/paused/off/standby), so the override persists
+    only while the music is playing, as intended.
+  triggers:
+  - trigger: state
+    entity_id: media_player.bathroom
+    to:
+    - idle
+    - paused
+    - 'off'
+    - standby
+  conditions:
+  - condition: state
+    entity_id: input_boolean.bathroom_volume_manual_override
+    state: 'on'
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.bathroom_volume_manual_override
+  mode: single
 - id: '1778194432803'
   alias: Bathroom Speaker Join on Motion v2
   description: 'Joins bathroom Sonos to the active source on motion. During welcome_home_active
@@ -9276,12 +9321,20 @@
           entity_id: media_player.bathroom
         data:
           is_volume_muted: false
-      - alias: Set bathroom volume low before joining
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.bathroom
-        data:
-          volume_level: 0.05
+      - alias: Skip the forced low-then-ramp volume dance if a manual override is active
+          - the whole point of the override is that motion-triggered joins stop touching
+          bathroom volume until the music stops
+        if:
+        - condition: state
+          entity_id: input_boolean.bathroom_volume_manual_override
+          state: 'off'
+        then:
+        - alias: Set bathroom volume low before joining
+          action: media_player.volume_set
+          target:
+            entity_id: media_player.bathroom
+          data:
+            volume_level: 0.05
       - alias: Join bathroom to source group
         action: media_player.join
         target:
@@ -9296,18 +9349,24 @@
           entity_id: media_player.bathroom
         data:
           is_volume_muted: false
-      - alias: Ramp bathroom volume up to match source
-        repeat:
-          count: 5
-          sequence:
-          - delay:
-              seconds: 6
-          - action: media_player.volume_set
-            target:
-              entity_id: media_player.bathroom
-            data:
-              volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n
-                \   target_vol] | min | round(3) }}"
+      - alias: Ramp bathroom volume up to match source, unless a manual override is
+          active
+        if:
+        - condition: state
+          entity_id: input_boolean.bathroom_volume_manual_override
+          state: 'off'
+        then:
+        - repeat:
+            count: 5
+            sequence:
+            - delay:
+                seconds: 6
+            - action: media_player.volume_set
+              target:
+                entity_id: media_player.bathroom
+              data:
+                volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n
+                  \   target_vol] | min | round(3) }}"
     - alias: Motion cleared - start idle timer (only if grouped)
       conditions:
       - condition: trigger
@@ -9339,13 +9398,20 @@
         target:
           entity_id: media_player.bathroom
         data: {}
-      - alias: Restore bathroom volume
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.bathroom
-        data:
-          volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30)
-            }}'
+      - alias: Restore bathroom volume, unless a manual override is active - the
+          override should hold the volume the way it was left, not snap it back to
+          the pre-join level
+        if:
+        - condition: state
+          entity_id: input_boolean.bathroom_volume_manual_override
+          state: 'off'
+        then:
+        - action: media_player.volume_set
+          target:
+            entity_id: media_player.bathroom
+          data:
+            volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30)
+              }}'
     - alias: Source stopped - ungroup immediately
       conditions:
       - condition: trigger
@@ -9369,13 +9435,18 @@
         target:
           entity_id: media_player.bathroom
         data: {}
-      - alias: Restore bathroom volume
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.bathroom
-        data:
-          volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30)
-            }}'
+      - alias: Restore bathroom volume, unless a manual override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.bathroom_volume_manual_override
+          state: 'off'
+        then:
+        - action: media_player.volume_set
+          target:
+            entity_id: media_player.bathroom
+          data:
+            volume_level: '{{ states(''input_number.bathroom_vol_before_join'') | float(0.30)
+              }}'
   mode: queued
   max: 10
 - id: '1778197535595'
