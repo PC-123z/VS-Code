@@ -605,6 +605,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           color_temp_kelvin: 5500
           brightness_pct: 100
@@ -612,6 +613,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           color_temp_kelvin: 3200
           brightness_pct: 100
@@ -624,6 +626,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           color_temp_kelvin: 4500
           brightness_pct: 100
@@ -631,6 +634,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           color_temp_kelvin: 3800
           brightness_pct: 100
@@ -643,6 +647,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           color_temp_kelvin: 3800
           brightness_pct: 100
@@ -650,6 +655,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           rgb_color:
           - 255
@@ -665,6 +671,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           rgb_color:
           - 238
@@ -675,6 +682,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           rgb_color:
           - 255
@@ -690,6 +698,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           rgb_color:
           - 0
@@ -700,6 +709,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           rgb_color:
           - 180
@@ -711,6 +721,7 @@
     - action: light.turn_on
       target:
         label_id: dining_room_top
+        entity_id: light.dining_room_top
       data:
         rgb_color:
         - 255
@@ -721,6 +732,7 @@
     - action: light.turn_on
       target:
         label_id: dining_room_bottom
+        entity_id: light.dining_room_bottom
       data:
         rgb_color:
         - 255
@@ -3288,6 +3300,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           brightness_pct: 8
           rgb_color:
@@ -3298,6 +3311,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           brightness_pct: 12
           rgb_color:
@@ -3335,11 +3349,13 @@
         action: light.turn_off
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           transition: 30
       - action: light.turn_off
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           transition: 30
       - alias: Only re-enable AL switches if room is still unoccupied
@@ -3378,11 +3394,13 @@
       - action: light.turn_off
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           transition: 15
       - action: light.turn_off
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           transition: 15
       - action: switch.turn_off
@@ -3405,11 +3423,13 @@
       - action: light.turn_off
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           transition: 30
       - action: light.turn_off
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           transition: 30
       - action: switch.turn_off
@@ -3476,6 +3496,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           brightness_pct: 20
           color_temp_kelvin: 3320
@@ -3483,6 +3504,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           brightness_pct: 20
           color_temp_kelvin: 2000
@@ -3506,6 +3528,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           rgb_color:
           - 64
@@ -3516,6 +3539,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           rgb_color:
           - 76
@@ -3542,6 +3566,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           brightness_pct: 8
           rgb_color:
@@ -3552,6 +3577,7 @@
       - action: light.turn_on
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           brightness_pct: 12
           rgb_color:
@@ -3586,6 +3612,7 @@
           - action: light.turn_on
             target:
               label_id: dining_room_bottom
+              entity_id: light.dining_room_bottom
             data:
               brightness_pct: 8
               rgb_color:
@@ -3596,6 +3623,7 @@
           - action: light.turn_on
             target:
               label_id: dining_room_top
+              entity_id: light.dining_room_top
             data:
               brightness_pct: 12
               rgb_color:
@@ -3616,11 +3644,13 @@
           - action: light.turn_on
             target:
               label_id: dining_room_bottom
+              entity_id: light.dining_room_bottom
             data:
               transition: 5
           - action: light.turn_on
             target:
               label_id: dining_room_top
+              entity_id: light.dining_room_top
             data:
               transition: 5
           - condition: template
@@ -3660,6 +3690,7 @@
           - action: light.turn_on
             target:
               label_id: dining_room_top
+              entity_id: light.dining_room_top
             data:
               brightness_pct: 20
               color_temp_kelvin: 3320
@@ -3667,6 +3698,7 @@
           - action: light.turn_on
             target:
               label_id: dining_room_bottom
+              entity_id: light.dining_room_bottom
             data:
               brightness_pct: 20
               color_temp_kelvin: 2000
@@ -3684,6 +3716,7 @@
           - action: light.turn_on
             target:
               label_id: dining_room_top
+              entity_id: light.dining_room_top
             data:
               rgb_color:
               - 64
@@ -3694,6 +3727,7 @@
           - action: light.turn_on
             target:
               label_id: dining_room_bottom
+              entity_id: light.dining_room_bottom
             data:
               rgb_color:
               - 76
@@ -3714,6 +3748,7 @@
           - action: light.turn_on
             target:
               label_id: dining_room_bottom
+              entity_id: light.dining_room_bottom
             data:
               brightness_pct: 8
               rgb_color:
@@ -3724,6 +3759,7 @@
           - action: light.turn_on
             target:
               label_id: dining_room_top
+              entity_id: light.dining_room_top
             data:
               brightness_pct: 12
               rgb_color:
@@ -3736,9 +3772,11 @@
           - action: light.turn_off
             target:
               label_id: dining_room_bottom
+              entity_id: light.dining_room_bottom
           - action: light.turn_off
             target:
               label_id: dining_room_top
+              entity_id: light.dining_room_top
   mode: restart
 - id: '1776009870388'
   alias: 'Big Bedroom: Disable Presence When TV On'
@@ -7554,12 +7592,14 @@
         metadata: {}
         target:
           label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
           brightness_pct: 2
       - action: light.turn_on
         metadata: {}
         target:
           label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
         data:
           brightness_pct: 2
       - type: turn_off
