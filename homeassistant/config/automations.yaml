@@ -5509,12 +5509,19 @@
       - delay:
           minutes: 5
       - alias: Cut power to the Nanoleaf P115 outlets so a WiFi-reconnect glitch can't
-          bring Ribbon/Fluttershy back on overnight - restored by Good Morning Routine
-        action: switch.turn_off
-        target:
-          entity_id:
-          - switch.bedroom2_office_nano1
-          - switch.nano2
+          bring Ribbon/Fluttershy back on overnight - only when someone is actually
+          sleeping here (bedroom2_occupied on); otherwise the outlets stay powered
+          all the time. Restored by Good Morning Routine, with Daily Reset as backstop.
+        if:
+        - condition: state
+          entity_id: input_boolean.bedroom2_occupied
+          state: 'on'
+        then:
+        - action: switch.turn_off
+          target:
+            entity_id:
+            - switch.bedroom2_office_nano1
+            - switch.nano2
     - conditions:
       - condition: trigger
         id: music_fade
