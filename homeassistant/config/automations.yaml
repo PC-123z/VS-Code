@@ -6076,7 +6076,9 @@
     time or it clears the flag first and Good Morning's occupied condition fails,
     skipping the whole routine (outlets, fan, wake ramp, everything) - this happened
     on weekdays from 2026-08-05 when Good Morning moved to 8:30am but this stayed
-    at 8:00am.
+    at 8:00am. Also restores the Nanoleaf P115 outlets unconditionally as a backstop,
+    in case Good Morning didn't run (e.g. occupied got cleared before its trigger)
+    and left them off from the Bedtime Routine's overnight cut.
   triggers:
   - trigger: time
     at: 09:30:00
@@ -6096,6 +6098,12 @@
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.bedroom2_occupied
+  - alias: Restore the Nanoleaf P115 outlets in case Good Morning didn't run
+    action: switch.turn_on
+    target:
+      entity_id:
+      - switch.bedroom2_office_nano1
+      - switch.nano2
   mode: single
 - id: '1776382720394'
   alias: Bedroom 2 Occupancy Latch
