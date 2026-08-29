@@ -103,9 +103,9 @@
     at: '18:00:00'
     weekday:
     - fri
-    enabled: true
+    enabled: false
   - trigger: time
-    at: '17:35:00'
+    at: '17:30:00'
     enabled: true
     weekday:
     - sat
@@ -7769,8 +7769,8 @@
     - fri
     - sun
     - sat
-  - alias: Skip the spoken announcement while Big Bedroom is asleep (sleep mode
-      or nap via Hue Button 2/3)
+  - alias: Skip the spoken announcement while Big Bedroom is asleep (sleep mode or
+      nap via Hue Button 2/3)
     condition: and
     conditions:
     - condition: state
@@ -9234,7 +9234,8 @@
       kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']
         }}"
       source_player: '{% if welcome_home_on and kitchen_active %} media_player.kitchen_2
-        {% elif bedroom_active %} media_player.bedroom_2 {% else %} none {% endif %}'
+        {% elif bedroom_active %} media_player.bedroom_2 {% else %} none {% endif
+        %}'
   - choose:
     - alias: Motion detected - join if eligible
       conditions:
