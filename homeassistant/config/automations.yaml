@@ -297,7 +297,7 @@
 
               '
         else:
-        - alias: Ramp volume to 0.30 over ~2.5 minutes
+        - alias: Ramp volume to 0.20 over ~2.5 minutes
           repeat:
             count: 8
             sequence:
@@ -307,7 +307,7 @@
               target:
                 entity_id: media_player.bedroom_2
               data:
-                volume_level: '{{ [0.1 + (repeat.index * 0.025), 0.30] | min | round(3)
+                volume_level: '{{ [0.1 + (repeat.index * 0.025), 0.20] | min | round(3)
                   }}'
         - alias: Wait for motion in bedroom/bathroom/hallway/kitchen (up to ~5 min
             from routine start)
@@ -327,12 +327,12 @@
             condition: template
             value_template: '{{ wait.completed == false }}'
           then:
-          - alias: Boost music to 0.40 for escalation
+          - alias: Boost music to 0.28 for escalation
             action: media_player.volume_set
             target:
               entity_id: media_player.bedroom_2
             data:
-              volume_level: 0.4
+              volume_level: 0.28
           - alias: Wait 40 seconds before insistent announcement
             delay:
               seconds: 40
