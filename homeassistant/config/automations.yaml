@@ -4490,7 +4490,7 @@
           media_type: playlist
           radio_mode: false
       - alias: Give playback a few seconds to start
-        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
+        wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
         timeout:
           seconds: 8
         continue_on_timeout: true
@@ -4501,7 +4501,7 @@
         condition: or
         conditions:
         - condition: state
-          entity_id: media_player.bedroom_2
+          entity_id: media_player.bedroom
           state: playing
         - condition: template
           value_template: '{{ repeat.index >= 2 }}'
@@ -4510,7 +4510,7 @@
     - condition: not
       conditions:
       - condition: state
-        entity_id: media_player.bedroom_2
+        entity_id: media_player.bedroom
         state: playing
     then:
     - action: notify.mobile_app_pc_iphone
@@ -4750,7 +4750,7 @@
           media_type: playlist
           radio_mode: false
       - alias: Give playback a few seconds to start
-        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
+        wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
         timeout:
           seconds: 8
         continue_on_timeout: true
@@ -4761,7 +4761,7 @@
         condition: or
         conditions:
         - condition: state
-          entity_id: media_player.bedroom_2
+          entity_id: media_player.bedroom
           state: playing
         - condition: template
           value_template: '{{ repeat.index >= 2 }}'
@@ -4770,7 +4770,7 @@
     - condition: not
       conditions:
       - condition: state
-        entity_id: media_player.bedroom_2
+        entity_id: media_player.bedroom
         state: playing
     then:
     - action: notify.mobile_app_pc_iphone
@@ -9672,7 +9672,7 @@
             data:
               shuffle: true
           - alias: Give playback a few seconds to start
-            wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
+            wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
             timeout:
               seconds: 8
             continue_on_timeout: true
@@ -9683,7 +9683,7 @@
             condition: or
             conditions:
             - condition: state
-              entity_id: media_player.bedroom_2
+              entity_id: media_player.bedroom
               state: playing
             - condition: template
               value_template: '{{ repeat.index >= 2 }}'
@@ -9692,7 +9692,7 @@
         - condition: not
           conditions:
           - condition: state
-            entity_id: media_player.bedroom_2
+            entity_id: media_player.bedroom
             state: playing
         then:
         - action: notify.mobile_app_pc_iphone
@@ -9725,7 +9725,7 @@
           data:
             shuffle: true
         - alias: Give playback a few seconds to start
-          wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
+          wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
           timeout:
             seconds: 8
           continue_on_timeout: true
@@ -9736,7 +9736,7 @@
           condition: or
           conditions:
           - condition: state
-            entity_id: media_player.bedroom_2
+            entity_id: media_player.bedroom
             state: playing
           - condition: template
             value_template: '{{ repeat.index >= 2 }}'
@@ -9745,7 +9745,7 @@
       - condition: not
         conditions:
         - condition: state
-          entity_id: media_player.bedroom_2
+          entity_id: media_player.bedroom
           state: playing
       then:
       - action: notify.mobile_app_pc_iphone
