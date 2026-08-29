@@ -7769,10 +7769,16 @@
     - fri
     - sun
     - sat
-  - alias: Skip the spoken announcement while Big Bedroom sleep mode is on
-    condition: state
-    entity_id: switch.al_sleep_mode_big_bedroom
-    state: 'off'
+  - alias: Skip the spoken announcement while Big Bedroom is asleep (sleep mode
+      or nap via Hue Button 2/3)
+    condition: and
+    conditions:
+    - condition: state
+      entity_id: switch.al_sleep_mode_big_bedroom
+      state: 'off'
+    - condition: state
+      entity_id: input_boolean.big_bedroom_asleep
+      state: 'off'
   - data:
       message: 'Alert: {{ trigger.payload_json.after.label | capitalize }} detected
         at {% if trigger.payload_json.after.camera == ''driveway'' %}Driveway {% elif
