@@ -4465,6 +4465,15 @@
   - alias: Play white noise via Music Assistant (with retry)
     repeat:
       sequence:
+      - alias: Set shuffle before starting playback - setting it after play_media
+          starts causes Music Assistant to reshuffle the already-playing queue and
+          jump to a different track a couple seconds in
+        continue_on_error: true
+        action: media_player.shuffle_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          shuffle: true
       - continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -4473,12 +4482,6 @@
           media_id: ytmusic://playlist/VLPLOS9HJPmm92-46p6EL6vUxfuZ6AGVDkRG
           media_type: playlist
           radio_mode: false
-      - continue_on_error: true
-        action: media_player.shuffle_set
-        target:
-          entity_id: media_player.bedroom_2
-        data:
-          shuffle: true
       - alias: Give playback a few seconds to start
         wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
         timeout:
@@ -4617,6 +4620,16 @@
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
       manual_control: true
+  - alias: Engage bathroom sleep mode - without this, Bathroom Smart Motion &
+      Presence has no way to know we're going to bed and lights the bathroom
+      at normal daytime/evening brightness on the next motion instead of dim
+      red sleep lighting, and Good Morning turns these switches back off
+      assuming bedtime turned them on
+    action: switch.turn_on
+    target:
+      entity_id:
+      - switch.al_sleep_mode_bathroom
+      - switch.al_sleep_mode_bathroom_main
   - alias: Set bedroom color to deep red (preserve brightness if already on)
     choose:
     - conditions:
