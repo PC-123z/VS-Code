@@ -9347,6 +9347,8 @@
     - paused
     - 'off'
     - standby
+    for:
+      seconds: 30
     id: bedroom_stopped
   - trigger: state
     entity_id: media_player.kitchen_2
@@ -9355,6 +9357,8 @@
     - paused
     - 'off'
     - standby
+    for:
+      seconds: 30
     id: kitchen_stopped
   conditions: []
   actions:
@@ -9386,10 +9390,12 @@
         entity_id: input_boolean.good_morning_active
         state: 'off'
         enabled: false
-      - alias: Skip if bathroom already in the source group
+      - alias: Skip if bathroom already in the source group - group_members on
+          an MA entity lists other MA entities (bathroom_2), not the raw Sonos
+          entity, so this must check for bathroom_2 not bathroom
         condition: template
         value_template: "{{ state_attr(source_player, 'group_members') is not none
-          and\n   'media_player.bathroom' not in\n   (state_attr(source_player, 'group_members')
+          and\n   'media_player.bathroom_2' not in\n   (state_attr(source_player, 'group_members')
           | default([])) }}"
       - variables:
           bathroom_vol_before: '{{ state_attr(''media_player.bathroom'', ''volume_level'')
@@ -9459,10 +9465,11 @@
       conditions:
       - condition: trigger
         id: motion_off
-      - alias: Bathroom is currently in any active source group
+      - alias: Bathroom is currently in any active source group - group_members
+          lists MA entities (bathroom_2), not the raw Sonos entity
         condition: template
-        value_template: "{{ ('media_player.bathroom' in\n    (state_attr('media_player.bedroom_2',
-          'group_members') | default([])))\n   or\n   ('media_player.bathroom' in\n
+        value_template: "{{ ('media_player.bathroom_2' in\n    (state_attr('media_player.bedroom_2',
+          'group_members') | default([])))\n   or\n   ('media_player.bathroom_2' in\n
           \   (state_attr('media_player.kitchen_2', 'group_members') | default([])))
           }}"
       sequence:
@@ -9506,10 +9513,11 @@
         id:
         - bedroom_stopped
         - kitchen_stopped
-      - alias: Bathroom is currently in the stopped source's group
+      - alias: Bathroom is currently in the stopped source's group - group_members
+          lists MA entities (bathroom_2), not the raw Sonos entity
         condition: template
         value_template: "{% set stopped = 'media_player.bedroom_2' if trigger.id ==
-          'bedroom_stopped'\n   else 'media_player.kitchen_2' %}\n{{ 'media_player.bathroom'
+          'bedroom_stopped'\n   else 'media_player.kitchen_2' %}\n{{ 'media_player.bathroom_2'
           in\n   (state_attr(stopped, 'group_members') | default([])) }}"
       sequence:
       - alias: Cancel idle timer if running
