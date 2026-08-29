@@ -5085,10 +5085,21 @@
       brightness_pct: 2
       transition: 1
     enabled: true
-  - alias: Fade all Hue lights off over 5 seconds
+  - alias: Fade bedroom lights off over 5 seconds - only if already on, no point
+      commanding an already-off light
+    if:
+    - condition: state
+      entity_id: light.bedroom
+      state: 'on'
+    then:
+    - action: light.turn_off
+      target:
+        entity_id: light.bedroom
+      data:
+        transition: 5
+  - alias: Fade bathroom lights off over 5 seconds
     action: light.turn_off
     target:
-      entity_id: light.bedroom
       area_id: bathroom
     data:
       transition: 5
@@ -5213,10 +5224,21 @@
       brightness_pct: 2
       transition: 1
     enabled: true
-  - alias: Fade all Hue lights off over 5 seconds
+  - alias: Fade bedroom lights off over 5 seconds - only if already on, no point
+      commanding an already-off light
+    if:
+    - condition: state
+      entity_id: light.bedroom
+      state: 'on'
+    then:
+    - action: light.turn_off
+      target:
+        entity_id: light.bedroom
+      data:
+        transition: 5
+  - alias: Fade bathroom lights off over 5 seconds
     action: light.turn_off
     target:
-      entity_id: light.bedroom
       area_id: bathroom
     data:
       transition: 5
