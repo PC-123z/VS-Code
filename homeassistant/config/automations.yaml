@@ -4382,6 +4382,18 @@
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
       manual_control: true
+  - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
+      Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
+      to know we're going to bed, so they'd light both rooms at normal
+      daytime/evening brightness on the next motion instead of dim red sleep
+      lighting, and Good Morning turns these switches back off assuming bedtime
+      turned them on
+    action: switch.turn_on
+    target:
+      entity_id:
+      - switch.al_sleep_mode_bathroom
+      - switch.al_sleep_mode_bathroom_main
+      - switch.al_sleep_mode_big_bedroom
   - alias: Set bedroom color to deep red (preserve brightness if already on)
     choose:
     - conditions:
@@ -4620,16 +4632,18 @@
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
       manual_control: true
-  - alias: Engage bathroom sleep mode - without this, Bathroom Smart Motion &
-      Presence has no way to know we're going to bed and lights the bathroom
-      at normal daytime/evening brightness on the next motion instead of dim
-      red sleep lighting, and Good Morning turns these switches back off
-      assuming bedtime turned them on
+  - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
+      Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
+      to know we're going to bed, so they'd light both rooms at normal
+      daytime/evening brightness on the next motion instead of dim red sleep
+      lighting, and Good Morning turns these switches back off assuming bedtime
+      turned them on
     action: switch.turn_on
     target:
       entity_id:
       - switch.al_sleep_mode_bathroom
       - switch.al_sleep_mode_bathroom_main
+      - switch.al_sleep_mode_big_bedroom
   - alias: Set bedroom color to deep red (preserve brightness if already on)
     choose:
     - conditions:
@@ -5015,6 +5029,18 @@
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
       manual_control: true
+  - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
+      Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
+      to know we're going to bed, so they'd light both rooms at normal
+      daytime/evening brightness on the next motion instead of dim red sleep
+      lighting, and Good Morning turns these switches back off assuming bedtime
+      turned them on
+    action: switch.turn_on
+    target:
+      entity_id:
+      - switch.al_sleep_mode_bathroom
+      - switch.al_sleep_mode_bathroom_main
+      - switch.al_sleep_mode_big_bedroom
   - alias: Set alarm to Home/Stay
     action: alarm_control_panel.alarm_arm_home
     target:
@@ -5131,6 +5157,18 @@
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
       manual_control: true
+  - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
+      Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
+      to know we're going to bed, so they'd light both rooms at normal
+      daytime/evening brightness on the next motion instead of dim red sleep
+      lighting, and Good Morning turns these switches back off assuming bedtime
+      turned them on
+    action: switch.turn_on
+    target:
+      entity_id:
+      - switch.al_sleep_mode_bathroom
+      - switch.al_sleep_mode_bathroom_main
+      - switch.al_sleep_mode_big_bedroom
   - alias: Set alarm to Home/Stay
     action: alarm_control_panel.alarm_arm_home
     target:
