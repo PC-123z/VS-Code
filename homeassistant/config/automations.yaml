@@ -4570,23 +4570,33 @@
         data:
           percentage: 50
     - sequence:
-      - alias: Shift any already-on bathroom lights to sleep red, preserving brightness
+      - alias: Turn off bathroom main lights immediately - never part of sleep
+          ambiance, and area_entities() was unreliable for this group entity
+        continue_on_error: true
+        action: light.turn_off
+        target:
+          entity_id: light.bathroom_main_lights
+      - alias: Shift any already-on bathroom accent lights to sleep red, preserving
+          brightness - named explicitly rather than via area_entities(), which
+          also matches the bathroom_main_lights group and its individual bulbs
         continue_on_error: true
         action: light.turn_on
         target:
-          entity_id: "{{ area_entities('bathroom') | select('is_state', 'on') | list }}"
+          entity_id: "{{ ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2',
+            'light.bathroom_back'] | select('is_state', 'on') | list }}"
         data:
           rgb_color:
           - 255
           - 30
           - 0
           transition: 2
-      - alias: Fade bathroom lights off over 3 minutes - only touches lights that
-          were already on, no point turning one on just to fade it back off
+      - alias: Fade bathroom accent lights off over 3 minutes - only touches lights
+          that were already on, no point turning one on just to fade it back off
         continue_on_error: true
         action: light.turn_off
         target:
-          entity_id: "{{ area_entities('bathroom') | select('is_state', 'on') | list }}"
+          entity_id: "{{ ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2',
+            'light.bathroom_back'] | select('is_state', 'on') | list }}"
         data:
           transition: 180
   mode: restart
@@ -4830,23 +4840,33 @@
         data:
           percentage: 50
     - sequence:
-      - alias: Shift any already-on bathroom lights to sleep red, preserving brightness
+      - alias: Turn off bathroom main lights immediately - never part of sleep
+          ambiance, and area_entities() was unreliable for this group entity
+        continue_on_error: true
+        action: light.turn_off
+        target:
+          entity_id: light.bathroom_main_lights
+      - alias: Shift any already-on bathroom accent lights to sleep red, preserving
+          brightness - named explicitly rather than via area_entities(), which
+          also matches the bathroom_main_lights group and its individual bulbs
         continue_on_error: true
         action: light.turn_on
         target:
-          entity_id: "{{ area_entities('bathroom') | select('is_state', 'on') | list }}"
+          entity_id: "{{ ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2',
+            'light.bathroom_back'] | select('is_state', 'on') | list }}"
         data:
           rgb_color:
           - 255
           - 30
           - 0
           transition: 2
-      - alias: Fade bathroom lights off over 3 minutes - only touches lights that
-          were already on, no point turning one on just to fade it back off
+      - alias: Fade bathroom accent lights off over 3 minutes - only touches lights
+          that were already on, no point turning one on just to fade it back off
         continue_on_error: true
         action: light.turn_off
         target:
-          entity_id: "{{ area_entities('bathroom') | select('is_state', 'on') | list }}"
+          entity_id: "{{ ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2',
+            'light.bathroom_back'] | select('is_state', 'on') | list }}"
         data:
           transition: 180
   mode: restart
