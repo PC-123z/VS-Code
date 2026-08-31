@@ -7,11 +7,12 @@
     Assistant (media_player.bedroom_2) can reassert playback almost instantly after
     a physical stop, so relying on it alone let Music Assistant win the race and made
     manual stops not stick. Kept the longer 8s debounce on bedroom_2 too, to avoid
-    false triggers from the routine's own brief TTS-announcement pause. Gated on input_boolean.good_morning_expected_pause
-    - the routine and its announcement companions turn that on for every deliberate
-    pause/idle window they create (opening-track-finished silence, between-songs TTS
-    pause) and off again once playback resumes, so this automation only reacts to
-    a stop it didn't cause. Does not touch this automation's or the Good Morning Routine
+    false triggers from the queue swap between the two music phases. Gated on input_boolean.good_morning_expected_pause
+    - the routine turns that on for every deliberate pause/idle window it creates
+    (the unjoin at the start, and the phase 1 to phase 2 queue replace) and off again
+    once playback resumes, so this automation only reacts to a stop it didn't cause.
+    Announcements no longer pause anything - they are spoken over the music through
+    Music Assistant's own announcement path, so they create no idle window at all. Does not touch this automation's or the Good Morning Routine
     automation's enabled state, so scheduled/manual runs still work normally in the
     future.
   triggers:
@@ -8657,10 +8658,11 @@
     target:
       entity_id: input_boolean.good_morning_active
   - alias: Arm the expected-pause flag for the whole run - the routine's own unjoin/track-swap
-      at start, the opener-finished silence, and the between-songs pauses all cause
-      brief idle/paused blips on the Sonos entity that the stop-on-idle watchdog would
-      otherwise treat as a manual stop. Disarmed once phase 2 (the shuffled playlist)
-      is solidly underway, and re-armed/disarmed around each later announcement pause.
+      at start and the phase 1 to phase 2 queue replace both cause brief idle/paused
+      blips on the Sonos entity that the stop-on-idle watchdog would otherwise treat
+      as a manual stop. Disarmed once phase 2 (the shuffled playlist) is solidly underway.
+      Announcements need no cover here - they are spoken over the music and never
+      pause it.
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.good_morning_expected_pause
@@ -10532,9 +10534,8 @@
     so it is blind to a clean restart - on 2026-08-22 the track ended at 179 of 185
     seconds and cleanly reset to 0, and that watchdog never fired. This one detects
     the restart itself - same track title, previous position well past the end, new
-    position back near zero - and skips forward, which also lets the title-change
-    announcement fire. Gated on the routine being active so a deliberate replay outside
-    the morning is left alone.
+    position back near zero - and skips forward. Gated on the routine being active
+    so a deliberate replay outside the morning is left alone.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
