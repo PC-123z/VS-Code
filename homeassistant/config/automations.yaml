@@ -9819,130 +9819,137 @@
     action: media_player.turn_off
     target:
       entity_id: media_player.bedroom_tv_2
-  - alias: Choose music based on time of day
+  - alias: Choose music - hold forces opposite time-of-day playlist, press (fresh) plays playlist 1
     choose:
-    - alias: After midnight - play chill album (or hold button to force it any time)
+    - alias: Hold button - force opposite of the time-of-day pick, set counter to 4
       conditions:
       - condition: template
-        value_template: '{{ (trigger.id == ''press'' and now().hour >= 0 and now().hour
-          < 6) or (trigger.id == ''hold'' and not (now().hour >= 0 and now().hour
-          < 6)) }}'
+        value_template: '{{ trigger.id == ''hold'' }}'
       sequence:
-      - alias: Set Sonos volume to 10%
-        action: media_player.volume_set
+      - action: counter.set_value
         target:
-          entity_id: media_player.bedroom_2
+          entity_id: counter.funtime_playlist_index
         data:
-          volume_level: 0.1
-      - alias: Play Chill Album via Music Assistant (with retry)
-        repeat:
-          sequence:
-          - continue_on_error: true
-            action: music_assistant.play_media
-            target:
-              entity_id: media_player.bedroom_2
-            data:
-              media_id: ytmusic://playlist/VLPLV_q9IkDBBFKI-4jQfFG5KZaWanZgd3-r
-              media_type: playlist
-              radio_mode: false
-          - continue_on_error: true
-            action: media_player.shuffle_set
-            target:
-              entity_id: media_player.bedroom_2
-            data:
-              shuffle: true
-          - alias: Give playback a few seconds to start
-            wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
-            timeout:
-              seconds: 8
-            continue_on_timeout: true
-          until:
-          - alias: Exit the loop once it is playing, or after two attempts. Must be
-              an until condition, not a stop action - stop would end the whole automation
-              run and skip every step after this repeat.
-            condition: or
-            conditions:
-            - condition: state
-              entity_id: media_player.bedroom
-              state: playing
-            - condition: template
-              value_template: '{{ repeat.index >= 2 }}'
-      - alias: Notify if music still isn't playing after retry
-        if:
-        - condition: not
+          value: 4
+      - choose:
+        - alias: It's 00:00-06:00, so the default pick would be chill - force upbeat instead
           conditions:
-          - condition: state
-            entity_id: media_player.bedroom
-            state: playing
-        then:
-        - action: notify.mobile_app_pc_iphone
-          data:
-            title: Fun Button music didn't start
-            message: Bedroom Sonos didn't start playing after two tries - speaker
-              may be offline.
-    default:
-    - alias: Set Sonos volume to 10%
-      action: media_player.volume_set
-      target:
-        entity_id: media_player.bedroom_2
-      data:
-        volume_level: 0.1
-    - alias: Play Fun Playlist via Music Assistant (with retry)
-      repeat:
-        sequence:
-        - continue_on_error: true
-          action: music_assistant.play_media
-          target:
-            entity_id: media_player.bedroom_2
-          data:
-            media_id: ytmusic://playlist/VLPLiy0XOfUv4hHOC8nCojwvnOW2vpCrj8gM
-            media_type: playlist
-            radio_mode: false
-        - continue_on_error: true
-          action: media_player.shuffle_set
-          target:
-            entity_id: media_player.bedroom_2
-          data:
-            shuffle: true
-        - alias: Give playback a few seconds to start
-          wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
-          timeout:
-            seconds: 8
-          continue_on_timeout: true
-        until:
-        - alias: Exit the loop once it is playing, or after two attempts. Must be
-            an until condition, not a stop action - stop would end the whole automation
-            run and skip every step after this repeat.
-          condition: or
-          conditions:
-          - condition: state
-            entity_id: media_player.bedroom
-            state: playing
           - condition: template
-            value_template: '{{ repeat.index >= 2 }}'
-    - alias: Notify if music still isn't playing after retry
-      if:
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: media_player.bedroom
-          state: playing
-      then:
-      - action: notify.mobile_app_pc_iphone
+            value_template: '{{ now().hour >= 0 and now().hour < 6 }}'
+          sequence:
+          - action: script.funtime_play_playlist
+            data:
+              media_id: ytmusic://playlist/VLPLiy0XOfUv4hHOC8nCojwvnOW2vpCrj8gM
+        default:
+        - alias: It's not 00:00-06:00, so the default pick would be upbeat - force chill instead
+          action: script.funtime_play_playlist
+          data:
+            media_id: ytmusic://playlist/VLPLV_q9IkDBBFKI-4jQfFG5KZaWanZgd3-r
+    default:
+    - alias: Fresh press - reset counter to 1 and play Playlist 1 (Spotify)
+      action: counter.set_value
+      target:
+        entity_id: counter.funtime_playlist_index
+      data:
+        value: 1
+    - action: script.funtime_play_playlist
+      data:
+        media_id: spotify://playlist/1GrWlZZ7Kb49epRDuiXUCz
+  - alias: Start/restart the shared 1-hour Funtime->Bedtime countdown
+    action: timer.start
+    target:
+      entity_id: timer.funtime_bedtime_countdown
+  mode: restart
+- id: '1778197535596'
+  alias: 'Pico Center - Big Bedroom: Fun Button - Cycle Playlist'
+  description: 'Center circle press while a Funtime session is already active (timer.funtime_bedtime_countdown
+    running, i.e. within an hour of the last press/hold) only advances counter.funtime_playlist_index
+    (wrapping 1 Spotify -> 2 YouTube Music -> 3 YouTube Music -> 4 time-of-day pick
+    -> back to 1) and plays the matching playlist. Lights, fan, alarm, and TV are
+    left untouched. Restarts the same shared 1-hour countdown as the main Fun Button
+    automation.'
+  triggers:
+  - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
+    domain: lutron_caseta
+    type: press
+    subtype: stop
+    trigger: device
+    id: press
+  conditions:
+  - condition: state
+    entity_id: timer.funtime_bedtime_countdown
+    state: active
+  actions:
+  - alias: Advance playlist index, wrapping 4 back to 1
+    action: counter.set_value
+    target:
+      entity_id: counter.funtime_playlist_index
+    data:
+      value: '{{ (states(''counter.funtime_playlist_index'') | int % 4) + 1 }}'
+  - alias: Play the playlist matching the new index
+    choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ states(''counter.funtime_playlist_index'') == ''1'' }}'
+      sequence:
+      - action: script.funtime_play_playlist
         data:
-          title: Fun Button music didn't start
-          message: Bedroom Sonos didn't start playing after two tries - speaker may
-            be offline.
-  - alias: 60-minute timer before transitioning to Bedtime routine
-    delay:
-      minutes: 60
+          media_id: spotify://playlist/1GrWlZZ7Kb49epRDuiXUCz
+    - conditions:
+      - condition: template
+        value_template: '{{ states(''counter.funtime_playlist_index'') == ''2'' }}'
+      sequence:
+      - action: script.funtime_play_playlist
+        data:
+          media_id: ytmusic://playlist/VLPLNMTXgsQnLlCAYdQGh3sVAvun2hWZ_a6x
+    - conditions:
+      - condition: template
+        value_template: '{{ states(''counter.funtime_playlist_index'') == ''3'' }}'
+      sequence:
+      - action: script.funtime_play_playlist
+        data:
+          media_id: ytmusic://playlist/VLPLa4tsQhaEepc
+    default:
+    - alias: Index 4 - same time-of-day pick as a fresh press would use (before midnight
+        = upbeat, 00:00-06:00 = chill)
+      choose:
+      - conditions:
+        - condition: template
+          value_template: '{{ now().hour >= 0 and now().hour < 6 }}'
+        sequence:
+        - action: script.funtime_play_playlist
+          data:
+            media_id: ytmusic://playlist/VLPLV_q9IkDBBFKI-4jQfFG5KZaWanZgd3-r
+      default:
+      - action: script.funtime_play_playlist
+        data:
+          media_id: ytmusic://playlist/VLPLiy0XOfUv4hHOC8nCojwvnOW2vpCrj8gM
+  - alias: Restart the shared 1-hour Funtime->Bedtime countdown
+    action: timer.start
+    target:
+      entity_id: timer.funtime_bedtime_countdown
+  mode: restart
+- id: '1778197535597'
+  alias: 'Pico Center - Big Bedroom: Funtime Countdown Finished -> Bedtime'
+  description: When the shared Funtime->Bedtime countdown (timer.funtime_bedtime_countdown,
+    started/restarted by every Fun Button press or hold) finishes untouched for a
+    full hour, trigger the Bedtime Button routine for wind-down. Replaces the old
+    in-line 60-minute delay so the countdown can be restarted by either Fun Button
+    automation.
+  triggers:
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.funtime_bedtime_countdown
+  conditions: []
+  actions:
   - alias: Trigger Bedtime Button routine
     action: automation.trigger
     target:
       entity_id: automation.big_bedroom_bedtime_button_hue_button_2
     data:
       skip_conditions: true
-  mode: restart
+  mode: single
 - id: '1747200000001'
   alias: Good Morning Active - Watchdog Shutoff
   description: Safety net in case HA restarts mid-routine and leaves good_morning_active
