@@ -133,6 +133,10 @@
       - switch.al_sleep_mode_kitchen_main
       - switch.al_sleep_mode_living_room
       - switch.adaptive_lighting_sleep_mode_office
+  - alias: Clear asleep flag - nap wake up confirms awake
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.big_bedroom_asleep
   - alias: Turn off bedroom AL switches and clear manual control
     action: switch.turn_off
     target:

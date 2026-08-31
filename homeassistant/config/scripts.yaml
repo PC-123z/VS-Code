@@ -332,6 +332,10 @@ goodbye_routine_all_clear_arm_and_power_off:
     timeout:
       minutes: 5
     continue_on_timeout: false
+  - alias: Failsafe - leaving the house confirms awake, clear stuck asleep flag
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.big_bedroom_asleep
   - data:
       code: ''
     target:
