@@ -8924,11 +8924,7 @@
           target:
             entity_id: input_boolean.good_morning_expected_pause
         else:
-        - alias: 'Ramp volume from 0.05 to 0.15 over ~2.5 minutes. The level is the
-            max of the ramp step and the live volume so this can only ever raise it:
-            the announcement branch lifts the Sonos to the announcement floor before
-            it speaks, and a bare index-based ramp would drag it straight back down
-            on the next step and leave the greeting almost inaudible.'
+        - alias: Ramp volume from 0.05 to 0.15 over ~2.5 minutes
           repeat:
             count: 8
             sequence:
@@ -8938,8 +8934,8 @@
               target:
                 entity_id: media_player.bedroom
               data:
-                volume_level: '{{ [[0.05 + (repeat.index * 0.0125), 0.15] | min, state_attr(''media_player.bedroom'',
-                  ''volume_level'') | float(0.05)] | max | round(3) }}'
+                volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3)
+                  }}'
         - alias: 'Wait for the opening track to finish. Idle is not a usable signal
             for this any more: Music Assistant auto-fills a queue that runs dry with
             similar tracks ("Fetching similar tracks for queue Bedroom based on: Here
@@ -9172,19 +9168,6 @@
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.good_morning_announcement_pending
-      - alias: 'Lift the Sonos to the announcement floor first. Music Assistant''s
-          Bedroom player uses the percentual announce strategy (announce_volume 85,
-          min 15, max 75), so it derives the announcement level from whatever the player
-          volume happens to be at that moment. At the bottom of the wake-up ramp that
-          is 0.05, which clamps the greeting down to the 15% floor and makes it barely
-          audible. The ramp above only ever raises from here, so this is not walked
-          back.'
-        continue_on_error: true
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.bedroom
-        data:
-          volume_level: 0.15
       - alias: 'First announcement - the full greeting, spoken over the music. tts.speak
           on the Music Assistant entity goes through MA''s native announcement path
           (the MA log line is "Playback announcement to player Bedroom"), which ducks
