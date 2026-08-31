@@ -155,23 +155,36 @@ script_volvo_start_core:
                 entity_id: cover.garage
               data: {}
     - sequence:
-      - alias: Wait for garage door contact sensor to open (up to 10 minutes)
-        wait_for_trigger:
-        - trigger: state
-          entity_id: binary_sensor.garage_door
-          to: 'on'
-        timeout:
-          minutes: 10
-        continue_on_timeout: true
-      - alias: Unlock doors once garage door is open
-        if:
-        - condition: template
-          value_template: '{{ wait.completed }}'
-        then:
-        - action: lock.unlock
-          target:
-            entity_id: lock.volvo_xc60_lock
-          data: {}
+      - alias: Unlock doors - immediately if the garage door is already open,
+          otherwise wait for it to open (up to 10 minutes)
+        choose:
+        - conditions:
+          - condition: state
+            entity_id: binary_sensor.garage_door
+            state: 'on'
+          sequence:
+          - action: lock.unlock
+            target:
+              entity_id: lock.volvo_xc60_lock
+            data: {}
+        default:
+        - alias: Wait for garage door contact sensor to open (up to 10 minutes)
+          wait_for_trigger:
+          - trigger: state
+            entity_id: binary_sensor.garage_door
+            to: 'on'
+          timeout:
+            minutes: 10
+          continue_on_timeout: true
+        - alias: Unlock doors once garage door is open
+          if:
+          - condition: template
+            value_template: '{{ wait.completed }}'
+          then:
+          - action: lock.unlock
+            target:
+              entity_id: lock.volvo_xc60_lock
+            data: {}
   mode: single
 script_good_morning_routine_core:
   alias: 'Script: Good Morning Routine Core'
