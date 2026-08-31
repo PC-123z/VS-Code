@@ -8670,13 +8670,11 @@
     action: counter.reset
     target:
       entity_id: counter.good_morning_announcements
-  - alias: Clear any left-over armed announcement. Only Arm Second turns this flag
-      on and only Between Songs turns it off, so if a run ended after motion armed
-      the second announcement but before a track boundary arrived (occupancy timeout,
-      music stopped at the speaker, or the hard cap), the flag stayed on overnight.
-      The next morning the counter resets to zero, so the first track change would
-      then fire Between Songs as announcement number one - a full greeting at a boundary,
-      on top of the routine's own announcement on motion.
+  - alias: Clear the announcement-in-progress flag in case a run ended mid-greeting.
+      The announcement branch holds this on only while it is actually speaking, and
+      the music branch waits on it before replacing the queue, so a stale 'on' left
+      behind by a cancelled run would stall the phase 2 playlist load for its full
+      timeout the next morning.
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.good_morning_announcement_pending
@@ -8926,7 +8924,11 @@
           target:
             entity_id: input_boolean.good_morning_expected_pause
         else:
-        - alias: Ramp volume to 0.20 over ~2.5 minutes
+        - alias: 'Ramp volume from 0.05 to 0.15 over ~2.5 minutes. The level is the
+            max of the ramp step and the live volume so this can only ever raise it:
+            the announcement branch lifts the Sonos to the announcement floor before
+            it speaks, and a bare index-based ramp would drag it straight back down
+            on the next step and leave the greeting almost inaudible.'
           repeat:
             count: 8
             sequence:
@@ -8936,22 +8938,26 @@
               target:
                 entity_id: media_player.bedroom
               data:
-                volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3)
-                  }}'
-        - alias: Wait for the opening track to finish rather than for motion. With
-            a one-track queue and repeat off, Music Assistant goes idle when the song
-            ends, so idle is the reliable "track finished" signal. The announcement
-            then lands in real silence between the two phases - nothing to duck, nothing
-            to pause and resume, and no part of a song lost underneath it. Timeout
-            is generously longer than the track and simply falls through.
-          wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') }}'
+                volume_level: '{{ [[0.05 + (repeat.index * 0.0125), 0.15] | min, state_attr(''media_player.bedroom'',
+                  ''volume_level'') | float(0.05)] | max | round(3) }}'
+        - alias: 'Wait for the opening track to finish. Idle is not a usable signal
+            for this any more: Music Assistant auto-fills a queue that runs dry with
+            similar tracks ("Fetching similar tracks for queue Bedroom based on: Here
+            Comes The Sun" in the MA log), so a one-track queue never goes idle and
+            the old wait_template burned its full 8-minute timeout every single morning.
+            Watching the content id works either way - it changes the moment the opener
+            ends, whether the queue auto-fills or genuinely stops. An MA announcement
+            does not change it, so speaking over the track cannot end this wait early.'
+          wait_template: '{% set cid = state_attr(''media_player.bedroom_2'', ''media_content_id'')
+            or '''' %} {{ is_state(''media_player.bedroom_2'', ''idle'') or (cid !=
+            '''' and ''xUNqsfFUwhY'' not in cid) }}'
           timeout:
-            minutes: 8
+            minutes: 6
           continue_on_timeout: true
         - alias: Bail out if the routine was cancelled while the opening track played
             - Goodbye, the sleep flag, or the hard cap can all clear good_morning_active
-            mid-run, and without this check the announcement and the whole shuffled
-            playlist would still start up afterwards.
+            mid-run, and without this check the whole shuffled playlist would still
+            start up afterwards.
           if:
           - condition: state
             entity_id: input_boolean.good_morning_active
@@ -8962,62 +8968,27 @@
               entity_id: input_boolean.good_morning_expected_pause
           - stop: Routine was cancelled during the opening track
           else:
-          - alias: Count the first announcement before speaking it, so the Between
-              Songs automation knows the next one is number two and keeps it time-only.
-            action: counter.increment
-            target:
-              entity_id: counter.good_morning_announcements
-          - alias: Turn shuffle on BEFORE speaking. The player is idle here - the
-              opening track has finished and the playlist has not been loaded yet
-              - so there is no playback and no pre-buffered next track to invalidate,
-              which is the mistake that used to put the same song second every morning.
-              Doing it now rather than after the announcement gives it the entire
-              spoken message to take effect, so no delay is needed before the music
-              starts.
+          - alias: Never swap the queue out from under a greeting. The announcement
+              branch holds input_boolean.good_morning_announcement_pending on for as
+              long as it is speaking, so if the opener happens to end mid-greeting
+              this waits it out instead of cutting it off with a queue replace.
+            wait_template: '{{ is_state(''input_boolean.good_morning_announcement_pending'',
+              ''off'') }}'
+            timeout:
+              seconds: 60
+            continue_on_timeout: true
+          - alias: Turn shuffle on BEFORE the playlist loads, never after. Toggling
+              shuffle once playback is under way invalidates Music Assistant's pre-buffered
+              next track, which is what used to play a few seconds of one song and
+              then jump to a different one at the first boundary.
             continue_on_error: true
             action: media_player.shuffle_set
             target:
               entity_id: media_player.bedroom_2
             data:
               shuffle: true
-          - alias: 'First announcement, spoken into the gap after the opening track
-              has finished. No pause or resume is needed any more because nothing
-              is playing - which is the whole point of splitting the morning into
-              two phases. Speaking over music never worked properly: Music Assistant
-              keeps the stream running underneath an announcement and only stops refreshing
-              the reported position, so roughly twenty seconds of song played unheard
-              and it picked up far further in, sounding like a different song.'
-            action: tts.speak
-            target:
-              entity_id: tts.piper
-            data:
-              cache: false
-              media_player_entity_id: media_player.bedroom_2
-              message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
-                if (today_fc is defined and today_fc and ''weather.forecast_home''
-                in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
-                Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M
-                %p'') }}. Right now it''s {{ states(''weather.forecast_home'') | replace(''-'',
-                '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'')
-                | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
-                | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
-                | round | int }} and a low of {{ (f.templow | float(0)) | round |
-                int }} degrees.{% endif %} I hope you have a wonderful day!'
-          - alias: Wait for the announcement to finish speaking. The player reports
-              'playing' while Piper talks and drops back to 'idle' when it is done,
-              so idle returning is the end-of-announcement signal. Generous timeout
-              that simply falls through.
-            wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') }}'
-            timeout:
-              seconds: 120
-            continue_on_timeout: true
-          - alias: PHASE 2 - load the shuffled playlist the moment the announcement
-              stops, with no padding in between. Shuffle was already switched on before
-              the announcement, so it has had the whole spoken message to take effect
-              and the queue is built shuffled from the very first item. Shuffle is
-              never toggled once playback is under way, which is what used to invalidate
-              Music Assistant's pre-buffered next track and make the first boundary
-              play a few seconds of one song before jumping to another.
+          - alias: PHASE 2 - load the shuffled playlist. Shuffle is already on, so
+              the queue is built shuffled from the very first item.
             continue_on_error: true
             action: music_assistant.play_media
             target:
@@ -9027,9 +8998,8 @@
               media_type: playlist
               enqueue: replace
           - alias: 'Repeat back on. Deliberately set AFTER the playlist loads rather
-              than before: it only matters once all 770 tracks have played, so it
-              needs no settling time, and leaving it until now means nothing has to
-              be waited on between the announcement ending and the music starting.'
+              than before: it only matters once all 770 tracks have played, so it needs
+              no settling time.'
             continue_on_error: true
             action: media_player.repeat_set
             target:
@@ -9140,6 +9110,152 @@
                   target:
                     entity_id: input_boolean.good_morning_active
                 - stop: Room cleared for 15 minutes - routine complete
+    - sequence:
+      - alias: 'ANNOUNCEMENTS. Deliberately their own parallel branch so the greeting
+          never depends on the state of the music queue. The previous design waited
+          for the player to report idle before speaking, but Music Assistant auto-fills
+          a queue that runs dry, so idle never arrived and the announcement only landed
+          when an 8-minute timeout expired - about eleven minutes into the routine
+          (06:56 and 07:41 on 2026-08-31), long after the room had emptied. Nothing
+          in this branch waits on queue state: the only inputs are the music being
+          up, motion, and the clock. First wait for the music, so there is something
+          to speak over.'
+        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
+        timeout:
+          minutes: 4
+        continue_on_timeout: true
+      - alias: If the music never came up, the music branch has already spoken its
+          own music-failed greeting on the Sonos entity directly - there is nothing
+          to add here, so end this branch.
+        condition: state
+        entity_id: media_player.bedroom_2
+        state: playing
+      - alias: First announcement fires on motion. The radar is normally already reporting
+          a moving target at wake-up time, in which case this falls straight through
+          and the greeting lands a few seconds after the music starts; otherwise it
+          waits for the first movement in the room.
+        if:
+        - condition: state
+          entity_id: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
+          state: 'off'
+        then:
+        - wait_for_trigger:
+          - trigger: state
+            entity_id: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
+            to: 'on'
+          timeout:
+            minutes: 20
+          continue_on_timeout: true
+      - alias: Nothing to announce if the routine was cancelled while we waited for
+          motion
+        condition: state
+        entity_id: input_boolean.good_morning_active
+        state: 'on'
+      - alias: 'Presence check that tolerates the sensor group''s flicker: it drops
+          out for a second at a time all morning (see any morning''s history for binary_sensor.big_bedroom_sensor_group),
+          so a bare state condition would abort the announcement at random. Treat the
+          room as occupied if the group is on now or was on within the last two minutes.'
+        condition: template
+        value_template: '{% set s = states.binary_sensor.big_bedroom_sensor_group %}
+          {{ s is not none and (s.state == ''on'' or (now() - s.last_changed).total_seconds()
+          < 120) }}'
+      - alias: Get today's daily forecast for the greeting
+        continue_on_error: true
+        action: weather.get_forecasts
+        target:
+          entity_id: weather.forecast_home
+        data:
+          type: daily
+        response_variable: today_fc
+      - alias: Hold the announcement-in-progress flag while speaking, so the music
+          branch cannot replace the queue underneath the greeting
+        action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.good_morning_announcement_pending
+      - alias: 'Lift the Sonos to the announcement floor first. Music Assistant''s
+          Bedroom player uses the percentual announce strategy (announce_volume 85,
+          min 15, max 75), so it derives the announcement level from whatever the player
+          volume happens to be at that moment. At the bottom of the wake-up ramp that
+          is 0.05, which clamps the greeting down to the 15% floor and makes it barely
+          audible. The ramp above only ever raises from here, so this is not walked
+          back.'
+        continue_on_error: true
+        action: media_player.volume_set
+        target:
+          entity_id: media_player.bedroom
+        data:
+          volume_level: 0.15
+      - alias: 'First announcement - the full greeting, spoken over the music. tts.speak
+          on the Music Assistant entity goes through MA''s native announcement path
+          (the MA log line is "Playback announcement to player Bedroom"), which ducks
+          the Sonos for the message and restores it afterwards. Nothing is paused,
+          so there is no queue position to resume and nothing that can leave playback
+          stuck.'
+        continue_on_error: true
+        action: tts.speak
+        target:
+          entity_id: tts.piper
+        data:
+          cache: false
+          media_player_entity_id: media_player.bedroom_2
+          message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if
+            (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc)
+            else [] %} {% set f = fc[0] if fc else none %} Good morning! Today is {{
+            now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M
+            %p'') }}. Right now it''s {{ states(''weather.forecast_home'') | replace(''-'',
+            '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'')
+            | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
+            | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
+            | round | int }} and a low of {{ (f.templow | float(0)) | round | int }}
+            degrees.{% endif %} I hope you have a wonderful day!'
+      - alias: Count it - for the dashboard and for the two-per-morning cap the counter's
+          own maximum enforces
+        action: counter.increment
+        target:
+          entity_id: counter.good_morning_announcements
+      - alias: 'Hold the flag for roughly the length of the message. MA announcements
+          are audio clips on the Sonos side and report no completion back to Home Assistant,
+          so there is no state to wait on - a fixed hold sized to the greeting is the
+          predictable option, and all it gates is the phase 2 queue swap.'
+        delay:
+          seconds: 35
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.good_morning_announcement_pending
+      - alias: Eight minutes between the two announcements, measured from the first
+          one
+        delay:
+          minutes: 8
+      - alias: Second announcement only while the routine is still running
+        condition: state
+        entity_id: input_boolean.good_morning_active
+        state: 'on'
+      - alias: ...and only if the room is still occupied, using the same flicker-tolerant
+          check as the first announcement
+        condition: template
+        value_template: '{% set s = states.binary_sensor.big_bedroom_sensor_group %}
+          {{ s is not none and (s.state == ''on'' or (now() - s.last_changed).total_seconds()
+          < 120) }}'
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.good_morning_announcement_pending
+      - alias: Second announcement - time only, again spoken over the music
+        continue_on_error: true
+        action: tts.speak
+        target:
+          entity_id: tts.piper
+        data:
+          cache: false
+          media_player_entity_id: media_player.bedroom_2
+          message: 'The time is now {{ now().strftime(''%-I:%M %p'') }}.'
+      - action: counter.increment
+        target:
+          entity_id: counter.good_morning_announcements
+      - delay:
+          seconds: 12
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.good_morning_announcement_pending
     - sequence:
       - alias: Wait 5 minutes then restore AL
         delay:
@@ -10425,119 +10541,6 @@
         title: Bedroom audio didn't stop
         message: Music was still playing after the 35-minute sleep timer and 3 stop
           attempts on both entities - Sonos may have lost connection to Music Assistant.
-  mode: single
-- id: '1787223476469'
-  alias: 'Bedroom: Play Good Morning Announcement Between Songs'
-  description: Companion to the Good Morning Routine. That automation no longer calls
-    tts.speak on media_player.bedroom_2 directly on motion, because MA's duck/pause-resume
-    mid-track was hanging Sonos playback afterward (position would freeze and the
-    routine looked like it was replaying the same song). Instead it just arms input_boolean.good_morning_announcement_pending.
-    This automation waits for the queue to naturally land on a new track (media_title
-    change = between songs) and speaks the announcement then, so it never interrupts
-    a track mid-play.
-  triggers:
-  - trigger: state
-    entity_id: media_player.bedroom_2
-    attribute: media_title
-  conditions:
-  - condition: state
-    entity_id: input_boolean.good_morning_announcement_pending
-    state: 'on'
-  - condition: state
-    entity_id: input_boolean.good_morning_active
-    state: 'on'
-  - alias: Safety cap - never more than 2 announcements per cycle (belt-and-suspenders
-      alongside the counter's own maximum)
-    condition: numeric_state
-    entity_id: counter.good_morning_announcements
-    below: 2
-  actions:
-  - alias: Remember whether this is the first or the second announcement, before the
-      counter is incremented
-    variables:
-      announcement_number: '{{ (states(''counter.good_morning_announcements'') | int(0))
-        + 1 }}'
-  - alias: Disarm immediately so this can't double-fire on the next track change
-    action: input_boolean.turn_off
-    target:
-      entity_id: input_boolean.good_morning_announcement_pending
-  - alias: Count this announcement against the per-cycle cap
-    action: counter.increment
-    target:
-      entity_id: counter.good_morning_announcements
-  - alias: Short settle before speaking. This automation triggers on the media_title
-      change, which is the exact instant the next song starts - announcing at that
-      moment ducks the new song at position zero, so it replays its opening few seconds
-      and sounds like the track restarting. Music Assistant resumes an announcement
-      at the SAME position, so a brief wait means the song is properly underway and
-      simply picks up where it was ducked. Kept short so this still lands right after
-      the track change, as intended.
-    delay:
-      seconds: 10
-  - alias: Get today's daily forecast (only needed for the full first announcement)
-    if:
-    - condition: template
-      value_template: '{{ announcement_number == 1 }}'
-    then:
-    - continue_on_error: true
-      action: weather.get_forecasts
-      target:
-        entity_id: weather.forecast_home
-      data:
-        type: daily
-      response_variable: today_fc
-  - alias: Announcement - full greeting the first time, time only the second time.
-      Spoken directly over the playing track (no pause/resume) to match how the
-      first announcement actually sounds - Sonos/MA duck the volume for the TTS
-      and restore it after, same as when it plays over a track mid-song.
-    continue_on_error: true
-    action: tts.speak
-    target:
-      entity_id: tts.piper
-    data:
-      cache: false
-      media_player_entity_id: media_player.bedroom_2
-      message: '{% if announcement_number == 1 %}{% set fc = today_fc[''weather.forecast_home''][''forecast'']
-        if (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc)
-        else [] %} {% set f = fc[0] if fc else none %} Good morning! Today is {{ now().strftime(''%A,
-        %B %-d'') }} and the time is {{ now().strftime(''%-I:%M %p'') }}. Right now
-        it''s {{ states(''weather.forecast_home'') | replace(''-'', '' '') }} and
-        {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round
-        | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'',
-        '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and
-        a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Have
-        a great day!{% else %}The time is now {{ now().strftime(''%-I:%M %p'') }}.{%
-        endif %}'
-  mode: single
-- id: '1787224007804'
-  alias: 'Bedroom: Arm Second Good Morning Announcement'
-  description: The first announcement is armed by the Good Morning Routine itself
-    on the first motion of the morning. This automation arms the second (and last)
-    one - it fires on any later motion, but only once the first announcement has actually
-    played (counter at exactly 1) and only while nothing is already armed, so it can't
-    stack a second arm before the first has fired or sneak in a third. The counter's
-    own maximum plus the numeric_state condition on the companion "Between Songs"
-    automation are the hard stop past two per cycle.
-  triggers:
-  - trigger: state
-    entity_id: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
-    to: 'on'
-  conditions:
-  - condition: state
-    entity_id: input_boolean.good_morning_active
-    state: 'on'
-  - condition: state
-    entity_id: counter.good_morning_announcements
-    state: '1'
-  - condition: state
-    entity_id: input_boolean.good_morning_announcement_pending
-    state: 'off'
-  actions:
-  - alias: Arm the second announcement - the Between Songs automation will fire it
-      at the next track change
-    action: input_boolean.turn_on
-    target:
-      entity_id: input_boolean.good_morning_announcement_pending
   mode: single
 - id: '1787404648055'
   alias: 'Bedroom: Repeat-Track Watchdog'
