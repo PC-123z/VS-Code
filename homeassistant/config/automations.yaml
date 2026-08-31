@@ -5237,10 +5237,10 @@
           - condition: state
             entity_id: media_player.bedroom_2
             state: playing
-  - alias: Set bedroom fan to 25%
+  - alias: Set bedroom fan to 50%
     action: fan.turn_on
     data:
-      percentage: 25
+      percentage: 50
     target:
       entity_id: fan.big_bedroom_fan
     enabled: true
