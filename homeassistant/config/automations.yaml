@@ -9116,18 +9116,26 @@
           when an 8-minute timeout expired - about eleven minutes into the routine
           (06:56 and 07:41 on 2026-08-31), long after the room had emptied. Nothing
           in this branch waits on queue state: the only inputs are the music being
-          up, motion, and the clock. First wait for the music, so there is something
-          to speak over.'
-        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
+          up, motion, and the clock. First wait for the routine''s OWN opening track
+          to be playing, matched on its track id rather than just on the player being
+          playing - overnight sleep audio can still be running at 06:45, and a bare
+          playing check would greet the room over that, seconds before the routine
+          unjoins the speaker and replaces the queue underneath it. The same track
+          id appears in the play_media call in the music branch and in that branch''s
+          end-of-opener wait; all three move together if the opening song changes.'
+        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and ''xUNqsfFUwhY''
+          in (state_attr(''media_player.bedroom_2'', ''media_content_id'') or '''')
+          }}'
         timeout:
           minutes: 4
         continue_on_timeout: true
-      - alias: If the music never came up, the music branch has already spoken its
-          own music-failed greeting on the Sonos entity directly - there is nothing
+      - alias: If the opening track never came up, the music branch has already spoken
+          its own music-failed greeting on the Sonos entity directly - there is nothing
           to add here, so end this branch.
-        condition: state
-        entity_id: media_player.bedroom_2
-        state: playing
+        condition: template
+        value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and ''xUNqsfFUwhY''
+          in (state_attr(''media_player.bedroom_2'', ''media_content_id'') or '''')
+          }}'
       - alias: First announcement fires on motion. The radar is normally already reporting
           a moving target at wake-up time, in which case this falls straight through
           and the greeting lands a few seconds after the music starts; otherwise it
