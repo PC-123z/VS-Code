@@ -8926,7 +8926,8 @@
           target:
             entity_id: input_boolean.good_morning_expected_pause
         else:
-        - alias: Ramp volume from 0.05 to 0.15 over ~2.5 minutes
+        - alias: Ramp volume from 0.05 to 0.15 over ~2.5 minutes (8 steps of 18s).
+            The announcements branch waits for this to reach 0.15 before speaking.
           repeat:
             count: 8
             sequence:
@@ -9136,10 +9137,23 @@
         value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and ''xUNqsfFUwhY''
           in (state_attr(''media_player.bedroom_2'', ''media_content_id'') or '''')
           }}'
-      - alias: First announcement fires on motion. The radar is normally already reporting
-          a moving target at wake-up time, in which case this falls straight through
-          and the greeting lands a few seconds after the music starts; otherwise it
-          waits for the first movement in the room.
+      - alias: 'Hold the greeting until the wake-up volume ramp has finished, so it
+          never lands over near-silent music. The ramp climbs media_player.bedroom
+          from 0.05 in eight 18-second steps and caps at 0.15, which is also the level
+          the occupancy loop holds for the rest of the routine - the alias on that
+          ramp step used to claim 0.20, but the template has always capped at 0.15.
+          This threshold must move with that cap if the ramp ceiling is ever changed.
+          Falls through on timeout so a stalled ramp cannot swallow the announcement
+          entirely.'
+        wait_template: '{{ (state_attr(''media_player.bedroom'', ''volume_level'')
+          | float(0)) >= 0.15 }}'
+        timeout:
+          minutes: 5
+        continue_on_timeout: true
+      - alias: First announcement then fires on motion. If the room is already occupied
+          when the ramp finishes the radar is normally already reporting a moving target,
+          so this falls straight through and the greeting lands as soon as the music
+          is up to volume; otherwise it waits for the first movement in the room.
         if:
         - condition: state
           entity_id: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
