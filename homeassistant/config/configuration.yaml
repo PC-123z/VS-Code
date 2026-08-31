@@ -60,6 +60,18 @@ timer:
   bedroom_sleep_audio:
     name: "Bedroom Sleep Audio Auto-Stop"
     duration: "00:35:00"
+  funtime_bedtime_countdown:
+    name: "Funtime Bedtime Countdown"
+    duration: "01:00:00"
+
+counter:
+  funtime_playlist_index:
+    name: "Funtime Playlist Index"
+    initial: 1
+    minimum: 1
+    maximum: 4
+    step: 1
+    restore: true
 
 # Wake on LAN Switch
 switch:

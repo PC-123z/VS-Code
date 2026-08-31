@@ -401,3 +401,68 @@ goodbye_routine_alexa:
   mode: single
   icon: mdi:amazon-alexa
   description: ''
+funtime_play_playlist:
+  alias: 'Funtime - Play Playlist (with retry)'
+  description: Shared by the Fun Button automations - sets bedroom volume, plays
+    the given Music Assistant media_id on media_player.bedroom_2, retries once if
+    playback doesn't start, and notifies if it still hasn't started after two tries.
+  fields:
+    media_id:
+      description: Music Assistant media_id URI to play (e.g. spotify://playlist/... or ytmusic://playlist/...)
+      example: spotify://playlist/1GrWlZZ7Kb49epRDuiXUCz
+  sequence:
+  - alias: Set Sonos volume to 10%
+    action: media_player.volume_set
+    target:
+      entity_id: media_player.bedroom_2
+    data:
+      volume_level: 0.1
+  - alias: Play playlist via Music Assistant (with retry)
+    repeat:
+      sequence:
+      - continue_on_error: true
+        action: music_assistant.play_media
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          media_id: '{{ media_id }}'
+          media_type: playlist
+          radio_mode: false
+      - continue_on_error: true
+        action: media_player.shuffle_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          shuffle: true
+      - alias: Give playback a few seconds to start
+        wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
+        timeout:
+          seconds: 8
+        continue_on_timeout: true
+      until:
+      - alias: Exit the loop once it is playing, or after two attempts. Must be
+          an until condition, not a stop action - stop would end the whole script
+          run and skip every step after this repeat.
+        condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.bedroom
+          state: playing
+        - condition: template
+          value_template: '{{ repeat.index >= 2 }}'
+  - alias: Notify if music still isn't playing after retry
+    if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.bedroom
+        state: playing
+    then:
+    - action: notify.mobile_app_pc_iphone
+      data:
+        title: Fun Button music didn't start
+        message: Bedroom Sonos didn't start playing after two tries - speaker may
+          be offline.
+  mode: queued
+  max: 3
+  icon: mdi:playlist-music

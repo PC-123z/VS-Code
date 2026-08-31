@@ -9713,12 +9713,15 @@
   max: 10
 - id: '1778197535595'
   alias: 'Pico Center - Big Bedroom: Fun Button / Sexy Time'
-  description: 'Center circle press sets mood mode: deep red lighting at 40% (matching
-    Bedtime Button), bedroom fan to 50%, alarm to home, TV off. Music plays based
-    on time of day (before midnight = upbeat playlist, after midnight = chill album).
-    Raise button forces the opposite time-of-day playlist instead (was previously
-    Bright White Override - removed since this remote can''t reliably do hold/multi-tap).
-    After 60 minutes, automatically triggers the Bedtime Button routine for wind-down.'
+  description: 'Center circle press, only when starting a fresh session (timer.funtime_bedtime_countdown
+    idle), sets mood mode: deep red lighting at 40% (matching Bedtime Button), bedroom
+    fan to 50%, alarm to home, TV off, and plays playlist 1 (Spotify), resetting
+    counter.funtime_playlist_index to 1. Raise button always forces the opposite
+    time-of-day playlist (chill vs upbeat) regardless of session state, and sets
+    the counter to 4. Repeat center presses within the hour are handled by the separate
+    "Fun Button - Cycle Playlist" automation instead, which only changes music. Every
+    press/hold (re)starts the shared 1-hour timer.funtime_bedtime_countdown, which
+    triggers the Bedtime Button routine when it runs out untouched.'
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
@@ -9732,7 +9735,10 @@
     subtype: raise
     trigger: device
     id: hold
-  conditions: []
+  conditions:
+  - condition: template
+    value_template: '{{ trigger.id == ''hold'' or is_state(''timer.funtime_bedtime_countdown'',
+      ''idle'') }}'
   actions:
   - alias: Disable motion automation
     action: automation.turn_off
