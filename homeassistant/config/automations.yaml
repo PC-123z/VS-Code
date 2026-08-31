@@ -9068,13 +9068,17 @@
               - delay:
                   seconds: 30
               else:
-              - alias: Wait 15 min to confirm room is truly clear
+              - alias: 'Wait 20 min to confirm the room is truly clear. The sensor
+                  group flickers off and on constantly while the room IS occupied,
+                  so this deliberately waits for an *unbroken* window with no ''on''
+                  transition at all rather than testing the state - any flicker back
+                  to on completes the wait and returns to the loop.'
                 wait_for_trigger:
                 - trigger: state
                   entity_id: binary_sensor.big_bedroom_sensor_group
                   to: 'on'
                 timeout:
-                  minutes: 15
+                  minutes: 20
                 continue_on_timeout: true
               - if:
                 - condition: template
@@ -9108,7 +9112,7 @@
                 - action: input_boolean.turn_off
                   target:
                     entity_id: input_boolean.good_morning_active
-                - stop: Room cleared for 15 minutes - routine complete
+                - stop: Room cleared for 20 minutes - routine complete
     - sequence:
       - alias: 'ANNOUNCEMENTS. Deliberately their own parallel branch so the greeting
           never depends on the state of the music queue. The previous design waited
@@ -9322,20 +9326,39 @@
             brightness_pct: 80
             transition: 5
     - sequence:
-      - alias: 60-minute hard cap timer
-        delay:
+      - alias: 'Hard cap, and the branch that lets the run actually end. This used
+          to be a blind hour-long delay, which kept the automation ''running'' long
+          after the routine was over: HA''s parallel step gathers every branch before
+          the occupancy loop''s stop can take effect, so on 2026-08-31 the routine
+          finished at 08:37:46 but the automation still reported current=1 at 08:38
+          and would have rejected a manual Alexa trigger until 09:15. Waiting on the
+          flag instead means this branch exits the moment the routine ends, freeing
+          the automation for re-triggering straight away.'
+        wait_template: '{{ is_state(''input_boolean.good_morning_active'', ''off'')
+          }}'
+        timeout:
           hours: 1
-      - continue_on_error: true
-        action: media_player.media_stop
-        target:
-          entity_id: media_player.bedroom_2
-      - continue_on_error: true
-        action: media_player.unjoin
-        target:
-          entity_id: media_player.bathroom_2
-      - action: input_boolean.turn_off
-        target:
+        continue_on_timeout: true
+      - alias: Only enforce the cap if we genuinely timed out at 60 minutes with the
+          routine still going. On a normal end the routine has already stopped the
+          music and cleared the flag, and re-running these here would be a no-op at
+          best - this is what keeps the branch from ever cutting music short.
+        if:
+        - condition: state
           entity_id: input_boolean.good_morning_active
+          state: 'on'
+        then:
+        - continue_on_error: true
+          action: media_player.media_stop
+          target:
+            entity_id: media_player.bedroom_2
+        - continue_on_error: true
+          action: media_player.unjoin
+          target:
+            entity_id: media_player.bathroom_2
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.good_morning_active
   mode: single
 - id: '1777890100001'
   alias: Heater Auto Off
