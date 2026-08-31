@@ -10486,24 +10486,11 @@
       data:
         type: daily
       response_variable: today_fc
-  - alias: Arm the expected-pause flag so the stop-on-idle/paused watchdog doesn't
-      treat this deliberate announcement pause as a manual stop
-    action: input_boolean.turn_on
-    target:
-      entity_id: input_boolean.good_morning_expected_pause
-  - alias: Pause the music properly before speaking. Music Assistant keeps the stream
-      running underneath an announcement and only stops refreshing the reported position,
-      so roughly twenty seconds of song get played unheard and it resumes far further
-      in, sounding like a different song. An explicit pause holds the song in place,
-      and parks the player in 'paused' which both track watchdogs ignore.
+  - alias: Announcement - full greeting the first time, time only the second time.
+      Spoken directly over the playing track (no pause/resume) to match how the
+      first announcement actually sounds - Sonos/MA duck the volume for the TTS
+      and restore it after, same as when it plays over a track mid-song.
     continue_on_error: true
-    action: media_player.media_pause
-    target:
-      entity_id: media_player.bedroom_2
-  - alias: Give the pause a moment to take effect on the Sonos side
-    delay:
-      seconds: 2
-  - alias: Announcement - full greeting the first time, time only the second time
     action: tts.speak
     target:
       entity_id: tts.piper
@@ -10521,29 +10508,6 @@
         a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Have
         a great day!{% else %}The time is now {{ now().strftime(''%-I:%M %p'') }}.{%
         endif %}'
-  - alias: Wait for the announcement to finish rather than guessing with a fixed delay.
-      Music Assistant reports 'playing' while it speaks and restores the paused state
-      it found afterwards, so waiting for 'paused' to return is what actually marks
-      the end of the announcement.
-    wait_template: '{{ is_state(''media_player.bedroom_2'', ''paused'') }}'
-    timeout:
-      seconds: 90
-    continue_on_timeout: true
-  - alias: Resume the song from exactly where it was paused
-    continue_on_error: true
-    action: media_player.media_play
-    target:
-      entity_id: media_player.bedroom_2
-  - alias: Disarm the expected-pause flag now that playback has resumed
-    action: input_boolean.turn_off
-    target:
-      entity_id: input_boolean.good_morning_expected_pause
-  - alias: Restore listening volume after announcement
-    action: media_player.volume_set
-    target:
-      entity_id: media_player.bedroom
-    data:
-      volume_level: 0.15
   mode: single
 - id: '1787224007804'
   alias: 'Bedroom: Arm Second Good Morning Announcement'
