@@ -31,10 +31,6 @@
                   "show_color_control": true,
                   "name": "Bedroom 2 - Fan Lights",
                   "icon": "mdi:ceiling-fan-light"
-                },
-                {
-                  "type": "tile",
-                  "entity": "binary_sensor.bedroom_2_sensor_group"
                 }
               ],
               "column_span": 1
@@ -132,6 +128,10 @@
                 {
                   "type": "heading",
                   "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.bedroom_2_sensor_group"
                 },
                 {
                   "type": "tile",
