@@ -131,13 +131,11 @@
               "cards": [
                 {
                   "type": "heading",
-                  "heading": "Showtime Light",
-                  "heading_style": "title",
-                  "icon": "mdi:spotlight-beam"
+                  "heading_style": "title"
                 },
                 {
                   "type": "tile",
-                  "entity": "light.showtime_light"
+                  "entity": "input_boolean.bedroom2_occupied"
                 }
               ]
             },
@@ -171,11 +169,13 @@
               "cards": [
                 {
                   "type": "heading",
-                  "heading_style": "title"
+                  "heading": "Showtime Light",
+                  "heading_style": "title",
+                  "icon": "mdi:spotlight-beam"
                 },
                 {
                   "type": "tile",
-                  "entity": "input_boolean.bedroom2_occupied"
+                  "entity": "light.showtime_light"
                 }
               ]
             }
