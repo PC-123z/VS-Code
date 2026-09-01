@@ -8148,96 +8148,100 @@
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.welcome_home_active
-      - alias: Set kitchen volume to 0.20
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.kitchen
-        data:
-          volume_level: 0.2
-      - alias: Set bedroom volume to 0.20
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.bedroom
-        data:
-          volume_level: 0.2
-      - alias: Set office volume to 0.20
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.office
-        data:
-          volume_level: 0.2
-      - alias: Play morning music (6 AM - 12 PM)
-        if:
-        - condition: template
-          value_template: '{{ current_hour|int < 12 }}'
-        then:
-        - continue_on_error: true
-          action: music_assistant.play_media
-          target:
-            device_id: b42d3b4542fb52c759f5aef09d3f6dad
-          data:
-            media_id: ytmusic://album/MPREb_Mxvr7f8ssSQ
-            media_type: album
-        - continue_on_error: true
-          action: media_player.shuffle_set
-          target:
-            device_id: b42d3b4542fb52c759f5aef09d3f6dad
-          data:
-            shuffle: true
-      - alias: Play afternoon music (12 PM - 5 PM)
-        if:
-        - condition: template
-          value_template: '{{ current_hour|int >= 12 and current_hour|int < 17 }}'
-        then:
-        - continue_on_error: true
-          action: music_assistant.play_media
-          target:
-            device_id: b42d3b4542fb52c759f5aef09d3f6dad
-          data:
-            media_id: ytmusic://album/MPREb_S3lOF926Vx1
-            media_type: album
-        - continue_on_error: true
-          action: media_player.shuffle_set
-          target:
-            device_id: b42d3b4542fb52c759f5aef09d3f6dad
-          data:
-            shuffle: true
-      - alias: Play evening music (5 PM - 8 PM)
-        if:
-        - condition: template
-          value_template: '{{ current_hour|int >= 17 and current_hour|int < 20 }}'
-        then:
-        - continue_on_error: true
-          action: music_assistant.play_media
-          target:
-            device_id: b42d3b4542fb52c759f5aef09d3f6dad
-          data:
-            media_id: ytmusic://album/MPREb_di7Fj3Fiafj
-            media_type: album
-        - continue_on_error: true
-          action: media_player.shuffle_set
-          target:
-            device_id: b42d3b4542fb52c759f5aef09d3f6dad
-          data:
-            shuffle: true
-      - alias: Play late night music (8 PM - 10 PM)
-        if:
-        - condition: template
-          value_template: '{{ current_hour|int >= 20 }}'
-        then:
-        - continue_on_error: true
-          action: music_assistant.play_media
-          target:
-            device_id: b42d3b4542fb52c759f5aef09d3f6dad
-          data:
-            media_id: ytmusic://album/MPREb_VkHTY8TFW8V
-            media_type: album
-        - continue_on_error: true
-          action: media_player.shuffle_set
-          target:
-            device_id: b42d3b4542fb52c759f5aef09d3f6dad
-          data:
-            shuffle: true
+      - alias: Start kitchen music at low volume, then ramp to a capped 0.15 over
+          60 seconds while music starts in parallel - never blast whatever volume
+          was left over from before, and never exceed 0.15 regardless
+        parallel:
+        - sequence:
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.kitchen
+            data:
+              volume_level: 0.02
+          - repeat:
+              count: 5
+              sequence:
+              - delay:
+                  seconds: 12
+              - action: media_player.volume_set
+                target:
+                  entity_id: media_player.kitchen
+                data:
+                  volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n
+                    \   0.15] | min | round(3) }}"
+        - sequence:
+          - alias: Play morning music (6 AM - 12 PM)
+            if:
+            - condition: template
+              value_template: '{{ current_hour|int < 12 }}'
+            then:
+            - continue_on_error: true
+              action: music_assistant.play_media
+              target:
+                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+              data:
+                media_id: ytmusic://album/MPREb_Mxvr7f8ssSQ
+                media_type: album
+            - continue_on_error: true
+              action: media_player.shuffle_set
+              target:
+                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+              data:
+                shuffle: true
+          - alias: Play afternoon music (12 PM - 5 PM)
+            if:
+            - condition: template
+              value_template: '{{ current_hour|int >= 12 and current_hour|int < 17 }}'
+            then:
+            - continue_on_error: true
+              action: music_assistant.play_media
+              target:
+                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+              data:
+                media_id: ytmusic://album/MPREb_S3lOF926Vx1
+                media_type: album
+            - continue_on_error: true
+              action: media_player.shuffle_set
+              target:
+                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+              data:
+                shuffle: true
+          - alias: Play evening music (5 PM - 8 PM)
+            if:
+            - condition: template
+              value_template: '{{ current_hour|int >= 17 and current_hour|int < 20 }}'
+            then:
+            - continue_on_error: true
+              action: music_assistant.play_media
+              target:
+                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+              data:
+                media_id: ytmusic://album/MPREb_di7Fj3Fiafj
+                media_type: album
+            - continue_on_error: true
+              action: media_player.shuffle_set
+              target:
+                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+              data:
+                shuffle: true
+          - alias: Play late night music (8 PM - 10 PM)
+            if:
+            - condition: template
+              value_template: '{{ current_hour|int >= 20 }}'
+            then:
+            - continue_on_error: true
+              action: music_assistant.play_media
+              target:
+                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+              data:
+                media_id: ytmusic://album/MPREb_VkHTY8TFW8V
+                media_type: album
+            - continue_on_error: true
+              action: media_player.shuffle_set
+              target:
+                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+              data:
+                shuffle: true
       continue_on_error: true
   mode: queued
   max: 4
@@ -8416,18 +8420,37 @@
     state: 'on'
   actions:
   - choose:
-    - alias: Bedroom 2 sensor - join office speaker
+    - alias: Bedroom 2 sensor - join office speaker at a capped, ramped volume
+          rather than whatever it was left at last
       conditions:
       - condition: trigger
         id: bedroom_2_motion
       sequence:
+      - action: media_player.volume_set
+        target:
+          entity_id: media_player.office
+        data:
+          volume_level: 0.02
       - action: media_player.join
         target:
           entity_id: media_player.kitchen
         data:
           group_members:
           - media_player.office
-    - alias: Big bedroom sensor - join bedroom speaker
+      - alias: Ramp office volume up to a capped 0.15 over 60 seconds
+        repeat:
+          count: 5
+          sequence:
+          - delay:
+              seconds: 12
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.office
+            data:
+              volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n
+                \   0.15] | min | round(3) }}"
+    - alias: Big bedroom sensor - join bedroom speaker at a capped, ramped volume
+          rather than whatever it was left at last
       conditions:
       - condition: trigger
         id: big_bedroom_motion
@@ -8436,12 +8459,29 @@
         entity_id: input_boolean.big_bedroom_asleep
         state: 'off'
       sequence:
+      - action: media_player.volume_set
+        target:
+          entity_id: media_player.bedroom
+        data:
+          volume_level: 0.02
       - action: media_player.join
         target:
           entity_id: media_player.kitchen
         data:
           group_members:
           - media_player.bedroom
+      - alias: Ramp bedroom volume up to a capped 0.15 over 60 seconds
+        repeat:
+          count: 5
+          sequence:
+          - delay:
+              seconds: 12
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.bedroom
+            data:
+              volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n
+                \   0.15] | min | round(3) }}"
   mode: single
 - id: '1777520160440'
   alias: 'Living Room: Unoccupied Shutoff'
