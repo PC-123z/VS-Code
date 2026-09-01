@@ -12,9 +12,9 @@
     (the unjoin at the start, and the phase 1 to phase 2 queue replace) and off again
     once playback resumes, so this automation only reacts to a stop it didn't cause.
     Announcements no longer pause anything - they are spoken over the music through
-    Music Assistant's own announcement path, so they create no idle window at all. Does not touch this automation's or the Good Morning Routine
-    automation's enabled state, so scheduled/manual runs still work normally in the
-    future.
+    Music Assistant's own announcement path, so they create no idle window at all.
+    Does not touch this automation's or the Good Morning Routine automation's enabled
+    state, so scheduled/manual runs still work normally in the future.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
@@ -8191,7 +8191,8 @@
           - alias: Play afternoon music (12 PM - 5 PM)
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 12 and current_hour|int < 17 }}'
+              value_template: '{{ current_hour|int >= 12 and current_hour|int < 17
+                }}'
             then:
             - continue_on_error: true
               action: music_assistant.play_media
@@ -8209,7 +8210,8 @@
           - alias: Play evening music (5 PM - 8 PM)
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 17 and current_hour|int < 20 }}'
+              value_template: '{{ current_hour|int >= 17 and current_hour|int < 20
+                }}'
             then:
             - continue_on_error: true
               action: music_assistant.play_media
@@ -8420,8 +8422,8 @@
     state: 'on'
   actions:
   - choose:
-    - alias: Bedroom 2 sensor - join office speaker at a capped, ramped volume
-          rather than whatever it was left at last
+    - alias: Bedroom 2 sensor - join office speaker at a capped, ramped volume rather
+        than whatever it was left at last
       conditions:
       - condition: trigger
         id: bedroom_2_motion
@@ -8447,10 +8449,10 @@
             target:
               entity_id: media_player.office
             data:
-              volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n
-                \   0.15] | min | round(3) }}"
+              volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n    0.15]
+                | min | round(3) }}"
     - alias: Big bedroom sensor - join bedroom speaker at a capped, ramped volume
-          rather than whatever it was left at last
+        rather than whatever it was left at last
       conditions:
       - condition: trigger
         id: big_bedroom_motion
@@ -8480,8 +8482,8 @@
             target:
               entity_id: media_player.bedroom
             data:
-              volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n
-                \   0.15] | min | round(3) }}"
+              volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n    0.15]
+                | min | round(3) }}"
   mode: single
 - id: '1777520160440'
   alias: 'Living Room: Unoccupied Shutoff'
@@ -8679,7 +8681,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 06:45:00
+    at: 07:45:00
     weekday:
     - mon
     - tue
@@ -9008,8 +9010,8 @@
           - stop: Routine was cancelled during the opening track
           else:
           - alias: Never swap the queue out from under a greeting. The announcement
-              branch holds input_boolean.good_morning_announcement_pending on for as
-              long as it is speaking, so if the opener happens to end mid-greeting
+              branch holds input_boolean.good_morning_announcement_pending on for
+              as long as it is speaking, so if the opener happens to end mid-greeting
               this waits it out instead of cutting it off with a queue replace.
             wait_template: '{{ is_state(''input_boolean.good_morning_announcement_pending'',
               ''off'') }}'
@@ -9037,8 +9039,8 @@
               media_type: playlist
               enqueue: replace
           - alias: 'Repeat back on. Deliberately set AFTER the playlist loads rather
-              than before: it only matters once all 770 tracks have played, so it needs
-              no settling time.'
+              than before: it only matters once all 770 tracks have played, so it
+              needs no settling time.'
             continue_on_error: true
             action: media_player.repeat_set
             target:
@@ -9108,11 +9110,11 @@
               - delay:
                   seconds: 30
               else:
-              - alias: 'Wait 20 min to confirm the room is truly clear. The sensor
+              - alias: Wait 20 min to confirm the room is truly clear. The sensor
                   group flickers off and on constantly while the room IS occupied,
-                  so this deliberately waits for an *unbroken* window with no ''on''
+                  so this deliberately waits for an *unbroken* window with no 'on'
                   transition at all rather than testing the state - any flicker back
-                  to on completes the wait and returns to the loop.'
+                  to on completes the wait and returns to the loop.
                 wait_for_trigger:
                 - trigger: state
                   entity_id: binary_sensor.big_bedroom_sensor_group
@@ -9178,26 +9180,27 @@
           its own music-failed greeting on the Sonos entity directly - there is nothing
           to add here, so end this branch.
         condition: template
-        value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and ''xUNqsfFUwhY''
-          in (state_attr(''media_player.bedroom_2'', ''media_content_id'') or '''')
-          }}'
-      - alias: 'Hold the greeting until the wake-up volume ramp has finished, so it
+        value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and
+          ''xUNqsfFUwhY'' in (state_attr(''media_player.bedroom_2'', ''media_content_id'')
+          or '''') }}'
+      - alias: Hold the greeting until the wake-up volume ramp has finished, so it
           never lands over near-silent music. The ramp climbs media_player.bedroom
           from 0.05 in eight 18-second steps and caps at 0.15, which is also the level
           the occupancy loop holds for the rest of the routine - the alias on that
           ramp step used to claim 0.20, but the template has always capped at 0.15.
           This threshold must move with that cap if the ramp ceiling is ever changed.
           Falls through on timeout so a stalled ramp cannot swallow the announcement
-          entirely.'
+          entirely.
         wait_template: '{{ (state_attr(''media_player.bedroom'', ''volume_level'')
           | float(0)) >= 0.15 }}'
         timeout:
           minutes: 5
         continue_on_timeout: true
       - alias: First announcement then fires on motion. If the room is already occupied
-          when the ramp finishes the radar is normally already reporting a moving target,
-          so this falls straight through and the greeting lands as soon as the music
-          is up to volume; otherwise it waits for the first movement in the room.
+          when the ramp finishes the radar is normally already reporting a moving
+          target, so this falls straight through and the greeting lands as soon as
+          the music is up to volume; otherwise it waits for the first movement in
+          the room.
         if:
         - condition: state
           entity_id: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
@@ -9217,11 +9220,12 @@
         state: 'on'
       - alias: 'Presence check that tolerates the sensor group''s flicker: it drops
           out for a second at a time all morning (see any morning''s history for binary_sensor.big_bedroom_sensor_group),
-          so a bare state condition would abort the announcement at random. Treat the
-          room as occupied if the group is on now or was on within the last two minutes.'
+          so a bare state condition would abort the announcement at random. Treat
+          the room as occupied if the group is on now or was on within the last two
+          minutes.'
         condition: template
-        value_template: '{% set s = states.binary_sensor.big_bedroom_sensor_group %}
-          {{ s is not none and (s.state == ''on'' or (now() - s.last_changed).total_seconds()
+        value_template: '{% set s = states.binary_sensor.big_bedroom_sensor_group
+          %} {{ s is not none and (s.state == ''on'' or (now() - s.last_changed).total_seconds()
           < 120) }}'
       - alias: Get today's daily forecast for the greeting
         continue_on_error: true
@@ -9236,12 +9240,12 @@
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.good_morning_announcement_pending
-      - alias: 'First announcement - the full greeting, spoken over the music. tts.speak
-          on the Music Assistant entity goes through MA''s native announcement path
+      - alias: First announcement - the full greeting, spoken over the music. tts.speak
+          on the Music Assistant entity goes through MA's native announcement path
           (the MA log line is "Playback announcement to player Bedroom"), which ducks
           the Sonos for the message and restores it afterwards. Nothing is paused,
           so there is no queue position to resume and nothing that can leave playback
-          stuck.'
+          stuck.
         continue_on_error: true
         action: tts.speak
         target:
@@ -9249,25 +9253,25 @@
         data:
           cache: false
           media_player_entity_id: media_player.bedroom_2
-          message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if
-            (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc)
-            else [] %} {% set f = fc[0] if fc else none %} Good morning! Today is {{
-            now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M
+          message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
+            if (today_fc is defined and today_fc and ''weather.forecast_home'' in
+            today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
+            Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M
             %p'') }}. Right now it''s {{ states(''weather.forecast_home'') | replace(''-'',
             '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'')
             | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
             | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
-            | round | int }} and a low of {{ (f.templow | float(0)) | round | int }}
-            degrees.{% endif %} I hope you have a wonderful day!'
+            | round | int }} and a low of {{ (f.templow | float(0)) | round | int
+            }} degrees.{% endif %} I hope you have a wonderful day!'
       - alias: Count it - for the dashboard and for the two-per-morning cap the counter's
           own maximum enforces
         action: counter.increment
         target:
           entity_id: counter.good_morning_announcements
-      - alias: 'Hold the flag for roughly the length of the message. MA announcements
-          are audio clips on the Sonos side and report no completion back to Home Assistant,
-          so there is no state to wait on - a fixed hold sized to the greeting is the
-          predictable option, and all it gates is the phase 2 queue swap.'
+      - alias: Hold the flag for roughly the length of the message. MA announcements
+          are audio clips on the Sonos side and report no completion back to Home
+          Assistant, so there is no state to wait on - a fixed hold sized to the greeting
+          is the predictable option, and all it gates is the phase 2 queue swap.
         delay:
           seconds: 35
       - action: input_boolean.turn_off
@@ -9281,11 +9285,11 @@
         condition: state
         entity_id: input_boolean.good_morning_active
         state: 'on'
-      - alias: ...and only if the room is still occupied, using the same flicker-tolerant
-          check as the first announcement
+      - alias: '...and only if the room is still occupied, using the same flicker-tolerant
+          check as the first announcement'
         condition: template
-        value_template: '{% set s = states.binary_sensor.big_bedroom_sensor_group %}
-          {{ s is not none and (s.state == ''on'' or (now() - s.last_changed).total_seconds()
+        value_template: '{% set s = states.binary_sensor.big_bedroom_sensor_group
+          %} {{ s is not none and (s.state == ''on'' or (now() - s.last_changed).total_seconds()
           < 120) }}'
       - action: input_boolean.turn_on
         target:
@@ -9298,7 +9302,7 @@
         data:
           cache: false
           media_player_entity_id: media_player.bedroom_2
-          message: 'The time is now {{ now().strftime(''%-I:%M %p'') }}.'
+          message: The time is now {{ now().strftime('%-I:%M %p') }}.
       - action: counter.increment
         target:
           entity_id: counter.good_morning_announcements
@@ -9755,13 +9759,13 @@
   alias: 'Pico Center - Big Bedroom: Fun Button / Sexy Time'
   description: 'Center circle press, only when starting a fresh session (timer.funtime_bedtime_countdown
     idle), sets mood mode: deep red lighting at 40% (matching Bedtime Button), bedroom
-    fan to 50%, alarm to home, TV off, and plays playlist 1 (Spotify), resetting
-    counter.funtime_playlist_index to 1. Raise button always forces the opposite
-    time-of-day playlist (chill vs upbeat) regardless of session state, and sets
-    the counter to 4. Repeat center presses within the hour are handled by the separate
-    "Fun Button - Cycle Playlist" automation instead, which only changes music. Every
-    press/hold (re)starts the shared 1-hour timer.funtime_bedtime_countdown, which
-    triggers the Bedtime Button routine when it runs out untouched.'
+    fan to 50%, alarm to home, TV off, and plays playlist 1 (Spotify), resetting counter.funtime_playlist_index
+    to 1. Raise button always forces the opposite time-of-day playlist (chill vs upbeat)
+    regardless of session state, and sets the counter to 4. Repeat center presses
+    within the hour are handled by the separate "Fun Button - Cycle Playlist" automation
+    instead, which only changes music. Every press/hold (re)starts the shared 1-hour
+    timer.funtime_bedtime_countdown, which triggers the Bedtime Button routine when
+    it runs out untouched.'
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
@@ -9859,9 +9863,11 @@
     action: media_player.turn_off
     target:
       entity_id: media_player.bedroom_tv_2
-  - alias: Choose music - hold forces opposite time-of-day playlist, press (fresh) plays playlist 1
+  - alias: Choose music - hold forces opposite time-of-day playlist, press (fresh)
+      plays playlist 1
     choose:
-    - alias: Hold button - force opposite of the time-of-day pick, set counter to 4
+    - alias: Hold button - force opposite of the time-of-day pick, set counter to
+        4
       conditions:
       - condition: template
         value_template: '{{ trigger.id == ''hold'' }}'
@@ -9872,7 +9878,8 @@
         data:
           value: 4
       - choose:
-        - alias: It's 00:00-06:00, so the default pick would be chill - force upbeat instead
+        - alias: It's 00:00-06:00, so the default pick would be chill - force upbeat
+            instead
           conditions:
           - condition: template
             value_template: '{{ now().hour >= 0 and now().hour < 6 }}'
@@ -9881,7 +9888,8 @@
             data:
               media_id: ytmusic://playlist/VLPLiy0XOfUv4hHOC8nCojwvnOW2vpCrj8gM
         default:
-        - alias: It's not 00:00-06:00, so the default pick would be upbeat - force chill instead
+        - alias: It's not 00:00-06:00, so the default pick would be upbeat - force
+            chill instead
           action: script.funtime_play_playlist
           data:
             media_id: ytmusic://playlist/VLPLV_q9IkDBBFKI-4jQfFG5KZaWanZgd3-r
@@ -9902,12 +9910,12 @@
   mode: restart
 - id: '1778197535596'
   alias: 'Pico Center - Big Bedroom: Fun Button - Cycle Playlist'
-  description: 'Center circle press while a Funtime session is already active (timer.funtime_bedtime_countdown
+  description: Center circle press while a Funtime session is already active (timer.funtime_bedtime_countdown
     running, i.e. within an hour of the last press/hold) only advances counter.funtime_playlist_index
     (wrapping 1 Spotify -> 2 YouTube Music -> 3 YouTube Music -> 4 time-of-day pick
     -> back to 1) and plays the matching playlist. Lights, fan, alarm, and TV are
     left untouched. Restarts the same shared 1-hour countdown as the main Fun Button
-    automation.'
+    automation.
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
