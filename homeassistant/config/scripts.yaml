@@ -171,10 +171,21 @@ script_volvo_start_core:
             entity_id: binary_sensor.garage_door
             state: 'on'
           sequence:
-          - action: lock.unlock
-            target:
-              entity_id: lock.volvo_xc60_lock
-            data: {}
+          - alias: Only unlock if the door opened recently and a person was
+              detected - two independent signals confirming someone actually
+              left through the garage, not a stale already-open door
+            if:
+            - condition: template
+              value_template: '{{ (now() - states.binary_sensor.garage_door.last_changed).total_seconds()
+                < 120 }}'
+            - condition: state
+              entity_id: binary_sensor.garage_occupancy_group
+              state: 'on'
+            then:
+            - action: lock.unlock
+              target:
+                entity_id: lock.volvo_xc60_lock
+              data: {}
         default:
         - alias: Wait for garage door contact sensor to open (up to 10 minutes)
           wait_for_trigger:
@@ -184,10 +195,18 @@ script_volvo_start_core:
           timeout:
             minutes: 10
           continue_on_timeout: true
-        - alias: Unlock doors once garage door is open
+        - alias: Unlock doors only if the door opened recently and a person
+            was detected - two independent signals confirming someone actually
+            left through the garage
           if:
           - condition: template
             value_template: '{{ wait.completed }}'
+          - condition: template
+            value_template: '{{ (now() - states.binary_sensor.garage_door.last_changed).total_seconds()
+              < 120 }}'
+          - condition: state
+            entity_id: binary_sensor.garage_occupancy_group
+            state: 'on'
           then:
           - action: lock.unlock
             target:
