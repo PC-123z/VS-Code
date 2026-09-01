@@ -137,18 +137,26 @@ script_volvo_start_core:
               entity_id: cover.garage
               state: open
           sequence:
-          - alias: Wait for person detected in garage (up to 10 minutes)
+          - alias: Wait for sustained person detection in garage (up to 10 minutes)
+              - requires 3 continuous seconds of occupancy so a brief Frigate
+              false-positive blip can't arm the garage open on its own
             wait_for_trigger:
             - trigger: state
               entity_id: binary_sensor.garage_occupancy_group
               to: 'on'
+              for:
+                seconds: 3
             timeout:
               minutes: 10
             continue_on_timeout: false
-          - alias: Open garage only if person was detected
+          - alias: Open garage only if person is still actually there right now,
+              not just at some point during the wait
             if:
             - condition: template
               value_template: '{{ wait.completed }}'
+            - condition: state
+              entity_id: binary_sensor.garage_occupancy_group
+              state: 'on'
             then:
             - action: cover.open_cover
               target:
