@@ -8321,16 +8321,16 @@
       - input_boolean.welcome_home_pending
   mode: single
 - id: '1748800000004'
-  alias: 'Welcome Home: Stop All Music When Kitchen Unoccupied 15 Min'
+  alias: 'Welcome Home: Stop All Music When Kitchen Unoccupied 10 Min'
   description: Kitchen is the anchor for the welcome home session. When it has been
-    empty for 15 minutes, stop all music, unjoin satellite rooms, and clear the active
-    flag. Bathroom handles itself via its own kitchen_stopped trigger.
+    empty for 10 minutes continuously, stop all music, unjoin satellite rooms, and
+    clear the active flag. Bathroom handles itself via its own kitchen_stopped trigger.
   triggers:
   - trigger: state
     entity_id: binary_sensor.kitchen_sensor_group
     to: 'off'
     for:
-      minutes: 15
+      minutes: 10
   conditions:
   - condition: state
     entity_id: input_boolean.welcome_home_active
