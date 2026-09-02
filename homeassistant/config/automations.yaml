@@ -8324,7 +8324,10 @@
   alias: 'Welcome Home: Stop All Music When Kitchen Unoccupied 10 Min'
   description: Kitchen is the anchor for the welcome home session. When it has been
     empty for 10 minutes continuously, stop all music, unjoin satellite rooms, and
-    clear the active flag. Bathroom handles itself via its own kitchen_stopped trigger.
+    clear the active flag. Fires if welcome_home_active is on OR kitchen is still
+    actually playing, so a stray premature flag-clear (e.g. from the music-pause
+    guard) can't leave kitchen music orphaned with no automation watching it. Bathroom
+    handles itself via its own kitchen_stopped trigger.
   triggers:
   - trigger: state
     entity_id: binary_sensor.kitchen_sensor_group
@@ -8332,9 +8335,17 @@
     for:
       minutes: 10
   conditions:
-  - condition: state
-    entity_id: input_boolean.welcome_home_active
-    state: 'on'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.welcome_home_active
+      state: 'on'
+    - condition: state
+      entity_id: media_player.kitchen
+      state: playing
+    - condition: state
+      entity_id: media_player.kitchen_2
+      state: playing
   actions:
   - alias: Clear welcome home flag
     action: input_boolean.turn_off
