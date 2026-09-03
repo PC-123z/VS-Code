@@ -8983,18 +8983,21 @@
             player goes idle, or its content_id moves off the opener''s track id,
             the moment the opener ends - whether Music Assistant genuinely stops or
             auto-fills the queue with a similar track ("Fetching similar tracks for
-            queue Bedroom based on: Here Comes The Sun" in the MA log). No longer
-            worth chasing that auto-fill with duration math or polling to keep a
-            stray track from ever being audible - the second announcement right
-            below covers it instead: it ducks whatever is currently playing, and
-            the queue gets unconditionally overwritten right after, so a few
-            seconds of a wrong song stops mattering.'
+            queue Bedroom based on: Here Comes The Sun" in the MA log).'
           wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') or
             ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'', ''media_content_id'')
             or '''') }}'
           timeout:
             minutes: 6
           continue_on_timeout: true
+        - alias: Stop playback immediately. Whatever is playing at this point - the
+            opener''s genuine tail, or MA''s auto-filled stand-in track - gets killed
+            right here, so there is nothing left to overlap or duck. The second
+            announcement below then plays into silence, not over another song.
+          continue_on_error: true
+          action: media_player.media_stop
+          target:
+            entity_id: media_player.bedroom_2
         - alias: Bail out if the routine was cancelled while the opening track played
             - Goodbye, the sleep flag, or the hard cap can all clear good_morning_active
             mid-run, and without this check the whole shuffled playlist would still
@@ -9009,10 +9012,8 @@
               entity_id: input_boolean.good_morning_expected_pause
           - stop: Routine was cancelled during the opening track
           else:
-          - alias: Second announcement - the same full greeting again, spoken over
-              whatever media_player.bedroom_2 is currently playing (the opener's
-              genuine tail, or MA's auto-filled stand-in - either way this ducks it,
-              and doubles as the audible cue that the opener is done).
+          - alias: Second announcement - the same full greeting again, now spoken
+              into silence since playback was just stopped above.
             action: input_boolean.turn_on
             target:
               entity_id: input_boolean.good_morning_announcement_pending
