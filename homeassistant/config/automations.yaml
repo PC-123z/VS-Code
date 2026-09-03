@@ -8908,6 +8908,15 @@
         timeout:
           seconds: 30
         continue_on_timeout: true
+      - alias: Record when the opener actually started and how long it runs,
+          so the later wait can compute a plain delay instead of polling or
+          reacting to Music Assistant's state. 185s is the fallback if
+          media_duration somehow isn't populated yet - "Here Comes The Sun"'s
+          actual reported length.
+        variables:
+          opener_start: '{{ now() }}'
+          opener_duration: '{{ state_attr(''media_player.bedroom_2'', ''media_duration'')
+            | float(185) }}'
       - delay:
           seconds: 3
       - alias: Ensure playback is not paused after unjoin
@@ -8979,32 +8988,23 @@
               data:
                 volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3)
                   }}'
-        - alias: 'Wait for the opening track to be about to finish. Used to wait
-            for media_content_id to change instead, on the theory that content_id
-            changes the moment the opener ends whether Music Assistant auto-fills
-            or genuinely goes idle. But content_id only changes AFTER MA has already
-            picked and started a replacement track - MA auto-fills a queue that runs
-            dry with a similar track ("Fetching similar tracks for queue Bedroom
-            based on: Here Comes The Sun" in the MA log) - so on 2026-09-03 that
-            auto-filled track ("Dont Let Me Down") played audibly for ~6 seconds
-            before phase 2 cut it off, sounding like a stray track skip. Polling
-            position + elapsed-since-update against duration instead lets this fire
-            just BEFORE the opener''s own runtime elapses, winning the race against
-            MA every time instead of reacting after MA has already lost it.'
-          repeat:
-            while:
-            - condition: template
-              value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'')
-                and (state_attr(''media_player.bedroom_2'', ''media_duration'') not
-                in (none, 0)) and ((state_attr(''media_player.bedroom_2'', ''media_position'')
-                | float(0)) + (now() - (state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')
-                or now())).total_seconds()) < ((state_attr(''media_player.bedroom_2'',
-                ''media_duration'') | float(0)) - 5) }}'
-            - condition: template
-              value_template: '{{ repeat.index < 120 }}'
-            sequence:
-            - delay:
-                seconds: 3
+        - alias: 'Wait for the opening track to finish - a single delay computed
+            from its known duration and the moment it started, instead of polling
+            or reacting to media_player state at all. Previously waited for
+            media_content_id to change, on the theory that content_id changes the
+            moment the opener ends whether Music Assistant auto-fills or genuinely
+            goes idle. But content_id only changes AFTER MA has already picked and
+            started a replacement track - MA auto-fills a queue that runs dry with
+            a similar track ("Fetching similar tracks for queue Bedroom based on:
+            Here Comes The Sun" in the MA log) - so on 2026-09-03 that auto-filled
+            track ("Dont Let Me Down") played audibly for ~6 seconds before phase 2
+            cut it off, sounding like a stray track skip. A flat delay to 5 seconds
+            before the opener''s own runtime elapses sidesteps MA entirely: there is
+            nothing left to react to or race.'
+          delay:
+            seconds: >-
+              {{ [opener_duration - (now() - opener_start).total_seconds() - 5, 0]
+              | max }}
         - alias: Bail out if the routine was cancelled while the opening track played
             - Goodbye, the sleep flag, or the hard cap can all clear good_morning_active
             mid-run, and without this check the whole shuffled playlist would still
