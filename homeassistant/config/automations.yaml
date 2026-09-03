@@ -8908,15 +8908,6 @@
         timeout:
           seconds: 30
         continue_on_timeout: true
-      - alias: Record when the opener actually started and how long it runs,
-          so the later wait can compute a plain delay instead of polling or
-          reacting to Music Assistant's state. 185s is the fallback if
-          media_duration somehow isn't populated yet - "Here Comes The Sun"'s
-          actual reported length.
-        variables:
-          opener_start: '{{ now() }}'
-          opener_duration: '{{ state_attr(''media_player.bedroom_2'', ''media_duration'')
-            | float(185) }}'
       - delay:
           seconds: 3
       - alias: Ensure playback is not paused after unjoin
