@@ -206,13 +206,6 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_656992550_tags/v1.11.2"
-      },
-      {
-        "created": "2026-09-03T11:27:15.291282+00:00",
-        "dismissed_version": null,
-        "domain": "automation",
-        "is_persistent": false,
-        "issue_id": "automation.system_global_sleep_mode_schedule_validation_failed_triggers"
       }
     ]
   }
