@@ -8979,20 +8979,32 @@
               data:
                 volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3)
                   }}'
-        - alias: 'Wait for the opening track to finish. Idle is not a usable signal
-            for this any more: Music Assistant auto-fills a queue that runs dry with
-            similar tracks ("Fetching similar tracks for queue Bedroom based on: Here
-            Comes The Sun" in the MA log), so a one-track queue never goes idle and
-            the old wait_template burned its full 8-minute timeout every single morning.
-            Watching the content id works either way - it changes the moment the opener
-            ends, whether the queue auto-fills or genuinely stops. An MA announcement
-            does not change it, so speaking over the track cannot end this wait early.'
-          wait_template: '{% set cid = state_attr(''media_player.bedroom_2'', ''media_content_id'')
-            or '''' %} {{ is_state(''media_player.bedroom_2'', ''idle'') or (cid !=
-            '''' and ''xUNqsfFUwhY'' not in cid) }}'
-          timeout:
-            minutes: 6
-          continue_on_timeout: true
+        - alias: 'Wait for the opening track to be about to finish. Used to wait
+            for media_content_id to change instead, on the theory that content_id
+            changes the moment the opener ends whether Music Assistant auto-fills
+            or genuinely goes idle. But content_id only changes AFTER MA has already
+            picked and started a replacement track - MA auto-fills a queue that runs
+            dry with a similar track ("Fetching similar tracks for queue Bedroom
+            based on: Here Comes The Sun" in the MA log) - so on 2026-09-03 that
+            auto-filled track ("Dont Let Me Down") played audibly for ~6 seconds
+            before phase 2 cut it off, sounding like a stray track skip. Polling
+            position + elapsed-since-update against duration instead lets this fire
+            just BEFORE the opener''s own runtime elapses, winning the race against
+            MA every time instead of reacting after MA has already lost it.'
+          repeat:
+            while:
+            - condition: template
+              value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'')
+                and (state_attr(''media_player.bedroom_2'', ''media_duration'') not
+                in (none, 0)) and ((state_attr(''media_player.bedroom_2'', ''media_position'')
+                | float(0)) + (now() - (state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')
+                or now())).total_seconds()) < ((state_attr(''media_player.bedroom_2'',
+                ''media_duration'') | float(0)) - 5) }}'
+            - condition: template
+              value_template: '{{ repeat.index < 120 }}'
+            sequence:
+            - delay:
+                seconds: 3
         - alias: Bail out if the routine was cancelled while the opening track played
             - Goodbye, the sleep flag, or the hard cap can all clear good_morning_active
             mid-run, and without this check the whole shuffled playlist would still
