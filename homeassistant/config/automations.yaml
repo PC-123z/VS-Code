@@ -8979,23 +8979,22 @@
               data:
                 volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3)
                   }}'
-        - alias: 'Wait for the opening track to finish - a single delay computed
-            from its known duration and the moment it started, instead of polling
-            or reacting to media_player state at all. Previously waited for
-            media_content_id to change, on the theory that content_id changes the
-            moment the opener ends whether Music Assistant auto-fills or genuinely
-            goes idle. But content_id only changes AFTER MA has already picked and
-            started a replacement track - MA auto-fills a queue that runs dry with
-            a similar track ("Fetching similar tracks for queue Bedroom based on:
-            Here Comes The Sun" in the MA log) - so on 2026-09-03 that auto-filled
-            track ("Dont Let Me Down") played audibly for ~6 seconds before phase 2
-            cut it off, sounding like a stray track skip. A flat delay to 5 seconds
-            before the opener''s own runtime elapses sidesteps MA entirely: there is
-            nothing left to react to or race.'
-          delay:
-            seconds: >-
-              {{ [opener_duration - (now() - opener_start).total_seconds() - 5, 0]
-              | max }}
+        - alias: 'Wait for the opening track to finish. Reactive and simple: the
+            player goes idle, or its content_id moves off the opener''s track id,
+            the moment the opener ends - whether Music Assistant genuinely stops or
+            auto-fills the queue with a similar track ("Fetching similar tracks for
+            queue Bedroom based on: Here Comes The Sun" in the MA log). No longer
+            worth chasing that auto-fill with duration math or polling to keep a
+            stray track from ever being audible - the second announcement right
+            below covers it instead: it ducks whatever is currently playing, and
+            the queue gets unconditionally overwritten right after, so a few
+            seconds of a wrong song stops mattering.'
+          wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') or
+            ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'', ''media_content_id'')
+            or '''') }}'
+          timeout:
+            minutes: 6
+          continue_on_timeout: true
         - alias: Bail out if the routine was cancelled while the opening track played
             - Goodbye, the sleep flag, or the hard cap can all clear good_morning_active
             mid-run, and without this check the whole shuffled playlist would still
@@ -9010,15 +9009,41 @@
               entity_id: input_boolean.good_morning_expected_pause
           - stop: Routine was cancelled during the opening track
           else:
-          - alias: Never swap the queue out from under a greeting. The announcement
-              branch holds input_boolean.good_morning_announcement_pending on for
-              as long as it is speaking, so if the opener happens to end mid-greeting
-              this waits it out instead of cutting it off with a queue replace.
-            wait_template: '{{ is_state(''input_boolean.good_morning_announcement_pending'',
-              ''off'') }}'
-            timeout:
-              seconds: 60
-            continue_on_timeout: true
+          - alias: Second announcement - the same full greeting again, spoken over
+              whatever media_player.bedroom_2 is currently playing (the opener's
+              genuine tail, or MA's auto-filled stand-in - either way this ducks it,
+              and doubles as the audible cue that the opener is done).
+            action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.good_morning_announcement_pending
+          - continue_on_error: true
+            action: tts.speak
+            target:
+              entity_id: tts.piper
+            data:
+              cache: false
+              media_player_entity_id: media_player.bedroom_2
+              message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
+                if (today_fc is defined and today_fc and ''weather.forecast_home'' in
+                today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
+                Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M
+                %p'') }}. Right now it''s {{ states(''weather.forecast_home'') | replace(''-'',
+                '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'')
+                | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
+                | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
+                | round | int }} and a low of {{ (f.templow | float(0)) | round | int
+                }} degrees.{% endif %} I hope you have a wonderful day!'
+          - action: counter.increment
+            target:
+              entity_id: counter.good_morning_announcements
+          - alias: Hold roughly the length of the message before swapping the queue.
+              MA announcements report no completion back to Home Assistant, so a
+              fixed hold sized to the greeting is the predictable option.
+            delay:
+              seconds: 35
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.good_morning_announcement_pending
           - alias: Turn shuffle on BEFORE the playlist loads, never after. Toggling
               shuffle once playback is under way invalidates Music Assistant's pre-buffered
               next track, which is what used to play a few seconds of one song and
@@ -9275,40 +9300,6 @@
           is the predictable option, and all it gates is the phase 2 queue swap.
         delay:
           seconds: 35
-      - action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.good_morning_announcement_pending
-      - alias: Eight minutes between the two announcements, measured from the first
-          one
-        delay:
-          minutes: 8
-      - alias: Second announcement only while the routine is still running
-        condition: state
-        entity_id: input_boolean.good_morning_active
-        state: 'on'
-      - alias: '...and only if the room is still occupied, using the same flicker-tolerant
-          check as the first announcement'
-        condition: template
-        value_template: '{% set s = states.binary_sensor.big_bedroom_sensor_group
-          %} {{ s is not none and (s.state == ''on'' or (now() - s.last_changed).total_seconds()
-          < 120) }}'
-      - action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.good_morning_announcement_pending
-      - alias: Second announcement - time only, again spoken over the music
-        continue_on_error: true
-        action: tts.speak
-        target:
-          entity_id: tts.piper
-        data:
-          cache: false
-          media_player_entity_id: media_player.bedroom_2
-          message: The time is now {{ now().strftime('%-I:%M %p') }}.
-      - action: counter.increment
-        target:
-          entity_id: counter.good_morning_announcements
-      - delay:
-          seconds: 12
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.good_morning_announcement_pending
@@ -10633,116 +10624,6 @@
         title: Bedroom audio didn't stop
         message: Music was still playing after the 35-minute sleep timer and 3 stop
           attempts on both entities - Sonos may have lost connection to Music Assistant.
-  mode: single
-- id: '1787404648055'
-  alias: 'Bedroom: Repeat-Track Watchdog'
-  description: Backstop for the morning routine replaying its first song. The older
-    Stuck Track Watchdog only fires when the reported position runs PAST the duration,
-    so it is blind to a clean restart - on 2026-08-22 the track ended at 179 of 185
-    seconds and cleanly reset to 0, and that watchdog never fired. This one detects
-    the restart itself - same track title, previous position well past the end, new
-    position back near zero - and skips forward. Gated on the routine being active
-    so a deliberate replay outside the morning is left alone.
-  triggers:
-  - trigger: state
-    entity_id: media_player.bedroom_2
-    attribute: media_position
-  conditions:
-  - condition: state
-    entity_id: input_boolean.good_morning_active
-    state: 'on'
-  - condition: template
-    value_template: '{% set f = trigger.from_state %} {% set t = trigger.to_state
-      %} {{ f is not none and t is not none and f.attributes.get(''media_title'')
-      is not none and f.attributes.get(''media_title'') == t.attributes.get(''media_title'')
-      and (f.attributes.get(''media_duration'') | float(0)) > 0 and (f.attributes.get(''media_position'')
-      | float(0)) > ((f.attributes.get(''media_duration'') | float(0)) * 0.6) and
-      (t.attributes.get(''media_position'') | float(999)) < 10 }}'
-  actions:
-  - alias: Remember which track looked like it restarted
-    variables:
-      suspect_title: '{{ trigger.from_state.attributes.get(''media_title'') }}'
-  - alias: Confirm before acting. At a NORMAL track boundary Home Assistant briefly
-      reports the new position (0) while media_title still holds the OLD track - the
-      title catches up a few milliseconds later. At trigger time that artifact is
-      indistinguishable from a real restart, so the first version of this watchdog
-      fired at every boundary and skipped ~2 seconds early, eating the end of every
-      song. Waiting lets the artifact resolve itself - a real replay still has the
-      same title playing after the pause, a normal boundary does not.
-    delay:
-      seconds: 8
-  - alias: Only a genuine replay still shows the same title at a low position
-    condition: template
-    value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and state_attr(''media_player.bedroom_2'',
-      ''media_title'') == suspect_title and (state_attr(''media_player.bedroom_2'',
-      ''media_position'') | float(999)) < 30 }}'
-  - alias: Log the confirmed self-restart
-    action: logbook.log
-    data:
-      name: Bedroom Repeat-Track Watchdog
-      message: '"{{ suspect_title }}" restarted itself instead of advancing - confirmed
-        after 8s, skipping to the next track.'
-      entity_id: media_player.bedroom_2
-  - alias: Skip forward so the song does not play twice
-    action: media_player.media_next_track
-    target:
-      entity_id: media_player.bedroom_2
-  - alias: Cooldown so a burst of position updates cannot double-skip
-    delay:
-      seconds: 15
-  mode: single
-- id: '1787057464833'
-  alias: 'Bedroom: Stuck Track Watchdog'
-  description: Music Assistant occasionally fails to advance the Bedroom queue when
-    a track ends (MA/Sonos end-of-track sync glitch) - repeat_mode all then just restarts
-    the same track from 0 instead of moving on, which looks like the same song playing
-    on a loop. Checks every minute whether the computed playback position has run
-    past the track's reported duration and, if so, forces a skip to unstick it.
-  triggers:
-  - trigger: time_pattern
-    minutes: /1
-  conditions:
-  - condition: state
-    entity_id: media_player.bedroom_2
-    state: playing
-  - condition: template
-    value_template: '{{ state_attr(''media_player.bedroom_2'', ''media_duration'')
-      not in (none, 0) and state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')
-      is not none and (state_attr(''media_player.bedroom_2'', ''media_position'')
-      | float(0)) + (now() - state_attr(''media_player.bedroom_2'', ''media_position_updated_at'')).total_seconds()
-      > (state_attr(''media_player.bedroom_2'', ''media_duration'') | float(0) + 5)
-      }}'
-  actions:
-  - alias: Remember which track looked stuck
-    variables:
-      suspect_title: '{{ state_attr(''media_player.bedroom_2'', ''media_title'') }}'
-  - alias: Confirm before skipping. Music Assistant plays a TTS announcement over
-      the queue and stops refreshing media_position while it speaks, so the computed
-      elapsed time keeps climbing and can cross the track duration on its own - which
-      looks identical to a stall at trigger time and would skip a perfectly healthy
-      song. A real stall persists; an announcement resolves itself within seconds.
-    delay:
-      seconds: 12
-  - alias: Only a genuine stall is still overrunning the same track
-    condition: template
-    value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and state_attr(''media_player.bedroom_2'',
-      ''media_title'') == suspect_title and state_attr(''media_player.bedroom_2'',
-      ''media_duration'') not in (none, 0) and state_attr(''media_player.bedroom_2'',
-      ''media_position_updated_at'') is not none and (state_attr(''media_player.bedroom_2'',
-      ''media_position'') | float(0)) + (now() - state_attr(''media_player.bedroom_2'',
-      ''media_position_updated_at'')).total_seconds() > (state_attr(''media_player.bedroom_2'',
-      ''media_duration'') | float(0) + 5) }}'
-  - alias: Log which track was stuck
-    action: logbook.log
-    data:
-      name: Bedroom Stuck Track Watchdog
-      message: Position ran past duration on "{{ suspect_title }}" - confirmed after
-        12s, forcing next track.
-      entity_id: media_player.bedroom_2
-  - alias: Force skip to next track to unstick the queue
-    action: media_player.media_next_track
-    target:
-      entity_id: media_player.bedroom_2
   mode: single
 - id: '1779800000006'
   alias: 'Big Bedroom: Cancel Sleep Audio Timer on Wake'
