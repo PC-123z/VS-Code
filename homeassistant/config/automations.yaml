@@ -1715,10 +1715,13 @@
     it still turns off earlier on its own via the Kitchen automation''s occupancy-clear
     triggers (kitchen_cleared/kitchen_cleared_hue) whenever the room actually clears,
     independent of sleep mode. Morning: catch-all that disables sleep mode and re-enables
-    AL everywhere, clearing manual_control. Big Bedroom is excluded from the morning
-    branch because the Good Morning Routine owns it. Bedroom 2 / Office is included
-    in the morning catch-all for simplicity - it''s redundant with "Office: Daily
-    AL Reset" but harmless.'
+    AL everywhere, clearing manual_control. Fires the moment the Good Morning Routine
+    starts (input_boolean.good_morning_active turning on) rather than a fixed clock
+    time; if Good Morning never runs, an 11:00 fallback fires the same catch-all
+    regardless of weekday. Big Bedroom is excluded from the morning branch because
+    the Good Morning Routine owns it. Bedroom 2 / Office is included in the morning
+    catch-all for simplicity - it''s redundant with "Office: Daily AL Reset" but
+    harmless.'
   triggers:
   - trigger: time
     at: '22:15:00'
@@ -1729,12 +1732,13 @@
   - trigger: time
     at: '23:45:00'
     id: kitchen_sleep_on
+  - trigger: state
+    entity_id: input_boolean.good_morning_active
+    to: 'on'
+    id: good_morning_sleep_off
   - trigger: time
-    at: 07:15:00
-    id: weekday_sleep_off
-  - trigger: time
-    at: 09:30:00
-    id: weekend_sleep_off
+    at: '11:00:00'
+    id: daily_reset_sleep_off
   actions:
   - choose:
     - conditions:
@@ -1867,27 +1871,10 @@
           adapt_color: true
           adapt_brightness: true
     - conditions:
-      - condition: or
-        conditions:
-        - condition: and
-          conditions:
-          - condition: trigger
-            id: weekday_sleep_off
-          - condition: time
-            weekday:
-            - mon
-            - tue
-            - wed
-            - thu
-            - fri
-        - condition: and
-          conditions:
-          - condition: trigger
-            id: weekend_sleep_off
-          - condition: time
-            weekday:
-            - sat
-            - sun
+      - condition: trigger
+        id:
+        - good_morning_sleep_off
+        - daily_reset_sleep_off
       sequence:
       - alias: Turn off all sleep-mode flags
         action: switch.turn_off
