@@ -9013,8 +9013,8 @@
           else:
           - alias: Second announcement, only if the motion-triggered greeting hasn't
               already played this morning - no need to repeat the same greeting into
-              silence. Skipping it also skips the 35-second silent hold that used
-              to follow it before the shuffled playlist loaded.
+              silence. No hold afterward either - the shuffled playlist loads immediately
+              once it's spoken.
             if:
             - condition: state
               entity_id: counter.good_morning_announcements
@@ -9043,8 +9043,6 @@
             - action: counter.increment
               target:
                 entity_id: counter.good_morning_announcements
-            - delay:
-                seconds: 35
             - action: input_boolean.turn_off
               target:
                 entity_id: input_boolean.good_morning_announcement_pending
