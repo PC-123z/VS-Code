@@ -163,31 +163,23 @@ script_volvo_start_core:
                 entity_id: cover.garage
               data: {}
     - sequence:
-      - alias: Unlock doors - immediately if the garage door is already open,
-          otherwise wait for it to open (up to 10 minutes)
+      - alias: Unlock doors - immediately if the garage door contact sensor
+          is already on, otherwise unlock the instant it blips on (up to 10
+          minutes). Driven solely by binary_sensor.garage_door - no occupancy
+          gate (it lagged the door blip and silently blocked the unlock on
+          2026-09-03) and no dependency on cover.garage.
         choose:
         - conditions:
           - condition: state
             entity_id: binary_sensor.garage_door
             state: 'on'
           sequence:
-          - alias: Only unlock if the door opened recently and a person was
-              detected - two independent signals confirming someone actually
-              left through the garage, not a stale already-open door
-            if:
-            - condition: template
-              value_template: '{{ (now() - states.binary_sensor.garage_door.last_changed).total_seconds()
-                < 120 }}'
-            - condition: state
-              entity_id: binary_sensor.garage_occupancy_group
-              state: 'on'
-            then:
-            - action: lock.unlock
-              target:
-                entity_id: lock.volvo_xc60_lock
-              data: {}
+          - action: lock.unlock
+            target:
+              entity_id: lock.volvo_xc60_lock
+            data: {}
         default:
-        - alias: Wait for garage door contact sensor to open (up to 10 minutes)
+        - alias: Wait for garage door contact sensor to blip on (up to 10 minutes)
           wait_for_trigger:
           - trigger: state
             entity_id: binary_sensor.garage_door
@@ -195,18 +187,10 @@ script_volvo_start_core:
           timeout:
             minutes: 10
           continue_on_timeout: true
-        - alias: Unlock doors only if the door opened recently and a person
-            was detected - two independent signals confirming someone actually
-            left through the garage
+        - alias: Unlock doors if the wait actually completed (not a timeout)
           if:
           - condition: template
             value_template: '{{ wait.completed }}'
-          - condition: template
-            value_template: '{{ (now() - states.binary_sensor.garage_door.last_changed).total_seconds()
-              < 120 }}'
-          - condition: state
-            entity_id: binary_sensor.garage_occupancy_group
-            state: 'on'
           then:
           - action: lock.unlock
             target:
