@@ -4300,9 +4300,18 @@
         - sat
         - sun
   actions:
-  - action: automation.turn_on
-    target:
-      entity_id: automation.office_bedroom_2_smart_motion_presence_2
+  - alias: Only hand control to Smart Presence here if Good Morning isn't running
+      it - Good Morning now keeps the Nanoleafs lit itself until 7:30 (or room
+      clear), and does its own hand-off when it ends. This reset fires at 7:00,
+      before that.
+    if:
+    - condition: state
+      entity_id: input_boolean.bedroom2_occupied
+      state: 'off'
+    then:
+    - action: automation.turn_on
+      target:
+        entity_id: automation.office_bedroom_2_smart_motion_presence_2
   - alias: Clear manual override (safety net for overnight occupancy)
     action: input_boolean.turn_off
     target:
