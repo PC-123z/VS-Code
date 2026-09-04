@@ -789,7 +789,12 @@
   mode: single
 - id: '1774943041042'
   alias: 'Big Bedroom Empty - Off '
-  description: ''
+  description: 'Turns lights/fan/media off after the room reads empty for 30 min.
+    The time_pattern trigger is a safety net: the state trigger only fires on a
+    fresh off-transition, so if something turns lights on again without the sensor
+    ever going back to on (e.g. a manual/voice command), the state trigger never
+    refires and lights would stay on indefinitely. The periodic check re-evaluates
+    the 30-minute condition regardless of when the sensor last transitioned.'
   triggers:
   - trigger: state
     entity_id:
@@ -800,6 +805,8 @@
       seconds: 0
     to:
     - 'off'
+  - trigger: time_pattern
+    minutes: /10
   conditions:
   - condition: state
     entity_id: binary_sensor.big_bedroom_temp_sensor_presence
@@ -810,6 +817,11 @@
       minutes: 0
       seconds: 0
     enabled: false
+  - condition: state
+    entity_id: binary_sensor.big_bedroom_sensor_group
+    state: 'off'
+    for:
+      minutes: 30
   - condition: time
     after: 09:00:00
     before: '18:00:00'
