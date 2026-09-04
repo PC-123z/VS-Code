@@ -163,39 +163,50 @@ script_volvo_start_core:
                 entity_id: cover.garage
               data: {}
     - sequence:
-      - alias: Unlock doors - immediately if the garage door contact sensor
-          is already on, otherwise unlock the instant it blips on (up to 10
-          minutes). Driven solely by binary_sensor.garage_door - no occupancy
-          gate (it lagged the door blip and silently blocked the unlock on
-          2026-09-03) and no dependency on cover.garage.
-        choose:
-        - conditions:
-          - condition: state
-            entity_id: binary_sensor.garage_door
-            state: 'on'
-          sequence:
-          - action: lock.unlock
-            target:
-              entity_id: lock.volvo_xc60_lock
-            data: {}
-        default:
-        - alias: Wait for garage door contact sensor to blip on (up to 10 minutes)
-          wait_for_trigger:
-          - trigger: state
-            entity_id: binary_sensor.garage_door
-            to: 'on'
-          timeout:
-            minutes: 10
-          continue_on_timeout: true
-        - alias: Unlock doors if the wait actually completed (not a timeout)
-          if:
+      - alias: Unlock immediately if the garage door contact sensor is already
+          on when this run starts (e.g. door was jostled right before climatization
+          was pressed)
+        if:
+        - condition: state
+          entity_id: binary_sensor.garage_door
+          state: 'on'
+        then:
+        - action: lock.unlock
+          target:
+            entity_id: lock.volvo_xc60_lock
+          data: {}
+      - alias: Re-unlock on every subsequent garage_door blip - the charge
+          cable needs a fresh unlock press to release from the terminal, and
+          the door can blip on/off several times before the garage actually
+          opens - until the garage cover itself opens (real departure, no
+          more cable-release blips expected) or 10 minutes of inactivity pass.
+          Driven solely by binary_sensor.garage_door - no occupancy gate (it
+          lagged the door blip and silently blocked the unlock on 2026-09-03).
+        repeat:
+          until:
           - condition: template
-            value_template: '{{ wait.completed }}'
-          then:
-          - action: lock.unlock
-            target:
-              entity_id: lock.volvo_xc60_lock
-            data: {}
+            value_template: '{{ is_state(''cover.garage'', ''open'') or not wait.completed
+              }}'
+          sequence:
+          - wait_for_trigger:
+            - trigger: state
+              entity_id: binary_sensor.garage_door
+              to: 'on'
+            - trigger: state
+              entity_id: cover.garage
+              to: open
+            timeout:
+              minutes: 10
+            continue_on_timeout: true
+          - if:
+            - condition: template
+              value_template: '{{ wait.completed and wait.trigger is not none and
+                wait.trigger.entity_id == ''binary_sensor.garage_door'' }}'
+            then:
+            - action: lock.unlock
+              target:
+                entity_id: lock.volvo_xc60_lock
+              data: {}
   mode: single
 script_good_morning_routine_core:
   alias: 'Script: Good Morning Routine Core'
