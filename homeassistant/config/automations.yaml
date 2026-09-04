@@ -104,7 +104,7 @@
     at: '18:00:00'
     weekday:
     - fri
-    enabled: false
+    enabled: true
   - trigger: time
     at: '16:58:00'
     enabled: true
@@ -790,11 +790,11 @@
 - id: '1774943041042'
   alias: 'Big Bedroom Empty - Off '
   description: 'Turns lights/fan/media off after the room reads empty for 30 min.
-    The time_pattern trigger is a safety net: the state trigger only fires on a
-    fresh off-transition, so if something turns lights on again without the sensor
-    ever going back to on (e.g. a manual/voice command), the state trigger never
-    refires and lights would stay on indefinitely. The periodic check re-evaluates
-    the 30-minute condition regardless of when the sensor last transitioned.'
+    The time_pattern trigger is a safety net: the state trigger only fires on a fresh
+    off-transition, so if something turns lights on again without the sensor ever
+    going back to on (e.g. a manual/voice command), the state trigger never refires
+    and lights would stay on indefinitely. The periodic check re-evaluates the 30-minute
+    condition regardless of when the sensor last transitioned.'
   triggers:
   - trigger: state
     entity_id:
@@ -4313,9 +4313,8 @@
         - sun
   actions:
   - alias: Only hand control to Smart Presence here if Good Morning isn't running
-      it - Good Morning now keeps the Nanoleafs lit itself until 7:30 (or room
-      clear), and does its own hand-off when it ends. This reset fires at 7:00,
-      before that.
+      it - Good Morning now keeps the Nanoleafs lit itself until 7:30 (or room clear),
+      and does its own hand-off when it ends. This reset fires at 7:00, before that.
     if:
     - condition: state
       entity_id: input_boolean.bedroom2_occupied
@@ -6133,10 +6132,10 @@
                     media_id: ytmusic://album/MPREb_eRqlXW8MAYH
                     media_type: album
               - alias: Self-heal - keep the Nanoleaf panels on for the full run. They
-                  were getting switched off mid-routine by the separate presence
-                  automation's own inactivity timeout, and they also drop offline
-                  (unavailable) on their own periodically - this re-asserts Cocoa
-                  Beach whenever they're not already on, recovering from either case.
+                  were getting switched off mid-routine by the separate presence automation's
+                  own inactivity timeout, and they also drop offline (unavailable)
+                  on their own periodically - this re-asserts Cocoa Beach whenever
+                  they're not already on, recovering from either case.
                 if:
                 - condition: not
                   conditions:
@@ -6198,8 +6197,8 @@
               - action: input_boolean.turn_off
                 target:
                   entity_id: input_boolean.bedroom2_occupied
-              - alias: Hand lighting control back to Smart Presence now that the
-                  routine is done
+              - alias: Hand lighting control back to Smart Presence now that the routine
+                  is done
                 action: automation.turn_on
                 target:
                   entity_id: automation.office_bedroom_2_smart_motion_presence_2
@@ -6273,8 +6272,8 @@
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.bedroom2_occupied
-      - alias: Hand lighting control back to Smart Presence now that the routine
-          is done
+      - alias: Hand lighting control back to Smart Presence now that the routine is
+          done
         action: automation.turn_on
         target:
           entity_id: automation.office_bedroom_2_smart_motion_presence_2
@@ -9111,14 +9110,15 @@
                 media_player_entity_id: media_player.bedroom_2
                 message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
                   if (today_fc is defined and today_fc and ''weather.forecast_home''
-                  in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
-                  Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M
-                  %p'') }}. Right now it''s {{ states(''weather.forecast_home'') | replace(''-'',
-                  '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'')
-                  | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
-                  | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
-                  | round | int }} and a low of {{ (f.templow | float(0)) | round |
-                  int }} degrees.{% endif %} I hope you have a wonderful day!'
+                  in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good
+                  morning! Today is {{ now().strftime(''%A, %B %-d'') }} and the time
+                  is {{ now().strftime(''%-I:%M %p'') }}. Right now it''s {{ states(''weather.forecast_home'')
+                  | replace(''-'', '' '') }} and {{ (state_attr(''weather.forecast_home'',
+                  ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today
+                  will be {{ f.condition | replace(''-'', '' '') }}, with a high of
+                  {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow
+                  | float(0)) | round | int }} degrees.{% endif %} I hope you have
+                  a wonderful day!'
             - action: counter.increment
               target:
                 entity_id: counter.good_morning_announcements
