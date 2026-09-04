@@ -6177,6 +6177,11 @@
               - action: input_boolean.turn_off
                 target:
                   entity_id: input_boolean.bedroom2_occupied
+              - alias: Hand lighting control back to Smart Presence now that the
+                  routine is done
+                action: automation.turn_on
+                target:
+                  entity_id: automation.office_bedroom_2_smart_motion_presence_2
               - stop: Room cleared - routine complete
         - action: media_player.media_stop
           target:
@@ -6184,6 +6189,11 @@
         - action: input_boolean.turn_off
           target:
             entity_id: input_boolean.bedroom2_occupied
+        - alias: Hand lighting control back to Smart Presence now that the routine
+            is done
+          action: automation.turn_on
+          target:
+            entity_id: automation.office_bedroom_2_smart_motion_presence_2
     - sequence:
       - delay:
           minutes: 5
@@ -6242,6 +6252,11 @@
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.bedroom2_occupied
+      - alias: Hand lighting control back to Smart Presence now that the routine
+          is done
+        action: automation.turn_on
+        target:
+          entity_id: automation.office_bedroom_2_smart_motion_presence_2
   mode: single
 - id: '1776382720393'
   alias: Bedroom 2 Daily Reset
