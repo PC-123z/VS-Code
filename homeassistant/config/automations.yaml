@@ -6089,6 +6089,50 @@
                   entity_id: binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
                   state: 'on'
               then:
+              - alias: Self-heal - re-queue the wake album if Music Assistant went
+                  silent. Matches the Big Bedroom routine's self-heal for the same
+                  failure mode.
+                if:
+                - condition: state
+                  entity_id: media_player.office_2
+                  state:
+                  - idle
+                  - 'off'
+                  for:
+                    seconds: 20
+                - condition: state
+                  entity_id: input_boolean.bedroom2_occupied
+                  state: 'on'
+                then:
+                - continue_on_error: true
+                  action: music_assistant.play_media
+                  target:
+                    entity_id: media_player.office_2
+                  data:
+                    media_id: ytmusic://album/MPREb_eRqlXW8MAYH
+                    media_type: album
+              - alias: Self-heal - keep the Nanoleaf panels on for the full run. They
+                  were getting switched off mid-routine by the separate presence
+                  automation's own inactivity timeout, and they also drop offline
+                  (unavailable) on their own periodically - this re-asserts Cocoa
+                  Beach whenever they're not already on, recovering from either case.
+                if:
+                - condition: not
+                  conditions:
+                  - condition: state
+                    entity_id: light.ribbon
+                    state: 'on'
+                then:
+                - continue_on_error: true
+                  action: light.turn_on
+                  target:
+                    entity_id:
+                    - light.ribbon
+                    - light.fluttershy
+                  data:
+                    effect: Cocoa Beach
+                    brightness_pct: 80
+                    transition: 5
               - action: media_player.volume_set
                 target:
                   entity_id: media_player.office_2
@@ -6178,20 +6222,19 @@
             effect: Cocoa Beach
             brightness_pct: 80
             transition: 5
-      - action: automation.turn_on
-        metadata: {}
-        target:
-          entity_id: automation.office_bedroom_2_smart_motion_presence_2
-        data: {}
     - sequence:
-      - alias: 30-minute hard cap timer. Clearing input_boolean.bedroom2_occupied
-          is what lets the occupancy-driven music loop above exit, so this branch
-          is what guarantees the run always terminates - which is in turn what makes
-          mode:single safe here. The triggers are four hours apart (06:30 and 10:30)
-          and a run can now last at most about half an hour, so a run can never still
-          be alive when the next trigger fires and be dropped.
+      - alias: 60-minute hard cap timer, matching the description's "until presence
+          clears or 7:30am" - it was previously coded as 30 minutes, cutting music
+          off at 7:00 even while the room was still genuinely occupied (radar zone
+          1 was stuck 'on' from 6:44 to 7:02 on 2026-09-04, well past the old cutoff).
+          Clearing input_boolean.bedroom2_occupied is what lets the occupancy-driven
+          music loop above exit, so this branch is what guarantees the run always
+          terminates - which is in turn what makes mode:single safe here. The triggers
+          are four hours apart (06:30 and 10:30) and a run can now last at most about
+          an hour, so a run can never still be alive when the next trigger fires and
+          be dropped.
         delay:
-          minutes: 30
+          minutes: 60
       - continue_on_error: true
         action: media_player.media_stop
         target:
