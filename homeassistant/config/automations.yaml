@@ -1717,11 +1717,10 @@
     independent of sleep mode. Morning: catch-all that disables sleep mode and re-enables
     AL everywhere, clearing manual_control. Fires the moment the Good Morning Routine
     starts (input_boolean.good_morning_active turning on) rather than a fixed clock
-    time; if Good Morning never runs, an 11:00 fallback fires the same catch-all
-    regardless of weekday. Big Bedroom is excluded from the morning branch because
-    the Good Morning Routine owns it. Bedroom 2 / Office is included in the morning
-    catch-all for simplicity - it''s redundant with "Office: Daily AL Reset" but
-    harmless.'
+    time; if Good Morning never runs, an 11:00 fallback fires the same catch-all regardless
+    of weekday. Big Bedroom is excluded from the morning branch because the Good Morning
+    Routine owns it. Bedroom 2 / Office is included in the morning catch-all for simplicity
+    - it''s redundant with "Office: Daily AL Reset" but harmless.'
   triggers:
   - trigger: time
     at: '22:15:00'
@@ -8679,7 +8678,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 07:35:00
+    at: 06:45:00
     weekday:
     - mon
     - tue
@@ -8979,21 +8978,21 @@
               data:
                 volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3)
                   }}'
-        - alias: 'Wait for the opening track to finish. Reactive and simple: the
-            player goes idle, or its content_id moves off the opener''s track id,
-            the moment the opener ends - whether Music Assistant genuinely stops or
-            auto-fills the queue with a similar track ("Fetching similar tracks for
-            queue Bedroom based on: Here Comes The Sun" in the MA log).'
-          wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') or
-            ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'', ''media_content_id'')
-            or '''') }}'
+        - alias: 'Wait for the opening track to finish. Reactive and simple: the player
+            goes idle, or its content_id moves off the opener''s track id, the moment
+            the opener ends - whether Music Assistant genuinely stops or auto-fills
+            the queue with a similar track ("Fetching similar tracks for queue Bedroom
+            based on: Here Comes The Sun" in the MA log).'
+          wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') or ''xUNqsfFUwhY''
+            not in (state_attr(''media_player.bedroom_2'', ''media_content_id'') or
+            '''') }}'
           timeout:
             minutes: 6
           continue_on_timeout: true
         - alias: Stop playback immediately. Whatever is playing at this point - the
             opener''s genuine tail, or MA''s auto-filled stand-in track - gets killed
-            right here, so there is nothing left to overlap or duck. The second
-            announcement below then plays into silence, not over another song.
+            right here, so there is nothing left to overlap or duck. The second announcement
+            below then plays into silence, not over another song.
           continue_on_error: true
           action: media_player.media_stop
           target:
@@ -9025,21 +9024,21 @@
               cache: false
               media_player_entity_id: media_player.bedroom_2
               message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
-                if (today_fc is defined and today_fc and ''weather.forecast_home'' in
-                today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
+                if (today_fc is defined and today_fc and ''weather.forecast_home''
+                in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning!
                 Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M
                 %p'') }}. Right now it''s {{ states(''weather.forecast_home'') | replace(''-'',
                 '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'')
                 | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition
                 | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0))
-                | round | int }} and a low of {{ (f.templow | float(0)) | round | int
-                }} degrees.{% endif %} I hope you have a wonderful day!'
+                | round | int }} and a low of {{ (f.templow | float(0)) | round |
+                int }} degrees.{% endif %} I hope you have a wonderful day!'
           - action: counter.increment
             target:
               entity_id: counter.good_morning_announcements
           - alias: Hold roughly the length of the message before swapping the queue.
-              MA announcements report no completion back to Home Assistant, so a
-              fixed hold sized to the greeting is the predictable option.
+              MA announcements report no completion back to Home Assistant, so a fixed
+              hold sized to the greeting is the predictable option.
             delay:
               seconds: 35
           - action: input_boolean.turn_off
