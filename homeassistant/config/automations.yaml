@@ -107,7 +107,7 @@
     enabled: true
   - trigger: time
     at: '16:58:00'
-    enabled: true
+    enabled: false
     weekday:
     - sun
   conditions: []
