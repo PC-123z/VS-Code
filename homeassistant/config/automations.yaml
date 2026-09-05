@@ -103,7 +103,7 @@
   - trigger: time
     at: '17:10:00'
     weekday:
-    - fri
+    - sat
     enabled: true
   - trigger: time
     at: '16:58:00'
