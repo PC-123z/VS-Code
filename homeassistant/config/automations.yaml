@@ -10607,10 +10607,12 @@
     (the anchor) stopping can kill the routine, and even then only if the kitchen
     is unoccupied - if kitchen occupancy is still active, leave welcome_home_active
     alone so a track-transition blip or a paused-then-resumed track cannot cut off
-    music the anchor room is still using. The 10s hold avoids a false trigger from
-    the idle->paused->playing blip that music_assistant.play_media goes through while
-    it loads the queue on arrival (was killing welcome_home_active ~8s after every
-    arrival, before music even started - see 2026-08-12 incident). Since welcome_home_active
+    music the anchor room is still using. Hold time widened to 5 minutes on 2026-09-06
+    (was 10s, too tight - a normal pause between tracks or a brief manual pause was
+    enough to trip it) - this also comfortably covers the idle->paused->playing blip
+    that music_assistant.play_media goes through while it loads the queue on arrival
+    (was killing welcome_home_active ~8s after every arrival, before music even started
+    - see 2026-08-12 incident). Since welcome_home_active
     is only re-armed by an actual departure + arrival (alarm must be armed away/home
     first), disabling it keeps it off until the next real cycle instead of it lingering
     or re-joining rooms after a manual pause.'
@@ -10630,7 +10632,7 @@
     - 'off'
     - standby
     for:
-      seconds: 10
+      seconds: 300
   - id: kitchen
     trigger: state
     entity_id:
@@ -10642,7 +10644,7 @@
     - 'off'
     - standby
     for:
-      seconds: 10
+      seconds: 300
   conditions:
   - condition: state
     entity_id: input_boolean.welcome_home_active
