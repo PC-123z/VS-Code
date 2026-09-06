@@ -8502,6 +8502,13 @@
       conditions:
       - condition: trigger
         id: bedroom_2_motion
+      - alias: Skip if office already in the kitchen group - motion re-triggers
+          constantly while the room is occupied, and without this the whole
+          volume-drop/join/ramp sequence re-ran on every retrigger, causing the
+          exact audible cutouts this was meant to prevent
+        condition: template
+        value_template: "{{ 'media_player.office' not in\n   (state_attr('media_player.kitchen',\n
+          \  'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
@@ -8535,6 +8542,11 @@
         condition: state
         entity_id: input_boolean.big_bedroom_asleep
         state: 'off'
+      - alias: Skip if bedroom already in the kitchen group - same repeated-retrigger
+          issue as the office branch above
+        condition: template
+        value_template: "{{ 'media_player.bedroom' not in\n   (state_attr('media_player.kitchen',\n
+          \  'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
