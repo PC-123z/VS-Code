@@ -119,15 +119,15 @@ script_volvo_start_core:
         target:
           entity_id: input_boolean.volvo_start_active
     - sequence:
-      - alias: Open garage if Volvo start active, between 7AM-9PM, not opened recently
+      - alias: Open garage if Volvo start active, between 6:30AM-10:50PM, not opened recently
         choose:
         - conditions:
           - condition: state
             entity_id: input_boolean.volvo_start_active
             state: 'on'
           - condition: time
-            after: 07:00:00
-            before: '21:00:00'
+            after: 06:30:00
+            before: '22:50:00'
           - condition: template
             value_template: '{{ (now() - states.cover.garage.last_changed).total_seconds()
               > 600 }}'
