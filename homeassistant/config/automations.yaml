@@ -8590,6 +8590,10 @@
       conditions:
       - condition: trigger
         id: bedroom_2_motion
+      - alias: Skip while Bedroom 2 is asleep
+        condition: state
+        entity_id: input_boolean.bedroom2_asleep
+        state: 'off'
       - alias: Skip if office already in the kitchen group - motion re-triggers constantly
           while the room is occupied, and without this the whole volume-drop/join/ramp
           sequence re-ran on every retrigger, causing the exact audible cutouts this
@@ -10803,6 +10807,59 @@
       entity_id:
       - input_boolean.welcome_home_active
       - input_boolean.good_morning_active
+  mode: single
+- id: '1779800000008'
+  alias: 'Bedroom 2: Sync Asleep Flag with AL Sleep Mode'
+  description: Bedroom 2 / office has no physical bedtime button like Big Bedroom's
+    Hue dimmer, so input_boolean.bedroom2_asleep tracks switch.adaptive_lighting_sleep_mode_office
+    directly - that switch already turns on at 22:15 via the Global Sleep Mode Schedule
+    and off at Good Morning / the 11:00 daily reset catch-all, so this flag follows
+    the same schedule without duplicating it.
+  triggers:
+  - trigger: state
+    entity_id: switch.adaptive_lighting_sleep_mode_office
+    to: 'on'
+    id: asleep
+  - trigger: state
+    entity_id: switch.adaptive_lighting_sleep_mode_office
+    to: 'off'
+    id: awake
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: asleep
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.bedroom2_asleep
+    - conditions:
+      - condition: trigger
+        id: awake
+      sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.bedroom2_asleep
+  mode: single
+- id: '1779800000009'
+  alias: 'Bedroom 2: Asleep Cancels Its Welcome Home Join'
+  description: Whenever Bedroom 2 goes to sleep (input_boolean.bedroom2_asleep turning
+    on), unjoin the office speaker from the kitchen welcome home group if it's currently
+    in it, mirroring Big Bedroom's sleep-cancels behavior but scoped to just this
+    room's speaker rather than killing welcome_home_active for the whole house.
+  triggers:
+  - trigger: state
+    entity_id: input_boolean.bedroom2_asleep
+    to: 'on'
+  conditions: []
+  actions:
+  - alias: Unjoin office from kitchen group
+    continue_on_error: true
+    action: media_player.unjoin
+    target:
+      entity_id: media_player.office_2
+    data: {}
   mode: single
 - id: '1779800000005'
   alias: 'Big Bedroom: Sleep Audio Auto-Stop Timer Finished'
