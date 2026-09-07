@@ -2916,8 +2916,8 @@
                 - 255
                 - 30
                 - 0
-                brightness_pct: '{{ [50 - ((now().hour * 60 + now().minute - 23 *
-                  60) / 60 * 48) | round(0), 2] | max }}'
+                brightness_pct: '{{ [[50 - ((now().hour * 60 + now().minute - 23 *
+                  60) / 60 * 48) | round(0), 2] | max, 50] | min }}'
                 transition: 30
     - conditions:
       - condition: trigger
@@ -6578,7 +6578,7 @@
         brightness_pct: 8
         effect: Slow Pulse
   - alias: Turn off the Sonos Roam
-    action: media_player.turn_off
+    action: media_player.media_stop
     target:
       entity_id: media_player.portable
     data: {}
@@ -10081,7 +10081,7 @@
     target:
       entity_id: automation.big_bedroom_bedtime_button_hue_button_2
     data:
-      skip_conditions: true
+      skip_condition: true
   mode: single
 - id: '1747200000001'
   alias: Good Morning Active - Watchdog Shutoff
