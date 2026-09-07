@@ -180,6 +180,30 @@ template:
           minutes: 3
         state: "{{ is_state('binary_sensor.kitchen_person_occupancy', 'on') }}"
 
+# Jellyfin Tiny (jellyfin-tiny.pc) doesn't fit the native jellyfin integration
+# (HA's config flow dedupes by a broken "unique id" that collides across separate
+# servers/accounts), so its playback state is pulled directly via the Sessions API.
+# jelly.pc (Jellyswarrm) just proxies to this server and jellyfin.pc, so no separate
+# entry is needed for it.
+rest:
+  - resource: http://jellyfin-tiny.pc/Sessions
+    method: GET
+    headers:
+      X-Emby-Token: !secret jellyfin_tiny_api_key
+    scan_interval: 10
+    sensor:
+      - name: "Jellyfin Tiny Living Room State"
+        unique_id: jellyfin_tiny_living_room_state
+        value_template: >
+          {% set sessions = value_json | selectattr('NowPlayingItem', 'defined') | list %}
+          {% if sessions | selectattr('PlayState.IsPaused', 'eq', false) | list | count > 0 %}
+            playing
+          {% elif sessions | count > 0 %}
+            paused
+          {% else %}
+            off
+          {% endif %}
+
 # The Emulated Hue Bridge
 emulated_hue:
   host_ip: 192.168.70.155
