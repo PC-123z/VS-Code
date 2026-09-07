@@ -10119,8 +10119,8 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: "{{ states('media_player.appletv_5') != 'playing'\n   and states('media_player.appletv_6')
-      != 'playing'\n   and states('media_player.appletv_14') != 'playing' }}\n"
+    value_template: >-
+      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count == 0 }}
   - condition: state
     entity_id: media_player.living_room_tv_2
     state: 'on'
@@ -10141,8 +10141,8 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: "{{ states('media_player.appletv_5') != 'playing'\n   and states('media_player.appletv_6')
-      != 'playing'\n   and states('media_player.appletv_14') != 'playing' }}\n"
+    value_template: >-
+      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count == 0 }}
   - action: media_player.turn_off
     target:
       entity_id: media_player.living_room_tv_2
