@@ -6894,24 +6894,6 @@
     entity_id: media_player.bedroom_tv
     to: 'off'
     id: tv_off
-  - device_id: 7501054a9a45dcff214f4cf4f9c143ef
-    domain: media_player
-    entity_id: 3cd6130d1d36d755abf52c6ebdb4aeab
-    type: playing
-    trigger: device
-    id: playing
-  - device_id: 7501054a9a45dcff214f4cf4f9c143ef
-    domain: media_player
-    entity_id: 3cd6130d1d36d755abf52c6ebdb4aeab
-    type: paused
-    trigger: device
-    id: paused
-  - device_id: 7501054a9a45dcff214f4cf4f9c143ef
-    domain: media_player
-    entity_id: 3cd6130d1d36d755abf52c6ebdb4aeab
-    type: idle
-    trigger: device
-    id: paused
   conditions: []
   actions:
   - choose:
@@ -7780,6 +7762,55 @@
       - action: light.turn_on
         target:
           entity_id: light.galaxy_projector
+      - alias: Dining room only stays dim during playback - restore or turn off now
+        if:
+        - condition: state
+          entity_id: binary_sensor.dining_room_sensor_group
+          state: 'on'
+        then:
+        - action: adaptive_lighting.set_manual_control
+          data:
+            entity_id: switch.al_dining_room_bottom
+            lights:
+            - light.dining_room_bottom
+            manual_control: false
+        - action: adaptive_lighting.set_manual_control
+          data:
+            entity_id: switch.al_dining_room_top
+            lights:
+            - light.dining_room_top
+            manual_control: false
+        - action: switch.turn_on
+          target:
+            entity_id:
+            - switch.al_dining_room_bottom
+            - switch.al_dining_room_top
+        - action: adaptive_lighting.apply
+          continue_on_error: true
+          data:
+            entity_id: switch.al_dining_room_bottom
+            lights:
+            - light.dining_room_bottom
+            transition: 3
+            adapt_color: true
+            adapt_brightness: true
+        - action: adaptive_lighting.apply
+          continue_on_error: true
+          data:
+            entity_id: switch.al_dining_room_top
+            lights:
+            - light.dining_room_top
+            transition: 3
+            adapt_color: true
+            adapt_brightness: true
+        else:
+        - action: light.turn_off
+          target:
+            entity_id:
+            - light.dining_room_bottom
+            - light.dining_room_top
+          data:
+            transition: 3
     - conditions:
       - condition: trigger
         id: tv_off
@@ -7824,6 +7855,55 @@
             entity_id:
             - light.living_room
             - light.galaxy_projector
+          data:
+            transition: 3
+      - alias: Dining room only stays dim during playback - restore or turn off now
+        if:
+        - condition: state
+          entity_id: binary_sensor.dining_room_sensor_group
+          state: 'on'
+        then:
+        - action: adaptive_lighting.set_manual_control
+          data:
+            entity_id: switch.al_dining_room_bottom
+            lights:
+            - light.dining_room_bottom
+            manual_control: false
+        - action: adaptive_lighting.set_manual_control
+          data:
+            entity_id: switch.al_dining_room_top
+            lights:
+            - light.dining_room_top
+            manual_control: false
+        - action: switch.turn_on
+          target:
+            entity_id:
+            - switch.al_dining_room_bottom
+            - switch.al_dining_room_top
+        - action: adaptive_lighting.apply
+          continue_on_error: true
+          data:
+            entity_id: switch.al_dining_room_bottom
+            lights:
+            - light.dining_room_bottom
+            transition: 3
+            adapt_color: true
+            adapt_brightness: true
+        - action: adaptive_lighting.apply
+          continue_on_error: true
+          data:
+            entity_id: switch.al_dining_room_top
+            lights:
+            - light.dining_room_top
+            transition: 3
+            adapt_color: true
+            adapt_brightness: true
+        else:
+        - action: light.turn_off
+          target:
+            entity_id:
+            - light.dining_room_bottom
+            - light.dining_room_top
           data:
             transition: 3
   variables:
