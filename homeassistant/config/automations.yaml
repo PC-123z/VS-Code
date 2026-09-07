@@ -4802,7 +4802,7 @@
     - sequence:
       - alias: Wait 30 seconds at 4% before stepping down
         delay:
-          seconds: 30
+          seconds: 20
       - alias: Step lights down 1% every 15 seconds
         repeat:
           count: 4
@@ -4815,7 +4815,7 @@
               brightness_pct: '{{ [4 - repeat.index, 0] | max }}'
               transition: 1
           - delay:
-              seconds: 15
+              seconds: 10
       - alias: Turn off bedroom lights
         continue_on_error: true
         action: light.turn_off
@@ -5083,6 +5083,10 @@
       - switch.al_sleep_mode_bathroom
       - switch.al_sleep_mode_bathroom_main
       - switch.al_sleep_mode_big_bedroom
+  - alias: Turn off bedroom TV
+    action: media_player.turn_off
+    target:
+      entity_id: media_player.bedroom_tv_2
   - alias: Set alarm to Home/Stay
     action: alarm_control_panel.alarm_arm_home
     target:
@@ -5221,6 +5225,10 @@
       - switch.al_sleep_mode_bathroom
       - switch.al_sleep_mode_bathroom_main
       - switch.al_sleep_mode_big_bedroom
+  - alias: Turn off bedroom TV
+    action: media_player.turn_off
+    target:
+      entity_id: media_player.bedroom_tv_2
   - alias: Set alarm to Home/Stay
     action: alarm_control_panel.alarm_arm_home
     target:
