@@ -446,12 +446,12 @@ funtime_play_playlist:
       description: Music Assistant media_id URI to play (e.g. spotify://playlist/... or ytmusic://playlist/...)
       example: spotify://playlist/1GrWlZZ7Kb49epRDuiXUCz
   sequence:
-  - alias: Set Sonos volume to 10%
+  - alias: Set Sonos volume to 20%
     action: media_player.volume_set
     target:
       entity_id: media_player.bedroom_2
     data:
-      volume_level: 0.1
+      volume_level: 0.2
   - alias: Play playlist via Music Assistant (with retry)
     repeat:
       sequence:
