@@ -227,6 +227,13 @@
         "domain": "homeassistant",
         "is_persistent": false,
         "issue_id": "config_entry_reauth_alexa_media_01KWB126HVY7XT65ZYWQK9Q43N"
+      },
+      {
+        "created": "2026-09-07T03:48:49.796173+00:00",
+        "dismissed_version": null,
+        "domain": "automation",
+        "is_persistent": false,
+        "issue_id": "automation.big_bedroom_tv_mode_unified_validation_failed_triggers"
       }
     ]
   }

@@ -7612,20 +7612,23 @@
     dims during playback if occupied. Galaxy projector off during playback, on when
     paused/off.
   triggers:
-  - alias: Jellyfin (any current/future Living Room client) - playing
+  - alias: Jellyfin (any current/future Living Room client, incl. Jellyfin Tiny) - playing
     trigger: template
     value_template: >-
-      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count > 0 }}
+      {{ (integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count > 0)
+         or (states('sensor.jellyfin_tiny_living_room_state') == 'playing') }}
     id: playing
-  - alias: Jellyfin (any current/future Living Room client) - paused/idle
+  - alias: Jellyfin (any current/future Living Room client, incl. Jellyfin Tiny) - paused/idle
     trigger: template
     value_template: >-
-      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('in', ['paused', 'idle']) | list | count > 0 }}
+      {{ (integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('in', ['paused', 'idle']) | list | count > 0)
+         or (states('sensor.jellyfin_tiny_living_room_state') == 'paused') }}
     id: paused
-  - alias: Jellyfin (any current/future Living Room client) - off
+  - alias: Jellyfin (any current/future Living Room client, incl. Jellyfin Tiny) - off
     trigger: template
     value_template: >-
-      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'off') | list | count > 0 }}
+      {{ (integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'off') | list | count > 0)
+         or (states('sensor.jellyfin_tiny_living_room_state') == 'off') }}
     id: tv_off
   - trigger: state
     entity_id:
@@ -10120,7 +10123,8 @@
     state: 'off'
   - condition: template
     value_template: >-
-      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count == 0 }}
+      {{ (integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count == 0)
+         and (states('sensor.jellyfin_tiny_living_room_state') != 'playing') }}
   - condition: state
     entity_id: media_player.living_room_tv_2
     state: 'on'
@@ -10142,7 +10146,8 @@
     state: 'off'
   - condition: template
     value_template: >-
-      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count == 0 }}
+      {{ (integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count == 0)
+         and (states('sensor.jellyfin_tiny_living_room_state') != 'playing') }}
   - action: media_player.turn_off
     target:
       entity_id: media_player.living_room_tv_2
