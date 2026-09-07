@@ -7615,17 +7615,17 @@
   - alias: Jellyfin (any current/future Living Room client) - playing
     trigger: template
     value_template: >-
-      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | selectattr('state', 'eq', 'playing') | list | count > 0 }}
+      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count > 0 }}
     id: playing
   - alias: Jellyfin (any current/future Living Room client) - paused/idle
     trigger: template
     value_template: >-
-      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | selectattr('state', 'in', ['paused', 'idle']) | list | count > 0 }}
+      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('in', ['paused', 'idle']) | list | count > 0 }}
     id: paused
   - alias: Jellyfin (any current/future Living Room client) - off
     trigger: template
     value_template: >-
-      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | selectattr('state', 'eq', 'off') | list | count > 0 }}
+      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'off') | list | count > 0 }}
     id: tv_off
   - trigger: state
     entity_id:
