@@ -7628,18 +7628,21 @@
   triggers:
   - alias: Jellyfin (any current/future Living Room client) - playing
     trigger: template
-    value_template: >-
-      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count > 0 }}
+    value_template: '{{ integration_entities(''jellyfin'') | select(''match'', ''^media_player\.'')
+      | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'',
+      ''playing'') | list | count > 0 }}'
     id: playing
   - alias: Jellyfin (any current/future Living Room client) - paused/idle
     trigger: template
-    value_template: >-
-      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('in', ['paused', 'idle']) | list | count > 0 }}
+    value_template: '{{ integration_entities(''jellyfin'') | select(''match'', ''^media_player\.'')
+      | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''in'',
+      [''paused'', ''idle'']) | list | count > 0 }}'
     id: paused
   - alias: Jellyfin (any current/future Living Room client) - off
     trigger: template
-    value_template: >-
-      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'off') | list | count > 0 }}
+    value_template: '{{ integration_entities(''jellyfin'') | select(''match'', ''^media_player\.'')
+      | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'',
+      ''off'') | list | count > 0 }}'
     id: tv_off
   - alias: Jellyfin Tiny - playing
     trigger: state
@@ -8587,10 +8590,10 @@
       conditions:
       - condition: trigger
         id: bedroom_2_motion
-      - alias: Skip if office already in the kitchen group - motion re-triggers
-          constantly while the room is occupied, and without this the whole
-          volume-drop/join/ramp sequence re-ran on every retrigger, causing the
-          exact audible cutouts this was meant to prevent
+      - alias: Skip if office already in the kitchen group - motion re-triggers constantly
+          while the room is occupied, and without this the whole volume-drop/join/ramp
+          sequence re-ran on every retrigger, causing the exact audible cutouts this
+          was meant to prevent
         condition: template
         value_template: "{{ 'media_player.office' not in\n   (state_attr('media_player.kitchen',\n
           \  'group_members') | default([])) }}"
@@ -8853,7 +8856,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 06:45:00
+    at: 08:25:00
     weekday:
     - mon
     - tue
@@ -10246,9 +10249,10 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: >-
-      {{ (integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count == 0)
-         and (states('sensor.jellyfin_tiny_living_room_state') != 'playing') }}
+    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\.')
+      | select('in', area_entities('living_room')) | map('states') | select('eq',
+      'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')
+      != 'playing') }}"
   - condition: state
     entity_id: media_player.living_room_tv_2
     state: 'on'
@@ -10269,9 +10273,10 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: >-
-      {{ (integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count == 0)
-         and (states('sensor.jellyfin_tiny_living_room_state') != 'playing') }}
+    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\.')
+      | select('in', area_entities('living_room')) | map('states') | select('eq',
+      'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')
+      != 'playing') }}"
   - action: media_player.turn_off
     target:
       entity_id: media_player.living_room_tv_2
@@ -10687,7 +10692,7 @@
   mode: single
 - id: '1779800000002'
   alias: 'Welcome Home: Unjoin Satellite or Disable on Kitchen Stop'
-  description: 'Split 2026-09-06 after a bathroom speaker going idle killed the whole
+  description: Split 2026-09-06 after a bathroom speaker going idle killed the whole
     kitchen session while Paul was still in the kitchen. Satellite rooms (bathroom,
     office, bedroom/bedroom_2) stopping just means that room emptied out - unjoin
     only that speaker and let the kitchen keep going. Only the kitchen player itself
@@ -10699,10 +10704,10 @@
     enough to trip it) - this also comfortably covers the idle->paused->playing blip
     that music_assistant.play_media goes through while it loads the queue on arrival
     (was killing welcome_home_active ~8s after every arrival, before music even started
-    - see 2026-08-12 incident). Since welcome_home_active
-    is only re-armed by an actual departure + arrival (alarm must be armed away/home
-    first), disabling it keeps it off until the next real cycle instead of it lingering
-    or re-joining rooms after a manual pause.'
+    - see 2026-08-12 incident). Since welcome_home_active is only re-armed by an actual
+    departure + arrival (alarm must be armed away/home first), disabling it keeps
+    it off until the next real cycle instead of it lingering or re-joining rooms after
+    a manual pause.
   triggers:
   - id: satellite
     trigger: state
