@@ -7612,62 +7612,20 @@
     dims during playback if occupied. Galaxy projector off during playback, on when
     paused/off.
   triggers:
-  - trigger: state
-    entity_id:
-    - media_player.appletv_14
-    to:
-    - playing
+  - alias: Jellyfin (any current/future Living Room client) - playing
+    trigger: template
+    value_template: >-
+      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | selectattr('state', 'eq', 'playing') | list | count > 0 }}
     id: playing
-  - trigger: state
-    entity_id:
-    - media_player.appletv_14
-    to:
-    - paused
-    - idle
+  - alias: Jellyfin (any current/future Living Room client) - paused/idle
+    trigger: template
+    value_template: >-
+      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | selectattr('state', 'in', ['paused', 'idle']) | list | count > 0 }}
     id: paused
-  - trigger: state
-    entity_id:
-    - media_player.appletv_14
-    to:
-    - 'off'
-    id: tv_off
-  - trigger: state
-    entity_id:
-    - media_player.appletv_5
-    to:
-    - playing
-    id: playing
-  - trigger: state
-    entity_id:
-    - media_player.appletv_5
-    to:
-    - paused
-    - idle
-    id: paused
-  - trigger: state
-    entity_id:
-    - media_player.appletv_5
-    to:
-    - 'off'
-    id: tv_off
-  - trigger: state
-    entity_id:
-    - media_player.appletv_6
-    to:
-    - playing
-    id: playing
-  - trigger: state
-    entity_id:
-    - media_player.appletv_6
-    to:
-    - paused
-    - idle
-    id: paused
-  - trigger: state
-    entity_id:
-    - media_player.appletv_6
-    to:
-    - 'off'
+  - alias: Jellyfin (any current/future Living Room client) - off
+    trigger: template
+    value_template: >-
+      {{ integration_entities('jellyfin') | select('match', '^media_player\.') | select('in', area_entities('living_room')) | map('states') | selectattr('state', 'eq', 'off') | list | count > 0 }}
     id: tv_off
   - trigger: state
     entity_id:
