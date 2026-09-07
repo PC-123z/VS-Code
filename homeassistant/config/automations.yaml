@@ -8539,7 +8539,7 @@
     continue_on_error: true
     action: media_player.unjoin
     target:
-      entity_id: media_player.bedroom
+      entity_id: media_player.bedroom_2
     data: {}
   mode: single
 - id: '1748800000003'
@@ -8562,7 +8562,7 @@
     continue_on_error: true
     action: media_player.unjoin
     target:
-      entity_id: media_player.office
+      entity_id: media_player.office_2
     data: {}
   mode: single
 - id: '1777890200001'
@@ -8595,20 +8595,20 @@
           sequence re-ran on every retrigger, causing the exact audible cutouts this
           was meant to prevent
         condition: template
-        value_template: "{{ 'media_player.office' not in\n   (state_attr('media_player.kitchen',\n
+        value_template: "{{ 'media_player.office_2' not in\n   (state_attr('media_player.kitchen_2',\n
           \  'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
-          entity_id: media_player.office
+          entity_id: media_player.office_2
         data:
           volume_level: 0.02
       - action: media_player.join
         target:
-          entity_id: media_player.kitchen
+          entity_id: media_player.kitchen_2
         data:
           group_members:
-          - media_player.office
+          - media_player.office_2
       - alias: Ramp office volume up to a capped 0.15 over 60 seconds
         repeat:
           count: 5
@@ -8617,7 +8617,7 @@
               seconds: 12
           - action: media_player.volume_set
             target:
-              entity_id: media_player.office
+              entity_id: media_player.office_2
             data:
               volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n    0.15]
                 | min | round(3) }}"
