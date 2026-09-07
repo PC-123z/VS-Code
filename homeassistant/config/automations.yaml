@@ -5110,25 +5110,25 @@
           - condition: state
             entity_id: media_player.bedroom_2
             state: playing
-  - alias: Set bedroom fan to 50%
+  - alias: Set bedroom fan to 25%
     action: fan.turn_on
     data:
-      percentage: 50
+      percentage: 25
     target:
       entity_id: fan.big_bedroom_fan
     enabled: true
-  - alias: Set purifier to 50%
+  - alias: Set purifier to 25%
     action: fan.turn_on
     target:
       device_id: c2504c8438baeadcf59cca47e71a14b4
     data:
-      percentage: 50
-  - alias: Set air circulator to 50%
+      percentage: 25
+  - alias: Set air circulator to 25%
     action: fan.turn_on
     target:
       device_id: ca438fb682d663761f41ccdd014ee6b0
     data:
-      percentage: 50
+      percentage: 25
   - alias: Nanoleaf to deep red 2%
     action: light.turn_on
     target:
