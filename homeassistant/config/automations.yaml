@@ -8633,20 +8633,20 @@
       - alias: Skip if bedroom already in the kitchen group - same repeated-retrigger
           issue as the office branch above
         condition: template
-        value_template: "{{ 'media_player.bedroom' not in\n   (state_attr('media_player.kitchen',\n
+        value_template: "{{ 'media_player.bedroom_2' not in\n   (state_attr('media_player.kitchen_2',\n
           \  'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
-          entity_id: media_player.bedroom
+          entity_id: media_player.bedroom_2
         data:
           volume_level: 0.02
       - action: media_player.join
         target:
-          entity_id: media_player.kitchen
+          entity_id: media_player.kitchen_2
         data:
           group_members:
-          - media_player.bedroom
+          - media_player.bedroom_2
       - alias: Ramp bedroom volume up to a capped 0.15 over 60 seconds
         repeat:
           count: 5
@@ -8655,7 +8655,7 @@
               seconds: 12
           - action: media_player.volume_set
             target:
-              entity_id: media_player.bedroom
+              entity_id: media_player.bedroom_2
             data:
               volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n    0.15]
                 | min | round(3) }}"
