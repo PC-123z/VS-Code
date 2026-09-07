@@ -4422,7 +4422,7 @@
           - 0
           transition: 2
     default: []
-  - alias: Nanoleaf to deep red 2%
+  - alias: Nanoleaf to deep red 5%
     action: light.turn_on
     target:
       entity_id: light.nano_sand_dune
@@ -4431,7 +4431,7 @@
       - 255
       - 30
       - 0
-      brightness_pct: 2
+      brightness_pct: 5
       transition: 1
   - alias: Fade to 4% over 30 seconds - only if the light was already on, otherwise
       leave it off
@@ -4555,14 +4555,26 @@
         data:
           transition: 1
     - sequence:
-      - alias: Wait 15 minutes then turn off Nanoleaf
-        delay:
-          minutes: 15
-      - action: light.turn_off
+      - alias: Step Nanoleaf down 1% every minute, off after 5 minutes
+        repeat:
+          count: 5
+          sequence:
+          - delay:
+              minutes: 1
+          - continue_on_error: true
+            action: light.turn_on
+            target:
+              entity_id: light.nano_sand_dune
+            data:
+              brightness_pct: '{{ [5 - repeat.index, 0] | max }}'
+              transition: 1
+      - alias: Turn off Nanoleaf
+        continue_on_error: true
+        action: light.turn_off
         target:
           entity_id: light.nano_sand_dune
         data:
-          transition: 30
+          transition: 1
     - sequence:
       - alias: Wait 60 seconds then boost fans
         delay:
@@ -4688,7 +4700,7 @@
           - 0
           transition: 2
     default: []
-  - alias: Nanoleaf to deep red 2%
+  - alias: Nanoleaf to deep red 5%
     action: light.turn_on
     target:
       entity_id: light.nano_sand_dune
@@ -4697,7 +4709,7 @@
       - 255
       - 30
       - 0
-      brightness_pct: 2
+      brightness_pct: 5
       transition: 1
   - alias: Fade to 4% over 30 seconds - only if the light was already on, otherwise
       leave it off
@@ -4824,14 +4836,26 @@
         data:
           transition: 1
     - sequence:
-      - alias: Wait 15 minutes then turn off Nanoleaf
-        delay:
-          minutes: 15
-      - action: light.turn_off
+      - alias: Step Nanoleaf down 1% every minute, off after 5 minutes
+        repeat:
+          count: 5
+          sequence:
+          - delay:
+              minutes: 1
+          - continue_on_error: true
+            action: light.turn_on
+            target:
+              entity_id: light.nano_sand_dune
+            data:
+              brightness_pct: '{{ [5 - repeat.index, 0] | max }}'
+              transition: 1
+      - alias: Turn off Nanoleaf
+        continue_on_error: true
+        action: light.turn_off
         target:
           entity_id: light.nano_sand_dune
         data:
-          transition: 30
+          transition: 1
     - sequence:
       - alias: Wait 60 seconds then boost fans
         delay:
