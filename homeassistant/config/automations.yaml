@@ -8817,11 +8817,12 @@
   mode: single
 - id: '1748800000002'
   alias: 'Welcome Home: Unjoin Bedroom When Unoccupied 10 Min'
-  description: Disabled 2026-09-08 - Big Bedroom (Arc) is now the welcome home
+  description: 'Disabled 2026-09-08 - Big Bedroom (Arc) is now the welcome home
     stream coordinator from the start of STAGE 2, not a motion-joined satellite,
     so unjoining it here on its own room going empty would kill the whole
-    session's audio for everyone else too. Kitchen occupancy (see "Welcome Home:
-    Stop All Music When Kitchen Unoccupied 10 Min") is what ends the session now.
+    session''s audio for everyone else too. Kitchen occupancy (see the "Stop
+    All Music When Kitchen Unoccupied 10 Min" automation) is what ends the
+    session now.'
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
@@ -8840,7 +8841,6 @@
       entity_id: media_player.bedroom_2
     data: {}
   mode: single
-  enabled: false
 - id: '1748800000003'
   alias: 'Welcome Home: Unjoin Office When Unoccupied 10 Min'
   description: While welcome home is active, unjoin the office speaker when the room
