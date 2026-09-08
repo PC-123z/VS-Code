@@ -3903,6 +3903,7 @@
           entity_id: switch.adaptive_lighting_office
           lights:
           - light.office
+          - light.hue_white_lamp_1
           manual_control: false
       - alias: Re-enable AL switches
         action: switch.turn_on
@@ -3968,7 +3969,9 @@
           sequence:
           - action: light.turn_on
             target:
-              entity_id: light.office
+              entity_id:
+              - light.office
+              - light.hue_white_lamp_1
             data:
               transition: 2
           - action: adaptive_lighting.apply
@@ -3977,6 +3980,7 @@
               entity_id: switch.adaptive_lighting_office
               lights:
               - light.office
+              - light.hue_white_lamp_1
               transition: 2
               adapt_color: true
               adapt_brightness: true
@@ -3997,7 +4001,9 @@
           sequence:
           - action: light.turn_on
             target:
-              entity_id: light.office
+              entity_id:
+              - light.office
+              - light.hue_white_lamp_1
             data:
               transition: 2
           - action: adaptive_lighting.apply
@@ -4006,6 +4012,7 @@
               entity_id: switch.adaptive_lighting_office
               lights:
               - light.office
+              - light.hue_white_lamp_1
               transition: 2
               adapt_color: true
               adapt_brightness: true
@@ -4018,6 +4025,7 @@
               - light.fluttershy
               - light.office_1
               - light.office_2
+              - light.hue_white_lamp_1
             data:
               transition: 2
     - conditions:
@@ -4042,6 +4050,7 @@
           entity_id: switch.adaptive_lighting_office
           lights:
           - light.office
+          - light.hue_white_lamp_1
           manual_control: true
       - alias: Apply current time-of-day color temperature to ceiling
         action: adaptive_lighting.apply
@@ -4050,13 +4059,16 @@
           entity_id: switch.adaptive_lighting_office
           lights:
           - light.office
+          - light.hue_white_lamp_1
           transition: 2
           adapt_color: true
           adapt_brightness: false
       - alias: Set ceiling lights bright at 100%
         action: light.turn_on
         target:
-          entity_id: light.office
+          entity_id:
+          - light.office
+          - light.hue_white_lamp_1
         data:
           brightness_pct: 100
           transition: 2
@@ -4161,11 +4173,13 @@
           entity_id: switch.adaptive_lighting_office
           lights:
           - light.office
+          - light.hue_white_lamp_1
           manual_control: true
       - action: light.turn_on
         target:
           entity_id:
           - light.office
+          - light.hue_white_lamp_1
           - light.ribbon
           - light.fluttershy
         data:
@@ -4180,6 +4194,7 @@
         target:
           entity_id:
           - light.office
+          - light.hue_white_lamp_1
           - light.ribbon
           - light.fluttershy
         data:
@@ -4206,11 +4221,13 @@
           entity_id: switch.adaptive_lighting_office
           lights:
           - light.office
+          - light.hue_white_lamp_1
           manual_control: true
       - action: light.turn_on
         target:
           entity_id:
           - light.office
+          - light.hue_white_lamp_1
           - light.ribbon
           - light.fluttershy
         data:
@@ -4225,6 +4242,7 @@
         target:
           entity_id:
           - light.office
+          - light.hue_white_lamp_1
           - light.ribbon
           - light.fluttershy
         data:
@@ -4244,6 +4262,7 @@
           entity_id: switch.adaptive_lighting_office
           lights:
           - light.office
+          - light.hue_white_lamp_1
           manual_control: false
       - alias: Re-enable AL switches so next motion uses AL
         action: switch.turn_on
@@ -4271,6 +4290,7 @@
         target:
           entity_id:
           - light.office
+          - light.hue_white_lamp_1
           - light.bedroom_2
           - light.ribbon
           - light.fluttershy
