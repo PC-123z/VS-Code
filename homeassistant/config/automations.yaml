@@ -5433,6 +5433,22 @@
           entity_id: input_boolean.bedroom2_manual_override
           state: 'off'
         then:
+        - alias: Turn off AL for office lights and mark them manual - otherwise
+            Adaptive Lighting's own reapply cycle overrides the dim bedtime levels
+            right back to its daytime/evening curve
+          action: switch.turn_off
+          target:
+            entity_id:
+            - switch.adaptive_lighting_office
+            - switch.adaptive_lighting_adapt_color_office
+            - switch.adaptive_lighting_adapt_brightness_office
+        - action: adaptive_lighting.set_manual_control
+          data:
+            entity_id: switch.adaptive_lighting_office
+            lights:
+            - light.office
+            - light.hue_white_lamp_1
+            manual_control: true
         - alias: Nanoleafs and office to burnt orange at 10%
           action: light.turn_on
           target:
@@ -5681,6 +5697,22 @@
           entity_id: input_boolean.bedroom2_manual_override
           state: 'off'
         then:
+        - alias: Turn off AL for office lights and mark them manual - otherwise
+            Adaptive Lighting's own reapply cycle overrides the dim bedtime levels
+            right back to its daytime/evening curve
+          action: switch.turn_off
+          target:
+            entity_id:
+            - switch.adaptive_lighting_office
+            - switch.adaptive_lighting_adapt_color_office
+            - switch.adaptive_lighting_adapt_brightness_office
+        - action: adaptive_lighting.set_manual_control
+          data:
+            entity_id: switch.adaptive_lighting_office
+            lights:
+            - light.office
+            - light.hue_white_lamp_1
+            manual_control: true
         - alias: Nanoleafs and office to burnt orange at 10%
           action: light.turn_on
           target:
