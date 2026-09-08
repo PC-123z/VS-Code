@@ -137,6 +137,17 @@ script_volvo_start_core:
               entity_id: cover.garage
               state: open
           sequence:
+          - alias: Wait for the garage man-door to open (up to 10 minutes) - confirms
+              someone actually walked into the garage before arming the occupancy
+              check. Without this, Frigate motion alone (car headlights, shadows,
+              etc.) was opening the cover with nobody present.
+            wait_for_trigger:
+            - trigger: state
+              entity_id: binary_sensor.garage_door
+              to: 'on'
+            timeout:
+              minutes: 10
+            continue_on_timeout: false
           - alias: Wait for sustained person detection in garage (up to 10 minutes)
               - requires 3 continuous seconds of occupancy so a brief Frigate
               false-positive blip can't arm the garage open on its own
