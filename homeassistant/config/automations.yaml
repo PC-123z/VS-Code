@@ -5440,13 +5440,21 @@
             - light.ribbon
             - light.fluttershy
             - light.office
-            - light.hue_white_lamp_1
           data:
             rgb_color:
             - 191
             - 87
             - 0
             brightness_pct: 10
+            transition: 180
+        - alias: Office lamp is white-only and puts out much more light than the
+            color bulbs at the same brightness_pct, so run it at half brightness
+            to blend in
+          action: light.turn_on
+          target:
+            entity_id: light.hue_white_lamp_1
+          data:
+            brightness_pct: 5
             transition: 180
       - alias: Presence without a latch - set occupied and let the occupied_set branch
           run fan and music, so they can't both start it
@@ -5680,13 +5688,21 @@
             - light.ribbon
             - light.fluttershy
             - light.office
-            - light.hue_white_lamp_1
           data:
             rgb_color:
             - 191
             - 87
             - 0
             brightness_pct: 10
+            transition: 180
+        - alias: Office lamp is white-only and puts out much more light than the
+            color bulbs at the same brightness_pct, so run it at half brightness
+            to blend in
+          action: light.turn_on
+          target:
+            entity_id: light.hue_white_lamp_1
+          data:
+            brightness_pct: 5
             transition: 180
     - conditions:
       - condition: trigger
@@ -5712,13 +5728,19 @@
           - light.ribbon
           - light.fluttershy
           - light.office
-          - light.hue_white_lamp_1
         data:
           rgb_color:
           - 191
           - 87
           - 0
           brightness_pct: 3
+          transition: 30
+      - alias: Office lamp at half brightness to match the color bulbs' dim orange
+        action: light.turn_on
+        target:
+          entity_id: light.hue_white_lamp_1
+        data:
+          brightness_pct: 1.5
           transition: 30
     - conditions:
       - condition: trigger
