@@ -1769,6 +1769,7 @@
           entity_id: switch.adaptive_lighting_office
           lights:
           - light.office
+          - light.hue_white_lamp_1
           transition: 150
           adapt_color: true
           adapt_brightness: true
