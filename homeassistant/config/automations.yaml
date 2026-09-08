@@ -10119,7 +10119,8 @@
       sequence:
       - alias: Fade bathroom volume to silence over 90s before ungrouping, unless
           a manual override is active - avoids the abrupt cutoff of unjoining while
-          still at listening volume
+          still at listening volume. Loop bails early if motion resumes mid-fade
+          so a re-entry doesn't keep sliding toward silence.
         if:
         - condition: state
           entity_id: input_boolean.bathroom_volume_manual_override
@@ -10129,7 +10130,12 @@
             fade_start_vol: '{{ state_attr(''media_player.bathroom'', ''volume_level'')
               | default(0.0) | float }}'
         - repeat:
-            count: 9
+            while:
+            - condition: template
+              value_template: '{{ repeat.index <= 9 }}'
+            - condition: state
+              entity_id: binary_sensor.bathroom_motion
+              state: 'off'
             sequence:
             - delay:
                 seconds: 10
@@ -10139,18 +10145,27 @@
               data:
                 volume_level: '{{ [fade_start_vol - (repeat.index * (fade_start_vol
                   / 9)), 0] | max | round(3) }}'
-      - alias: Ungroup bathroom Sonos
-        continue_on_error: true
-        action: media_player.unjoin
-        target:
-          entity_id: media_player.bathroom
-        data: {}
-      - alias: Restore bathroom volume, unless a manual override is active - the override
-          should hold the volume the way it was left, not snap it back to the pre-join
-          level
+      - alias: Ungroup bathroom Sonos, unless motion resumed during the fade
+        if:
+        - condition: state
+          entity_id: binary_sensor.bathroom_motion
+          state: 'off'
+        then:
+        - continue_on_error: true
+          action: media_player.unjoin
+          target:
+            entity_id: media_player.bathroom
+          data: {}
+      - alias: Restore bathroom volume, unless a manual override is active or motion
+          resumed mid-fade - the override should hold the volume the way it was
+          left, not snap it back to the pre-join level, and a resumed session should
+          keep whatever volume the (possibly interrupted) fade left it at
         if:
         - condition: state
           entity_id: input_boolean.bathroom_volume_manual_override
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.bathroom_motion
           state: 'off'
         then:
         - action: media_player.volume_set
