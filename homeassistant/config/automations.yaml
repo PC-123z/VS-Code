@@ -2045,6 +2045,7 @@
           entity_id: switch.adaptive_lighting_office
           lights:
           - light.office
+          - light.hue_white_lamp_1
           transition: 30
           adapt_color: true
           adapt_brightness: true
@@ -4367,6 +4368,7 @@
       entity_id: switch.adaptive_lighting_office
       lights:
       - light.office
+      - light.hue_white_lamp_1
       manual_control: false
   mode: single
 - id: '1778900000001'
@@ -5438,6 +5440,7 @@
             - light.ribbon
             - light.fluttershy
             - light.office
+            - light.hue_white_lamp_1
           data:
             rgb_color:
             - 191
@@ -5639,6 +5642,7 @@
             - light.ribbon
             - light.fluttershy
             - light.office
+            - light.hue_white_lamp_1
           data:
             rgb_color:
             - 191
@@ -5670,6 +5674,7 @@
           - light.ribbon
           - light.fluttershy
           - light.office
+          - light.hue_white_lamp_1
         data:
           rgb_color:
           - 191
@@ -5695,6 +5700,7 @@
           - light.ribbon
           - light.fluttershy
           - light.office
+          - light.hue_white_lamp_1
         data:
           transition: 120
     - conditions:
@@ -5708,6 +5714,7 @@
           - light.ribbon
           - light.fluttershy
           - light.office
+          - light.hue_white_lamp_1
           - light.bedroom_2
         data:
           transition: 60
@@ -5841,6 +5848,7 @@
       entity_id:
       - light.office_2
       - light.office_1
+      - light.hue_white_lamp_1
     data:
       brightness_pct: 1
       color_temp_kelvin: 2700
@@ -5875,7 +5883,9 @@
           sequence:
           - action: light.turn_on
             target:
-              entity_id: light.office
+              entity_id:
+              - light.office
+              - light.hue_white_lamp_1
             data:
               brightness_pct: '{{ [1 + (repeat.index * 6.6), 100] | min | round(0)
                 }}'
@@ -6279,6 +6289,7 @@
           entity_id: switch.adaptive_lighting_office
           lights:
           - light.office
+          - light.hue_white_lamp_1
           transition: 30
           adapt_color: true
           adapt_brightness: true
@@ -6417,6 +6428,7 @@
     - light.ribbon
     - light.fluttershy
     - light.office
+    - light.hue_white_lamp_1
     - light.bedroom_2
     to: 'on'
     for:
@@ -6472,6 +6484,7 @@
           - light.ribbon
           - light.fluttershy
           - light.office
+          - light.hue_white_lamp_1
           - light.bedroom_2
         data:
           transition: 30
@@ -7230,6 +7243,7 @@
           - light.fluttershy
           - light.office_1
           - light.office_2
+          - light.hue_white_lamp_1
         data:
           transition: 15
     - conditions:
@@ -7245,6 +7259,7 @@
           entity_id: switch.adaptive_lighting_office
           lights:
           - light.office
+          - light.hue_white_lamp_1
           manual_control: false
       - alias: Do NOT re-enable AL here — it would immediately turn ribbon/fluttershy
           back on. Good Morning routine handles re-enabling AL at wake time.
@@ -7255,6 +7270,7 @@
           - light.fluttershy
           - light.office_1
           - light.office_2
+          - light.hue_white_lamp_1
         data:
           transition: 30
     - conditions:
@@ -7307,7 +7323,9 @@
           sequence:
           - action: light.turn_on
             target:
-              entity_id: light.office
+              entity_id:
+              - light.office
+              - light.hue_white_lamp_1
             data:
               brightness_pct: 4
               rgb_color:
@@ -7335,7 +7353,9 @@
           sequence:
           - action: light.turn_on
             target:
-              entity_id: light.office
+              entity_id:
+              - light.office
+              - light.hue_white_lamp_1
             data:
               transition: 2
           - if:
@@ -7352,6 +7372,7 @@
                 entity_id: switch.adaptive_lighting_office
                 lights:
                 - light.office
+                - light.hue_white_lamp_1
                 transition: 2
                 adapt_color: true
                 adapt_brightness: true
@@ -7372,7 +7393,9 @@
           sequence:
           - action: light.turn_on
             target:
-              entity_id: light.office
+              entity_id:
+              - light.office
+              - light.hue_white_lamp_1
             data:
               transition: 2
           - if:
@@ -7389,6 +7412,7 @@
                 entity_id: switch.adaptive_lighting_office
                 lights:
                 - light.office
+                - light.hue_white_lamp_1
                 transition: 2
                 adapt_color: true
                 adapt_brightness: true
@@ -7401,6 +7425,7 @@
               - light.fluttershy
               - light.office_1
               - light.office_2
+              - light.hue_white_lamp_1
             data:
               transition: 2
     - conditions:
@@ -7422,6 +7447,7 @@
           entity_id: switch.adaptive_lighting_office
           lights:
           - light.office
+          - light.hue_white_lamp_1
           manual_control: false
       - alias: Re-enable AL switches so they're ready for next motion
         action: switch.turn_on
@@ -7616,6 +7642,7 @@
       - light.ribbon
       - light.fluttershy
       - light.office
+      - light.hue_white_lamp_1
     data: {}
   - alias: Turn off fan
     action: fan.turn_off
@@ -10985,6 +11012,7 @@
       - light.office
       - light.office_1
       - light.office_2
+      - light.hue_white_lamp_1
       manual_control: true
   - alias: Engage AL sleep mode for office/bedroom 2
     action: switch.turn_on
@@ -11038,6 +11066,17 @@
     - action: light.turn_off
       target:
         entity_id: light.office
+      data:
+        transition: 5
+  - alias: Fade the lamp off over 5 seconds - only if already on
+    if:
+    - condition: state
+      entity_id: light.hue_white_lamp_1
+      state: 'on'
+    then:
+    - action: light.turn_off
+      target:
+        entity_id: light.hue_white_lamp_1
       data:
         transition: 5
   - alias: Turn off Nanoleaf night light after 15 minutes
