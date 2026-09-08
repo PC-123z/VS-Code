@@ -5449,13 +5449,24 @@
             - light.office
             - light.hue_white_lamp_1
             manual_control: true
-        - alias: Nanoleafs and office to burnt orange at 10%
+        - alias: Nanoleafs to dark red at 10% - a night-light accent, not the burnt
+            orange lamp color
           action: light.turn_on
           target:
             entity_id:
             - light.ribbon
             - light.fluttershy
-            - light.office
+          data:
+            rgb_color:
+            - 255
+            - 30
+            - 0
+            brightness_pct: 10
+            transition: 180
+        - alias: Office lamp to burnt orange at 10%
+          action: light.turn_on
+          target:
+            entity_id: light.office
           data:
             rgb_color:
             - 191
@@ -5472,6 +5483,27 @@
           data:
             brightness_pct: 5
             transition: 180
+        - alias: Nanoleafs keep getting dimmer through the night - fade from 10%
+            to 2% over 30 minutes in 10 steps, well ahead of the 10:30pm dim-down
+            and 10:45pm hard lights out that follow up as backstops
+          repeat:
+            count: 10
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                rgb_color:
+                - 255
+                - 30
+                - 0
+                brightness_pct: '{{ [10 - 8 * repeat.index / 10, 2] | max | round(1) }}'
+                transition: 170
+            - delay:
+                minutes: 3
       - alias: Presence without a latch - set occupied and let the occupied_set branch
           run fan and music, so they can't both start it
         if:
@@ -5713,13 +5745,24 @@
             - light.office
             - light.hue_white_lamp_1
             manual_control: true
-        - alias: Nanoleafs and office to burnt orange at 10%
+        - alias: Nanoleafs to dark red at 10% - a night-light accent, not the burnt
+            orange lamp color
           action: light.turn_on
           target:
             entity_id:
             - light.ribbon
             - light.fluttershy
-            - light.office
+          data:
+            rgb_color:
+            - 255
+            - 30
+            - 0
+            brightness_pct: 10
+            transition: 180
+        - alias: Office lamp to burnt orange at 10%
+          action: light.turn_on
+          target:
+            entity_id: light.office
           data:
             rgb_color:
             - 191
@@ -5736,6 +5779,27 @@
           data:
             brightness_pct: 5
             transition: 180
+        - alias: Nanoleafs keep getting dimmer through the night - fade from 10%
+            to 2% over 30 minutes in 10 steps, well ahead of the 10:30pm dim-down
+            and 10:45pm hard lights out that follow up as backstops
+          repeat:
+            count: 10
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                rgb_color:
+                - 255
+                - 30
+                - 0
+                brightness_pct: '{{ [10 - 8 * repeat.index / 10, 2] | max | round(1) }}'
+                transition: 170
+            - delay:
+                minutes: 3
     - conditions:
       - condition: trigger
         id: motion_cleared
@@ -5753,13 +5817,23 @@
         entity_id: input_boolean.bedroom2_manual_override
         state: 'off'
       sequence:
-      - alias: Nanoleafs and office back to dim orange
+      - alias: Nanoleafs dimmer still - dark red at 2%
         action: light.turn_on
         target:
           entity_id:
           - light.ribbon
           - light.fluttershy
-          - light.office
+        data:
+          rgb_color:
+          - 255
+          - 30
+          - 0
+          brightness_pct: 2
+          transition: 30
+      - alias: Office lamp back to dim orange
+        action: light.turn_on
+        target:
+          entity_id: light.office
         data:
           rgb_color:
           - 191
