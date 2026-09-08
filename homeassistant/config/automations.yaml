@@ -5370,11 +5370,13 @@
   description: Triggers on motion or bedroom2_occupied turning on any time from 9:45pm
     to 6am (no more hard 10:45pm cutoff on the initial trigger - a late bedtime no
     longer skips the whole routine). Sets bedroom2_occupied, starts fan (stays on
-    until Good Morning turns it off) and sleep music (volume fades to silence over
-    5 minutes starting at 11:00pm, hard stop at 11:05pm). Lights to burnt orange at
-    setup (whenever bedtime starts, or by 9:45pm at the latest as a catch-up), fully
-    off at 10:30pm. All lights fade off at 10:45pm and the room stays dark from then
-    on - see *Bedroom 2 Late Night Lights Out.
+    until Good Morning turns it off) and sleep music. A 60-minute experience from
+    a 9:45pm start - lights to burnt orange/dark red at setup (whenever bedtime starts,
+    or by 9:45pm at the latest as a catch-up) for the first 30 minutes, then the
+    back 30 minutes (10:15pm-10:45pm) fade every light to 0% and off while the music
+    fades to silence over its last 5 minutes. Hard stop/hard lights out at 10:45pm
+    is the backstop for both, and the room stays dark from then on - see *Bedroom
+    2 Late Night Lights Out.
   triggers:
   - trigger: state
     entity_id:
@@ -5956,7 +5958,7 @@
       - condition: trigger
         id: music_stop
       sequence:
-      - alias: Hard music stop at 11:05pm regardless of occupied or override state
+      - alias: Hard music stop at 10:45pm regardless of occupied or override state
         action: media_player.media_stop
         continue_on_error: true
         target:
