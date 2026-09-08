@@ -5975,6 +5975,38 @@
           volume_level: 0.15
   mode: parallel
   max: 3
+- id: '1778100000001'
+  alias: 'Bedroom 2: Pre-warm Nanoleaf Outlets'
+  description: Powers the Nanoleaf P115 outlets (Ribbon/Fluttershy) back on 4 minutes
+    before the Bedroom 2 Good Morning Routine's own trigger, so the panels have time
+    to reboot/rejoin WiFi (observed ~90-120s) before the routine's pre-stage and
+    ramp start commanding them. Hardcoded to match the Good Morning Routine's trigger
+    times - keep both in sync if that schedule ever changes.
+  triggers:
+  - trigger: time
+    at: 06:26:00
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+  - trigger: time
+    at: '10:26:00'
+    weekday:
+    - sun
+    - sat
+  conditions:
+  - condition: state
+    entity_id: input_boolean.bedroom2_occupied
+    state: 'on'
+  actions:
+  - action: switch.turn_on
+    target:
+      entity_id:
+      - switch.bedroom2_office_nano1
+      - switch.nano2
+  mode: single
 - id: '1776378473889'
   alias: '*Bedroom 2 Good Morning Routine'
   description: Triggers at 6:50am only if bedroom2_occupied is on. Pre-staged lights
