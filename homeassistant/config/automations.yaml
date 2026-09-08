@@ -8797,27 +8797,31 @@
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.welcome_home_active
-  - alias: Unjoin satellite rooms
+  - alias: Unjoin satellite rooms - Big Bedroom is the coordinator itself now
+      (changed 2026-09-08), so it's stopped directly below instead of unjoined
+      like a satellite
     continue_on_error: true
     action: media_player.unjoin
     target:
       entity_id:
-      - media_player.bedroom
-      - media_player.bedroom_2
+      - media_player.kitchen
       - media_player.office
       - media_player.bathroom
     data: {}
-  - alias: Stop kitchen
+  - alias: Stop Big Bedroom - it's the stream coordinator (changed 2026-09-08,
+      was "Stop kitchen" when Kitchen was the coordinator)
     continue_on_error: true
     action: media_player.media_stop
     target:
-      entity_id: media_player.kitchen
+      entity_id: media_player.bedroom_2
   mode: single
 - id: '1748800000002'
   alias: 'Welcome Home: Unjoin Bedroom When Unoccupied 10 Min'
-  description: While welcome home is active, unjoin the bedroom speaker when the room
-    has been empty for 10 minutes. The auto-join automation handles re-joining if
-    someone returns.
+  description: Disabled 2026-09-08 - Big Bedroom (Arc) is now the welcome home
+    stream coordinator from the start of STAGE 2, not a motion-joined satellite,
+    so unjoining it here on its own room going empty would kill the whole
+    session's audio for everyone else too. Kitchen occupancy (see "Welcome Home:
+    Stop All Music When Kitchen Unoccupied 10 Min") is what ends the session now.
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
@@ -8836,6 +8840,7 @@
       entity_id: media_player.bedroom_2
     data: {}
   mode: single
+  enabled: false
 - id: '1748800000003'
   alias: 'Welcome Home: Unjoin Office When Unoccupied 10 Min'
   description: While welcome home is active, unjoin the office speaker when the room
@@ -8861,18 +8866,20 @@
   mode: single
 - id: '1777890200001'
   alias: 'Welcome Home: Auto Join Bedroom Speakers on Motion'
-  description: While welcome home music is playing in kitchen, joins bedroom speakers
-    when motion is detected in those rooms.
+  description: While welcome home music is playing (coordinated by Big Bedroom/Arc
+    - kitchen is joined immediately on arrival, see STAGE 2), joins the office
+    speaker when motion is detected there. Changed 2026-09-08 - Big Bedroom is no
+    longer joined here on motion because it's now the stream coordinator itself
+    from the start of STAGE 2, not an optional satellite; the old "join bedroom
+    into kitchen on motion" branch was removed. Office now joins Big Bedroom
+    instead of Kitchen, since Kitchen (Play:5) kept dropping its own connection
+    to Music Assistant whenever it was made the coordinator/stream source.
   triggers:
   - trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
     to: 'on'
     id: bedroom_2_motion
     enabled: true
-  - trigger: state
-    entity_id: binary_sensor.big_bedroom_sensor_group
-    to: 'on'
-    id: big_bedroom_motion
   conditions:
   - condition: state
     entity_id: input_boolean.welcome_home_active
@@ -8888,12 +8895,12 @@
         condition: state
         entity_id: input_boolean.bedroom2_asleep
         state: 'off'
-      - alias: Skip if office already in the kitchen group - motion re-triggers constantly
-          while the room is occupied, and without this the whole volume-drop/join/ramp
-          sequence re-ran on every retrigger, causing the exact audible cutouts this
-          was meant to prevent
+      - alias: Skip if office already in the Big Bedroom group - motion re-triggers
+          constantly while the room is occupied, and without this the whole
+          volume-drop/join/ramp sequence re-ran on every retrigger, causing the
+          exact audible cutouts this was meant to prevent
         condition: template
-        value_template: "{{ 'media_player.office_2' not in\n   (state_attr('media_player.kitchen_2',\n
+        value_template: "{{ 'media_player.office_2' not in\n   (state_attr('media_player.bedroom_2',\n
           \  'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
@@ -8903,7 +8910,7 @@
           volume_level: 0.02
       - action: media_player.join
         target:
-          entity_id: media_player.kitchen_2
+          entity_id: media_player.bedroom_2
         data:
           group_members:
           - media_player.office_2
@@ -8916,44 +8923,6 @@
           - action: media_player.volume_set
             target:
               entity_id: media_player.office_2
-            data:
-              volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n    0.15]
-                | min | round(3) }}"
-    - alias: Big bedroom sensor - join bedroom speaker at a capped, ramped volume
-        rather than whatever it was left at last
-      conditions:
-      - condition: trigger
-        id: big_bedroom_motion
-      - alias: Skip while Big Bedroom is asleep
-        condition: state
-        entity_id: input_boolean.big_bedroom_asleep
-        state: 'off'
-      - alias: Skip if bedroom already in the kitchen group - same repeated-retrigger
-          issue as the office branch above
-        condition: template
-        value_template: "{{ 'media_player.bedroom_2' not in\n   (state_attr('media_player.kitchen_2',\n
-          \  'group_members') | default([])) }}"
-      sequence:
-      - action: media_player.volume_set
-        target:
-          entity_id: media_player.bedroom_2
-        data:
-          volume_level: 0.02
-      - action: media_player.join
-        target:
-          entity_id: media_player.kitchen_2
-        data:
-          group_members:
-          - media_player.bedroom_2
-      - alias: Ramp bedroom volume up to a capped 0.15 over 60 seconds
-        repeat:
-          count: 5
-          sequence:
-          - delay:
-              seconds: 12
-          - action: media_player.volume_set
-            target:
-              entity_id: media_player.bedroom_2
             data:
               volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n    0.15]
                 | min | round(3) }}"
