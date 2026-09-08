@@ -5372,11 +5372,11 @@
     longer skips the whole routine). Sets bedroom2_occupied, starts fan (stays on
     until Good Morning turns it off) and sleep music. A 60-minute experience from
     a 9:45pm start - lights to burnt orange/dark red at setup (whenever bedtime starts,
-    or by 9:45pm at the latest as a catch-up) for the first 30 minutes, then the
-    back 30 minutes (10:15pm-10:45pm) fade every light to 0% and off while the music
-    fades to silence over its last 5 minutes. Hard stop/hard lights out at 10:45pm
-    is the backstop for both, and the room stays dark from then on - see *Bedroom
-    2 Late Night Lights Out.
+    or by 9:45pm at the latest as a catch-up) for the first 30 minutes, then the back
+    30 minutes (10:15pm-10:45pm) fade every light to 0% and off while the music fades
+    to silence over its last 5 minutes. Hard stop/hard lights out at 10:45pm is the
+    backstop for both, and the room stays dark from then on - see *Bedroom 2 Late
+    Night Lights Out.
   triggers:
   - trigger: state
     entity_id:
@@ -5405,8 +5405,8 @@
   - trigger: time
     at: '22:45:00'
     id: hard_lights_out
-  - alias: Begin the sleep-music volume fade so it lands on silence right at the
-      60-minute mark (9:45pm start to 10:45pm)
+  - alias: Begin the sleep-music volume fade so it lands on silence right at the 60-minute
+      mark (9:45pm start to 10:45pm)
     trigger: time
     at: '22:40:00'
     id: music_fade
@@ -5438,9 +5438,9 @@
           entity_id: input_boolean.bedroom2_manual_override
           state: 'off'
         then:
-        - alias: Turn off AL for office lights and mark them manual - otherwise
-            Adaptive Lighting's own reapply cycle overrides the dim bedtime levels
-            right back to its daytime/evening curve
+        - alias: Turn off AL for office lights and mark them manual - otherwise Adaptive
+            Lighting's own reapply cycle overrides the dim bedtime levels right back
+            to its daytime/evening curve
           action: switch.turn_off
           target:
             entity_id:
@@ -5479,17 +5479,17 @@
             - 0
             brightness_pct: 10
             transition: 180
-        - alias: Office lamp is white-only and puts out much more light than the
-            color bulbs at the same brightness_pct, so run it at half brightness
-            to blend in
+        - alias: Office lamp is white-only and puts out much more light than the color
+            bulbs at the same brightness_pct, so run it at half brightness to blend
+            in
           action: light.turn_on
           target:
             entity_id: light.hue_white_lamp_1
           data:
             brightness_pct: 5
             transition: 180
-        - alias: Nanoleafs keep getting dimmer through the night - fade from 10%
-            to 2% over 30 minutes in 10 steps, well ahead of the 10:15pm fade-to-off
+        - alias: Nanoleafs keep getting dimmer through the night - fade from 10% to
+            2% over 30 minutes in 10 steps, well ahead of the 10:15pm fade-to-off
             and 10:45pm hard lights out that follow up as backstops
           repeat:
             sequence:
@@ -5504,14 +5504,15 @@
                 - 255
                 - 30
                 - 0
-                brightness_pct: '{{ [10 - 8 * repeat.index / 10, 2] | max | round(1) }}'
+                brightness_pct: '{{ [10 - 8 * repeat.index / 10, 2] | max | round(1)
+                  }}'
                 transition: 170
             - delay:
                 minutes: 3
             until:
-            - alias: Stop after 10 steps, or once the 10:15pm fade-to-off/10:45pm hard
-                lights out take over so this fade can't re-turn the Nanoleafs back
-                on afterward
+            - alias: Stop after 10 steps, or once the 10:15pm fade-to-off/10:45pm
+                hard lights out take over so this fade can't re-turn the Nanoleafs
+                back on afterward
               condition: or
               conditions:
               - condition: template
@@ -5551,8 +5552,8 @@
         timeout:
           seconds: 5
         continue_on_timeout: true
-      - alias: Start at low volume - the fade-in below ramps this up to 0.15, so
-          starting at full volume would defeat the point of a gentle fade-in
+      - alias: Start at low volume - the fade-in below ramps this up to 0.15, so starting
+          at full volume would defeat the point of a gentle fade-in
         action: media_player.volume_set
         target:
           entity_id: media_player.office_2
@@ -5651,8 +5652,8 @@
         timeout:
           seconds: 5
         continue_on_timeout: true
-      - alias: Start at low volume - the fade-in below ramps this up to 0.15, so
-          starting at full volume would defeat the point of a gentle fade-in
+      - alias: Start at low volume - the fade-in below ramps this up to 0.15, so starting
+          at full volume would defeat the point of a gentle fade-in
         action: media_player.volume_set
         target:
           entity_id: media_player.office_2
@@ -5744,9 +5745,9 @@
           entity_id: input_boolean.bedroom2_manual_override
           state: 'off'
         then:
-        - alias: Turn off AL for office lights and mark them manual - otherwise
-            Adaptive Lighting's own reapply cycle overrides the dim bedtime levels
-            right back to its daytime/evening curve
+        - alias: Turn off AL for office lights and mark them manual - otherwise Adaptive
+            Lighting's own reapply cycle overrides the dim bedtime levels right back
+            to its daytime/evening curve
           action: switch.turn_off
           target:
             entity_id:
@@ -5785,17 +5786,17 @@
             - 0
             brightness_pct: 10
             transition: 180
-        - alias: Office lamp is white-only and puts out much more light than the
-            color bulbs at the same brightness_pct, so run it at half brightness
-            to blend in
+        - alias: Office lamp is white-only and puts out much more light than the color
+            bulbs at the same brightness_pct, so run it at half brightness to blend
+            in
           action: light.turn_on
           target:
             entity_id: light.hue_white_lamp_1
           data:
             brightness_pct: 5
             transition: 180
-        - alias: Nanoleafs keep getting dimmer through the night - fade from 10%
-            to 2% over 30 minutes in 10 steps, well ahead of the 10:15pm fade-to-off
+        - alias: Nanoleafs keep getting dimmer through the night - fade from 10% to
+            2% over 30 minutes in 10 steps, well ahead of the 10:15pm fade-to-off
             and 10:45pm hard lights out that follow up as backstops
           repeat:
             sequence:
@@ -5810,14 +5811,15 @@
                 - 255
                 - 30
                 - 0
-                brightness_pct: '{{ [10 - 8 * repeat.index / 10, 2] | max | round(1) }}'
+                brightness_pct: '{{ [10 - 8 * repeat.index / 10, 2] | max | round(1)
+                  }}'
                 transition: 170
             - delay:
                 minutes: 3
             until:
-            - alias: Stop after 10 steps, or once the 10:15pm fade-to-off/10:45pm hard
-                lights out take over so this fade can't re-turn the Nanoleafs back
-                on afterward
+            - alias: Stop after 10 steps, or once the 10:15pm fade-to-off/10:45pm
+                hard lights out take over so this fade can't re-turn the Nanoleafs
+                back on afterward
               condition: or
               conditions:
               - condition: template
@@ -5833,8 +5835,8 @@
         state: 'on'
       - alias: Dim-down window - 10:00pm to 10:15pm only. The 10:15pm-10:45pm fade
           to off takes over after that, and from 10:45pm the room stays dark until
-          the Good Morning Routine restores the lights, so a motion-clear can no
-          longer relight the room.
+          the Good Morning Routine restores the lights, so a motion-clear can no longer
+          relight the room.
         condition: time
         after: '22:00:00'
         before: '22:15:00'
@@ -9101,7 +9103,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 08:25:00
+    at: 06:45:00
     weekday:
     - mon
     - tue
@@ -11223,8 +11225,8 @@
       percentage: 25
     target:
       entity_id: fan.bedroom2_fan
-  - alias: Stop any music - goodnight means no music, unlike the Bedtime Routine
-      (with verify and retry)
+  - alias: Stop any music - goodnight means no music, unlike the Bedtime Routine (with
+      verify and retry)
     repeat:
       sequence:
       - continue_on_error: true
