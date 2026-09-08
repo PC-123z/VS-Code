@@ -3033,7 +3033,7 @@
         id: sleep_on
       sequence:
       - condition: state
-        entity_id: binary_sensor.living_room_sensor_presence
+        entity_id: binary_sensor.living_room_sensor_group
         state: 'on'
       - action: switch.turn_off
         target:
@@ -3091,7 +3091,7 @@
         id: morning_transition
       sequence:
       - condition: state
-        entity_id: binary_sensor.living_room_sensor_presence
+        entity_id: binary_sensor.living_room_sensor_group
         state: 'on'
       - action: switch.turn_on
         target:
@@ -3113,7 +3113,7 @@
         id: sunset_transition
       sequence:
       - condition: state
-        entity_id: binary_sensor.living_room_sensor_presence
+        entity_id: binary_sensor.living_room_sensor_group
         state: 'on'
       - action: switch.turn_off
         target:
@@ -3133,7 +3133,7 @@
         id: night_transition
       sequence:
       - condition: state
-        entity_id: binary_sensor.living_room_sensor_presence
+        entity_id: binary_sensor.living_room_sensor_group
         state: 'on'
       - action: switch.turn_off
         target:
