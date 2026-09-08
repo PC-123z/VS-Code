@@ -5447,7 +5447,7 @@
             - 87
             - 0
             brightness_pct: 10
-            transition: 3
+            transition: 180
       - alias: Presence without a latch - set occupied and let the occupied_set branch
           run fan and music, so they can't both start it
         if:
@@ -5480,13 +5480,13 @@
         timeout:
           seconds: 5
         continue_on_timeout: true
-      - alias: Play sleep music regardless of dimmer override - a button press to
-          adjust lights shouldn't silently skip the music too
+      - alias: Start at low volume - the fade-in below ramps this up to 0.15, so
+          starting at full volume would defeat the point of a gentle fade-in
         action: media_player.volume_set
         target:
           entity_id: media_player.office_2
         data:
-          volume_level: 0.15
+          volume_level: 0.01
       - alias: Play sleep music via Music Assistant (with retry)
         repeat:
           sequence:
@@ -5532,6 +5532,25 @@
             title: Bedroom 2 sleep music didn't start
             message: Office/Bedroom 2 speaker didn't start playing after two tries
               - speaker may be offline.
+      - alias: Fade in from 0.01 to 0.15 over 60 seconds in 6 steps, only if playback
+          actually started
+        if:
+        - condition: state
+          entity_id: media_player.office_2
+          state: playing
+        then:
+        - repeat:
+            count: 6
+            sequence:
+            - action: media_player.volume_set
+              continue_on_error: true
+              target:
+                entity_id: media_player.office_2
+              data:
+                volume_level: '{{ [0.01 + (0.15 - 0.01) * repeat.index / 6, 0.15]
+                  | min | round(3) }}'
+            - delay:
+                seconds: 10
     - conditions:
       - condition: trigger
         id: occupied_set
@@ -5561,13 +5580,13 @@
         timeout:
           seconds: 5
         continue_on_timeout: true
-      - alias: Play sleep music regardless of dimmer override - a button press to
-          adjust lights shouldn't silently skip the music too
+      - alias: Start at low volume - the fade-in below ramps this up to 0.15, so
+          starting at full volume would defeat the point of a gentle fade-in
         action: media_player.volume_set
         target:
           entity_id: media_player.office_2
         data:
-          volume_level: 0.15
+          volume_level: 0.01
       - alias: Play sleep music via Music Assistant (with retry)
         repeat:
           sequence:
@@ -5613,6 +5632,25 @@
             title: Bedroom 2 sleep music didn't start
             message: Office/Bedroom 2 speaker didn't start playing after two tries
               - speaker may be offline.
+      - alias: Fade in from 0.01 to 0.15 over 60 seconds in 6 steps, only if playback
+          actually started
+        if:
+        - condition: state
+          entity_id: media_player.office_2
+          state: playing
+        then:
+        - repeat:
+            count: 6
+            sequence:
+            - action: media_player.volume_set
+              continue_on_error: true
+              target:
+                entity_id: media_player.office_2
+              data:
+                volume_level: '{{ [0.01 + (0.15 - 0.01) * repeat.index / 6, 0.15]
+                  | min | round(3) }}'
+            - delay:
+                seconds: 10
     - conditions:
       - condition: trigger
         id: motion_detected
@@ -5649,7 +5687,7 @@
             - 87
             - 0
             brightness_pct: 10
-            transition: 3
+            transition: 180
     - conditions:
       - condition: trigger
         id: motion_cleared
