@@ -395,6 +395,7 @@ goodbye_routine_all_clear_arm_and_power_off:
       - light.office
       - light.office_1
       - light.office_2
+      - light.hue_white_lamp_1
       - light.living_room
       - light.bathroom_main_lights
       - light.bathroom_shower
