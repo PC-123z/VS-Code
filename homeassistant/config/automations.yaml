@@ -8536,17 +8536,22 @@
       entity_id: alarm_control_panel.3302_alarm
     data:
       code: ''
-  - alias: Ungroup bedroom from kitchen
+  - alias: Ungroup kitchen from any stale group - Big Bedroom (Arc) is now the
+      stream coordinator, so start kitchen clean before joining it in below.
+      Changed 2026-09-08 - Kitchen (Play:5) kept dropping its own stream connection
+      to Music Assistant whenever it was made the coordinator (see automation
+      history below); the Arc has the strongest connectivity in the house, so
+      it now owns the stream and kitchen/office join it as satellites instead.
     continue_on_error: true
     action: media_player.unjoin
     target:
-      entity_id: media_player.bedroom
+      entity_id: media_player.kitchen
     data: {}
-  - alias: Ungroup bedroom 2 from kitchen
+  - alias: Ungroup kitchen 2 from any stale group
     continue_on_error: true
     action: media_player.unjoin
     target:
-      entity_id: media_player.bedroom_2
+      entity_id: media_player.kitchen_2
     data: {}
   - alias: Turn on hallway lights
     action: light.turn_on
@@ -8575,14 +8580,26 @@
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.welcome_home_active
-      - alias: Start kitchen music at low volume, then ramp to a capped 0.15 over
-          60 seconds while music starts in parallel - never blast whatever volume
-          was left over from before, and never exceed 0.15 regardless
+      - alias: Join kitchen to Big Bedroom (Arc) as a satellite before playback
+          starts, so kitchen never has to hold its own stream connection to
+          Music Assistant - only relays Sonos-native synced audio from the Arc.
+        action: media_player.join
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          group_members:
+          - media_player.kitchen
+      - alias: Start Big Bedroom + kitchen music at low volume, then ramp both
+          to a capped 0.15 over 60 seconds while music starts in parallel - never
+          blast whatever volume was left over from before, and never exceed 0.15
+          regardless
         parallel:
         - sequence:
           - action: media_player.volume_set
             target:
-              entity_id: media_player.kitchen
+              entity_id:
+              - media_player.bedroom
+              - media_player.kitchen
             data:
               volume_level: 0.02
           - repeat:
@@ -8592,7 +8609,9 @@
                   seconds: 12
               - action: media_player.volume_set
                 target:
-                  entity_id: media_player.kitchen
+                  entity_id:
+                  - media_player.bedroom
+                  - media_player.kitchen
                 data:
                   volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n
                     \   0.15] | min | round(3) }}"
@@ -8605,14 +8624,14 @@
             - continue_on_error: true
               action: music_assistant.play_media
               target:
-                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+                entity_id: media_player.bedroom_2
               data:
                 media_id: ytmusic://album/MPREb_Mxvr7f8ssSQ
                 media_type: album
             - continue_on_error: true
               action: media_player.shuffle_set
               target:
-                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+                entity_id: media_player.bedroom_2
               data:
                 shuffle: true
           - alias: Play afternoon music (12 PM - 5 PM)
@@ -8624,14 +8643,14 @@
             - continue_on_error: true
               action: music_assistant.play_media
               target:
-                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+                entity_id: media_player.bedroom_2
               data:
                 media_id: ytmusic://album/MPREb_S3lOF926Vx1
                 media_type: album
             - continue_on_error: true
               action: media_player.shuffle_set
               target:
-                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+                entity_id: media_player.bedroom_2
               data:
                 shuffle: true
           - alias: Play evening music (5 PM - 8 PM)
@@ -8643,14 +8662,14 @@
             - continue_on_error: true
               action: music_assistant.play_media
               target:
-                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+                entity_id: media_player.bedroom_2
               data:
                 media_id: ytmusic://album/MPREb_di7Fj3Fiafj
                 media_type: album
             - continue_on_error: true
               action: media_player.shuffle_set
               target:
-                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+                entity_id: media_player.bedroom_2
               data:
                 shuffle: true
           - alias: Play late night music (8 PM - 10 PM)
@@ -8661,14 +8680,14 @@
             - continue_on_error: true
               action: music_assistant.play_media
               target:
-                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+                entity_id: media_player.bedroom_2
               data:
                 media_id: ytmusic://album/MPREb_VkHTY8TFW8V
                 media_type: album
             - continue_on_error: true
               action: media_player.shuffle_set
               target:
-                device_id: b42d3b4542fb52c759f5aef09d3f6dad
+                entity_id: media_player.bedroom_2
               data:
                 shuffle: true
       continue_on_error: true
