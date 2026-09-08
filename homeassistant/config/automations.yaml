@@ -5395,18 +5395,21 @@
   - trigger: time
     at: '21:45:00'
     id: window_open_catchup
-  - trigger: time
-    at: '22:30:00'
+  - alias: Start of the back-30-minutes fade to off, 30 minutes before the 10:45pm
+      hard cutoff
+    trigger: time
+    at: '22:15:00'
     id: lights_out
   - trigger: time
     at: '22:45:00'
     id: hard_lights_out
-  - alias: Begin the sleep-music volume fade at 11:00pm
+  - alias: Begin the sleep-music volume fade so it lands on silence right at the
+      60-minute mark (9:45pm start to 10:45pm)
     trigger: time
-    at: '23:00:00'
+    at: '22:40:00'
     id: music_fade
   - trigger: time
-    at: '23:05:00'
+    at: '22:45:00'
     id: music_stop
   conditions: []
   actions:
@@ -5484,10 +5487,9 @@
             brightness_pct: 5
             transition: 180
         - alias: Nanoleafs keep getting dimmer through the night - fade from 10%
-            to 2% over 30 minutes in 10 steps, well ahead of the 10:30pm dim-down
+            to 2% over 30 minutes in 10 steps, well ahead of the 10:15pm fade-to-off
             and 10:45pm hard lights out that follow up as backstops
           repeat:
-            count: 10
             sequence:
             - action: light.turn_on
               continue_on_error: true
@@ -5504,6 +5506,17 @@
                 transition: 170
             - delay:
                 minutes: 3
+            until:
+            - alias: Stop after 10 steps, or once the 10:15pm fade-to-off/10:45pm hard
+                lights out take over so this fade can't re-turn the Nanoleafs back
+                on afterward
+              condition: or
+              conditions:
+              - condition: template
+                value_template: '{{ repeat.index >= 10 }}'
+              - condition: time
+                after: '22:14:00'
+                before: 06:00:00
       - alias: Presence without a latch - set occupied and let the occupied_set branch
           run fan and music, so they can't both start it
         if:
@@ -5780,10 +5793,9 @@
             brightness_pct: 5
             transition: 180
         - alias: Nanoleafs keep getting dimmer through the night - fade from 10%
-            to 2% over 30 minutes in 10 steps, well ahead of the 10:30pm dim-down
+            to 2% over 30 minutes in 10 steps, well ahead of the 10:15pm fade-to-off
             and 10:45pm hard lights out that follow up as backstops
           repeat:
-            count: 10
             sequence:
             - action: light.turn_on
               continue_on_error: true
@@ -5800,18 +5812,30 @@
                 transition: 170
             - delay:
                 minutes: 3
+            until:
+            - alias: Stop after 10 steps, or once the 10:15pm fade-to-off/10:45pm hard
+                lights out take over so this fade can't re-turn the Nanoleafs back
+                on afterward
+              condition: or
+              conditions:
+              - condition: template
+                value_template: '{{ repeat.index >= 10 }}'
+              - condition: time
+                after: '22:14:00'
+                before: 06:00:00
     - conditions:
       - condition: trigger
         id: motion_cleared
       - condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'on'
-      - alias: Dim-down window - 10:00pm to 10:45pm only. From hard lights out at
-          10:45pm the room stays dark until the Good Morning Routine restores the
-          lights, so a motion-clear can no longer relight the room.
+      - alias: Dim-down window - 10:00pm to 10:15pm only. The 10:15pm-10:45pm fade
+          to off takes over after that, and from 10:45pm the room stays dark until
+          the Good Morning Routine restores the lights, so a motion-clear can no
+          longer relight the room.
         condition: time
         after: '22:00:00'
-        before: '22:45:00'
+        before: '22:15:00'
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.bedroom2_manual_override
@@ -5859,7 +5883,8 @@
         entity_id: input_boolean.bedroom2_manual_override
         state: 'off'
       sequence:
-      - alias: Slow fade all lights off over 2 minutes
+      - alias: Fade all lights to 0% and off over the back 30 minutes, landing at
+          10:45pm alongside the hard lights out backstop and the music hard stop
         action: light.turn_off
         target:
           entity_id:
@@ -5868,7 +5893,7 @@
           - light.office
           - light.hue_white_lamp_1
         data:
-          transition: 120
+          transition: 1800
     - conditions:
       - condition: trigger
         id: hard_lights_out
@@ -5914,7 +5939,7 @@
           start_volume: '{{ state_attr(''media_player.office_2'', ''volume_level'')
             | float(0.15) }}'
       - alias: Fade to silence over 5 minutes in 20 steps, landing at 0 just as the
-          11:05pm hard stop fires
+          10:45pm hard stop fires - 60 minutes after a 9:45pm start
         repeat:
           count: 20
           sequence:
