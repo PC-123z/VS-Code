@@ -5367,12 +5367,12 @@
   mode: single
 - id: '1776378416550'
   alias: '*Bedroom 2 Bedtime Routine'
-  description: Triggers on motion or bedroom2_occupied turning on any time from 10:00pm
+  description: Triggers on motion or bedroom2_occupied turning on any time from 9:45pm
     to 6am (no more hard 10:45pm cutoff on the initial trigger - a late bedtime no
     longer skips the whole routine). Sets bedroom2_occupied, starts fan (stays on
     until Good Morning turns it off) and sleep music (volume fades to silence over
     5 minutes starting at 11:00pm, hard stop at 11:05pm). Lights to burnt orange at
-    setup (whenever bedtime starts, or by 10:00pm at the latest as a catch-up), fully
+    setup (whenever bedtime starts, or by 9:45pm at the latest as a catch-up), fully
     off at 10:30pm. All lights fade off at 10:45pm and the room stays dark from then
     on - see *Bedroom 2 Late Night Lights Out.
   triggers:
@@ -5393,7 +5393,7 @@
     to: 'on'
     id: occupied_set
   - trigger: time
-    at: '22:00:00'
+    at: '21:45:00'
     id: window_open_catchup
   - trigger: time
     at: '22:30:00'
@@ -5535,9 +5535,9 @@
     - conditions:
       - condition: trigger
         id: occupied_set
-      - alias: Bedtime Routine active window - 10:00pm to 6am
+      - alias: Bedtime Routine active window - 9:45pm to 6am
         condition: time
-        after: '22:00:00'
+        after: '21:45:00'
         before: 06:00:00
       sequence:
       - alias: Fan on - stays on until Good Morning routine turns it off
@@ -5620,9 +5620,9 @@
         condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'off'
-      - alias: Bedtime Routine active window - 10:00pm to 6am
+      - alias: Bedtime Routine active window - 9:45pm to 6am
         condition: time
-        after: '22:00:00'
+        after: '21:45:00'
         before: 06:00:00
       sequence:
       - alias: Set bedroom 2 occupied (fan and music start via occupied_set branch)
