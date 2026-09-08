@@ -227,13 +227,6 @@
         "domain": "homeassistant",
         "is_persistent": false,
         "issue_id": "config_entry_reauth_alexa_media_01KWB126HVY7XT65ZYWQK9Q43N"
-      },
-      {
-        "created": "2026-09-08T21:44:23.995997+00:00",
-        "dismissed_version": null,
-        "domain": "hacs",
-        "is_persistent": false,
-        "issue_id": "restart_required_290261325_tags/v1.32.0"
       }
     ]
   }
