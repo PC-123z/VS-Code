@@ -10976,9 +10976,9 @@
   alias: '*Bedroom 2: Goodnight Routine'
   description: Manually triggered "going to sleep now" for Bedroom 2/Office - mirrors
     the Big Bedroom Goodnight Button. Stops motion automation, marks the room occupied
-    (so Good Morning fires normally), engages AL sleep mode, stops music, fans up,
-    and fades all lights off. No music (unlike the Bedtime Routine, which is a
-    wind-down with music still playing).
+    (so Good Morning fires normally) and asleep, engages AL sleep mode, stops music,
+    fans up, and fades all lights off. No music (unlike the Bedtime Routine, which
+    is a wind-down with music still playing).
   triggers: []
   conditions: []
   actions:
@@ -11018,6 +11018,12 @@
     action: switch.turn_on
     target:
       entity_id: switch.adaptive_lighting_sleep_mode_office
+  - alias: Mark bedroom 2 asleep directly - the sleep mode switch above also syncs
+      this via "Bedroom 2: Sync Asleep Flag with AL Sleep Mode", but setting it here
+      too means this routine doesn't depend on that automation staying enabled
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.bedroom2_asleep
   - alias: Set bedroom 2 fan to 25%
     action: fan.turn_on
     data:
