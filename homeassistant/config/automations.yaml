@@ -2286,60 +2286,19 @@
         - conditions:
           - condition: time
             after: '20:30:00'
-            before: '23:45:00'
-          sequence:
-          - action: scene.turn_on
-            target:
-              entity_id: scene.bathroom_blood_moon
-            data:
-              transition: 1
-          - action: light.turn_on
-            target:
-              entity_id: light.bathroom_main_lights
-            data:
-              transition: 1
-          - condition: template
-            value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main',
-              'manual_control') }}\n"
-          - action: adaptive_lighting.apply
-            continue_on_error: true
-            data:
-              entity_id: switch.al_bathroom_main
-              lights:
-              - light.bathroom_main_lights
-              transition: 1
-              adapt_color: true
-              adapt_brightness: true
-        - conditions:
-          - condition: time
-            after: '23:45:00'
             before: 06:30:00
           sequence:
-          - action: light.turn_on
+          - alias: Not in sleep mode yet - just resume whatever scene/state was last applied, no forced override
+            action: light.turn_on
             target:
               entity_id:
               - light.bathroom_shower
               - light.bathroom_tub_1
               - light.bathroom_tub_2
               - light.bathroom_back
+              - light.bathroom_main_lights
             data:
-              brightness_pct: 2
               transition: 1
-          - condition: template
-            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
-              'manual_control') }}\n"
-          - action: adaptive_lighting.apply
-            continue_on_error: true
-            data:
-              entity_id: switch.al_bathroom
-              lights:
-              - light.bathroom_shower
-              - light.bathroom_tub_1
-              - light.bathroom_tub_2
-              - light.bathroom_back
-              transition: 1
-              adapt_color: true
-              adapt_brightness: false
         - conditions:
           - condition: sun
             before: sunrise
