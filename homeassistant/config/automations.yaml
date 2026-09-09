@@ -10957,7 +10957,13 @@
   description: Safety net so the welcome home routine never runs longer than 30 minutes
     - turns off input_boolean.welcome_home_active 30 minutes after it's set, unless
     it's already been turned off. It won't re-arm until the next real departure +
-    arrival cycle, since only the arrival automation turns it on.
+    arrival cycle, since only the arrival automation turns it on. Fixed 2026-09-08 -
+    previously this only cleared the flag and relied on the kitchen-unoccupied
+    automation to actually stop audio, but that one is gated on kitchen occupancy,
+    not Big Bedroom's - so if the kitchen was still occupied (or nobody was
+    watching kitchen occupancy at all) the music kept playing in an empty Big
+    Bedroom indefinitely after expiry. Now stops the coordinator directly here so
+    expiry always silences the room regardless of kitchen state.
   triggers:
   - trigger: state
     entity_id: input_boolean.welcome_home_active
@@ -10966,6 +10972,14 @@
       minutes: 30
   conditions: []
   actions:
+  - alias: Stop Big Bedroom audio - it's the stream coordinator, so expiry must
+      stop it directly rather than relying on kitchen occupancy
+    continue_on_error: true
+    action: media_player.media_stop
+    target:
+      entity_id:
+      - media_player.bedroom_2
+      - media_player.bedroom
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.welcome_home_active
