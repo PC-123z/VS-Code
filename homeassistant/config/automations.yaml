@@ -1721,7 +1721,7 @@
   max: 10
 - id: '1775368699660'
   alias: 'System: Global Sleep Mode Schedule'
-  description: 'Evening: enables sleep mode for Bedroom 2 / Office at 22:15, the kitchen
+  description: 'Evening: enables sleep mode for Bedroom 2 / Office at 22:00, the kitchen
     at 23:45, and the rest of the house at 23:00. Kitchen is deliberately later than
     the rest of the house so the main light stays on through late-night kitchen use;
     it still turns off earlier on its own via the Kitchen automation''s occupancy-clear
@@ -1735,7 +1735,7 @@
     - it''s redundant with "Office: Daily AL Reset" but harmless.'
   triggers:
   - trigger: time
-    at: '22:15:00'
+    at: '22:00:00'
     id: bedroom_2_sleep_on
   - trigger: time
     at: '23:00:00'
@@ -7349,9 +7349,9 @@
   mode: restart
 - id: '1776965023589'
   alias: 'Office/Bedroom 2: Smart Motion & Presence'
-  description: AL daytime, sleep mode evening. Handles motion 07:00-22:30 only. Stands
+  description: AL daytime, sleep mode evening. Handles motion 07:00-22:15 only. Stands
     down when bedroom2_occupied is on (Bedtime Routine has taken over). Hard cutoff
-    at 22:30 - no motion response after that until 07:00.
+    at 22:15 - no motion response after that until 07:00.
   triggers:
   - trigger: state
     entity_id:
@@ -7508,10 +7508,10 @@
     - conditions:
       - condition: trigger
         id: detected
-      - alias: Hard block - Smart Motion only active 07:00 to 22:30
+      - alias: Hard block - Smart Motion only active 07:00 to 22:15
         condition: time
         after: 07:00:00
-        before: '22:30:00'
+        before: '22:15:00'
       - alias: Stand down if Bedtime Routine has taken over
         condition: state
         entity_id: input_boolean.bedroom2_occupied
@@ -7550,8 +7550,8 @@
               transition: 2
         - conditions:
           - condition: time
-            after: '22:15:00'
-            before: '22:30:00'
+            after: '22:00:00'
+            before: '22:15:00'
           sequence:
           - action: light.turn_on
             target:
@@ -7621,7 +7621,7 @@
         - conditions:
           - condition: time
             after: 06:30:00
-            before: '22:15:00'
+            before: '22:00:00'
           sequence:
           - action: light.turn_on
             target:
@@ -7688,10 +7688,10 @@
           - switch.adaptive_lighting_office
           - switch.adaptive_lighting_adapt_color_office
           - switch.adaptive_lighting_adapt_brightness_office
-      - alias: Re-enable sleep mode if it should be active (after 22:15)
+      - alias: Re-enable sleep mode if it should be active (after 22:00)
         if:
         - condition: time
-          after: '22:15:00'
+          after: '22:00:00'
           before: 06:30:00
         then:
         - action: switch.turn_on
