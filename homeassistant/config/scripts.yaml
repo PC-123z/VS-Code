@@ -379,6 +379,21 @@ goodbye_routine_all_clear_arm_and_power_off:
     timeout:
       minutes: 5
     continue_on_timeout: false
+  - alias: Abort if car beacon shows Paul is actually home (stale/premature away
+      trigger - e.g. beacon still said away after he already walked back in)
+    if:
+    - condition: state
+      entity_id: device_tracker.bcpro_204982_08b8
+      state: home
+    then:
+    - action: notify.mobile_app_pc_iphone
+      data:
+        title: Goodbye Routine Aborted
+        message: Car beacon shows home - skipping alarm arm and lockdown.
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.goodbye_routine_active
+    - stop: Beacon confirms Paul is home - not arming
   - alias: Failsafe - leaving the house confirms awake, clear stuck asleep flag
     action: input_boolean.turn_off
     target:
