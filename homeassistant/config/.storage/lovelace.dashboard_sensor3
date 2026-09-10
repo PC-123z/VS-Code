@@ -1766,14 +1766,204 @@
           "max_columns": 4,
           "title": "Garage",
           "path": "garage-people-detection",
-          "icon": "mdi:garage",
-          "show_icon_and_title": true,
           "sections": [
             {
               "type": "grid",
-              "cards": []
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Garage Presence Controls",
+                  "entities": [
+                    {
+                      "entity": "switch.garage_garage_people_detection_engineering_mode",
+                      "name": "Engineering Mode"
+                    },
+                    {
+                      "entity": "switch.garage_garage_people_detection_control_bluetooth",
+                      "name": "Control Bluetooth"
+                    },
+                    {
+                      "entity": "select.garage_garage_people_detection_distance_resolution",
+                      "name": "Distance Resolution"
+                    },
+                    {
+                      "entity": "select.garage_garage_people_detection_out_pin_level",
+                      "name": "Out Pin Level"
+                    },
+                    {
+                      "entity": "select.garage_garage_people_detection_light_function",
+                      "name": "Light Function"
+                    },
+                    {
+                      "entity": "select.garage_garage_people_detection_baud_rate",
+                      "name": "Baud Rate"
+                    }
+                  ]
+                },
+                {
+                  "type": "entities",
+                  "title": "Garage Distance / Timeout Config",
+                  "entities": [
+                    {
+                      "entity": "number.garage_garage_people_detection_timeout",
+                      "name": "Timeout"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_max_move_distance_gate",
+                      "name": "Max Move Distance Gate"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_max_still_distance_gate",
+                      "name": "Max Still Distance Gate"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_light_threshold",
+                      "name": "Light Threshold"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "history-graph",
+                  "title": "Distances",
+                  "hours_to_show": 12,
+                  "entities": [
+                    {
+                      "entity": "sensor.garage_garage_people_detection_detection_distance",
+                      "name": "Detection Distance"
+                    },
+                    {
+                      "entity": "sensor.garage_garage_people_detection_moving_distance",
+                      "name": "Moving Distance"
+                    },
+                    {
+                      "entity": "sensor.garage_garage_people_detection_still_distance",
+                      "name": "Still Distance"
+                    }
+                  ]
+                },
+                {
+                  "type": "history-graph",
+                  "title": "Occupancy History",
+                  "hours_to_show": 24,
+                  "entities": [
+                    {
+                      "entity": "binary_sensor.garage_garage_people_detection_presence",
+                      "name": "Presence"
+                    },
+                    {
+                      "entity": "binary_sensor.garage_garage_people_detection_moving_target",
+                      "name": "Moving Target"
+                    },
+                    {
+                      "entity": "binary_sensor.garage_garage_people_detection_still_target",
+                      "name": "Still Target"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "entities",
+                  "title": "Target / Occupancy",
+                  "entities": [
+                    {
+                      "entity": "binary_sensor.garage_garage_people_detection_presence",
+                      "name": "Presence"
+                    },
+                    {
+                      "entity": "binary_sensor.garage_garage_people_detection_moving_target",
+                      "name": "Moving Target"
+                    },
+                    {
+                      "entity": "binary_sensor.garage_garage_people_detection_still_target",
+                      "name": "Still Target"
+                    },
+                    {
+                      "entity": "sensor.garage_garage_people_detection_move_energy",
+                      "name": "Move Energy"
+                    },
+                    {
+                      "entity": "sensor.garage_garage_people_detection_still_energy",
+                      "name": "Still Energy"
+                    },
+                    {
+                      "entity": "sensor.garage_garage_people_detection_light",
+                      "name": "Light"
+                    }
+                  ]
+                },
+                {
+                  "type": "entities",
+                  "title": "Gate Thresholds (G0–G8)",
+                  "entities": [
+                    {
+                      "entity": "number.garage_garage_people_detection_g0_move_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g0_still_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g1_move_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g1_still_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g2_move_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g2_still_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g3_move_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g3_still_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g4_move_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g4_still_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g5_move_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g5_still_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g6_move_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g6_still_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g7_move_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g7_still_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g8_move_threshold"
+                    },
+                    {
+                      "entity": "number.garage_garage_people_detection_g8_still_threshold"
+                    }
+                  ]
+                }
+              ]
             }
-          ]
+          ],
+          "cards": []
         }
       ],
       "streamline_templates": {
