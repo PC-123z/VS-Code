@@ -8747,18 +8747,26 @@
       - input_boolean.welcome_home_pending
   mode: single
 - id: '1748800000004'
-  alias: 'Welcome Home: Stop All Music When Kitchen Unoccupied 10 Min'
-  description: 'Reverted 2026-09-10 - back to join/broadcast mode (see "Welcome
-    Home: Auto Join Bedroom Speakers on Motion" below), so kitchen is the fixed
-    anchor again. When it has been empty for 10 minutes continuously, stop all
-    music, unjoin satellite rooms, and clear the active flag. Fires if
+  alias: 'Welcome Home: Stop Session When Nobody Present Anywhere 10 Min'
+  description: Corrected 2026-09-10 - kitchen-only occupancy was wrong as the "is
+    anyone home" signal, since kitchen keeps playing as the anchor even when
+    everyone's actually in another room (Big Bedroom, Office/Bedroom 2, Bathroom,
+    Living Room). The session should only end on explicit stop, the 30-minute
+    hard cap, or when NONE of those rooms have had presence for 10 minutes -
+    not just because kitchen itself emptied out. Watches all five rooms; only
+    stops music, unjoins satellites, and clears the active flag once every one
+    of them has been unoccupied for a continuous 10 minutes. Fires if
     welcome_home_active is on OR kitchen is still actually playing, so a stray
-    premature flag-clear (e.g. from the music-pause guard) can''t leave kitchen
-    music orphaned with no automation watching it. Bathroom handles itself via
-    its own kitchen_stopped trigger (see "Bathroom Speaker Join on Motion v2").'
+    premature flag-clear (e.g. from the music-pause guard) can't leave kitchen
+    music orphaned with no automation watching it.
   triggers:
   - trigger: state
-    entity_id: binary_sensor.kitchen_sensor_group
+    entity_id:
+    - binary_sensor.kitchen_sensor_group
+    - binary_sensor.big_bedroom_sensor_group
+    - binary_sensor.bedroom_2_sensor_group
+    - binary_sensor.bathroom_motion
+    - binary_sensor.living_room_sensor_group
     to: 'off'
     for:
       minutes: 10
@@ -8774,6 +8782,27 @@
     - condition: state
       entity_id: media_player.kitchen_2
       state: playing
+  - alias: Kitchen must actually be empty right now, not just at the moment it
+      triggered
+    condition: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    state: 'off'
+  - alias: Big Bedroom must actually be empty right now
+    condition: state
+    entity_id: binary_sensor.big_bedroom_sensor_group
+    state: 'off'
+  - alias: Office/Bedroom 2 must actually be empty right now
+    condition: state
+    entity_id: binary_sensor.bedroom_2_sensor_group
+    state: 'off'
+  - alias: Bathroom must actually be empty right now
+    condition: state
+    entity_id: binary_sensor.bathroom_motion
+    state: 'off'
+  - alias: Living Room must actually be empty right now
+    condition: state
+    entity_id: binary_sensor.living_room_sensor_group
+    state: 'off'
   actions:
   - alias: Clear welcome home flag
     action: input_boolean.turn_off
@@ -11035,24 +11064,27 @@
   mode: single
 - id: '1779800000002'
   alias: 'Welcome Home: Unjoin Satellite or Disable on Kitchen Stop'
-  description: Re-enabled 2026-09-10 - back to join/broadcast mode with kitchen as
-    the fixed anchor, so kitchen going idle/paused is a real "did it stop" signal
-    again. Split 2026-09-06 after a bathroom speaker going idle killed the whole
-    kitchen session while Paul was still in the kitchen. Satellite rooms (bathroom,
-    office, bedroom/bedroom_2) stopping just means that room emptied out - unjoin
-    only that speaker and let the kitchen keep going. Only the kitchen player itself
-    (the anchor) stopping can kill the routine, and even then only if the kitchen
-    is unoccupied - if kitchen occupancy is still active, leave welcome_home_active
-    alone so a track-transition blip or a paused-then-resumed track cannot cut off
-    music the anchor room is still using. Hold time widened to 5 minutes on 2026-09-06
-    (was 10s, too tight - a normal pause between tracks or a brief manual pause was
-    enough to trip it) - this also comfortably covers the idle->paused->playing blip
-    that music_assistant.play_media goes through while it loads the queue on arrival
-    (was killing welcome_home_active ~8s after every arrival, before music even started
-    - see 2026-08-12 incident). Since welcome_home_active is only re-armed by an actual
-    departure + arrival (alarm must be armed away/home first), disabling it keeps
-    it off until the next real cycle instead of it lingering or re-joining rooms after
-    a manual pause.
+  description: 'Re-enabled 2026-09-10 - back to join/broadcast mode with kitchen
+    as the fixed anchor, so kitchen going idle/paused is a real "did it stop"
+    signal again. Corrected the same day - kitchen stopping used to only check
+    kitchen''s own occupancy before killing the session, which was wrong -
+    kitchen is just the anchor speaker, not where people actually are. Now
+    checks all five tracked rooms (kitchen, Big Bedroom, Office/Bedroom 2,
+    Bathroom, Living Room) - if anyone''s present in ANY of them, a kitchen
+    pause/stop blip is left alone and the session keeps going, matching "Stop
+    Session When Nobody Present Anywhere 10 Min" above. Split 2026-09-06 after
+    a bathroom speaker going idle killed the whole kitchen session while Paul
+    was still in the kitchen. Satellite rooms (bathroom, office, bedroom/bedroom_2)
+    stopping just means that room emptied out - unjoin only that speaker and let
+    the kitchen keep going. Hold time widened to 5 minutes on 2026-09-06 (was
+    10s, too tight - a normal pause between tracks or a brief manual pause was
+    enough to trip it) - this also comfortably covers the idle->paused->playing
+    blip that music_assistant.play_media goes through while it loads the queue
+    on arrival (was killing welcome_home_active ~8s after every arrival, before
+    music even started - see 2026-08-12 incident). Since welcome_home_active is
+    only re-armed by an actual departure + arrival (alarm must be armed away/home
+    first), disabling it keeps it off until the next real cycle instead of it
+    lingering or re-joining rooms after a manual pause.'
   triggers:
   - id: satellite
     trigger: state
@@ -11099,7 +11131,8 @@
         action: media_player.unjoin
         target:
           entity_id: '{{ trigger.entity_id }}'
-    - alias: Kitchen itself stopped - only kill the session if the kitchen is unoccupied
+    - alias: Kitchen itself stopped - only kill the session if nobody is present
+        in any tracked room
       conditions:
       - condition: trigger
         id: kitchen
@@ -11107,6 +11140,18 @@
       - if:
         - condition: state
           entity_id: binary_sensor.kitchen_sensor_group
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.big_bedroom_sensor_group
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.bedroom_2_sensor_group
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.bathroom_motion
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.living_room_sensor_group
           state: 'off'
         then:
         - action: input_boolean.turn_off
