@@ -8870,15 +8870,22 @@
   mode: single
 - id: '1777890200001'
   alias: 'Welcome Home: Auto Join Bedroom Speakers on Motion'
-  description: Reverted 2026-09-10 - true handoff (transfer_queue) moved the whole
-    stream on every room change, including kitchen, which wasn't wanted; back to join/broadcast
-    mode so kitchen stays the anchor and other rooms just add in on motion rather
-    than taking over. While welcome home music is playing in kitchen, joins bedroom
-    speakers when motion is detected in those rooms. Volume ramp matched to
-    "Bathroom Speaker Join on Motion v2" the same day (was starting too low and
-    ramping too slowly) - starts at 0.05 instead of 0.02, ramps over 5 steps of
-    6 seconds (30s total, was 12s/60s), and targets kitchen's actual current
-    volume instead of a fixed 0.15 cap, same as bathroom does.
+  description: 'Reverted 2026-09-10 - true handoff (transfer_queue) moved the whole
+    stream on every room change, including kitchen, which wasn''t wanted; back to
+    join/broadcast mode so kitchen stays the anchor and other rooms just add in on
+    motion rather than taking over. While welcome home music is playing in kitchen,
+    joins bedroom speakers when motion is detected in those rooms. Volume ramp fixed
+    2026-09-10 (second pass, same day) - office/bedroom_2 was observed stuck at 0.02
+    (the OLD pre-fix starting volume) for a real 20+ minute session despite the
+    volume_set-then-join sequence looking correct. Root cause: joining a Sonos group
+    via media_player.join appears to restore/re-apply a remembered volume for that
+    speaker in that group topology, silently overwriting whatever volume_set was
+    called right before the join - "Bathroom Speaker Join on Motion v2" already
+    hit this and works around it by re-applying volume AFTER the join too (its
+    "Unmute again after join" step), which this automation was missing. Added the
+    same re-apply-after-join step here. Also switched from ramping to kitchen''s
+    current volume to fixed per-room targets, and shortened the ramp to 20 seconds
+    total (5 steps of 4s) - office/bedroom_2 targets 0.12, Big Bedroom targets 0.14.'
   triggers:
   - trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
