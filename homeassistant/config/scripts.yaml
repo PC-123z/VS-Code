@@ -386,51 +386,8 @@ goodbye_routine_all_clear_arm_and_power_off:
       entity_id: device_tracker.bcpro_204982_08b8
       state: home
     then:
-    - action: notify.mobile_app_pc_iphone
-      data:
-        title: Goodbye Routine Aborted
-        message: Car beacon shows home - skipping alarm arm and restoring lights.
-    - action: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.goodbye_routine_active
-    - alias: Undo the immediate-actions lights-off since he's actually home
-      target:
-        entity_id:
-        - light.indoor
-        - light.galaxy_projector
-        - light.kitchen_main_lights
-        - light.kitchen_1_color
-        - light.kitchen_2_color
-        - light.dining_room_bottom
-        - light.dining_room_top
-        - light.ribbon
-        - light.fluttershy
-        - light.nano_sand_dune
-        - light.office
-        - light.office_1
-        - light.office_2
-        - light.hue_white_lamp_1
-        - light.living_room
-        - light.bathroom_main_lights
-        - light.bathroom_shower
-        - light.bathroom_back
-        - light.showtime_light
-        - light.bedroom
-        - light.bedroom_2
-        - light.bedroom_ceiling_1
-        - light.bedroom_ceiling_2
-        - light.bedroom_lamp_1
-        - light.bedroom_lamp_2
-      action: light.turn_on
+    - action: script.goodbye_routine_abort_and_restore
       data: {}
-    - alias: Undo the hallway swap (dim hallway on / al_hallway switch off) from
-        immediate actions
-      target:
-        entity_id: switch.al_hallway
-      action: switch.turn_on
-    - target:
-        entity_id: light.hallway
-      action: light.turn_off
     - stop: Beacon confirms Paul is home - lights restored, not arming
   - alias: Failsafe - leaving the house confirms awake, clear stuck asleep flag
     action: input_boolean.turn_off
@@ -494,6 +451,62 @@ goodbye_routine_all_clear_arm_and_power_off:
   mode: single
   icon: mdi:shield-lock
   description: ''
+goodbye_routine_abort_and_restore:
+  alias: Goodbye Routine - Abort and Restore Lights
+  description: Shared by the beacon-home checks (both the arm-time gate in "All
+    Clear, Arm and Power Off" and the immediate "Beacon Home - Abort In-Progress
+    Goodbye Routine" automation) to cancel a goodbye routine that was triggered
+    by a stale/premature away signal and undo what immediate_actions already
+    turned off.
+  sequence:
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Goodbye Routine Aborted
+      message: Car beacon shows home - cancelling goodbye routine and restoring
+        lights.
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.goodbye_routine_active
+  - alias: Undo the immediate-actions lights-off since he's actually home
+    target:
+      entity_id:
+      - light.indoor
+      - light.galaxy_projector
+      - light.kitchen_main_lights
+      - light.kitchen_1_color
+      - light.kitchen_2_color
+      - light.dining_room_bottom
+      - light.dining_room_top
+      - light.ribbon
+      - light.fluttershy
+      - light.nano_sand_dune
+      - light.office
+      - light.office_1
+      - light.office_2
+      - light.hue_white_lamp_1
+      - light.living_room
+      - light.bathroom_main_lights
+      - light.bathroom_shower
+      - light.bathroom_back
+      - light.showtime_light
+      - light.bedroom
+      - light.bedroom_2
+      - light.bedroom_ceiling_1
+      - light.bedroom_ceiling_2
+      - light.bedroom_lamp_1
+      - light.bedroom_lamp_2
+    action: light.turn_on
+    data: {}
+  - alias: Undo the hallway swap (dim hallway on / al_hallway switch off) from
+      immediate actions
+    target:
+      entity_id: switch.al_hallway
+    action: switch.turn_on
+  - target:
+      entity_id: light.hallway
+    action: light.turn_off
+  mode: single
+  icon: mdi:restore
 goodbye_routine_alexa:
   alias: Goodbye Routine - Alexa
   sequence:

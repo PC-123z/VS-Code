@@ -8365,6 +8365,37 @@
         target:
           entity_id: script.goodbye_routine_main
   mode: restart
+- id: '1778000000001'
+  alias: 'AUTO AWAY: Beacon Home - Abort In-Progress Goodbye Routine'
+  description: Covers the 2026-09-09 near-miss where the car beacon was still
+    showing away (stale) when Paul actually walked back in - the goodbye routine
+    got as far as turning off lights and almost armed away while he was in Bedroom
+    2. Rather than waiting for the arm-time gate in "Goodbye Routine - All Clear,
+    Arm and Power Off" (which can be up to ~12 minutes into the motion-tracking
+    wait), this fires the moment the beacon flips back to home while the routine
+    is active and cancels it immediately.
+  triggers:
+  - trigger: state
+    entity_id: device_tracker.bcpro_204982_08b8
+    to: home
+  conditions:
+  - condition: state
+    entity_id: input_boolean.goodbye_routine_active
+    state: 'on'
+  actions:
+  - alias: Cancel any in-flight goodbye routine scripts before they can arm/act
+      again
+    action: script.turn_off
+    target:
+      entity_id:
+      - script.goodbye_routine_main
+      - script.goodbye_routine_immediate_actions
+      - script.goodbye_routine_motion_tracking
+      - script.goodbye_routine_all_clear_arm_and_power_off
+  - action: script.turn_on
+    target:
+      entity_id: script.goodbye_routine_abort_and_restore
+  mode: single
 - id: '1777484175032'
   alias: Arrival (Welcome Home) - STAGE 1 Two-Factor Arm to Pending
   description: 'STAGE 1 of 2. Two-factor arrival detection, order-independent. Needs
