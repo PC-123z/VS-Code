@@ -227,27 +227,6 @@
         "domain": "homeassistant",
         "is_persistent": false,
         "issue_id": "config_entry_reauth_alexa_media_01KWB126HVY7XT65ZYWQK9Q43N"
-      },
-      {
-        "created": "2026-09-10T01:25:36.943640+00:00",
-        "dismissed_version": null,
-        "domain": "automation",
-        "is_persistent": false,
-        "issue_id": "automation.welcome_home_unjoin_bedroom_when_unoccupied_10_min_validation_failed_schema"
-      },
-      {
-        "created": "2026-09-10T01:25:36.943710+00:00",
-        "dismissed_version": null,
-        "domain": "automation",
-        "is_persistent": false,
-        "issue_id": "automation.welcome_home_unjoin_office_when_unoccupied_10_min_validation_failed_schema"
-      },
-      {
-        "created": "2026-09-10T01:25:36.944146+00:00",
-        "dismissed_version": null,
-        "domain": "automation",
-        "is_persistent": false,
-        "issue_id": "automation.welcome_home_disable_immediately_if_music_pauses_validation_failed_schema"
       }
     ]
   }

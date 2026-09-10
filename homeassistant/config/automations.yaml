@@ -8747,61 +8747,59 @@
       - input_boolean.welcome_home_pending
   mode: single
 - id: '1748800000004'
-  alias: 'Welcome Home: Stop Session When Nobody Present 10 Min'
-  description: Redesigned 2026-09-09 for true handoff - kitchen is no longer the
-    fixed anchor, so kitchen-only occupancy can't be the "has everyone left" signal
-    anymore. Watches all three handoff rooms (kitchen, big bedroom, office/bedroom
-    2) together; only when NONE of them have had presence for 10 minutes does it
-    stop whichever MA player is currently holding the queue and clear the active
-    flag. Whoever's actually playing is found dynamically via source_player_entity,
-    since the queue could be on any of the three at the time this fires.
+  alias: 'Welcome Home: Stop All Music When Kitchen Unoccupied 10 Min'
+  description: 'Reverted 2026-09-10 - back to join/broadcast mode (see "Welcome
+    Home: Auto Join Bedroom Speakers on Motion" below), so kitchen is the fixed
+    anchor again. When it has been empty for 10 minutes continuously, stop all
+    music, unjoin satellite rooms, and clear the active flag. Fires if
+    welcome_home_active is on OR kitchen is still actually playing, so a stray
+    premature flag-clear (e.g. from the music-pause guard) can''t leave kitchen
+    music orphaned with no automation watching it. Bathroom handles itself via
+    its own kitchen_stopped trigger (see "Bathroom Speaker Join on Motion v2").'
   triggers:
   - trigger: state
-    entity_id:
-    - binary_sensor.kitchen_sensor_group
-    - binary_sensor.big_bedroom_sensor_group
-    - binary_sensor.bedroom_2_sensor_group
+    entity_id: binary_sensor.kitchen_sensor_group
     to: 'off'
     for:
       minutes: 10
   conditions:
-  - condition: state
-    entity_id: input_boolean.welcome_home_active
-    state: 'on'
-  - alias: All three handoff rooms must actually be empty right now (not just the
-      one that triggered)
-    condition: state
-    entity_id:
-    - binary_sensor.kitchen_sensor_group
-    - binary_sensor.big_bedroom_sensor_group
-    - binary_sensor.bedroom_2_sensor_group
-    state: 'off'
-  variables:
-    source_player_entity: >-
-      {% set players = ['media_player.kitchen_2', 'media_player.bedroom_2', 'media_player.office_2'] %}
-      {% set active = players | select('is_state', 'playing') | list %}
-      {% if active | length == 0 %}
-        {% set active = players | select('is_state', 'paused') | list %}
-      {% endif %}
-      {{ active | first | default('media_player.kitchen_2') }}
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.welcome_home_active
+      state: 'on'
+    - condition: state
+      entity_id: media_player.kitchen
+      state: playing
+    - condition: state
+      entity_id: media_player.kitchen_2
+      state: playing
   actions:
   - alias: Clear welcome home flag
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.welcome_home_active
-  - alias: Stop whichever room currently holds the queue
+  - alias: Unjoin satellite rooms
+    continue_on_error: true
+    action: media_player.unjoin
+    target:
+      entity_id:
+      - media_player.bedroom
+      - media_player.bedroom_2
+      - media_player.office
+      - media_player.bathroom
+    data: {}
+  - alias: Stop kitchen
     continue_on_error: true
     action: media_player.media_stop
     target:
-      entity_id: '{{ source_player_entity }}'
+      entity_id: media_player.kitchen
   mode: single
 - id: '1748800000002'
   alias: 'Welcome Home: Unjoin Bedroom When Unoccupied 10 Min'
-  description: 'Disabled 2026-09-09 - true handoff (see "Welcome Home: Follow
-    Presence, True Handoff" below) transfers the MA queue between rooms one at
-    a time instead of Sonos-grouping them as satellites, so there''s nothing
-    left to unjoin here. Kept disabled rather than deleted in case handoff mode
-    is ever reverted.'
+  description: Re-enabled 2026-09-10 - back to join/broadcast mode. While welcome
+    home is active, unjoin the bedroom speaker when the room has been empty for
+    10 minutes. The auto-join automation handles re-joining if someone returns.
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
@@ -8820,11 +8818,11 @@
       entity_id: media_player.bedroom_2
     data: {}
   mode: single
-  enabled: false
 - id: '1748800000003'
   alias: 'Welcome Home: Unjoin Office When Unoccupied 10 Min'
-  description: Disabled 2026-09-09 - same reason as "Unjoin Bedroom When Unoccupied
-    10 Min" above; true handoff has nothing to unjoin.
+  description: Re-enabled 2026-09-10 - back to join/broadcast mode. While welcome
+    home is active, unjoin the office speaker when the room has been empty for
+    10 minutes. The auto-join automation handles re-joining if someone returns.
   triggers:
   - trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
@@ -8843,131 +8841,110 @@
       entity_id: media_player.office_2
     data: {}
   mode: single
-  enabled: false
 - id: '1777890200001'
-  alias: 'Welcome Home: Follow Presence (True Handoff)'
-  description: Replaced the old join-as-satellite/broadcast behavior on 2026-09-09
-    now that SonosNet mesh removes the connectivity problems that made a fixed
-    kitchen anchor necessary. Moves the single active Music Assistant queue to
-    whichever of kitchen / big bedroom / office has presence, via
-    music_assistant.transfer_queue so playback resumes mid-track/mid-queue on the
-    new room instead of restarting - only one room plays at a time. The old
-    room goes idle automatically once the queue is transferred off of it.
+  alias: 'Welcome Home: Auto Join Bedroom Speakers on Motion'
+  description: Reverted 2026-09-10 - true handoff (transfer_queue) moved the whole
+    stream on every room change, including kitchen, which wasn't wanted; back to
+    join/broadcast mode so kitchen stays the anchor and other rooms just add in
+    on motion rather than taking over. While welcome home music is playing in
+    kitchen, joins bedroom speakers when motion is detected in those rooms.
+    Bathroom is handled separately by "Bathroom Speaker Join on Motion v2", which
+    already worked this way and wasn't touched by the handoff experiment.
   triggers:
-  - trigger: state
-    entity_id: binary_sensor.kitchen_sensor_group
-    to: 'on'
-    id: kitchen
-  - trigger: state
-    entity_id: binary_sensor.big_bedroom_sensor_group
-    to: 'on'
-    id: big_bedroom
   - trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
     to: 'on'
-    id: office
+    id: bedroom_2_motion
+    enabled: true
+  - trigger: state
+    entity_id: binary_sensor.big_bedroom_sensor_group
+    to: 'on'
+    id: big_bedroom_motion
   conditions:
   - condition: state
     entity_id: input_boolean.welcome_home_active
     state: 'on'
-  variables:
-    target_player: >-
-      {% if trigger.id == 'kitchen' %}media_player.kitchen_2
-      {%- elif trigger.id == 'big_bedroom' %}media_player.bedroom_2
-      {%- else %}media_player.office_2
-      {%- endif %}
-    source_player: >-
-      {% set players = ['media_player.kitchen_2', 'media_player.bedroom_2', 'media_player.office_2'] %}
-      {% set active = players | select('is_state', 'playing') | list %}
-      {% if active | length == 0 %}
-        {% set active = players | select('is_state', 'paused') | list %}
-      {% endif %}
-      {{ active | first | default('media_player.kitchen_2') }}
   actions:
   - choose:
-    - alias: Motion in kitchen - hand the queue back to kitchen
+    - alias: Bedroom 2 sensor - join office speaker at a capped, ramped volume rather
+        than whatever it was left at last
       conditions:
       - condition: trigger
-        id: kitchen
-      - alias: Skip if kitchen already holds the queue - motion re-triggers constantly
-          while the room is occupied, and without this the transfer would re-run
-          on every retrigger
-        condition: template
-        value_template: '{{ target_player != source_player }}'
-      sequence:
-      - alias: Set kitchen to a safe volume before the queue lands, rather than
-          whatever it was left at last
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.kitchen
-        data:
-          volume_level: 0.12
-      - alias: Hand off the MA queue from wherever it was to kitchen, preserving
-          queue position
-        action: music_assistant.transfer_queue
-        target:
-          entity_id: media_player.kitchen_2
-        data:
-          source_player: '{{ source_player }}'
-          auto_play: true
-    - alias: Motion in office (Bedroom 2 room) - hand the queue to office
-      conditions:
-      - condition: trigger
-        id: office
+        id: bedroom_2_motion
       - alias: Skip while Bedroom 2 is asleep
         condition: state
         entity_id: input_boolean.bedroom2_asleep
         state: 'off'
-      - alias: Skip if office already holds the queue - same repeated-retrigger
-          issue as the kitchen branch above
+      - alias: Skip if office already in the kitchen group - motion re-triggers constantly
+          while the room is occupied, and without this the whole volume-drop/join/ramp
+          sequence re-ran on every retrigger, causing the exact audible cutouts this
+          was meant to prevent
         condition: template
-        value_template: '{{ target_player != source_player }}'
+        value_template: "{{ 'media_player.office_2' not in\n   (state_attr('media_player.kitchen_2',\n
+          \  'group_members') | default([])) }}"
       sequence:
-      - alias: Set office to a safe volume before the queue lands, rather than
-          whatever it was left at last
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.office
-        data:
-          volume_level: 0.12
-      - alias: Hand off the MA queue from wherever it was to office, preserving
-          queue position
-        action: music_assistant.transfer_queue
+      - action: media_player.volume_set
         target:
           entity_id: media_player.office_2
         data:
-          source_player: '{{ source_player }}'
-          auto_play: true
-    - alias: Motion in Big Bedroom - hand the queue to Big Bedroom
+          volume_level: 0.02
+      - action: media_player.join
+        target:
+          entity_id: media_player.kitchen_2
+        data:
+          group_members:
+          - media_player.office_2
+      - alias: Ramp office volume up to a capped 0.15 over 60 seconds
+        repeat:
+          count: 5
+          sequence:
+          - delay:
+              seconds: 12
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.office_2
+            data:
+              volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n    0.15]
+                | min | round(3) }}"
+    - alias: Big bedroom sensor - join bedroom speaker at a capped, ramped volume
+        rather than whatever it was left at last
       conditions:
       - condition: trigger
-        id: big_bedroom
+        id: big_bedroom_motion
       - alias: Skip while Big Bedroom is asleep
         condition: state
         entity_id: input_boolean.big_bedroom_asleep
         state: 'off'
-      - alias: Skip if Big Bedroom already holds the queue - same repeated-retrigger
-          issue as the kitchen branch above
+      - alias: Skip if bedroom already in the kitchen group - same repeated-retrigger
+          issue as the office branch above
         condition: template
-        value_template: '{{ target_player != source_player }}'
+        value_template: "{{ 'media_player.bedroom_2' not in\n   (state_attr('media_player.kitchen_2',\n
+          \  'group_members') | default([])) }}"
       sequence:
-      - alias: Set Big Bedroom to a safe volume before the queue lands, rather
-          than whatever it was left at last
-        action: media_player.volume_set
-        target:
-          entity_id: media_player.bedroom
-        data:
-          volume_level: 0.12
-      - alias: Hand off the MA queue from wherever it was to Big Bedroom, preserving
-          queue position
-        action: music_assistant.transfer_queue
+      - action: media_player.volume_set
         target:
           entity_id: media_player.bedroom_2
         data:
-          source_player: '{{ source_player }}'
-          auto_play: true
-  mode: queued
-  max: 5
+          volume_level: 0.02
+      - action: media_player.join
+        target:
+          entity_id: media_player.kitchen_2
+        data:
+          group_members:
+          - media_player.bedroom_2
+      - alias: Ramp bedroom volume up to a capped 0.15 over 60 seconds
+        repeat:
+          count: 5
+          sequence:
+          - delay:
+              seconds: 12
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.bedroom_2
+            data:
+              volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n    0.15]
+                | min | round(3) }}"
+  mode: single
 - id: '1777520160440'
   alias: 'Living Room: Unoccupied Shutoff'
   description: After 15 min of no living room presence (with dining room also empty),
@@ -10990,15 +10967,15 @@
   mode: single
 - id: '1779800000001'
   alias: 'Welcome Home: Auto-Expire After 30 Minutes'
-  description: Hard cap so a welcome home session (now true handoff, since 2026-09-09)
-    never runs longer than 30 minutes total regardless of how many rooms it moved
-    through - turns off input_boolean.welcome_home_active 30 minutes after it's
-    set, unless it's already been turned off. It won't re-arm until the next real
+  description: Hard cap so a welcome home session never runs longer than 30 minutes
+    total - turns off input_boolean.welcome_home_active 30 minutes after it's set,
+    unless it's already been turned off. It won't re-arm until the next real
     departure + arrival cycle, since only the arrival automation turns it on.
-    Originally fixed 2026-09-08 to stop audio directly instead of relying on
-    kitchen occupancy; now finds whichever of the three handoff rooms actually
-    holds the MA queue at expiry time and stops that one, since the queue could
-    be anywhere by the 30-minute mark.
+    Fixed 2026-09-08 to stop audio directly instead of relying on kitchen
+    occupancy alone, so expiry always silences the room even if nobody's watching
+    kitchen occupancy. Reverted 2026-09-10 to join/broadcast mode - kitchen is
+    the fixed anchor again, so stopping kitchen (and unjoining satellites) is
+    enough to end the whole group regardless of who's still joined to it.
   triggers:
   - trigger: state
     entity_id: input_boolean.welcome_home_active
@@ -11006,21 +10983,23 @@
     for:
       minutes: 30
   conditions: []
-  variables:
-    source_player_entity: >-
-      {% set players = ['media_player.kitchen_2', 'media_player.bedroom_2', 'media_player.office_2'] %}
-      {% set active = players | select('is_state', 'playing') | list %}
-      {% if active | length == 0 %}
-        {% set active = players | select('is_state', 'paused') | list %}
-      {% endif %}
-      {{ active | first | default('media_player.kitchen_2') }}
   actions:
-  - alias: Stop whichever room currently holds the queue - expiry must stop it
-      directly rather than relying on any single room's occupancy
+  - alias: Unjoin satellite rooms
+    continue_on_error: true
+    action: media_player.unjoin
+    target:
+      entity_id:
+      - media_player.bedroom
+      - media_player.bedroom_2
+      - media_player.office
+      - media_player.bathroom
+    data: {}
+  - alias: Stop kitchen audio - it's the anchor, so expiry must stop it directly
+      rather than relying on kitchen occupancy
     continue_on_error: true
     action: media_player.media_stop
     target:
-      entity_id: '{{ source_player_entity }}'
+      entity_id: media_player.kitchen
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.welcome_home_active
@@ -11056,20 +11035,24 @@
   mode: single
 - id: '1779800000002'
   alias: 'Welcome Home: Unjoin Satellite or Disable on Kitchen Stop'
-  description: 'Disabled 2026-09-09 - true handoff (see "Welcome Home: Follow
-    Presence, True Handoff") means kitchen going paused/idle is now a NORMAL
-    event whenever the queue transfers to another room, not a sign the session
-    ended. Left enabled this would wrongly kill welcome_home_active on every
-    kitchen-to-bedroom handoff. "Stop Session When Nobody Present 10 Min" (see
-    above) now owns session termination, based on all three rooms'' presence
-    instead of kitchen player state. Kept disabled rather than deleted in case
-    handoff mode is ever reverted to the old fixed-kitchen-anchor design, whose
-    history is: split 2026-09-06 after a bathroom speaker going idle killed the
-    whole kitchen session while Paul was still in the kitchen; hold time widened
-    to 5 minutes the same day (was 10s, too tight - a normal pause between tracks
-    tripped it, and it also covered the idle->paused->playing blip
-    music_assistant.play_media goes through while loading the queue on arrival -
-    see 2026-08-12 incident).'
+  description: Re-enabled 2026-09-10 - back to join/broadcast mode with kitchen as
+    the fixed anchor, so kitchen going idle/paused is a real "did it stop" signal
+    again. Split 2026-09-06 after a bathroom speaker going idle killed the whole
+    kitchen session while Paul was still in the kitchen. Satellite rooms (bathroom,
+    office, bedroom/bedroom_2) stopping just means that room emptied out - unjoin
+    only that speaker and let the kitchen keep going. Only the kitchen player itself
+    (the anchor) stopping can kill the routine, and even then only if the kitchen
+    is unoccupied - if kitchen occupancy is still active, leave welcome_home_active
+    alone so a track-transition blip or a paused-then-resumed track cannot cut off
+    music the anchor room is still using. Hold time widened to 5 minutes on 2026-09-06
+    (was 10s, too tight - a normal pause between tracks or a brief manual pause was
+    enough to trip it) - this also comfortably covers the idle->paused->playing blip
+    that music_assistant.play_media goes through while it loads the queue on arrival
+    (was killing welcome_home_active ~8s after every arrival, before music even started
+    - see 2026-08-12 incident). Since welcome_home_active is only re-armed by an actual
+    departure + arrival (alarm must be armed away/home first), disabling it keeps
+    it off until the next real cycle instead of it lingering or re-joining rooms after
+    a manual pause.
   triggers:
   - id: satellite
     trigger: state
@@ -11131,7 +11114,6 @@
             entity_id: input_boolean.welcome_home_active
   mode: queued
   max: 10
-  enabled: false
 - id: '1779800000003'
   alias: 'Good Morning: Auto-Expire After 45 Minutes'
   description: Safety net so the good morning routine never runs longer than 45 minutes
