@@ -8967,9 +8967,6 @@
         value_template: "{{ 'media_player.bedroom_2' not in\n   (state_attr('media_player.kitchen_2',\n
           \  'group_members') | default([])) }}"
       sequence:
-      - variables:
-          target_vol: '{{ state_attr(''media_player.kitchen_2'', ''volume_level'')
-            | default(0.20) | float }}'
       - action: media_player.volume_set
         target:
           entity_id: media_player.bedroom_2
@@ -8981,19 +8978,28 @@
         data:
           group_members:
           - media_player.bedroom_2
-      - alias: Ramp bedroom volume up to match kitchen's current volume over 30
-          seconds
+      - alias: Re-apply the low volume after joining - joining a Sonos group can
+          silently restore a remembered volume for this speaker in that group,
+          overwriting the volume_set that ran right before the join (same issue
+          "Bathroom Speaker Join on Motion v2" already worked around with its
+          own "unmute again after join" step)
+        action: media_player.volume_set
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          volume_level: 0.05
+      - alias: Ramp bedroom volume up to 0.14 over 20 seconds
         repeat:
           count: 5
           sequence:
           - delay:
-              seconds: 6
+              seconds: 4
           - action: media_player.volume_set
             target:
               entity_id: media_player.bedroom_2
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n
-                \   target_vol] | min | round(3) }}"
+              volume_level: "{{ [0.05 + (repeat.index * ((0.14 - 0.05) / 5)),\n
+                \   0.14] | min | round(3) }}"
   mode: single
 - id: '1777520160440'
   alias: 'Living Room: Unoccupied Shutoff'
