@@ -1760,6 +1760,20 @@
             }
           ],
           "cards": []
+        },
+        {
+          "type": "sections",
+          "max_columns": 4,
+          "title": "Garage",
+          "path": "garage-people-detection",
+          "icon": "mdi:garage",
+          "show_icon_and_title": true,
+          "sections": [
+            {
+              "type": "grid",
+              "cards": []
+            }
+          ]
         }
       ],
       "streamline_templates": {
