@@ -11162,22 +11162,27 @@
   max: 10
 - id: '1780200000001'
   alias: 'Welcome Home: Immediate Stop on Manual Pause'
-  description: Added 2026-09-10 - pressing pause on ANY welcome home speaker (kitchen,
-    the anchor, or any satellite) should immediately unjoin everyone and end the session,
-    not just unjoin the one speaker that paused (the "satellite" branch of "Unjoin
-    Satellite or Disable on Kitchen Stop") and not wait on a 5-minute hold. The hard
-    part is telling a real button-press pause apart from the idle->paused->playing
-    blip music_assistant.play_media goes through while loading the queue on arrival
-    or between tracks - that blip also passes through "paused" for an instant, and
-    reacting to it unconditionally would kill the session ~seconds after every arrival
-    before music even starts (see the 2026-08-12 incident that "Unjoin Satellite or
-    Disable" was built around). Two independent checks guard against that, both must
-    pass - trigger.from_state.state must be 'playing' (a real pause always comes from
-    playing; the loading blip arrives at paused from idle, never from playing), and
-    media_position on the paused player must be a few seconds into the track (a fresh
-    queue load sits at position 0 when it flashes through paused; a genuine pause
-    happens mid-track). No "for" delay needed since both checks are evaluated instantly
-    off the trigger's state object, so this reacts the moment pause is pressed.
+  description: 'Added 2026-09-10, fixed same day after a real false-positive - pressing
+    pause on ANY welcome home speaker (kitchen, the anchor, or any satellite) should
+    unjoin everyone and end the session, not just unjoin the one speaker that paused
+    (the "satellite" branch of "Unjoin Satellite or Disable on Kitchen Stop") and not
+    wait on the old 5-minute hold. Originally shipped with no "for" delay, relying only
+    on two instant checks (from_state was playing, media_position > 2s) to rule out
+    the idle->paused->playing blip music_assistant.play_media goes through at queue
+    load (position 0, arrives from idle). That blocked the load-time blip fine, but on
+    2026-09-10 at 11:32 AM a real arrival showed a DIFFERENT blip: kitchen, already 51
+    seconds into normal playback, spontaneously went playing->paused->idle->paused->playing
+    over about 3 seconds (almost certainly a Sonos/MA rebuffer hiccup, not a button
+    press) - and because it was well into the track already, it passed both checks
+    and killed welcome_home_active ~66 seconds after arrival, before Paul had even
+    reached Big Bedroom. That is why "Auto Join Bedroom Speakers on Motion" did not
+    join when he got there - the flag was already off by the time motion fired, which
+    is correct behavior for that automation given the (wrongly) cleared flag. Fix:
+    added a 6-second "for" hold on the paused trigger - long enough that the observed
+    3-second self-correcting blip never reaches it, short enough that a real
+    button-press (which stays paused far longer) still ends the session almost
+    immediately. The from_state/media_position checks are kept as a second, independent
+    layer specifically for the queue-load case.'
   triggers:
   - trigger: state
     entity_id:
@@ -11190,6 +11195,8 @@
     - media_player.bathroom
     - media_player.bathroom_2
     to: paused
+    for:
+      seconds: 6
   conditions:
   - condition: state
     entity_id: input_boolean.welcome_home_active
