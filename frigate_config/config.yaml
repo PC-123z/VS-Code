@@ -16,9 +16,11 @@ detectors:
   ov_0:
     type: openvino
     device: CPU
+    num_threads: 3
   ov_1:
     type: openvino
     device: CPU
+    num_threads: 3
 
 model:
   path: /openvino-model/ssdlite_mobilenet_v2.xml
