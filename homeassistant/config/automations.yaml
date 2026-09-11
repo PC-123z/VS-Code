@@ -7984,9 +7984,6 @@
     - conditions:
       - condition: trigger
         id: playing
-      - condition: state
-        entity_id: light.living_room
-        state: 'on'
       - condition: template
         value_template: '{{ integration_entities(''jellyfin'') | select(''match'', ''^media_player\.'')
           | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'',
@@ -7994,25 +7991,31 @@
           ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''media_player.living_room_tv_3'',
           ''playing'') or is_state(''media_player.living_room'', ''playing'') }}'
       sequence:
-      - action: automation.turn_off
-        target:
-          entity_id: automation.living_room_smart_motion_presence
-      - action: switch.turn_off
-        target:
-          entity_id: switch.al_living_room
-      - action: adaptive_lighting.set_manual_control
-        data:
-          entity_id: switch.al_living_room
-          lights:
-          - light.living_room
-          manual_control: true
-      - action: light.turn_on
-        target:
+      - alias: Living room fixture dim - only if it's actually on; don't force-light a dark room just because media started
+        if:
+        - condition: state
           entity_id: light.living_room
-        data:
-          brightness_pct: '{{ playing_brightness | int }}'
-          color_temp_kelvin: '{{ tv_kelvin | int }}'
-          transition: 3
+          state: 'on'
+        then:
+        - action: automation.turn_off
+          target:
+            entity_id: automation.living_room_smart_motion_presence
+        - action: switch.turn_off
+          target:
+            entity_id: switch.al_living_room
+        - action: adaptive_lighting.set_manual_control
+          data:
+            entity_id: switch.al_living_room
+            lights:
+            - light.living_room
+            manual_control: true
+        - action: light.turn_on
+          target:
+            entity_id: light.living_room
+          data:
+            brightness_pct: '{{ playing_brightness | int }}'
+            color_temp_kelvin: '{{ tv_kelvin | int }}'
+            transition: 3
       - choose:
         - conditions:
           - condition: state
