@@ -5053,6 +5053,9 @@
     id: press
   conditions: []
   actions:
+  - alias: Remember whether we were already asleep before this press (so Nanoleaf only lights on the initial bedtime trigger, not a repeat press while already asleep)
+    variables:
+      already_asleep: "{{ is_state('input_boolean.big_bedroom_asleep', 'on') }}"
   - alias: Disable motion automation
     action: automation.turn_off
     target:
@@ -5136,6 +5139,21 @@
       device_id: ca438fb682d663761f41ccdd014ee6b0
     data:
       percentage: 25
+  - alias: Nanoleaf to deep red 2% (only on initial bedtime press, not if already asleep)
+    if:
+    - condition: template
+      value_template: '{{ not already_asleep }}'
+    then:
+    - action: light.turn_on
+      target:
+        entity_id: light.nano_sand_dune
+      data:
+        rgb_color:
+        - 255
+        - 30
+        - 0
+        brightness_pct: 2
+        transition: 1
   - alias: Fade bedroom lights off over 5 seconds - only if already on, no point commanding
       an already-off light
     if:
@@ -5183,6 +5201,9 @@
     id: hold
   conditions: []
   actions:
+  - alias: Remember whether we were already asleep before this press (so Nanoleaf only lights on the initial bedtime trigger, not a repeat press while already asleep)
+    variables:
+      already_asleep: "{{ is_state('input_boolean.big_bedroom_asleep', 'on') }}"
   - alias: Disable motion automation
     action: automation.turn_off
     target:
@@ -5266,6 +5287,21 @@
       device_id: ca438fb682d663761f41ccdd014ee6b0
     data:
       percentage: 50
+  - alias: Nanoleaf to deep red 2% (only on initial bedtime press, not if already asleep)
+    if:
+    - condition: template
+      value_template: '{{ not already_asleep }}'
+    then:
+    - action: light.turn_on
+      target:
+        entity_id: light.nano_sand_dune
+      data:
+        rgb_color:
+        - 255
+        - 30
+        - 0
+        brightness_pct: 2
+        transition: 1
   - alias: Fade bedroom lights off over 5 seconds - only if already on, no point commanding
       an already-off light
     if:
