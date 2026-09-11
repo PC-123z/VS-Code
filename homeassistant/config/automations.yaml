@@ -8575,7 +8575,7 @@
         target:
           entity_id: input_boolean.welcome_home_active
       - alias: Start kitchen music at low volume, then ramp to a capped 0.15 over
-          60 seconds while music starts in parallel - never blast whatever volume
+          30 seconds while music starts in parallel - never blast whatever volume
           was left over from before, and never exceed 0.15 regardless
         parallel:
         - sequence:
@@ -8588,7 +8588,7 @@
               count: 5
               sequence:
               - delay:
-                  seconds: 12
+                  seconds: 6
               - action: media_player.volume_set
                 target:
                   entity_id: media_player.kitchen
