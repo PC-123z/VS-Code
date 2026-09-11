@@ -7951,6 +7951,28 @@
     to:
     - 'off'
     id: tv_off
+  - alias: Apple TV (living room) - playing
+    trigger: state
+    entity_id:
+    - media_player.living_room
+    to:
+    - playing
+    id: playing
+  - alias: Apple TV (living room) - paused
+    trigger: state
+    entity_id:
+    - media_player.living_room
+    to:
+    - paused
+    id: paused
+    enabled: false
+  - alias: Apple TV (living room) - off
+    trigger: state
+    entity_id:
+    - media_player.living_room
+    to:
+    - 'off'
+    id: tv_off
   - alias: Living room light turned on while media may already be playing (catches walking into the room after the show already started, when the TV came on before the light did)
     trigger: state
     entity_id: light.living_room
@@ -7970,7 +7992,7 @@
           | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'',
           ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
           ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''media_player.living_room_tv_3'',
-          ''playing'') }}'
+          ''playing'') or is_state(''media_player.living_room'', ''playing'') }}'
       sequence:
       - action: automation.turn_off
         target:
