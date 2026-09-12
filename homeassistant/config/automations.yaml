@@ -911,15 +911,6 @@
       - light.bedroom_lamp_1
       - light.bedroom_lamp_2
       manual_control: false
-  - alias: Restore sleep mode during night hours
-    if:
-    - condition: time
-      after: '23:00:00'
-      before: 07:00:00
-    then:
-    - action: switch.turn_on
-      target:
-        entity_id: switch.al_sleep_mode_big_bedroom
   mode: single
 - id: '1774970377473'
   alias: 'Pico Button 1 - Big Bedroom: Bright/Mood Override'
@@ -1256,8 +1247,8 @@
             transition: 2
         - if:
           - condition: template
-            value_template: "{{ 'light.hallway' not in\n   state_attr('switch.al_hallway',
-              'manual_control') }}\n"
+            value_template: "{{ 'light.hallway' not in\n   state_attr('switch.al_hallway',\
+              \ 'manual_control') }}\n"
           then:
           - action: adaptive_lighting.apply
             continue_on_error: true
@@ -1338,12 +1329,13 @@
     to: 'on'
     id: sleep_on
   - trigger: template
-    value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')
-      | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',
-      'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in mc_color\n
-      \     or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'
-      in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   ( 'light.kitchen_main_lights'
-      in mc_main\n     and is_state('switch.al_kitchen_main', 'on') ) }}\n"
+    value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')\
+      \ | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',\
+      \ 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in\
+      \ mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'\
+      \ in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   (\
+      \ 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',\
+      \ 'on') ) }}\n"
     id: al_manual_control_changed
   - device_id: 864fec31db3ec90f02e244eb717c9cd4
     domain: lutron_caseta
@@ -1394,13 +1386,13 @@
       - condition: trigger
         id: al_manual_control_changed
       - condition: template
-        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')
-          | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',
-          'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in
-          mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'
-          in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   (
-          'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',
-          'on') ) }}\n"
+        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')\
+          \ | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',\
+          \ 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color'\
+          \ in mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'\
+          \ in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n\
+          \   ( 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',\
+          \ 'on') ) }}\n"
       sequence:
       - delay:
           seconds: 2
@@ -1408,13 +1400,13 @@
         entity_id: binary_sensor.kitchen_sensor_group
         state: 'on'
       - condition: template
-        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')
-          | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',
-          'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in
-          mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'
-          in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   (
-          'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',
-          'on') ) }}\n"
+        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')\
+          \ | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',\
+          \ 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color'\
+          \ in mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'\
+          \ in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n\
+          \   ( 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',\
+          \ 'on') ) }}\n"
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.kitchen_manual_override
@@ -1722,17 +1714,19 @@
 - id: '1775368699660'
   alias: 'System: Global Sleep Mode Schedule'
   description: 'Evening: enables sleep mode for Bedroom 2 / Office at 22:00, the kitchen
-    at 23:45, and the rest of the house at 23:00. Kitchen is deliberately later than
-    the rest of the house so the main light stays on through late-night kitchen use;
-    it still turns off earlier on its own via the Kitchen automation''s occupancy-clear
-    triggers (kitchen_cleared/kitchen_cleared_hue) whenever the room actually clears,
-    independent of sleep mode. Morning: catch-all that disables sleep mode and re-enables
-    AL everywhere, clearing manual_control. Fires the moment the Good Morning Routine
-    starts (input_boolean.good_morning_active turning on) rather than a fixed clock
-    time; if Good Morning never runs, an 11:00 fallback fires the same catch-all regardless
-    of weekday. Big Bedroom is excluded from the morning branch because the Good Morning
-    Routine owns it. Bedroom 2 / Office is included in the morning catch-all for simplicity
-    - it''s redundant with "Office: Daily AL Reset" but harmless.'
+    at 23:45, and hallway/living room/dining room/bathrooms at 23:00. Big Bedroom
+    sleep mode is manual only (Pico button) - excluded from this schedule; AL still
+    applies to it via other automations. Kitchen is deliberately later than the rest
+    of the house so the main light stays on through late-night kitchen use; it still
+    turns off earlier on its own via the Kitchen automation''s occupancy-clear triggers
+    (kitchen_cleared/kitchen_cleared_hue) whenever the room actually clears, independent
+    of sleep mode. Morning: catch-all that disables sleep mode and re-enables AL everywhere,
+    clearing manual_control. Fires the moment the Good Morning Routine starts (input_boolean.good_morning_active
+    turning on) rather than a fixed clock time; if Good Morning never runs, an 11:00
+    fallback fires the same catch-all regardless of weekday. Big Bedroom is excluded
+    from the morning branch because the Good Morning Routine owns it. Bedroom 2 /
+    Office is included in the morning catch-all for simplicity - it''s redundant with
+    "Office: Daily AL Reset" but harmless.'
   triggers:
   - trigger: time
     at: '22:00:00'
@@ -1781,7 +1775,6 @@
         target:
           entity_id:
           - switch.al_sleep_mode_hallway
-          - switch.al_sleep_mode_big_bedroom
           - switch.al_sleep_mode_living_room
           - switch.al_sleep_mode_dining_room_bottom
           - switch.al_sleep_mode_dining_room_top
@@ -1793,15 +1786,6 @@
           entity_id: switch.al_hallway
           lights:
           - light.hallway
-          transition: 150
-          adapt_color: true
-          adapt_brightness: true
-      - action: adaptive_lighting.apply
-        continue_on_error: true
-        data:
-          entity_id: switch.al_big_bedroom
-          lights:
-          - light.bedroom
           transition: 150
           adapt_color: true
           adapt_brightness: true
@@ -2260,9 +2244,9 @@
         id: detected
       sequence:
       - condition: template
-        value_template: "{% set lights = [\n  'light.bathroom_shower',\n  'light.bathroom_tub_1',\n
-          \ 'light.bathroom_tub_2',\n  'light.bathroom_back',\n  'light.bathroom_main_lights'\n]
-          %} {{ lights | select('is_state', 'on') | list | count == 0 }}\n"
+        value_template: "{% set lights = [\n  'light.bathroom_shower',\n  'light.bathroom_tub_1',\n\
+          \  'light.bathroom_tub_2',\n  'light.bathroom_back',\n  'light.bathroom_main_lights'\n\
+          ] %} {{ lights | select('is_state', 'on') | list | count == 0 }}\n"
       - choose:
         - conditions:
           - condition: state
@@ -2316,8 +2300,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
-              'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',\
+              \ 'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2338,8 +2322,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main',
-              'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main',\
+              \ 'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2359,8 +2343,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
-              'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',\
+              \ 'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2390,8 +2374,8 @@
         - trigger: state
           entity_id: binary_sensor.bathroom_motion
           to: 'on'
-        timeout: "{{ '00:10:00' if (now().hour >= 23 or now().hour < 7)\n   else '00:15:00'
-          }}\n"
+        timeout: "{{ '00:10:00' if (now().hour >= 23 or now().hour < 7)\n   else '00:15:00'\
+          \ }}\n"
         continue_on_timeout: true
       - condition: state
         entity_id: binary_sensor.bathroom_motion
@@ -3057,8 +3041,8 @@
         target:
           entity_id: switch.al_living_room
       - condition: template
-        value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',
-          'manual_control') }}\n"
+        value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',\
+          \ 'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3147,8 +3131,8 @@
             data:
               transition: 5
           - condition: template
-            value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',
-              'manual_control') }}\n"
+            value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',\
+              \ 'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3419,8 +3403,8 @@
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
       - condition: template
-        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
-          'manual_control') }}\n"
+        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',\
+          \ 'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3431,8 +3415,8 @@
           adapt_color: true
           adapt_brightness: true
       - condition: template
-        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
-          'manual_control') }}\n"
+        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',\
+          \ 'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3619,8 +3603,8 @@
             data:
               transition: 5
           - condition: template
-            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
-              'manual_control') }}\n"
+            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',\
+              \ 'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3631,8 +3615,8 @@
               adapt_color: true
               adapt_brightness: true
           - condition: template
-            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
-              'manual_control') }}\n"
+            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',\
+              \ 'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -5052,9 +5036,11 @@
     id: press
   conditions: []
   actions:
-  - alias: Remember whether we were already asleep before this press (so Nanoleaf only lights on the initial bedtime trigger, not a repeat press while already asleep)
+  - alias: Remember whether we were already asleep before this press (so Nanoleaf
+      only lights on the initial bedtime trigger, not a repeat press while already
+      asleep)
     variables:
-      already_asleep: "{{ is_state('input_boolean.big_bedroom_asleep', 'on') }}"
+      already_asleep: '{{ is_state(''input_boolean.big_bedroom_asleep'', ''on'') }}'
   - alias: Disable motion automation
     action: automation.turn_off
     target:
@@ -5138,7 +5124,8 @@
       device_id: ca438fb682d663761f41ccdd014ee6b0
     data:
       percentage: 25
-  - alias: Nanoleaf to deep red 2% (only on initial bedtime press, not if already asleep)
+  - alias: Nanoleaf to deep red 2% (only on initial bedtime press, not if already
+      asleep)
     if:
     - condition: template
       value_template: '{{ not already_asleep }}'
@@ -5200,9 +5187,11 @@
     id: hold
   conditions: []
   actions:
-  - alias: Remember whether we were already asleep before this press (so Nanoleaf only lights on the initial bedtime trigger, not a repeat press while already asleep)
+  - alias: Remember whether we were already asleep before this press (so Nanoleaf
+      only lights on the initial bedtime trigger, not a repeat press while already
+      asleep)
     variables:
-      already_asleep: "{{ is_state('input_boolean.big_bedroom_asleep', 'on') }}"
+      already_asleep: '{{ is_state(''input_boolean.big_bedroom_asleep'', ''on'') }}'
   - alias: Disable motion automation
     action: automation.turn_off
     target:
@@ -5286,7 +5275,8 @@
       device_id: ca438fb682d663761f41ccdd014ee6b0
     data:
       percentage: 50
-  - alias: Nanoleaf to deep red 2% (only on initial bedtime press, not if already asleep)
+  - alias: Nanoleaf to deep red 2% (only on initial bedtime press, not if already
+      asleep)
     if:
     - condition: template
       value_template: '{{ not already_asleep }}'
@@ -6719,9 +6709,9 @@
     state: 'off'
   actions:
   - variables:
-      already_joined: "{{ state_attr('media_player.bedroom_2', 'group_members') is
-        not none and\n   'media_player.kitchen' in\n   state_attr('media_player.bedroom_2',
-        'group_members') | default([]) }}"
+      already_joined: "{{ state_attr('media_player.bedroom_2', 'group_members') is\
+        \ not none and\n   'media_player.kitchen' in\n   state_attr('media_player.bedroom_2',\
+        \ 'group_members') | default([]) }}"
       kitchen_vol_before: '{{ state_attr(''media_player.kitchen'', ''volume_level'')
         | default(0.10) }}'
   - alias: Join and ramp only if not already in group
@@ -7562,8 +7552,8 @@
               entity_id: switch.adaptive_lighting_office
               state: 'on'
             - condition: template
-              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',
-                'manual_control') | default([])) }}\n"
+              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',\
+                \ 'manual_control') | default([])) }}\n"
             then:
             - action: adaptive_lighting.apply
               continue_on_error: true
@@ -7602,8 +7592,8 @@
               entity_id: switch.adaptive_lighting_office
               state: 'on'
             - condition: template
-              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',
-                'manual_control') | default([])) }}\n"
+              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',\
+                \ 'manual_control') | default([])) }}\n"
             then:
             - action: adaptive_lighting.apply
               continue_on_error: true
@@ -7965,7 +7955,9 @@
     to:
     - 'off'
     id: tv_off
-  - alias: Living room light turned on while media may already be playing (catches walking into the room after the show already started, when the TV came on before the light did)
+  - alias: Living room light turned on while media may already be playing (catches
+      walking into the room after the show already started, when the TV came on before
+      the light did)
     trigger: state
     entity_id: light.living_room
     to: 'on'
@@ -7977,13 +7969,15 @@
       - condition: trigger
         id: playing
       - condition: template
-        value_template: '{{ integration_entities(''jellyfin'') | select(''match'', ''^media_player\.'')
-          | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'',
-          ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
-          ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''media_player.living_room_tv_3'',
-          ''playing'') or is_state(''media_player.living_room'', ''playing'') }}'
+        value_template: '{{ integration_entities(''jellyfin'') | select(''match'',
+          ''^media_player\.'') | select(''in'', area_entities(''living_room'')) |
+          map(''states'') | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
+          ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or
+          is_state(''media_player.living_room_tv_3'', ''playing'') or is_state(''media_player.living_room'',
+          ''playing'') }}'
       sequence:
-      - alias: Living room fixture dim - only if it's actually on; don't force-light a dark room just because media started
+      - alias: Living room fixture dim - only if it's actually on; don't force-light
+          a dark room just because media started
         if:
         - condition: state
           entity_id: light.living_room
@@ -8599,9 +8593,9 @@
       is_quiet_hours: '{{ current_hour|int < 8 or current_hour|int >= 22 }}'
       kids_present: '{{ is_state("input_boolean.bedroom2_occupied", "on") }}'
   - alias: Check if quiet hours (before 8 AM or after 10 PM) AND kids are actually
-      here (bedroom2_occupied on) - added 2026-09-12 so quiet hours only silence
-      music when there's someone in Bedroom 2 to be quiet for; otherwise music plays
-      normally even late at night
+      here (bedroom2_occupied on) - added 2026-09-12 so quiet hours only silence music
+      when there's someone in Bedroom 2 to be quiet for; otherwise music plays normally
+      even late at night
     if:
     - condition: template
       value_template: '{{ is_quiet_hours and kids_present }}'
@@ -8638,8 +8632,8 @@
                 target:
                   entity_id: media_player.kitchen
                 data:
-                  volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n
-                    \   0.15] | min | round(3) }}"
+                  volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n\
+                    \    0.15] | min | round(3) }}"
         - sequence:
           - alias: Play morning music (6 AM - 12 PM)
             if:
@@ -8753,13 +8747,13 @@
 - id: '1777484175034'
   alias: Arrival Latch - Clear after 1 hr or on Disarm
   description: Clears the arrival latches (beacon/phone, garage-open) and the welcome_home_pending
-    waiting state 1 hour after any of them was set, or as soon as the alarm is
-    disarmed (so a stale latch never lingers or wrongly satisfies the two-factor check
-    on some unrelated future event). Clearing pending on disarm also means that letting
-    yourself in some other way - keypad, front door - cancels the waiting routine
-    instead of leaving it to fire the next time the garage opens. Extended from 15
-    min 2026-09-12 - a Ring garage-door-sensor delay/miss let the latch expire before
-    STAGE 2 saw the door as open, so the alarm never disarmed.
+    waiting state 1 hour after any of them was set, or as soon as the alarm is disarmed
+    (so a stale latch never lingers or wrongly satisfies the two-factor check on some
+    unrelated future event). Clearing pending on disarm also means that letting yourself
+    in some other way - keypad, front door - cancels the waiting routine instead of
+    leaving it to fire the next time the garage opens. Extended from 15 min 2026-09-12
+    - a Ring garage-door-sensor delay/miss let the latch expire before STAGE 2 saw
+    the door as open, so the alarm never disarmed.
   triggers:
   - alias: Arrival latch has been on for 1 hour
     trigger: state
@@ -8963,8 +8957,8 @@
           sequence re-ran on every retrigger, causing the exact audible cutouts this
           was meant to prevent
         condition: template
-        value_template: "{{ 'media_player.office_2' not in\n   (state_attr('media_player.kitchen_2',\n
-          \  'group_members') | default([])) }}"
+        value_template: "{{ 'media_player.office_2' not in\n   (state_attr('media_player.kitchen_2',\n\
+          \   'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
@@ -8997,8 +8991,8 @@
             target:
               entity_id: media_player.office_2
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((0.12 - 0.05) / 5)),\n    0.12]
-                | min | round(3) }}"
+              volume_level: "{{ [0.05 + (repeat.index * ((0.12 - 0.05) / 5)),\n  \
+                \  0.12] | min | round(3) }}"
     - alias: Big bedroom sensor - join bedroom speaker at a capped, ramped volume
         rather than whatever it was left at last
       conditions:
@@ -9011,8 +9005,8 @@
       - alias: Skip if bedroom already in the kitchen group - same repeated-retrigger
           issue as the office branch above
         condition: template
-        value_template: "{{ 'media_player.bedroom_2' not in\n   (state_attr('media_player.kitchen_2',\n
-          \  'group_members') | default([])) }}"
+        value_template: "{{ 'media_player.bedroom_2' not in\n   (state_attr('media_player.kitchen_2',\n\
+          \   'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
@@ -9045,8 +9039,8 @@
             target:
               entity_id: media_player.bedroom_2
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((0.14 - 0.05) / 5)),\n    0.14]
-                | min | round(3) }}"
+              volume_level: "{{ [0.05 + (repeat.index * ((0.14 - 0.05) / 5)),\n  \
+                \  0.14] | min | round(3) }}"
   mode: single
 - id: '1777520160440'
   alias: 'Living Room: Unoccupied Shutoff'
@@ -10136,10 +10130,10 @@
   - variables:
       welcome_home_on: '{{ is_state(''input_boolean.welcome_home_active'', ''on'')
         }}'
-      bedroom_active: "{{ states('media_player.bedroom') not in\n   ['off','idle','paused','standby','unavailable','unknown']
-        }}"
-      kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']
-        }}"
+      bedroom_active: "{{ states('media_player.bedroom') not in\n   ['off','idle','paused','standby','unavailable','unknown']\
+        \ }}"
+      kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']\
+        \ }}"
       source_player: '{% if welcome_home_on and kitchen_active %} media_player.kitchen_2
         {% elif bedroom_active %} media_player.bedroom_2 {% else %} none {% endif
         %}'
@@ -10165,9 +10159,9 @@
           MA entity lists other MA entities (bathroom_2), not the raw Sonos entity,
           so this must check for bathroom_2 not bathroom
         condition: template
-        value_template: "{{ state_attr(source_player, 'group_members') is not none
-          and\n   'media_player.bathroom_2' not in\n   (state_attr(source_player,
-          'group_members') | default([])) }}"
+        value_template: "{{ state_attr(source_player, 'group_members') is not none\
+          \ and\n   'media_player.bathroom_2' not in\n   (state_attr(source_player,\
+          \ 'group_members') | default([])) }}"
       - variables:
           bathroom_vol_before: '{{ state_attr(''media_player.bathroom'', ''volume_level'')
             | default(0.30) }}'
@@ -10230,8 +10224,8 @@
               target:
                 entity_id: media_player.bathroom
               data:
-                volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n
-                  \   target_vol] | min | round(3) }}"
+                volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n\
+                  \    target_vol] | min | round(3) }}"
     - alias: Motion cleared - start idle timer (only if grouped)
       conditions:
       - condition: trigger
@@ -10239,10 +10233,10 @@
       - alias: Bathroom is currently in any active source group - group_members lists
           MA entities (bathroom_2), not the raw Sonos entity
         condition: template
-        value_template: "{{ ('media_player.bathroom_2' in\n    (state_attr('media_player.bedroom_2',
-          'group_members') | default([])))\n   or\n   ('media_player.bathroom_2' in\n
-          \   (state_attr('media_player.kitchen_2', 'group_members') | default([])))
-          }}"
+        value_template: "{{ ('media_player.bathroom_2' in\n    (state_attr('media_player.bedroom_2',\
+          \ 'group_members') | default([])))\n   or\n   ('media_player.bathroom_2'\
+          \ in\n    (state_attr('media_player.kitchen_2', 'group_members') | default([])))\
+          \ }}"
       sequence:
       - alias: Start/restart the 10-minute idle timer
         action: timer.start
@@ -10324,9 +10318,9 @@
       - alias: Bathroom is currently in the stopped source's group - group_members
           lists MA entities (bathroom_2), not the raw Sonos entity
         condition: template
-        value_template: "{% set stopped = 'media_player.bedroom_2' if trigger.id ==
-          'bedroom_stopped'\n   else 'media_player.kitchen_2' %}\n{{ 'media_player.bathroom_2'
-          in\n   (state_attr(stopped, 'group_members') | default([])) }}"
+        value_template: "{% set stopped = 'media_player.bedroom_2' if trigger.id ==\
+          \ 'bedroom_stopped'\n   else 'media_player.kitchen_2' %}\n{{ 'media_player.bathroom_2'\
+          \ in\n   (state_attr(stopped, 'group_members') | default([])) }}"
       sequence:
       - alias: Cancel idle timer if running
         action: timer.cancel
@@ -10674,10 +10668,10 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\.')
-      | select('in', area_entities('living_room')) | map('states') | select('eq',
-      'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')
-      != 'playing') }}"
+    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\\
+      .') | select('in', area_entities('living_room')) | map('states') | select('eq',\
+      \ 'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')\
+      \ != 'playing') }}"
   - condition: state
     entity_id: media_player.living_room_tv_2
     state: 'on'
@@ -10698,10 +10692,10 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\.')
-      | select('in', area_entities('living_room')) | map('states') | select('eq',
-      'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')
-      != 'playing') }}"
+    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\\
+      .') | select('in', area_entities('living_room')) | map('states') | select('eq',\
+      \ 'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')\
+      \ != 'playing') }}"
   - action: media_player.turn_off
     target:
       entity_id: media_player.living_room_tv_2
@@ -10713,10 +10707,10 @@
   triggers:
   - trigger: template
     id: five_minutes
-    value_template: "{{ states('sensor.washer_machine_state') == 'run'\n   and states('sensor.washer_completion_time')
-      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.washer_completion_time'))
-      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.washer_completion_time'))
-      - as_timestamp(now())) | int > 0 }}"
+    value_template: "{{ states('sensor.washer_machine_state') == 'run'\n   and states('sensor.washer_completion_time')\
+      \ not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.washer_completion_time'))\
+      \ - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.washer_completion_time'))\
+      \ - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.washer_machine_state
@@ -10789,10 +10783,10 @@
   triggers:
   - trigger: template
     id: five_minutes
-    value_template: "{{ states('sensor.dryer_machine_state') == 'run'\n   and states('sensor.dryer_completion_time')
-      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.dryer_completion_time'))
-      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.dryer_completion_time'))
-      - as_timestamp(now())) | int > 0 }}"
+    value_template: "{{ states('sensor.dryer_machine_state') == 'run'\n   and states('sensor.dryer_completion_time')\
+      \ not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.dryer_completion_time'))\
+      \ - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.dryer_completion_time'))\
+      \ - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.dryer_machine_state
@@ -11645,11 +11639,11 @@
   alias: 'Garage: Open on Presence During Volvo Start'
   description: While a Volvo remote-start cycle is active and the garage man-door
     has opened at least once this cycle (input_boolean.volvo_garage_door_opened_this_cycle),
-    open the garage cover the moment the mmWave presence sensor sees anyone -
-    no hold-time and no requirement that the door be open at that exact instant.
-    Replaces the old same-moment door+3s-presence check in script_volvo_start_core,
-    which never fired on 2026-09-11 because presence was already on before the
-    wait step for it even started.
+    open the garage cover the moment the mmWave presence sensor sees anyone - no hold-time
+    and no requirement that the door be open at that exact instant. Replaces the old
+    same-moment door+3s-presence check in script_volvo_start_core, which never fired
+    on 2026-09-11 because presence was already on before the wait step for it even
+    started.
   triggers:
   - trigger: state
     entity_id: binary_sensor.garage_garage_people_detection_presence
@@ -11674,9 +11668,8 @@
   mode: single
 - id: '1778700000002'
   alias: 'Garage: Reset Volvo Door-Opened Flag When Start Cycle Ends'
-  description: Clears input_boolean.volvo_garage_door_opened_this_cycle when
-    volvo_start_active turns off, so the flag doesn't leak into the next
-    remote-start cycle.
+  description: Clears input_boolean.volvo_garage_door_opened_this_cycle when volvo_start_active
+    turns off, so the flag doesn't leak into the next remote-start cycle.
   triggers:
   - trigger: state
     entity_id: input_boolean.volvo_start_active
