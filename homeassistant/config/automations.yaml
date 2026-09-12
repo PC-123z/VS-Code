@@ -58,39 +58,6 @@
     target:
       entity_id: input_boolean.good_morning_active
   mode: single
-- id: '1772505504350'
-  alias: Kitchen Off Switch
-  description: 'Kills all kitchen lights when the Pico OFF button is pressed. Presence-based
-    shutoff (main at 60s, Hue at 3:30 after the room clears) is owned by the Kitchen:
-    Smart Motion & Presence automation, so the old "main turned off externally" trigger
-    was removed - it killed the Hue lights 2:30 after any main-off even if someone
-    had walked back in. Uses explicit entity IDs to avoid registry-UUID drift.
-
-    '
-  triggers:
-  - device_id: 864fec31db3ec90f02e244eb717c9cd4
-    domain: lutron_caseta
-    type: press
-    subtype: 'off'
-    trigger: device
-    id: pico_off
-  conditions: []
-  actions:
-  - action: light.turn_off
-    target:
-      entity_id: light.kitchen_main_lights
-  - delay:
-      minutes: 2
-      seconds: 30
-  - action: light.turn_off
-    target:
-      entity_id:
-      - light.kitchen_1_color
-      - light.kitchen_2_color
-      - light.kitchen_lightstrip
-    data:
-      transition: 30
-  mode: restart
 - id: '1772717730627'
   alias: '*Nap Wake Up Routine v3'
   description: 'Staged sunrise wake-up with 3-min light ramp. Music ramps to 0.30,
@@ -131,7 +98,6 @@
       - switch.al_sleep_mode_dining_room_top
       - switch.al_sleep_mode_hallway
       - switch.al_sleep_mode_kitchen
-      - switch.al_sleep_mode_kitchen_main
       - switch.al_sleep_mode_living_room
       - switch.adaptive_lighting_sleep_mode_office
   - alias: Clear asleep flag - nap wake up confirms awake
@@ -1247,8 +1213,8 @@
             transition: 2
         - if:
           - condition: template
-            value_template: "{{ 'light.hallway' not in\n   state_attr('switch.al_hallway',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.hallway' not in\n   state_attr('switch.al_hallway',
+              'manual_control') }}\n"
           then:
           - action: adaptive_lighting.apply
             continue_on_error: true
@@ -1286,14 +1252,18 @@
   mode: restart
 - id: '1775348628799'
   alias: 'Kitchen: Smart Motion & Presence (Split Color/White)'
-  description: 'Hue sensors trigger lights on immediately. Frigate confirmed presence
-    (3 min debounce) blocks shutoff while someone is sitting still. Sleep mode overrides
-    AL. Manual override flag auto-clears 10 min after motion stops (kitchen_cleared).
-    Late-night dishes mode (23:45–23:55) keeps lights warm/usable when motion is active,
-    right as kitchen sleep mode (kitchen_sleep_on, 23:45) is applied. Main light stays
-    on normally from sun-down until 23:45. AL is disabled BEFORE manual color changes
-    in ALL paths to prevent manual_control flag from triggering the override boolean
-    spuriously. Mode is queued (max 10) so long transitions can''t cause dropped triggers.
+  description: 'Hue sensors trigger lights on immediately. All kitchen fixtures are
+    Hue: 3 color lights (1 Color, 2 Color, Lightstrip) plus the Datura (Kitchen -
+    Up / Kitchen - Down), all on Kitchen - AL (the old Lutron ''Kitchen Main'' dimmer
+    moved to the garage 2026-09-12 and its Pico to the bathroom, so neither is referenced
+    here). Frigate confirmed presence (3 min debounce) blocks shutoff while someone
+    is sitting still. Sleep mode overrides AL. Manual override flag auto-clears 60s
+    after the room clears (kitchen_cleared); lights fade off at 3:30. Late-night dishes
+    mode (23:45-23:55) keeps lights warm/usable when motion is active, right as kitchen
+    sleep mode (kitchen_sleep_on, 23:45) is applied. AL is disabled BEFORE manual
+    color changes in ALL paths to prevent manual_control flag from triggering the
+    override boolean spuriously. Mode is queued (max 10) so long transitions can''t
+    cause dropped triggers.
 
     '
   triggers:
@@ -1325,74 +1295,32 @@
   - trigger: state
     entity_id:
     - switch.al_sleep_mode_kitchen
-    - switch.al_sleep_mode_kitchen_main
     to: 'on'
     id: sleep_on
   - trigger: template
-    value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')\
-      \ | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',\
-      \ 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in\
-      \ mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'\
-      \ in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   (\
-      \ 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',\
-      \ 'on') ) }}\n"
+    value_template: '{% set mc = state_attr(''switch.al_kitchen'', ''manual_control'')
+      | default([], true) %}
+
+      {{ is_state(''switch.al_kitchen'', ''on'') and (mc | select(''in'', [''light.kitchen_1_color'',
+      ''light.kitchen_2_color'', ''light.kitchen_lightstrip'', ''light.hue_datura_top_1'',
+      ''light.hue_datura_bottom_1'']) | list | count > 0) }}
+
+      '
     id: al_manual_control_changed
-  - device_id: 864fec31db3ec90f02e244eb717c9cd4
-    domain: lutron_caseta
-    type: press
-    subtype: raise
-    trigger: device
-    id: pico_pressed
-  - device_id: 864fec31db3ec90f02e244eb717c9cd4
-    domain: lutron_caseta
-    type: press
-    subtype: lower
-    trigger: device
-    id: pico_pressed
-  - device_id: 864fec31db3ec90f02e244eb717c9cd4
-    domain: lutron_caseta
-    type: press
-    subtype: stop
-    trigger: device
-    id: pico_pressed
-  - device_id: 864fec31db3ec90f02e244eb717c9cd4
-    domain: lutron_caseta
-    type: press
-    subtype: 'on'
-    trigger: device
-    id: pico_pressed
-  - device_id: 864fec31db3ec90f02e244eb717c9cd4
-    domain: lutron_caseta
-    type: press
-    subtype: 'off'
-    trigger: device
-    id: pico_pressed
   actions:
   - choose:
     - conditions:
       - condition: trigger
-        id: pico_pressed
-      sequence:
-      - action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.kitchen_manual_override
-      - alias: Disable AL so it cannot override manual lights
-        action: switch.turn_off
-        target:
-          entity_id:
-          - switch.al_kitchen
-          - switch.al_kitchen_main
-    - conditions:
-      - condition: trigger
         id: al_manual_control_changed
       - condition: template
-        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')\
-          \ | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',\
-          \ 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color'\
-          \ in mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'\
-          \ in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n\
-          \   ( 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',\
-          \ 'on') ) }}\n"
+        value_template: '{% set mc = state_attr(''switch.al_kitchen'', ''manual_control'')
+          | default([], true) %}
+
+          {{ is_state(''switch.al_kitchen'', ''on'') and (mc | select(''in'', [''light.kitchen_1_color'',
+          ''light.kitchen_2_color'', ''light.kitchen_lightstrip'', ''light.hue_datura_top_1'',
+          ''light.hue_datura_bottom_1'']) | list | count > 0) }}
+
+          '
       sequence:
       - delay:
           seconds: 2
@@ -1400,13 +1328,14 @@
         entity_id: binary_sensor.kitchen_sensor_group
         state: 'on'
       - condition: template
-        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')\
-          \ | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',\
-          \ 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color'\
-          \ in mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'\
-          \ in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n\
-          \   ( 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',\
-          \ 'on') ) }}\n"
+        value_template: '{% set mc = state_attr(''switch.al_kitchen'', ''manual_control'')
+          | default([], true) %}
+
+          {{ is_state(''switch.al_kitchen'', ''on'') and (mc | select(''in'', [''light.kitchen_1_color'',
+          ''light.kitchen_2_color'', ''light.kitchen_lightstrip'', ''light.hue_datura_top_1'',
+          ''light.hue_datura_bottom_1'']) | list | count > 0) }}
+
+          '
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.kitchen_manual_override
@@ -1415,7 +1344,6 @@
         target:
           entity_id:
           - switch.al_kitchen
-          - switch.al_kitchen_main
     - conditions:
       - condition: trigger
         id: sleep_on
@@ -1430,36 +1358,33 @@
         target:
           entity_id:
           - switch.al_kitchen
-          - switch.al_kitchen_main
       - choose:
         - conditions:
           - condition: time
             after: '23:45:00'
             before: '23:55:00'
           sequence:
-          - action: light.turn_off
-            target:
-              entity_id: light.kitchen_main_lights
           - action: light.turn_on
             target:
               entity_id:
               - light.kitchen_1_color
               - light.kitchen_2_color
               - light.kitchen_lightstrip
+              - light.hue_datura_top_1
+              - light.hue_datura_bottom_1
             data:
               brightness_pct: 60
               color_temp_kelvin: 2200
               transition: 5
         default:
-        - action: light.turn_off
-          target:
-            entity_id: light.kitchen_main_lights
         - action: light.turn_on
           target:
             entity_id:
             - light.kitchen_1_color
             - light.kitchen_2_color
             - light.kitchen_lightstrip
+            - light.hue_datura_top_1
+            - light.hue_datura_bottom_1
           data:
             brightness_pct: 24
             rgb_color:
@@ -1485,16 +1410,14 @@
             target:
               entity_id:
               - switch.al_kitchen
-              - switch.al_kitchen_main
-          - action: light.turn_off
-            target:
-              entity_id: light.kitchen_main_lights
           - action: light.turn_on
             target:
               entity_id:
               - light.kitchen_1_color
               - light.kitchen_2_color
               - light.kitchen_lightstrip
+              - light.hue_datura_top_1
+              - light.hue_datura_bottom_1
             data:
               brightness_pct: 60
               color_temp_kelvin: 2200
@@ -1505,24 +1428,19 @@
             - condition: state
               entity_id: switch.al_sleep_mode_kitchen
               state: 'on'
-            - condition: state
-              entity_id: switch.al_sleep_mode_kitchen_main
-              state: 'on'
           sequence:
           - action: switch.turn_off
             target:
               entity_id:
               - switch.al_kitchen
-              - switch.al_kitchen_main
-          - action: light.turn_off
-            target:
-              entity_id: light.kitchen_main_lights
           - action: light.turn_on
             target:
               entity_id:
               - light.kitchen_1_color
               - light.kitchen_2_color
               - light.kitchen_lightstrip
+              - light.hue_datura_top_1
+              - light.hue_datura_bottom_1
             data:
               brightness_pct: 24
               rgb_color:
@@ -1540,21 +1458,14 @@
             target:
               entity_id:
               - switch.al_kitchen
-              - switch.al_kitchen_main
-          - alias: Main light on (TV dimming handled by Living Room TV Mode)
-            action: light.turn_on
-            target:
-              entity_id: light.kitchen_main_lights
-            data:
-              brightness_pct: 30
-              color_temp_kelvin: 2700
-              transition: 2
           - action: light.turn_on
             target:
               entity_id:
               - light.kitchen_1_color
               - light.kitchen_2_color
               - light.kitchen_lightstrip
+              - light.hue_datura_top_1
+              - light.hue_datura_bottom_1
             data:
               transition: 2
           - action: switch.turn_on
@@ -1568,6 +1479,8 @@
               - light.kitchen_1_color
               - light.kitchen_2_color
               - light.kitchen_lightstrip
+              - light.hue_datura_top_1
+              - light.hue_datura_bottom_1
               transition: 2
               adapt_color: true
               adapt_brightness: true
@@ -1583,31 +1496,14 @@
             target:
               entity_id:
               - switch.al_kitchen
-              - switch.al_kitchen_main
-          - alias: Main light on via AL (TV dimming handled by Living Room TV Mode)
-            action: light.turn_on
-            target:
-              entity_id: light.kitchen_main_lights
-            data:
-              transition: 2
-          - action: switch.turn_on
-            target:
-              entity_id: switch.al_kitchen_main
-          - action: adaptive_lighting.apply
-            continue_on_error: true
-            data:
-              entity_id: switch.al_kitchen_main
-              lights:
-              - light.kitchen_main_lights
-              transition: 2
-              adapt_color: true
-              adapt_brightness: true
           - action: light.turn_on
             target:
               entity_id:
               - light.kitchen_1_color
               - light.kitchen_2_color
               - light.kitchen_lightstrip
+              - light.hue_datura_top_1
+              - light.hue_datura_bottom_1
             data:
               transition: 2
           - action: switch.turn_on
@@ -1621,6 +1517,8 @@
               - light.kitchen_1_color
               - light.kitchen_2_color
               - light.kitchen_lightstrip
+              - light.hue_datura_top_1
+              - light.hue_datura_bottom_1
               transition: 2
               adapt_color: true
               adapt_brightness: true
@@ -1629,16 +1527,14 @@
           target:
             entity_id:
             - switch.al_kitchen
-            - switch.al_kitchen_main
-        - action: light.turn_off
-          target:
-            entity_id: light.kitchen_main_lights
         - action: light.turn_on
           target:
             entity_id:
             - light.kitchen_1_color
             - light.kitchen_2_color
             - light.kitchen_lightstrip
+            - light.hue_datura_top_1
+            - light.hue_datura_bottom_1
           data:
             brightness_pct: 40
             transition: 2
@@ -1653,44 +1549,26 @@
             - light.kitchen_1_color
             - light.kitchen_2_color
             - light.kitchen_lightstrip
+            - light.hue_datura_top_1
+            - light.hue_datura_bottom_1
             transition: 10
             adapt_color: true
             adapt_brightness: true
     - conditions:
       - condition: trigger
         id: kitchen_cleared
-      alias: 'Cleared 60s: main light dims to 15% then turns off (Hue stays on)'
+      alias: 'Cleared 60s: clear manual override flag (lights stay on until the 3:30
+        fade)'
       sequence:
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.kitchen_manual_override
-      - alias: Disable main AL so it cannot fight the dim/off
-        action: switch.turn_off
-        target:
-          entity_id: switch.al_kitchen_main
-      - action: adaptive_lighting.set_manual_control
-        data:
-          entity_id: switch.al_kitchen_main
-          manual_control: false
-      - alias: Dim main to 15% as a soft warning
-        action: light.turn_on
-        target:
-          entity_id: light.kitchen_main_lights
-        data:
-          brightness_pct: 15
-          transition: 2
       - delay:
           seconds: 3
-      - alias: Then turn main off
-        action: light.turn_off
-        target:
-          entity_id: light.kitchen_main_lights
-        data:
-          transition: 2
     - conditions:
       - condition: trigger
         id: kitchen_cleared_hue
-      alias: 'Cleared 3:30: fade the 3 Hue lights off over 30s'
+      alias: 'Cleared 3:30: fade the 5 Hue lights (3 color + 2 Datura) off over 30s'
       sequence:
       - alias: Disable color AL so it cannot re-apply during the fade
         action: switch.turn_off
@@ -1700,13 +1578,15 @@
         data:
           entity_id: switch.al_kitchen
           manual_control: false
-      - alias: Fade the 3 Hue lights off over 30 seconds
+      - alias: Fade the 5 Hue lights off over 30 seconds
         action: light.turn_off
         target:
           entity_id:
           - light.kitchen_1_color
           - light.kitchen_2_color
           - light.kitchen_lightstrip
+          - light.hue_datura_top_1
+          - light.hue_datura_bottom_1
         data:
           transition: 30
   mode: queued
@@ -1822,7 +1702,6 @@
         target:
           entity_id:
           - switch.al_sleep_mode_kitchen
-          - switch.al_sleep_mode_kitchen_main
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -1831,15 +1710,8 @@
           - light.kitchen_1_color
           - light.kitchen_2_color
           - light.kitchen_lightstrip
-          transition: 150
-          adapt_color: true
-          adapt_brightness: true
-      - action: adaptive_lighting.apply
-        continue_on_error: true
-        data:
-          entity_id: switch.al_kitchen_main
-          lights:
-          - light.kitchen_main_lights
+          - light.hue_datura_top_1
+          - light.hue_datura_bottom_1
           transition: 150
           adapt_color: true
           adapt_brightness: true
@@ -1855,7 +1727,6 @@
           entity_id:
           - switch.al_sleep_mode_hallway
           - switch.al_sleep_mode_kitchen
-          - switch.al_sleep_mode_kitchen_main
           - switch.al_sleep_mode_living_room
           - switch.al_sleep_mode_dining_room_bottom
           - switch.al_sleep_mode_dining_room_top
@@ -1869,7 +1740,6 @@
           entity_id:
           - switch.al_hallway
           - switch.al_kitchen
-          - switch.al_kitchen_main
           - switch.al_living_room
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
@@ -1886,11 +1756,6 @@
         continue_on_error: true
         data:
           entity_id: switch.al_kitchen
-          manual_control: false
-      - action: adaptive_lighting.set_manual_control
-        continue_on_error: true
-        data:
-          entity_id: switch.al_kitchen_main
           manual_control: false
       - action: adaptive_lighting.set_manual_control
         continue_on_error: true
@@ -1940,15 +1805,8 @@
           - light.kitchen_1_color
           - light.kitchen_2_color
           - light.kitchen_lightstrip
-          transition: 30
-          adapt_color: true
-          adapt_brightness: true
-      - action: adaptive_lighting.apply
-        continue_on_error: true
-        data:
-          entity_id: switch.al_kitchen_main
-          lights:
-          - light.kitchen_main_lights
+          - light.hue_datura_top_1
+          - light.hue_datura_bottom_1
           transition: 30
           adapt_color: true
           adapt_brightness: true
@@ -2090,7 +1948,6 @@
       entity_id:
       - switch.al_sleep_mode_hallway
       - switch.al_sleep_mode_kitchen
-      - switch.al_sleep_mode_kitchen_main
       - switch.al_sleep_mode_big_bedroom
       - switch.al_sleep_mode_living_room
       - switch.al_sleep_mode_dining_room_bottom
@@ -2104,7 +1961,7 @@
       entity_id:
       - switch.al_hallway
       - switch.al_kitchen
-      - switch.al_kitchen_main
+      - switch.al_garage
       - switch.al_big_bedroom
       - switch.al_living_room
       - switch.al_dining_room_bottom
@@ -2128,7 +1985,7 @@
   - action: adaptive_lighting.set_manual_control
     continue_on_error: true
     data:
-      entity_id: switch.al_kitchen_main
+      entity_id: switch.al_garage
       manual_control: false
   - action: adaptive_lighting.set_manual_control
     continue_on_error: true
@@ -2221,9 +2078,9 @@
         id: detected
       sequence:
       - condition: template
-        value_template: "{% set lights = [\n  'light.bathroom_shower',\n  'light.bathroom_tub_1',\n\
-          \  'light.bathroom_tub_2',\n  'light.bathroom_back',\n  'light.bathroom_main_lights'\n\
-          ] %} {{ lights | select('is_state', 'on') | list | count == 0 }}\n"
+        value_template: "{% set lights = [\n  'light.bathroom_shower',\n  'light.bathroom_tub_1',\n
+          \ 'light.bathroom_tub_2',\n  'light.bathroom_back',\n  'light.bathroom_main_lights'\n]
+          %} {{ lights | select('is_state', 'on') | list | count == 0 }}\n"
       - choose:
         - conditions:
           - condition: state
@@ -2277,8 +2134,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2299,8 +2156,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2320,8 +2177,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2351,8 +2208,8 @@
         - trigger: state
           entity_id: binary_sensor.bathroom_motion
           to: 'on'
-        timeout: "{{ '00:10:00' if (now().hour >= 23 or now().hour < 7)\n   else '00:15:00'\
-          \ }}\n"
+        timeout: "{{ '00:10:00' if (now().hour >= 23 or now().hour < 7)\n   else '00:15:00'
+          }}\n"
         continue_on_timeout: true
       - condition: state
         entity_id: binary_sensor.bathroom_motion
@@ -3018,8 +2875,8 @@
         target:
           entity_id: switch.al_living_room
       - condition: template
-        value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',\
-          \ 'manual_control') }}\n"
+        value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',
+          'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3108,8 +2965,8 @@
             data:
               transition: 5
           - condition: template
-            value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3380,8 +3237,8 @@
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
       - condition: template
-        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',\
-          \ 'manual_control') }}\n"
+        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
+          'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3392,8 +3249,8 @@
           adapt_color: true
           adapt_brightness: true
       - condition: template
-        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',\
-          \ 'manual_control') }}\n"
+        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
+          'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3580,8 +3437,8 @@
             data:
               transition: 5
           - condition: template
-            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3592,8 +3449,8 @@
               adapt_color: true
               adapt_brightness: true
           - condition: template
-            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -6686,9 +6543,9 @@
     state: 'off'
   actions:
   - variables:
-      already_joined: "{{ state_attr('media_player.bedroom_2', 'group_members') is\
-        \ not none and\n   'media_player.kitchen' in\n   state_attr('media_player.bedroom_2',\
-        \ 'group_members') | default([]) }}"
+      already_joined: "{{ state_attr('media_player.bedroom_2', 'group_members') is
+        not none and\n   'media_player.kitchen' in\n   state_attr('media_player.bedroom_2',
+        'group_members') | default([]) }}"
       kitchen_vol_before: '{{ state_attr(''media_player.kitchen'', ''volume_level'')
         | default(0.10) }}'
   - alias: Join and ramp only if not already in group
@@ -7542,8 +7399,8 @@
               entity_id: switch.adaptive_lighting_office
               state: 'on'
             - condition: template
-              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',\
-                \ 'manual_control') | default([])) }}\n"
+              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',
+                'manual_control') | default([])) }}\n"
             then:
             - action: adaptive_lighting.apply
               continue_on_error: true
@@ -7582,8 +7439,8 @@
               entity_id: switch.adaptive_lighting_office
               state: 'on'
             - condition: template
-              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',\
-                \ 'manual_control') | default([])) }}\n"
+              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',
+                'manual_control') | default([])) }}\n"
             then:
             - action: adaptive_lighting.apply
               continue_on_error: true
@@ -7992,22 +7849,6 @@
             brightness_pct: '{{ playing_brightness | int }}'
             color_temp_kelvin: '{{ tv_kelvin | int }}'
             transition: 3
-      - choose:
-        - conditions:
-          - condition: state
-            entity_id: binary_sensor.kitchen_sensor_group
-            state: 'on'
-          sequence:
-          - action: light.turn_on
-            target:
-              entity_id: light.kitchen_main_lights
-            data:
-              brightness_pct: 15
-              transition: 3
-        default:
-        - action: light.turn_off
-          target:
-            entity_id: light.kitchen_main_lights
       - action: light.turn_off
         target:
           entity_id: light.galaxy_projector
@@ -8028,10 +7869,6 @@
           entity_id: light.dining_room_bottom
         data:
           brightness_pct: 2
-      - type: turn_off
-        device_id: a239769fc8575407917d2a4a56682e94
-        entity_id: d265a36c8203e2b0bc3ea9ae06afdf73
-        domain: light
     - conditions:
       - condition: trigger
         id: paused
@@ -8622,8 +8459,8 @@
                 target:
                   entity_id: media_player.kitchen
                 data:
-                  volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n\
-                    \    0.15] | min | round(3) }}"
+                  volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n
+                    \   0.15] | min | round(3) }}"
         - sequence:
           - alias: Play morning music (6 AM - 12 PM)
             if:
@@ -8947,8 +8784,8 @@
           sequence re-ran on every retrigger, causing the exact audible cutouts this
           was meant to prevent
         condition: template
-        value_template: "{{ 'media_player.office_2' not in\n   (state_attr('media_player.kitchen_2',\n\
-          \   'group_members') | default([])) }}"
+        value_template: "{{ 'media_player.office_2' not in\n   (state_attr('media_player.kitchen_2',\n
+          \  'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
@@ -8981,8 +8818,8 @@
             target:
               entity_id: media_player.office_2
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((0.12 - 0.05) / 5)),\n  \
-                \  0.12] | min | round(3) }}"
+              volume_level: "{{ [0.05 + (repeat.index * ((0.12 - 0.05) / 5)),\n    0.12]
+                | min | round(3) }}"
     - alias: Big bedroom sensor - join bedroom speaker at a capped, ramped volume
         rather than whatever it was left at last
       conditions:
@@ -8995,8 +8832,8 @@
       - alias: Skip if bedroom already in the kitchen group - same repeated-retrigger
           issue as the office branch above
         condition: template
-        value_template: "{{ 'media_player.bedroom_2' not in\n   (state_attr('media_player.kitchen_2',\n\
-          \   'group_members') | default([])) }}"
+        value_template: "{{ 'media_player.bedroom_2' not in\n   (state_attr('media_player.kitchen_2',\n
+          \  'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
@@ -9029,8 +8866,8 @@
             target:
               entity_id: media_player.bedroom_2
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((0.14 - 0.05) / 5)),\n  \
-                \  0.14] | min | round(3) }}"
+              volume_level: "{{ [0.05 + (repeat.index * ((0.14 - 0.05) / 5)),\n    0.14]
+                | min | round(3) }}"
   mode: single
 - id: '1777520160440'
   alias: 'Living Room: Unoccupied Shutoff'
@@ -9284,7 +9121,6 @@
       - switch.al_sleep_mode_dining_room_top
       - switch.al_sleep_mode_hallway
       - switch.al_sleep_mode_kitchen
-      - switch.al_sleep_mode_kitchen_main
       - switch.al_sleep_mode_living_room
       - switch.adaptive_lighting_sleep_mode_office
   - alias: Clear manual control for bathroom main so Adaptive Lighting adapts it to
@@ -10122,10 +9958,10 @@
   - variables:
       welcome_home_on: '{{ is_state(''input_boolean.welcome_home_active'', ''on'')
         }}'
-      bedroom_active: "{{ states('media_player.bedroom') not in\n   ['off','idle','paused','standby','unavailable','unknown']\
-        \ }}"
-      kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']\
-        \ }}"
+      bedroom_active: "{{ states('media_player.bedroom') not in\n   ['off','idle','paused','standby','unavailable','unknown']
+        }}"
+      kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']
+        }}"
       source_player: '{% if welcome_home_on and kitchen_active %} media_player.kitchen_2
         {% elif bedroom_active %} media_player.bedroom_2 {% else %} none {% endif
         %}'
@@ -10151,9 +9987,9 @@
           MA entity lists other MA entities (bathroom_2), not the raw Sonos entity,
           so this must check for bathroom_2 not bathroom
         condition: template
-        value_template: "{{ state_attr(source_player, 'group_members') is not none\
-          \ and\n   'media_player.bathroom_2' not in\n   (state_attr(source_player,\
-          \ 'group_members') | default([])) }}"
+        value_template: "{{ state_attr(source_player, 'group_members') is not none
+          and\n   'media_player.bathroom_2' not in\n   (state_attr(source_player,
+          'group_members') | default([])) }}"
       - variables:
           bathroom_vol_before: '{{ state_attr(''media_player.bathroom'', ''volume_level'')
             | default(0.30) }}'
@@ -10216,8 +10052,8 @@
               target:
                 entity_id: media_player.bathroom
               data:
-                volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n\
-                  \    target_vol] | min | round(3) }}"
+                volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n
+                  \   target_vol] | min | round(3) }}"
     - alias: Motion cleared - start idle timer (only if grouped)
       conditions:
       - condition: trigger
@@ -10225,10 +10061,10 @@
       - alias: Bathroom is currently in any active source group - group_members lists
           MA entities (bathroom_2), not the raw Sonos entity
         condition: template
-        value_template: "{{ ('media_player.bathroom_2' in\n    (state_attr('media_player.bedroom_2',\
-          \ 'group_members') | default([])))\n   or\n   ('media_player.bathroom_2'\
-          \ in\n    (state_attr('media_player.kitchen_2', 'group_members') | default([])))\
-          \ }}"
+        value_template: "{{ ('media_player.bathroom_2' in\n    (state_attr('media_player.bedroom_2',
+          'group_members') | default([])))\n   or\n   ('media_player.bathroom_2' in\n
+          \   (state_attr('media_player.kitchen_2', 'group_members') | default([])))
+          }}"
       sequence:
       - alias: Start/restart the 10-minute idle timer
         action: timer.start
@@ -10310,9 +10146,9 @@
       - alias: Bathroom is currently in the stopped source's group - group_members
           lists MA entities (bathroom_2), not the raw Sonos entity
         condition: template
-        value_template: "{% set stopped = 'media_player.bedroom_2' if trigger.id ==\
-          \ 'bedroom_stopped'\n   else 'media_player.kitchen_2' %}\n{{ 'media_player.bathroom_2'\
-          \ in\n   (state_attr(stopped, 'group_members') | default([])) }}"
+        value_template: "{% set stopped = 'media_player.bedroom_2' if trigger.id ==
+          'bedroom_stopped'\n   else 'media_player.kitchen_2' %}\n{{ 'media_player.bathroom_2'
+          in\n   (state_attr(stopped, 'group_members') | default([])) }}"
       sequence:
       - alias: Cancel idle timer if running
         action: timer.cancel
@@ -10660,10 +10496,10 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\\
-      .') | select('in', area_entities('living_room')) | map('states') | select('eq',\
-      \ 'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')\
-      \ != 'playing') }}"
+    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\.')
+      | select('in', area_entities('living_room')) | map('states') | select('eq',
+      'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')
+      != 'playing') }}"
   - condition: state
     entity_id: media_player.living_room_tv_2
     state: 'on'
@@ -10684,10 +10520,10 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\\
-      .') | select('in', area_entities('living_room')) | map('states') | select('eq',\
-      \ 'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')\
-      \ != 'playing') }}"
+    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\.')
+      | select('in', area_entities('living_room')) | map('states') | select('eq',
+      'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')
+      != 'playing') }}"
   - action: media_player.turn_off
     target:
       entity_id: media_player.living_room_tv_2
@@ -10699,10 +10535,10 @@
   triggers:
   - trigger: template
     id: five_minutes
-    value_template: "{{ states('sensor.washer_machine_state') == 'run'\n   and states('sensor.washer_completion_time')\
-      \ not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.washer_completion_time'))\
-      \ - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.washer_completion_time'))\
-      \ - as_timestamp(now())) | int > 0 }}"
+    value_template: "{{ states('sensor.washer_machine_state') == 'run'\n   and states('sensor.washer_completion_time')
+      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.washer_completion_time'))
+      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.washer_completion_time'))
+      - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.washer_machine_state
@@ -10775,10 +10611,10 @@
   triggers:
   - trigger: template
     id: five_minutes
-    value_template: "{{ states('sensor.dryer_machine_state') == 'run'\n   and states('sensor.dryer_completion_time')\
-      \ not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.dryer_completion_time'))\
-      \ - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.dryer_completion_time'))\
-      \ - as_timestamp(now())) | int > 0 }}"
+    value_template: "{{ states('sensor.dryer_machine_state') == 'run'\n   and states('sensor.dryer_completion_time')
+      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.dryer_completion_time'))
+      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.dryer_completion_time'))
+      - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.dryer_machine_state
@@ -11673,3 +11509,103 @@
       entity_id: input_boolean.volvo_garage_door_opened_this_cycle
     data: {}
   mode: single
+- id: '1778800000001'
+  alias: 'Garage: Lights on Presence, Door/Cover Open, or Volvo Start'
+  description: 'Lutron dimmer light.garage_lights (moved from the kitchen 2026-09-12).
+    Turns on when presence is seen (mmWave group or Frigate person), when the overhead
+    cover or the man-door opens, or when anything else turns it on (e.g. script_volvo_start_core).
+    Brightness comes from Garage - AL (intercepts the turn_on). Turns off once presence
+    (mmWave + Frigate person) has been clear for 5 minutes and no Volvo start cycle
+    is active. Mode restart: every new trigger restarts the 5-minute clock. Re-arms
+    the off-timer after HA restart / automation reload if the light was left on.'
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.garage_occupancy_group
+    to: 'on'
+    id: activity
+  - trigger: state
+    entity_id: binary_sensor.garage_person_occupancy
+    to: 'on'
+    id: activity
+  - trigger: state
+    entity_id: cover.garage
+    from:
+    - closed
+    - closing
+    to:
+    - opening
+    - open
+    id: activity
+  - trigger: state
+    entity_id: binary_sensor.garage_door
+    from: 'off'
+    to: 'on'
+    id: activity
+  - alias: Turned on by anything else (Volvo start core script, wall dimmer, app)
+      - start the off timer
+    trigger: state
+    entity_id: light.garage_lights
+    from: 'off'
+    to: 'on'
+    id: light_on
+  - alias: Turned off manually - cancel any running off timer
+    trigger: state
+    entity_id: light.garage_lights
+    from: 'on'
+    to: 'off'
+    id: light_off
+  - trigger: homeassistant
+    event: start
+    id: recheck
+  - trigger: event
+    event_type: automation_reloaded
+    id: recheck
+  conditions: []
+  actions:
+  - if:
+    - condition: trigger
+      id: light_off
+    then:
+    - stop: Light turned off - nothing to time
+  - alias: 'Activity: turn the light on if it is off (Garage - AL sets brightness)'
+    if:
+    - condition: trigger
+      id: activity
+    - condition: state
+      entity_id: light.garage_lights
+      state: 'off'
+    then:
+    - action: light.turn_on
+      target:
+        entity_id: light.garage_lights
+      data:
+        transition: 1
+  - condition: state
+    entity_id: light.garage_lights
+    state: 'on'
+  - alias: Wait until presence has been clear (and no Volvo start active) for 5 continuous
+      minutes
+    repeat:
+      sequence:
+      - wait_template: '{{ not is_state(''binary_sensor.garage_occupancy_group'',''on'')
+          and not is_state(''binary_sensor.garage_person_occupancy'',''on'') and not
+          is_state(''input_boolean.volvo_start_active'',''on'') }}'
+      - wait_for_trigger:
+        - trigger: state
+          entity_id:
+          - binary_sensor.garage_occupancy_group
+          - binary_sensor.garage_person_occupancy
+          - input_boolean.volvo_start_active
+          to: 'on'
+        timeout:
+          minutes: 5
+        continue_on_timeout: true
+      until:
+      - condition: template
+        value_template: '{{ wait.trigger is none }}'
+  - action: light.turn_off
+    target:
+      entity_id: light.garage_lights
+    data:
+      transition: 2
+  mode: restart

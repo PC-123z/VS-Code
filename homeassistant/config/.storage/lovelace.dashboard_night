@@ -48,10 +48,6 @@
                       "name": "Kitchen Color"
                     },
                     {
-                      "entity": "switch.al_sleep_mode_kitchen_main",
-                      "name": "Kitchen Main"
-                    },
-                    {
                       "entity": "switch.al_sleep_mode_living_room",
                       "name": "Living Room"
                     },
