@@ -1247,8 +1247,8 @@
             transition: 2
         - if:
           - condition: template
-            value_template: "{{ 'light.hallway' not in\n   state_attr('switch.al_hallway',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.hallway' not in\n   state_attr('switch.al_hallway',
+              'manual_control') }}\n"
           then:
           - action: adaptive_lighting.apply
             continue_on_error: true
@@ -1329,13 +1329,12 @@
     to: 'on'
     id: sleep_on
   - trigger: template
-    value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')\
-      \ | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',\
-      \ 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in\
-      \ mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'\
-      \ in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   (\
-      \ 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',\
-      \ 'on') ) }}\n"
+    value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')
+      | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',
+      'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in mc_color\n
+      \     or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'
+      in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   ( 'light.kitchen_main_lights'
+      in mc_main\n     and is_state('switch.al_kitchen_main', 'on') ) }}\n"
     id: al_manual_control_changed
   - device_id: 864fec31db3ec90f02e244eb717c9cd4
     domain: lutron_caseta
@@ -1386,13 +1385,13 @@
       - condition: trigger
         id: al_manual_control_changed
       - condition: template
-        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')\
-          \ | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',\
-          \ 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color'\
-          \ in mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'\
-          \ in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n\
-          \   ( 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',\
-          \ 'on') ) }}\n"
+        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')
+          | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',
+          'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in
+          mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'
+          in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   (
+          'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',
+          'on') ) }}\n"
       sequence:
       - delay:
           seconds: 2
@@ -1400,13 +1399,13 @@
         entity_id: binary_sensor.kitchen_sensor_group
         state: 'on'
       - condition: template
-        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')\
-          \ | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',\
-          \ 'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color'\
-          \ in mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'\
-          \ in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n\
-          \   ( 'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',\
-          \ 'on') ) }}\n"
+        value_template: "{% set mc_color = state_attr('switch.al_kitchen', 'manual_control')
+          | default([], true) %} {% set mc_main = state_attr('switch.al_kitchen_main',
+          'manual_control') | default([], true) %} {{ ( ('light.kitchen_1_color' in
+          mc_color\n      or 'light.kitchen_2_color' in mc_color\n      or 'light.kitchen_lightstrip'
+          in mc_color)\n     and is_state('switch.al_kitchen', 'on') )\n   or\n   (
+          'light.kitchen_main_lights' in mc_main\n     and is_state('switch.al_kitchen_main',
+          'on') ) }}\n"
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.kitchen_manual_override
@@ -2221,9 +2220,9 @@
         id: detected
       sequence:
       - condition: template
-        value_template: "{% set lights = [\n  'light.bathroom_shower',\n  'light.bathroom_tub_1',\n\
-          \  'light.bathroom_tub_2',\n  'light.bathroom_back',\n  'light.bathroom_main_lights'\n\
-          ] %} {{ lights | select('is_state', 'on') | list | count == 0 }}\n"
+        value_template: "{% set lights = [\n  'light.bathroom_shower',\n  'light.bathroom_tub_1',\n
+          \ 'light.bathroom_tub_2',\n  'light.bathroom_back',\n  'light.bathroom_main_lights'\n]
+          %} {{ lights | select('is_state', 'on') | list | count == 0 }}\n"
       - choose:
         - conditions:
           - condition: state
@@ -2277,8 +2276,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2299,8 +2298,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2320,8 +2319,8 @@
             data:
               transition: 1
           - condition: template
-            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2351,8 +2350,8 @@
         - trigger: state
           entity_id: binary_sensor.bathroom_motion
           to: 'on'
-        timeout: "{{ '00:10:00' if (now().hour >= 23 or now().hour < 7)\n   else '00:15:00'\
-          \ }}\n"
+        timeout: "{{ '00:10:00' if (now().hour >= 23 or now().hour < 7)\n   else '00:15:00'
+          }}\n"
         continue_on_timeout: true
       - condition: state
         entity_id: binary_sensor.bathroom_motion
@@ -3018,8 +3017,8 @@
         target:
           entity_id: switch.al_living_room
       - condition: template
-        value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',\
-          \ 'manual_control') }}\n"
+        value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',
+          'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3108,8 +3107,8 @@
             data:
               transition: 5
           - condition: template
-            value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.living_room' not in\n   state_attr('switch.al_living_room',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3380,8 +3379,8 @@
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
       - condition: template
-        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',\
-          \ 'manual_control') }}\n"
+        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
+          'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3392,8 +3391,8 @@
           adapt_color: true
           adapt_brightness: true
       - condition: template
-        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',\
-          \ 'manual_control') }}\n"
+        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
+          'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3580,8 +3579,8 @@
             data:
               transition: 5
           - condition: template
-            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3592,8 +3591,8 @@
               adapt_color: true
               adapt_brightness: true
           - condition: template
-            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -6686,9 +6685,9 @@
     state: 'off'
   actions:
   - variables:
-      already_joined: "{{ state_attr('media_player.bedroom_2', 'group_members') is\
-        \ not none and\n   'media_player.kitchen' in\n   state_attr('media_player.bedroom_2',\
-        \ 'group_members') | default([]) }}"
+      already_joined: "{{ state_attr('media_player.bedroom_2', 'group_members') is
+        not none and\n   'media_player.kitchen' in\n   state_attr('media_player.bedroom_2',
+        'group_members') | default([]) }}"
       kitchen_vol_before: '{{ state_attr(''media_player.kitchen'', ''volume_level'')
         | default(0.10) }}'
   - alias: Join and ramp only if not already in group
@@ -7542,8 +7541,8 @@
               entity_id: switch.adaptive_lighting_office
               state: 'on'
             - condition: template
-              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',\
-                \ 'manual_control') | default([])) }}\n"
+              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',
+                'manual_control') | default([])) }}\n"
             then:
             - action: adaptive_lighting.apply
               continue_on_error: true
@@ -7582,8 +7581,8 @@
               entity_id: switch.adaptive_lighting_office
               state: 'on'
             - condition: template
-              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',\
-                \ 'manual_control') | default([])) }}\n"
+              value_template: "{{ 'light.office' not in\n   (state_attr('switch.adaptive_lighting_office',
+                'manual_control') | default([])) }}\n"
             then:
             - action: adaptive_lighting.apply
               continue_on_error: true
@@ -8622,8 +8621,8 @@
                 target:
                   entity_id: media_player.kitchen
                 data:
-                  volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n\
-                    \    0.15] | min | round(3) }}"
+                  volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n
+                    \   0.15] | min | round(3) }}"
         - sequence:
           - alias: Play morning music (6 AM - 12 PM)
             if:
@@ -8947,8 +8946,8 @@
           sequence re-ran on every retrigger, causing the exact audible cutouts this
           was meant to prevent
         condition: template
-        value_template: "{{ 'media_player.office_2' not in\n   (state_attr('media_player.kitchen_2',\n\
-          \   'group_members') | default([])) }}"
+        value_template: "{{ 'media_player.office_2' not in\n   (state_attr('media_player.kitchen_2',\n
+          \  'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
@@ -8981,8 +8980,8 @@
             target:
               entity_id: media_player.office_2
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((0.12 - 0.05) / 5)),\n  \
-                \  0.12] | min | round(3) }}"
+              volume_level: "{{ [0.05 + (repeat.index * ((0.12 - 0.05) / 5)),\n    0.12]
+                | min | round(3) }}"
     - alias: Big bedroom sensor - join bedroom speaker at a capped, ramped volume
         rather than whatever it was left at last
       conditions:
@@ -8995,8 +8994,8 @@
       - alias: Skip if bedroom already in the kitchen group - same repeated-retrigger
           issue as the office branch above
         condition: template
-        value_template: "{{ 'media_player.bedroom_2' not in\n   (state_attr('media_player.kitchen_2',\n\
-          \   'group_members') | default([])) }}"
+        value_template: "{{ 'media_player.bedroom_2' not in\n   (state_attr('media_player.kitchen_2',\n
+          \  'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
@@ -9029,8 +9028,8 @@
             target:
               entity_id: media_player.bedroom_2
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((0.14 - 0.05) / 5)),\n  \
-                \  0.14] | min | round(3) }}"
+              volume_level: "{{ [0.05 + (repeat.index * ((0.14 - 0.05) / 5)),\n    0.14]
+                | min | round(3) }}"
   mode: single
 - id: '1777520160440'
   alias: 'Living Room: Unoccupied Shutoff'
@@ -9236,7 +9235,7 @@
     - thu
     - fri
   - trigger: time
-    at: '11:40:00'
+    at: 09:40:00
     weekday:
     - sat
     - sun
@@ -10120,10 +10119,10 @@
   - variables:
       welcome_home_on: '{{ is_state(''input_boolean.welcome_home_active'', ''on'')
         }}'
-      bedroom_active: "{{ states('media_player.bedroom') not in\n   ['off','idle','paused','standby','unavailable','unknown']\
-        \ }}"
-      kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']\
-        \ }}"
+      bedroom_active: "{{ states('media_player.bedroom') not in\n   ['off','idle','paused','standby','unavailable','unknown']
+        }}"
+      kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']
+        }}"
       source_player: '{% if welcome_home_on and kitchen_active %} media_player.kitchen_2
         {% elif bedroom_active %} media_player.bedroom_2 {% else %} none {% endif
         %}'
@@ -10149,9 +10148,9 @@
           MA entity lists other MA entities (bathroom_2), not the raw Sonos entity,
           so this must check for bathroom_2 not bathroom
         condition: template
-        value_template: "{{ state_attr(source_player, 'group_members') is not none\
-          \ and\n   'media_player.bathroom_2' not in\n   (state_attr(source_player,\
-          \ 'group_members') | default([])) }}"
+        value_template: "{{ state_attr(source_player, 'group_members') is not none
+          and\n   'media_player.bathroom_2' not in\n   (state_attr(source_player,
+          'group_members') | default([])) }}"
       - variables:
           bathroom_vol_before: '{{ state_attr(''media_player.bathroom'', ''volume_level'')
             | default(0.30) }}'
@@ -10214,8 +10213,8 @@
               target:
                 entity_id: media_player.bathroom
               data:
-                volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n\
-                  \    target_vol] | min | round(3) }}"
+                volume_level: "{{ [0.05 + (repeat.index * ((target_vol - 0.05) / 5)),\n
+                  \   target_vol] | min | round(3) }}"
     - alias: Motion cleared - start idle timer (only if grouped)
       conditions:
       - condition: trigger
@@ -10223,10 +10222,10 @@
       - alias: Bathroom is currently in any active source group - group_members lists
           MA entities (bathroom_2), not the raw Sonos entity
         condition: template
-        value_template: "{{ ('media_player.bathroom_2' in\n    (state_attr('media_player.bedroom_2',\
-          \ 'group_members') | default([])))\n   or\n   ('media_player.bathroom_2'\
-          \ in\n    (state_attr('media_player.kitchen_2', 'group_members') | default([])))\
-          \ }}"
+        value_template: "{{ ('media_player.bathroom_2' in\n    (state_attr('media_player.bedroom_2',
+          'group_members') | default([])))\n   or\n   ('media_player.bathroom_2' in\n
+          \   (state_attr('media_player.kitchen_2', 'group_members') | default([])))
+          }}"
       sequence:
       - alias: Start/restart the 10-minute idle timer
         action: timer.start
@@ -10308,9 +10307,9 @@
       - alias: Bathroom is currently in the stopped source's group - group_members
           lists MA entities (bathroom_2), not the raw Sonos entity
         condition: template
-        value_template: "{% set stopped = 'media_player.bedroom_2' if trigger.id ==\
-          \ 'bedroom_stopped'\n   else 'media_player.kitchen_2' %}\n{{ 'media_player.bathroom_2'\
-          \ in\n   (state_attr(stopped, 'group_members') | default([])) }}"
+        value_template: "{% set stopped = 'media_player.bedroom_2' if trigger.id ==
+          'bedroom_stopped'\n   else 'media_player.kitchen_2' %}\n{{ 'media_player.bathroom_2'
+          in\n   (state_attr(stopped, 'group_members') | default([])) }}"
       sequence:
       - alias: Cancel idle timer if running
         action: timer.cancel
@@ -10658,10 +10657,10 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\\
-      .') | select('in', area_entities('living_room')) | map('states') | select('eq',\
-      \ 'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')\
-      \ != 'playing') }}"
+    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\.')
+      | select('in', area_entities('living_room')) | map('states') | select('eq',
+      'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')
+      != 'playing') }}"
   - condition: state
     entity_id: media_player.living_room_tv_2
     state: 'on'
@@ -10682,10 +10681,10 @@
     entity_id: binary_sensor.ps5_living_room
     state: 'off'
   - condition: template
-    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\\
-      .') | select('in', area_entities('living_room')) | map('states') | select('eq',\
-      \ 'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')\
-      \ != 'playing') }}"
+    value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\.')
+      | select('in', area_entities('living_room')) | map('states') | select('eq',
+      'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')
+      != 'playing') }}"
   - action: media_player.turn_off
     target:
       entity_id: media_player.living_room_tv_2
@@ -10697,10 +10696,10 @@
   triggers:
   - trigger: template
     id: five_minutes
-    value_template: "{{ states('sensor.washer_machine_state') == 'run'\n   and states('sensor.washer_completion_time')\
-      \ not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.washer_completion_time'))\
-      \ - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.washer_completion_time'))\
-      \ - as_timestamp(now())) | int > 0 }}"
+    value_template: "{{ states('sensor.washer_machine_state') == 'run'\n   and states('sensor.washer_completion_time')
+      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.washer_completion_time'))
+      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.washer_completion_time'))
+      - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.washer_machine_state
@@ -10773,10 +10772,10 @@
   triggers:
   - trigger: template
     id: five_minutes
-    value_template: "{{ states('sensor.dryer_machine_state') == 'run'\n   and states('sensor.dryer_completion_time')\
-      \ not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.dryer_completion_time'))\
-      \ - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.dryer_completion_time'))\
-      \ - as_timestamp(now())) | int > 0 }}"
+    value_template: "{{ states('sensor.dryer_machine_state') == 'run'\n   and states('sensor.dryer_completion_time')
+      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.dryer_completion_time'))
+      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.dryer_completion_time'))
+      - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.dryer_machine_state
