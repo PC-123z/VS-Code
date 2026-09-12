@@ -1741,6 +1741,9 @@
           transition: 150
           adapt_color: true
           adapt_brightness: true
+      - alias: Re-apply Living Room TV Mode (no-op unless media is playing) so AL
+          doesn't undo the TV dim mid-show
+        event: living_room_tv_mode_reapply
     - conditions:
       - condition: trigger
         id: kitchen_sleep_on
@@ -1913,6 +1916,9 @@
           transition: 30
           adapt_color: true
           adapt_brightness: true
+      - alias: Re-apply Living Room TV Mode (no-op unless media is playing) so AL
+          doesn't undo the TV dim mid-show
+        event: living_room_tv_mode_reapply
   mode: single
 - id: '1778500000000'
   alias: 'System: Global Daily Automation Reset'
@@ -3107,11 +3113,16 @@
       minutes: 30
       seconds: 0
     id: override_cleared
+  variables:
+    tv_playing: '{{ integration_entities(''jellyfin'') | select(''match'', ''^media_player\.'') | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'', ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''media_player.living_room_tv_3'', ''playing'') or is_state(''media_player.living_room'', ''playing'') }}'
   actions:
   - choose:
     - conditions:
       - condition: trigger
         id: sleep_on
+      - alias: Skip while living room TV is playing (TV Mode owns dining brightness)
+        condition: template
+        value_template: '{{ not tv_playing }}'
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.dining_room_manual_override
@@ -3308,6 +3319,9 @@
     - conditions:
       - condition: trigger
         id: dinner_transition
+      - alias: Skip while living room TV is playing (TV Mode owns dining brightness)
+        condition: template
+        value_template: '{{ not tv_playing }}'
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.dining_room_manual_override
@@ -3340,6 +3354,9 @@
     - conditions:
       - condition: trigger
         id: late_evening_transition
+      - alias: Skip while living room TV is playing (TV Mode owns dining brightness)
+        condition: template
+        value_template: '{{ not tv_playing }}'
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.dining_room_manual_override
@@ -3378,6 +3395,9 @@
     - conditions:
       - condition: trigger
         id: night_transition
+      - alias: Skip while living room TV is playing (TV Mode owns dining brightness)
+        condition: template
+        value_template: '{{ not tv_playing }}'
       - alias: Skip if dimmer override is active
         condition: state
         entity_id: input_boolean.dining_room_manual_override
@@ -3422,6 +3442,23 @@
         state: 'off'
       sequence:
       - choose:
+        - conditions:
+          - alias: Living room TV playing - match TV Mode's dining dim level
+            condition: template
+            value_template: '{{ tv_playing }}'
+          sequence:
+          - action: light.turn_on
+            target:
+              label_id: dining_room_bottom
+              entity_id: light.dining_room_bottom
+            data:
+              brightness_pct: 2
+          - action: light.turn_on
+            target:
+              label_id: dining_room_top
+              entity_id: light.dining_room_top
+            data:
+              brightness_pct: 2
         - conditions:
           - condition: or
             conditions:
@@ -7853,6 +7890,11 @@
     trigger: state
     entity_id: light.living_room
     to: 'on'
+    id: playing
+  - alias: Re-apply requested by another automation (e.g. global sleep/morning reset
+      re-enabled AL mid-show) - playing branch re-verifies media is actually playing
+    trigger: event
+    event_type: living_room_tv_mode_reapply
     id: playing
   conditions: []
   actions:
