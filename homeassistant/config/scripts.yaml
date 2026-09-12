@@ -577,3 +577,85 @@ funtime_play_playlist:
   mode: queued
   max: 3
   icon: mdi:playlist-music
+kitchen_up_light_apply:
+  alias: 'Kitchen - Up Light: Apply Mode Color'
+  description: 'Sets the Datura up light (light.hue_datura_top_1) for the current
+    kitchen mode. Normal: the complementary color of the white Adaptive Lighting is
+    giving the rest of the kitchen (warm white -> twilight indigo/blue, neutral ->
+    blush rose, cool daylight -> peach/amber; soft saturation, brightness 50% of AL,
+    min 10%). Reads switch.al_kitchen, falling back to switch.al_garage (same 2000-5500K
+    / 40-100% curve) when Kitchen AL is momentarily off. Dishes window 23:45-23:55:
+    dim indigo 15%. Sleep mode: "Ember" deep amber-red 35% (up light is the prominent
+    night light; Kitchen - Down drops to 5% red in the Smart Motion automation). Turns
+    the light on - callers decide whether it should be on. Skips while kitchen manual
+    override is on.'
+  icon: mdi:ceiling-light-multiple
+  mode: restart
+  fields:
+    transition:
+      name: Transition
+      description: Seconds
+      default: 5
+      selector:
+        number:
+          min: 0
+          max: 300
+  sequence:
+  - condition: state
+    entity_id: input_boolean.kitchen_manual_override
+    state: 'off'
+  - variables:
+      sleep_mode: '{{ is_state(''switch.al_sleep_mode_kitchen'', ''on'') }}'
+      dishes_window: '{{ today_at(''23:45'') <= now() < today_at(''23:55'') }}'
+      al_source: '{{ ''switch.al_kitchen'' if state_attr(''switch.al_kitchen'', ''color_temp_kelvin'')
+        is number else ''switch.al_garage'' }}'
+      al_ct: '{{ state_attr(al_source, ''color_temp_kelvin'') | float(2700) }}'
+      al_bri: '{{ state_attr(al_source, ''brightness_pct'') | float(70) }}'
+      t: '{{ [[(al_ct - 2000) / 3500, 0] | max, 1] | min }}'
+      complement_hs: "{% set k = [[0, 240, 75], [0.2, 225, 55], [0.57, 340, 45], [1,
+        390, 55]] %}\n{% set ns = namespace(h=240, s=75) %}\n{% for i in range(k |
+        length - 1) %}\n  {% set a = k[i] %}{% set b = k[i + 1] %}\n  {% if t >= a[0]
+        and t <= b[0] %}\n    {% set f = (t - a[0]) / (b[0] - a[0]) %}\n    {% set
+        ns.h = a[1] + (b[1] - a[1]) * f %}{% set ns.s = a[2] + (b[2] - a[2]) * f %}\n
+        \ {% endif %}\n{% endfor %}\n{{ [(ns.h % 360) | round(1), ns.s | round(1)]
+        }}"
+      complement_bri: '{{ [(al_bri * 0.5) | round(0), 10] | max }}'
+      fade: '{{ transition | default(5) }}'
+  - choose:
+    - alias: Dishes window - dim indigo
+      conditions:
+      - condition: template
+        value_template: '{{ dishes_window }}'
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: light.hue_datura_top_1
+        data:
+          hs_color:
+          - 240
+          - 75
+          brightness_pct: 15
+          transition: '{{ fade }}'
+    - alias: Sleep mode - Ember
+      conditions:
+      - condition: template
+        value_template: '{{ sleep_mode }}'
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: light.hue_datura_top_1
+        data:
+          hs_color:
+          - 18
+          - 100
+          brightness_pct: 35
+          transition: '{{ fade }}'
+    default:
+    - alias: Complement of the AL white
+      action: light.turn_on
+      target:
+        entity_id: light.hue_datura_top_1
+      data:
+        hs_color: '{{ complement_hs }}'
+        brightness_pct: '{{ complement_bri }}'
+        transition: '{{ fade }}'
