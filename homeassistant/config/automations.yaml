@@ -1713,20 +1713,20 @@
   max: 10
 - id: '1775368699660'
   alias: 'System: Global Sleep Mode Schedule'
-  description: 'Evening: enables sleep mode for Bedroom 2 / Office at 22:00, the kitchen
-    at 23:45, and hallway/living room/dining room/bathrooms at 23:00. Big Bedroom
-    sleep mode is manual only (Pico button) - excluded from this schedule; AL still
-    applies to it via other automations. Kitchen is deliberately later than the rest
-    of the house so the main light stays on through late-night kitchen use; it still
-    turns off earlier on its own via the Kitchen automation''s occupancy-clear triggers
-    (kitchen_cleared/kitchen_cleared_hue) whenever the room actually clears, independent
-    of sleep mode. Morning: catch-all that disables sleep mode and re-enables AL everywhere,
-    clearing manual_control. Fires the moment the Good Morning Routine starts (input_boolean.good_morning_active
-    turning on) rather than a fixed clock time; if Good Morning never runs, an 11:00
-    fallback fires the same catch-all regardless of weekday. Big Bedroom is excluded
-    from the morning branch because the Good Morning Routine owns it. Bedroom 2 /
-    Office is included in the morning catch-all for simplicity - it''s redundant with
-    "Office: Daily AL Reset" but harmless.'
+  description: 'Evening: enables sleep mode for Bedroom 2 / Office at 22:00 and the
+    kitchen at 23:45. Big Bedroom and Bathroom sleep mode are manual only (Hue buttons
+    - bathroom follows Big Bedroom''s bedtime buttons) - both excluded from this schedule;
+    AL still applies to them via other automations. Kitchen is deliberately later
+    than the rest of the house so the main light stays on through late-night kitchen
+    use; it still turns off earlier on its own via the Kitchen automation''s occupancy-clear
+    triggers (kitchen_cleared/kitchen_cleared_hue) whenever the room actually clears,
+    independent of sleep mode. Morning: catch-all that disables sleep mode and re-enables
+    AL everywhere, clearing manual_control. Fires the moment the Good Morning Routine
+    starts (input_boolean.good_morning_active turning on) rather than a fixed clock
+    time; if Good Morning never runs, an 11:00 fallback fires the same catch-all regardless
+    of weekday. Big Bedroom and Bathroom are excluded from the morning branch because
+    the Good Morning Routine owns them. Bedroom 2 / Office is included in the morning
+    catch-all for simplicity - it''s redundant with "Office: Daily AL Reset" but harmless.'
   triggers:
   - trigger: time
     at: '22:00:00'
@@ -1778,8 +1778,6 @@
           - switch.al_sleep_mode_living_room
           - switch.al_sleep_mode_dining_room_bottom
           - switch.al_sleep_mode_dining_room_top
-          - switch.al_sleep_mode_bathroom
-          - switch.al_sleep_mode_bathroom_main
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -1813,27 +1811,6 @@
           entity_id: switch.al_dining_room_top
           lights:
           - light.dining_room_top
-          transition: 150
-          adapt_color: true
-          adapt_brightness: true
-      - action: adaptive_lighting.apply
-        continue_on_error: true
-        data:
-          entity_id: switch.al_bathroom
-          lights:
-          - light.bathroom_shower
-          - light.bathroom_tub_1
-          - light.bathroom_tub_2
-          - light.bathroom_back
-          transition: 150
-          adapt_color: true
-          adapt_brightness: true
-      - action: adaptive_lighting.apply
-        continue_on_error: true
-        data:
-          entity_id: switch.al_bathroom_main
-          lights:
-          - light.bathroom_main_lights
           transition: 150
           adapt_color: true
           adapt_brightness: true
