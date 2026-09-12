@@ -147,20 +147,21 @@ script_volvo_start_core:
             timeout:
               minutes: 10
             continue_on_timeout: false
-          - alias: Wait for sustained person detection in garage (up to 10 minutes)
-              - requires 3 continuous seconds of presence on the mmWave sensor
-              so a brief blip can't arm the garage open on its own. Uses the
-              esphome presence sensor instead of Frigate, which was opening
-              the garage on car headlights/shadows with nobody present.
-            wait_for_trigger:
-            - trigger: state
-              entity_id: binary_sensor.garage_garage_people_detection_presence
-              to: 'on'
-              for:
-                seconds: 3
+          - alias: Wait for person detection in garage (up to 10 minutes) - fires
+              immediately if presence is already on (e.g. it went on while we
+              were still waiting on the man-door), otherwise waits for the
+              sensor to turn on. A state trigger with for:3s only fires on a
+              fresh on-transition, so it silently never fired when presence
+              was already on before this step started (2026-09-11 incident) -
+              wait_template checks the current state instead of requiring an edge.
+            wait_template: '{{ is_state(''binary_sensor.garage_garage_people_detection_presence'', ''on'') }}'
             timeout:
               minutes: 10
             continue_on_timeout: false
+          - alias: Require 3 continuous seconds of presence so a brief blip
+              can't arm the garage open on its own
+            delay:
+              seconds: 3
           - alias: Open garage only if person is still actually there right now,
               not just at some point during the wait
             if:
