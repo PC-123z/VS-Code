@@ -8751,32 +8751,34 @@
       entity_id: input_boolean.arrival_recent
   mode: single
 - id: '1777484175034'
-  alias: Arrival Latch - Clear after 15 min or on Disarm
+  alias: Arrival Latch - Clear after 1 hr or on Disarm
   description: Clears the arrival latches (beacon/phone, garage-open) and the welcome_home_pending
-    waiting state 15 minutes after any of them was set, or as soon as the alarm is
+    waiting state 1 hour after any of them was set, or as soon as the alarm is
     disarmed (so a stale latch never lingers or wrongly satisfies the two-factor check
     on some unrelated future event). Clearing pending on disarm also means that letting
     yourself in some other way - keypad, front door - cancels the waiting routine
-    instead of leaving it to fire the next time the garage opens.
+    instead of leaving it to fire the next time the garage opens. Extended from 15
+    min 2026-09-12 - a Ring garage-door-sensor delay/miss let the latch expire before
+    STAGE 2 saw the door as open, so the alarm never disarmed.
   triggers:
-  - alias: Arrival latch has been on for 15 minutes
+  - alias: Arrival latch has been on for 1 hour
     trigger: state
     entity_id: input_boolean.arrival_recent
     to: 'on'
     for:
-      minutes: 15
-  - alias: Garage-open latch has been on for 15 minutes
+      hours: 1
+  - alias: Garage-open latch has been on for 1 hour
     trigger: state
     entity_id: input_boolean.garage_open_recent
     to: 'on'
     for:
-      minutes: 15
-  - alias: Welcome home pending has been waiting 15 minutes
+      hours: 1
+  - alias: Welcome home pending has been waiting 1 hour
     trigger: state
     entity_id: input_boolean.welcome_home_pending
     to: 'on'
     for:
-      minutes: 15
+      hours: 1
   - alias: Alarm disarmed
     trigger: state
     entity_id: alarm_control_panel.3302_alarm
