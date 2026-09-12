@@ -85,6 +85,10 @@ switch:
     host: "192.168.70.203"
 
 input_boolean:
+  volvo_garage_door_opened_this_cycle:
+    name: "Volvo Garage Door Opened (this cycle)"
+    icon: mdi:garage-open
+    initial: off
   good_morning_expected_pause:
     name: "Good Morning Expected Pause"
     icon: mdi:pause-circle
