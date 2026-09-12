@@ -4252,7 +4252,6 @@
           entity_id:
           - light.office
           - light.hue_white_lamp_1
-          - light.bedroom_2
           - light.ribbon
           - light.fluttershy
           - light.showtime_light
@@ -5882,7 +5881,6 @@
           - light.fluttershy
           - light.office
           - light.hue_white_lamp_1
-          - light.bedroom_2
         data:
           transition: 60
       - delay:
@@ -6633,7 +6631,6 @@
     - light.fluttershy
     - light.office
     - light.hue_white_lamp_1
-    - light.bedroom_2
     to: 'on'
     for:
       seconds: 60
@@ -6689,7 +6686,6 @@
           - light.fluttershy
           - light.office
           - light.hue_white_lamp_1
-          - light.bedroom_2
         data:
           transition: 30
     - conditions:
@@ -7429,7 +7425,6 @@
               entity_id:
               - light.ribbon
               - light.fluttershy
-              - light.bedroom_2
             data:
               transition: 2
     - conditions:
