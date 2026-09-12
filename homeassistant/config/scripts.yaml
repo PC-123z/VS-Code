@@ -141,7 +141,7 @@ script_volvo_start_core:
               someone actually walked into the garage before arming presence-based
               open. Once it opens, the flag below stays on for the rest of this
               cycle - opening no longer has to coincide with presence at that
-              exact instant (2026-09-11: door open and presence-on didn't line
+              exact instant (on 2026-09-11, door-open and presence-on didn't line
               up, so the old same-moment check never fired).
             wait_for_trigger:
             - trigger: state

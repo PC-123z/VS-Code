@@ -11646,3 +11646,50 @@
           - switch.garage_motion
         data: {}
   mode: single
+- id: '1778700000001'
+  alias: 'Garage: Open on Presence During Volvo Start'
+  description: While a Volvo remote-start cycle is active and the garage man-door
+    has opened at least once this cycle (input_boolean.volvo_garage_door_opened_this_cycle),
+    open the garage cover the moment the mmWave presence sensor sees anyone -
+    no hold-time and no requirement that the door be open at that exact instant.
+    Replaces the old same-moment door+3s-presence check in script_volvo_start_core,
+    which never fired on 2026-09-11 because presence was already on before the
+    wait step for it even started.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.garage_garage_people_detection_presence
+    to: 'on'
+  conditions:
+  - condition: state
+    entity_id: input_boolean.volvo_start_active
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.volvo_garage_door_opened_this_cycle
+    state: 'on'
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: cover.garage
+      state: open
+  actions:
+  - action: cover.open_cover
+    target:
+      entity_id: cover.garage
+    data: {}
+  mode: single
+- id: '1778700000002'
+  alias: 'Garage: Reset Volvo Door-Opened Flag When Start Cycle Ends'
+  description: Clears input_boolean.volvo_garage_door_opened_this_cycle when
+    volvo_start_active turns off, so the flag doesn't leak into the next
+    remote-start cycle.
+  triggers:
+  - trigger: state
+    entity_id: input_boolean.volvo_start_active
+    to: 'off'
+  conditions: []
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.volvo_garage_door_opened_this_cycle
+    data: {}
+  mode: single
