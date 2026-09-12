@@ -6897,7 +6897,8 @@
   alias: 'Hue Button 1 - Big Bedroom: Restore AL'
   description: Pico 'on' press clears all overrides, re-enables AL switches and motion
     automation, clears manual_control, applies adaptive lighting, and always turns
-    sleep mode off - sleep mode is manual only via Hue button 2/3.
+    sleep mode off - sleep mode is manual only via Hue button 2/3. Press sets AL min
+    brightness floor to 45%, hold sets it to 85%.
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
@@ -6905,12 +6906,14 @@
     subtype: 1
     unique_id: da34ba0c-d931-434d-8531-b8dbb4ffac2e
     trigger: device
+    id: press
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
     type: repeat
     subtype: 1
     unique_id: bedroom-dimmer-hold-btn1-al-toggle
     trigger: device
+    id: hold
   conditions: []
   actions:
   - alias: Clear manual override flag
@@ -6938,6 +6941,26 @@
       - switch.al_big_bedroom
       - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_color_big_bedroom_al
       - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_brightness_big_bedroom_al
+  - alias: Set AL min brightness floor - 45% on press, 85% on hold
+    choose:
+    - conditions:
+      - condition: trigger
+        id: press
+      sequence:
+      - action: adaptive_lighting.change_switch_settings
+        target:
+          entity_id: switch.al_big_bedroom
+        data:
+          min_brightness: 45
+    - conditions:
+      - condition: trigger
+        id: hold
+      sequence:
+      - action: adaptive_lighting.change_switch_settings
+        target:
+          entity_id: switch.al_big_bedroom
+        data:
+          min_brightness: 85
   - alias: Always turn sleep mode off - manual only via Hue button 2/3
     action: switch.turn_off
     target:
