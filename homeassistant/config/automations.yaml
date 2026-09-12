@@ -8602,16 +8602,21 @@
   - variables:
       current_hour: '{{ now().hour }}'
       is_quiet_hours: '{{ current_hour|int < 8 or current_hour|int >= 22 }}'
-  - alias: Check if quiet hours (before 8 AM or after 10 PM)
+      kids_present: '{{ is_state("input_boolean.bedroom2_occupied", "on") }}'
+  - alias: Check if quiet hours (before 8 AM or after 10 PM) AND kids are actually
+      here (bedroom2_occupied on) - added 2026-09-12 so quiet hours only silence
+      music when there's someone in Bedroom 2 to be quiet for; otherwise music plays
+      normally even late at night
     if:
     - condition: template
-      value_template: '{{ is_quiet_hours }}'
+      value_template: '{{ is_quiet_hours and kids_present }}'
     then:
-    - alias: Quiet hours - stay silent
+    - alias: Quiet hours with kids home - stay silent
       action: notify.mobile_app_pc_iphone
       data:
         title: Welcome Home
-        message: Hallway lights on. Music skipped (quiet hours 10 PM – 8 AM).
+        message: Hallway lights on. Music skipped (quiet hours 10 PM – 8 AM, Bedroom
+          2 occupied).
     else:
     - alias: Before 10 PM - play appropriate music
       sequence:
