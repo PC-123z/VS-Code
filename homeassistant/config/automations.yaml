@@ -6896,7 +6896,8 @@
 - id: '1776828862786'
   alias: 'Hue Button 1 - Big Bedroom: Restore AL'
   description: Pico 'on' press clears all overrides, re-enables AL switches and motion
-    automation, clears manual_control, and applies adaptive lighting.
+    automation, clears manual_control, applies adaptive lighting, and always turns
+    sleep mode off - sleep mode is manual only via Hue button 2/3.
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
@@ -6937,21 +6938,10 @@
       - switch.al_big_bedroom
       - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_color_big_bedroom_al
       - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_brightness_big_bedroom_al
-  - alias: Set sleep mode based on time of day
-    if:
-    - condition: time
-      after: '23:00:00'
-      before: 07:00:00
-    then:
-    - alias: Sleep hours - turn sleep mode on
-      action: switch.turn_on
-      target:
-        entity_id: switch.al_sleep_mode_big_bedroom
-    else:
-    - alias: Day hours - keep sleep mode off
-      action: switch.turn_off
-      target:
-        entity_id: switch.al_sleep_mode_big_bedroom
+  - alias: Always turn sleep mode off - manual only via Hue button 2/3
+    action: switch.turn_off
+    target:
+      entity_id: switch.al_sleep_mode_big_bedroom
   - alias: Re-enable motion/presence automation
     action: automation.turn_on
     target:
