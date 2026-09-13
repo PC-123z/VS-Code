@@ -20,8 +20,10 @@ logger:
     asyncio: critical
     custom_components.localtuya: error
 
-go2rtc:
-  url: http://192.168.70.155:1984
+# go2rtc: HA uses its bundled go2rtc (Frigate 0.17.2 ships 1.9.10, below HA minimum 1.9.13).
+# HomeKit camera bridge pulls RTSP from Frigate directly and does not depend on this.
+# go2rtc:
+#   url: http://192.168.70.155:1984
 
 homekit:
   - name: Cameras
