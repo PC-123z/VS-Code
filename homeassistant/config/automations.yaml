@@ -7614,9 +7614,11 @@
       entity_id: timer.departure_window
   mode: restart
 - id: '1776981901284'
-  alias: Departure - Monitor Garage and Arm Based on Occupancy
-  description: When Volvo cable is disconnected during departure window and Paul or
-    the car leaves, check for motion and arm accordingly.
+  alias: Departure - Volvo Cable Disconnect in Departure Window
+  description: When the Volvo cable is disconnected during the departure window and
+    Paul or the car then leaves, start the goodbye routine (which decides Stay vs
+    Away). Overlaps with AUTO AWAY on normal garage departures; the routine is
+    single-mode so only one run happens.
   triggers:
   - trigger: state
     entity_id: sensor.volvo_xc60_charging_connection_status
@@ -7626,7 +7628,7 @@
     entity_id: timer.departure_window
     state: active
   actions:
-  - alias: Wait for Paul or car to leave
+  - alias: Wait for Paul or car to be detected away
     wait_for_trigger:
     - trigger: state
       entity_id: person.paul
@@ -7639,38 +7641,11 @@
     timeout:
       minutes: 15
     continue_on_timeout: false
-  - alias: Wait for motion to clear or timeout after 1 minute
-    wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'')
-      }}'
-    timeout:
-      hours: 0
-      minutes: 1
-      seconds: 0
-      milliseconds: 0
-    continue_on_timeout: true
-  - alias: Check if motion was detected (someone home)
-    if:
-    - condition: state
-      entity_id: binary_sensor.goodbye_motion_sensors
-      state: 'on'
-    then:
-    - alias: Someone is home - alert and set alarm to home
-      sequence:
-      - action: notify.mobile_app_pc_iphone
-        data:
-          title: Motion Detected
-          message: Motion detected after you left. Setting alarm to home mode.
-      - action: alarm_control_panel.alarm_arm_home
-        target:
-          entity_id: alarm_control_panel.3302_alarm
-        data:
-          code: ''
-    else:
-    - alias: No motion - house is empty, run goodbye routine
-      sequence:
-      - action: script.turn_on
-        target:
-          entity_id: script.goodbye_routine_main
+  - alias: Hand off to the goodbye routine - it decides Stay vs Away (single-mode, so
+      a duplicate start from the other departure automation is ignored)
+    action: script.turn_on
+    target:
+      entity_id: script.goodbye_routine_main
   - alias: Cancel the departure window timer
     action: timer.cancel
     target:
@@ -8239,9 +8214,10 @@
       entity_id: notify.bedroom_dot_announce
 - id: '1777484048364'
   alias: 'AUTO AWAY: Departure - Monitor Garage and Arm Based on Occupancy'
-  description: When garage opens and Paul or the car is detected away, wait for motion
-    sensors to clear, then check if someone's home. If motion detected, set alarm
-    to home. If empty, run goodbye routine.
+  description: When the garage opens and Paul or the car is then detected away (or
+    the iOS geofence webhook fires), start the goodbye routine. The routine watches
+    motion (settle + 5 x 2 min) and arms Stay if anyone is home, or Away + power down
+    only if the house is empty.
   triggers:
   - trigger: state
     entity_id: cover.garage
@@ -8254,13 +8230,6 @@
     - POST
     local_only: false
     id: webhook
-  conditions:
-  - alias: Don't run if Departure - Monitor Garage and Arm Based on Occupancy is active
-    condition: state
-    entity_id: automation.departure_open_garage_on_cable_disconnect
-    state:
-    - 'off'
-    enabled: false
   actions:
   - alias: Confirm departure (skip wait when geofence webhook already confirmed Paul
       left)
@@ -8268,51 +8237,24 @@
     - condition: template
       value_template: '{{ trigger.id != ''webhook'' }}'
     then:
-    - alias: Wait for Paul or car to be detected away
-      wait_for_trigger:
-      - trigger: state
-        entity_id: person.paul
-        to: not_home
-      - trigger: state
-        entity_id: device_tracker.bcpro_204982_08b8
-        to:
-        - not_home
-        - unavailable
-      timeout:
-        hours: 0
-        minutes: 15
-        seconds: 0
-        milliseconds: 0
-      continue_on_timeout: false
-  - alias: Wait for motion to clear or timeout after 5 minutes
-    wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'')
-      }}'
-    timeout:
-      minutes: 5
-    continue_on_timeout: true
-  - alias: Check if motion was detected (someone home)
-    if:
-    - condition: state
-      entity_id: binary_sensor.goodbye_motion_sensors
-      state: 'on'
-    then:
-    - alias: Someone is home - alert and set alarm to home
-      sequence:
-      - action: notify.mobile_app_pc_iphone
-        data:
-          title: Motion Detected
-          message: Motion detected after garage closed. Setting alarm to home mode.
-      - action: alarm_control_panel.alarm_arm_home
-        target:
-          entity_id: alarm_control_panel.3302_alarm
-        data:
-          code: ''
-    else:
-    - alias: No motion - house is empty, run goodbye routine
-      sequence:
-      - action: script.turn_on
-        target:
-          entity_id: script.goodbye_routine_main
+      - alias: Wait for Paul or car to be detected away
+        wait_for_trigger:
+        - trigger: state
+          entity_id: person.paul
+          to: not_home
+        - trigger: state
+          entity_id: device_tracker.bcpro_204982_08b8
+          to:
+          - not_home
+          - unavailable
+        timeout:
+          minutes: 15
+        continue_on_timeout: false
+  - alias: Hand off to the goodbye routine - it decides Stay vs Away (single-mode, so
+      a duplicate start from the other departure automation is ignored)
+    action: script.turn_on
+    target:
+      entity_id: script.goodbye_routine_main
   mode: restart
 - id: '1778000000001'
   alias: 'AUTO AWAY: Beacon Home - Abort In-Progress Goodbye Routine'
@@ -8337,8 +8279,8 @@
     target:
       entity_id:
       - script.goodbye_routine_main
-      - script.goodbye_routine_immediate_actions
       - script.goodbye_routine_motion_tracking
+      - script.goodbye_routine_someone_home_arm_stay
       - script.goodbye_routine_all_clear_arm_and_power_off
   - action: script.turn_on
     target:

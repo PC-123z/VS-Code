@@ -229,153 +229,105 @@ script_good_morning_routine_core:
   mode: single
 goodbye_routine_main:
   alias: Goodbye Routine - Main
+  description: Runs after Paul leaves. Nothing in the house is touched until occupancy
+    is decided - if anyone is home the alarm goes to Stay and lights/TVs/music are
+    left alone; only a confirmed-empty house gets armed Away and powered down.
   sequence:
-  - action: script.goodbye_routine_immediate_actions
-    data: {}
-  - action: script.goodbye_routine_motion_tracking
-    data: {}
-  - action: script.goodbye_routine_all_clear_arm_and_power_off
-    data: {}
-  mode: single
-  icon: mdi:logout
-  description: ''
-goodbye_routine_immediate_actions:
-  alias: Goodbye Routine - Immediate Actions
-  sequence:
-  - continue_on_error: true
+  - action: input_boolean.turn_on
     target:
-      entity_id:
-      - fan.air_circulator
-      - fan.bedroom_purifier
-      - fan.big_bedroom_fan
-      - fan.kitchen_purifier
-      - fan.living_room_fan
-      - fan.bedroom2_fan
-    action: fan.turn_off
-    data: {}
-  - continue_on_error: true
-    target:
-      entity_id:
-      - media_player.living_room_tv_2
-      - media_player.bedroom_tv_2
-    action: media_player.turn_off
-  - continue_on_error: true
-    data:
-      with_group: true
-    target:
-      entity_id:
-      - media_player.bathroom
-      - media_player.kitchen
-      - media_player.bedroom
-      - media_player.office
-    action: sonos.snapshot
-  - continue_on_error: true
-    target:
-      entity_id:
-      - media_player.bathroom
-      - media_player.kitchen
-      - media_player.bedroom
-      - media_player.office
-    action: media_player.media_stop
-  - continue_on_error: true
-    target:
-      entity_id:
-      - light.galaxy_projector
-      - light.garage_lights
-      - light.kitchen_1_color
-      - light.kitchen_2_color
-      - light.hue_datura_top_1
-      - light.hue_datura_bottom_1
-      - light.dining_room_bottom
-      - light.dining_room_top
-      - light.ribbon
-      - light.fluttershy
-      - light.nano_sand_dune
-      - light.office
-      - light.office_1
-      - light.office_2
-      - light.hue_white_lamp_1
-      - light.living_room
-      - light.bathroom_main_lights
-      - light.bathroom_shower
-      - light.bathroom_back
-      - light.showtime_light
-      - light.bedroom
-      - light.bedroom_2
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
-    action: light.turn_off
-  - continue_on_error: true
-    data:
-      transition: 15
-    target:
-      entity_id: light.indoor
-    action: light.turn_off
-  - continue_on_error: true
-    target:
-      entity_id: switch.al_hallway
-    action: switch.turn_off
-  - continue_on_error: true
-    data:
-      brightness_pct: 20
-    target:
-      entity_id: light.hallway
-    action: light.turn_on
-  - target:
       entity_id: input_boolean.goodbye_routine_active
-    action: input_boolean.turn_on
+  - action: script.goodbye_routine_motion_tracking
+    response_variable: occupancy
+  - if:
+    - condition: template
+      value_template: '{{ occupancy.someone_home }}'
+    then:
+    - action: script.goodbye_routine_someone_home_arm_stay
+      data:
+        detected: '{{ occupancy.detected }}'
+    else:
+    - action: script.goodbye_routine_all_clear_arm_and_power_off
   mode: single
-  icon: mdi:power
-  description: ''
+  max_exceeded: silent
+  icon: mdi:logout
 goodbye_routine_motion_tracking:
   alias: Goodbye Routine - Motion Tracking
+  description: Decides home vs empty. First allows up to 5 min for Paul's own exit
+    motion (and the Big Bedroom ecobee sensor's 4-9 min occupancy hold) to clear,
+    then runs 5 consecutive 2-minute checks. Motion at any point during the checks
+    = someone is home. Returns {someone_home, detected}.
   sequence:
+  - alias: Settle - let departure motion clear (still-on after 5 min fails check 1)
+    wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'') }}'
+    timeout:
+      minutes: 5
+    continue_on_timeout: true
   - repeat:
-      count: 3
+      count: 5
       sequence:
-      - wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'')
-          }}
-
-          '
-        timeout:
-          minutes: 2
-        continue_on_timeout: true
-      - wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''on'')
-          }}
-
-          '
+      - wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''on'') }}'
         timeout:
           minutes: 2
         continue_on_timeout: true
       - if:
-        - condition: state
-          entity_id: binary_sensor.goodbye_motion_sensors
-          state: 'off'
+        - condition: template
+          value_template: '{{ wait.completed }}'
         then:
-        - action: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.goodbye_routine_active
-        - stop: All clear confirmed
+        - variables:
+            result:
+              someone_home: true
+              detected: '{{ expand(state_attr(''binary_sensor.goodbye_motion_sensors'',
+                ''entity_id'')) | selectattr(''state'', ''eq'', ''on'') | map(attribute=''name'')
+                | join('', '') }}'
+        - stop: Motion detected - someone is home
+          response_variable: result
+  - variables:
+      result:
+        someone_home: false
+        detected: ''
+  - stop: No motion across 5 checks - house is empty
+    response_variable: result
+  mode: single
+  icon: mdi:motion-sensor
+goodbye_routine_someone_home_arm_stay:
+  alias: Goodbye Routine - Someone Home, Arm Stay
+  description: Someone is still home after Paul left - arm Stay and leave lights,
+    TVs, music and fans exactly as they are.
+  fields:
+    detected:
+      description: Sensors that detected motion
+  sequence:
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.goodbye_routine_active
-  mode: restart
-  icon: mdi:motion-sensor
-  description: ''
+  - alias: Paul came back before the decision - do nothing
+    condition: not
+    conditions:
+    - condition: state
+      entity_id: device_tracker.bcpro_204982_08b8
+      state: home
+  - if:
+    - condition: state
+      entity_id: alarm_control_panel.3302_alarm
+      state: disarmed
+    then:
+    - action: alarm_control_panel.alarm_arm_home
+      target:
+        entity_id: alarm_control_panel.3302_alarm
+      data:
+        code: ''
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Someone's Home
+      message: 'Motion after you left ({{ detected }}). Alarm set to Stay - lights,
+        TVs and music left alone.'
+  mode: single
+  icon: mdi:home-account
 goodbye_routine_all_clear_arm_and_power_off:
   alias: Goodbye Routine - All Clear, Arm and Power Off
+  description: House confirmed empty by motion tracking - arm Away, then power down.
   sequence:
-  - wait_template: '{{ is_state(''input_boolean.goodbye_routine_active'', ''off'')
-      }}
-
-      '
-    timeout:
-      minutes: 5
-    continue_on_timeout: false
-  - alias: Abort if car beacon shows Paul is actually home (stale/premature away trigger
-      - e.g. beacon still said away after he already walked back in)
+  - alias: Abort if car beacon shows Paul is actually home (stale/premature away trigger)
     if:
     - condition: state
       entity_id: device_tracker.bcpro_204982_08b8
@@ -383,7 +335,7 @@ goodbye_routine_all_clear_arm_and_power_off:
     then:
     - action: script.goodbye_routine_abort_and_restore
       data: {}
-    - stop: Beacon confirms Paul is home - lights restored, not arming
+    - stop: Beacon confirms Paul is home - not arming
   - alias: Failsafe - leaving the house confirms awake, clear stuck asleep flag
     action: input_boolean.turn_off
     target:
@@ -395,7 +347,22 @@ goodbye_routine_all_clear_arm_and_power_off:
     action: alarm_control_panel.alarm_arm_away
   - delay:
       seconds: 2
-  - target:
+  - continue_on_error: true
+    target:
+      entity_id:
+      - media_player.living_room_tv_2
+      - media_player.bedroom_tv_2
+    action: media_player.turn_off
+  - continue_on_error: true
+    target:
+      entity_id:
+      - media_player.bathroom
+      - media_player.kitchen
+      - media_player.bedroom
+      - media_player.office
+    action: media_player.media_stop
+  - continue_on_error: true
+    target:
       entity_id:
       - light.indoor
       - light.hallway
@@ -427,7 +394,8 @@ goodbye_routine_all_clear_arm_and_power_off:
       - light.bedroom_lamp_2
     action: light.turn_off
     data: {}
-  - target:
+  - continue_on_error: true
+    target:
       entity_id:
       - fan.air_circulator
       - fan.bedroom_purifier
@@ -441,66 +409,23 @@ goodbye_routine_all_clear_arm_and_power_off:
       entity_id: input_boolean.goodbye_routine_active
     action: input_boolean.turn_off
     data: {}
-  - target:
-      entity_id: switch.al_hallway
-    action: switch.turn_on
-    data: {}
   mode: single
   icon: mdi:shield-lock
-  description: ''
 goodbye_routine_abort_and_restore:
-  alias: Goodbye Routine - Abort and Restore Lights
-  description: Shared by the beacon-home checks (both the arm-time gate in "All Clear,
-    Arm and Power Off" and the immediate "Beacon Home - Abort In-Progress Goodbye
-    Routine" automation) to cancel a goodbye routine that was triggered by a stale/premature
-    away signal and undo what immediate_actions already turned off.
+  alias: Goodbye Routine - Abort
+  description: Shared by the beacon-home checks (the gate in "All Clear, Arm and Power
+    Off" and the "Beacon Home - Abort In-Progress Goodbye Routine" automation). The
+    routine no longer changes anything before the empty-house decision, so there is
+    nothing to restore - just cancel and clear the flag.
   sequence:
   - action: notify.mobile_app_pc_iphone
     data:
       title: Goodbye Routine Aborted
-      message: Car beacon shows home - cancelling goodbye routine and restoring lights.
+      message: Car beacon shows home - cancelled goodbye routine before arming. Nothing
+        in the house was changed.
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.goodbye_routine_active
-  - alias: Undo the immediate-actions lights-off since he's actually home
-    target:
-      entity_id:
-      - light.indoor
-      - light.galaxy_projector
-      - light.kitchen_1_color
-      - light.kitchen_2_color
-      - light.hue_datura_top_1
-      - light.hue_datura_bottom_1
-      - light.dining_room_bottom
-      - light.dining_room_top
-      - light.ribbon
-      - light.fluttershy
-      - light.nano_sand_dune
-      - light.office
-      - light.office_1
-      - light.office_2
-      - light.hue_white_lamp_1
-      - light.living_room
-      - light.bathroom_main_lights
-      - light.bathroom_shower
-      - light.bathroom_back
-      - light.showtime_light
-      - light.bedroom
-      - light.bedroom_2
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
-    action: light.turn_on
-    data: {}
-  - alias: Undo the hallway swap (dim hallway on / al_hallway switch off) from immediate
-      actions
-    target:
-      entity_id: switch.al_hallway
-    action: switch.turn_on
-  - target:
-      entity_id: light.hallway
-    action: light.turn_off
   mode: single
   icon: mdi:restore
 goodbye_routine_alexa:
