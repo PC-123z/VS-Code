@@ -9415,17 +9415,28 @@
               data:
                 volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3)
                   }}'
-        - alias: 'Wait for the opening track to finish. Reactive and simple: the player
-            goes idle, or its content_id moves off the opener''s track id, the moment
-            the opener ends - whether Music Assistant genuinely stops or auto-fills
-            the queue with a similar track ("Fetching similar tracks for queue Bedroom
-            based on: Here Comes The Sun" in the MA log).'
-          wait_template: '{{ is_state(''media_player.bedroom_2'', ''idle'') or ''xUNqsfFUwhY''
-            not in (state_attr(''media_player.bedroom_2'', ''media_content_id'') or
-            '''') }}'
-          timeout:
-            minutes: 6
-          continue_on_timeout: true
+        - variables:
+            opener_wait_start: '{{ now().timestamp() }}'
+        - alias: 'Wait for the opening track to finish. MA''s announcement path reports
+            the player idle for the whole greeting - on 2026-09-13 a motion greeting
+            landed at 07:44:29, 4s before the opener ended, the player flipped to idle,
+            the old bare idle check completed and the stop below cut the song under
+            the greeting. So idle only counts while no announcement is in progress,
+            and it must still hold 3s later, because after a greeting MA takes a moment
+            to report the resumed track as playing again. The content_id check is a
+            fallback in case Autoplay could not be switched off. Capped at 6 minutes
+            overall.'
+          repeat:
+            sequence:
+            - wait_template: '{{ (is_state(''media_player.bedroom_2'', ''idle'') and is_state(''input_boolean.good_morning_announcement_pending'', ''off'')) or ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'', ''media_content_id'') or '''') }}'
+              timeout:
+                seconds: '{{ [360 - (now().timestamp() - opener_wait_start | float), 1] | max | int }}'
+              continue_on_timeout: true
+            - delay:
+                seconds: 3
+            until:
+            - condition: template
+              value_template: '{{ (now().timestamp() - opener_wait_start | float) > 360 or (is_state(''media_player.bedroom_2'', ''idle'') and is_state(''input_boolean.good_morning_announcement_pending'', ''off'')) or ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'', ''media_content_id'') or '''') }}'
         - alias: Safety-net stop. With Autoplay off the player is normally already idle
             here because the opener simply ended, so this is a no-op - it only matters
             if Autoplay could not be switched off and MA rolled into a filled track.
@@ -9716,6 +9727,12 @@
         data:
           type: daily
         response_variable: today_fc
+      - alias: If the music branch is already speaking its end-of-opener greeting, let
+          it finish first so the two greetings never talk over each other
+        wait_template: '{{ is_state(''input_boolean.good_morning_announcement_pending'', ''off'') }}'
+        timeout:
+          seconds: 60
+        continue_on_timeout: true
       - alias: Hold the announcement-in-progress flag while speaking, so the music
           branch cannot replace the queue underneath the greeting
         action: input_boolean.turn_on
@@ -9749,12 +9766,13 @@
         action: counter.increment
         target:
           entity_id: counter.good_morning_announcements
-      - alias: Hold the flag for roughly the length of the message. MA announcements
-          are audio clips on the Sonos side and report no completion back to Home
-          Assistant, so there is no state to wait on - a fixed hold sized to the greeting
-          is the predictable option, and all it gates is the phase 2 queue swap.
+      - alias: Short settle before releasing the flag. tts.speak through MA blocks
+          until the greeting has finished playing (16-18s calls on 2026-09-13), so no
+          length-sized hold is needed - just a few seconds for MA to report the resumed
+          track as playing again, so the music branch's opener-finished wait does not
+          mistake the announcement's idle for the end of the song.
         delay:
-          seconds: 35
+          seconds: 4
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.good_morning_announcement_pending
