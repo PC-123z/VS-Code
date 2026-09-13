@@ -11750,3 +11750,106 @@
     data:
       transition: '{{ 60 if trigger.id == ''drift'' else 10 }}'
   mode: restart
+- id: '1789400000001'
+  alias: 'Welcome Home: Stop Music After 10 Minutes'
+  description: Added 2026-09-13 - Welcome Home music plays for 10 minutes total, not
+    the whole album. When the welcome_home_active flag turns on (Stage 2 starts the
+    kitchen music), wait 9:40, then fade every speaker in the kitchen group from its
+    current volume to 0 over the last 20 seconds, stop, unjoin the satellites, restore
+    each speaker's pre-fade volume so nothing is left at 0, and clear the flag. Does
+    nothing if the session already ended or if the kitchen is no longer playing Music
+    Assistant's queue (e.g. someone took over with Spotify Connect). Uses media_stop
+    (idle), not pause, so 'Immediate Stop on Manual Pause' doesn't double-handle it.
+    Mode single so Stage 2's duplicate queued runs can't start a second timer.
+  triggers:
+  - trigger: state
+    entity_id: input_boolean.welcome_home_active
+    from: 'off'
+    to: 'on'
+  conditions: []
+  actions:
+  - alias: Let the music play for 9:40, unless the session ends first
+    wait_for_trigger:
+    - trigger: state
+      entity_id: input_boolean.welcome_home_active
+      to: 'off'
+    timeout:
+      minutes: 9
+      seconds: 40
+    continue_on_timeout: true
+  - alias: Only fade/stop our own Welcome Home music that is still playing
+    if:
+    - condition: template
+      value_template: '{{ wait.trigger is none }}'
+    - condition: state
+      entity_id: input_boolean.welcome_home_active
+      state: 'on'
+    - condition: state
+      entity_id: media_player.kitchen_2
+      state: playing
+    - alias: Still Music Assistant's queue, not a Spotify/Alexa takeover
+      condition: template
+      value_template: '{{ is_state_attr(''media_player.kitchen_2'',''app_id'',''music_assistant'')
+        }}'
+    then:
+    - alias: Capture every speaker in the kitchen group and its current volume
+      variables:
+        fade_targets: '{% set ns = namespace(l=[]) %}{% for m in (state_attr(''media_player.kitchen_2'',''group_members'')
+          or [''media_player.kitchen_2'']) %}{% set ns.l = ns.l + [{''entity'': m,
+          ''vol'': (state_attr(m,''volume_level'') | float(0))}] %}{% endfor %}{{
+          ns.l }}'
+    - alias: Fade all speakers to 0 over 20 seconds (10 steps x 2s)
+      repeat:
+        count: 10
+        sequence:
+        - variables:
+            step: '{{ repeat.index }}'
+        - repeat:
+            for_each: '{{ fade_targets }}'
+            sequence:
+            - continue_on_error: true
+              action: media_player.volume_set
+              target:
+                entity_id: '{{ repeat.item.entity }}'
+              data:
+                volume_level: '{{ [0, (repeat.item.vol * (1 - step / 10))] | max |
+                  round(3) }}'
+        - delay:
+            seconds: 2
+    - alias: Stop the music (stop, not pause)
+      continue_on_error: true
+      action: media_player.media_stop
+      target:
+        entity_id: media_player.kitchen_2
+    - alias: Cancel bathroom's own idle timer so it doesn't separately fade/unjoin
+      continue_on_error: true
+      action: timer.cancel
+      target:
+        entity_id: timer.bathroom_join_idle
+    - alias: Unjoin the satellite rooms from the kitchen group
+      repeat:
+        for_each: '{{ fade_targets | map(attribute=''entity'') | reject(''eq'',''media_player.kitchen_2'')
+          | list }}'
+        sequence:
+        - continue_on_error: true
+          action: media_player.unjoin
+          target:
+            entity_id: '{{ repeat.item }}'
+    - delay:
+        seconds: 2
+    - alias: Restore each speaker's pre-fade volume so nothing is left at 0 next time
+      repeat:
+        for_each: '{{ fade_targets }}'
+        sequence:
+        - continue_on_error: true
+          action: media_player.volume_set
+          target:
+            entity_id: '{{ repeat.item.entity }}'
+          data:
+            volume_level: '{{ repeat.item.vol }}'
+    - alias: End the Welcome Home session
+      action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.welcome_home_active
+  mode: single
+  max_exceeded: silent
