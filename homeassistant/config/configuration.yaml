@@ -197,7 +197,8 @@ rest:
   - resource: http://jellyfin-tiny.pc/Sessions
     method: GET
     headers:
-      X-Emby-Token: !secret jellyfin_tiny_api_key
+      # Jellyfin 12 dropped legacy X-Emby-Token / api_key auth; Authorization header required
+      Authorization: !secret jellyfin_tiny_auth_header
     scan_interval: 10
     sensor:
       - name: "Jellyfin Tiny Living Room State"
