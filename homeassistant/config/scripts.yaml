@@ -510,7 +510,9 @@ kitchen_up_light_apply:
     saturation, brightness 50% of AL, min 10%), drifting slowly through 3 related colors:
     the complement, +35 deg hue, -35 deg hue (18 min cycle, eased so it lingers on
     each; position is derived from the clock so every caller lands on the same point
-    of the cycle). The lightstrip (NOT on Kitchen - AL) gets a faint tint of the same
+    of the cycle), and slowly breathes +/-15% in brightness on a 7 min sine (out of
+    step with the color cycle, so the combination rarely repeats; sleep/dishes unaffected).
+    The lightstrip (NOT on Kitchen - AL) gets a faint tint of the same
     complement drifting the opposite way (mirror offset, ~45% of the up light saturation)
     at the AL brightness. Reads switch.al_kitchen, falling back to switch.al_garage
     (same 2000-5500K / 40-100% curve) when Kitchen AL is momentarily off. Dishes window
@@ -565,7 +567,9 @@ kitchen_up_light_apply:
         }}'
       strip_hs: '{{ [((complement_hs[0] - drift_offset) % 360) | round(1), (complement_hs[1]
         * 0.45) | round(1)] }}'
-      complement_bri: '{{ [(al_bri * 0.5) | round(0), 10] | max }}'
+      breathe: '{{ (1 + 0.15 * sin(2 * pi * (now().timestamp() % 420) / 420)) | round(3)
+        }}'
+      complement_bri: '{{ [(al_bri * 0.5 * breathe) | round(0), 10] | max }}'
       strip_bri: '{{ al_bri | round(0) }}'
       fade: '{{ transition | default(5) }}'
   - choose:
