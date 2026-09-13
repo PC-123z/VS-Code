@@ -712,7 +712,7 @@
                       "ev"
                     ],
                     "format": "uint8",
-                    "value": 0,
+                    "value": 1,
                     "description": "Occupancy Detected",
                     "minValue": 0,
                     "maxValue": 1,
@@ -761,7 +761,7 @@
                       "pr"
                     ],
                     "format": "int",
-                    "value": 19309,
+                    "value": 1546,
                     "unit": "seconds",
                     "minValue": -1,
                     "maxValue": 86400,
@@ -827,7 +827,7 @@
                       "pr"
                     ],
                     "format": "int",
-                    "value": 19309,
+                    "value": 367,
                     "unit": "seconds",
                     "minValue": -1,
                     "maxValue": 86400,
@@ -2026,7 +2026,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -64
+                    "value": -60
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
