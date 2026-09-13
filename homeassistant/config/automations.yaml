@@ -5907,7 +5907,7 @@
     - thu
     - fri
   - trigger: time
-    at: '10:30:00'
+    at: 09:30:00
     weekday:
     - sun
     - sat
@@ -6336,24 +6336,38 @@
               - delay:
                   seconds: 30
               else:
-              - alias: 'Ramp volume down over 2 minutes, abandoning the ramp the moment occupancy returns. This used to end with a bare stop action when occupancy came back, but stop ends the WHOLE automation run, not just the ramp - on 2026-09-13 it fired at 07:35:39, killing the occupancy loop and the 60-minute cap, so the album kept playing (MA Autoplay refilled the queue at 07:52) and bedroom2_occupied was left on with nothing to clear it.'
+              - alias: Ramp volume down over 2 minutes, abandoning the ramp the moment
+                  occupancy returns. This used to end with a bare stop action when
+                  occupancy came back, but stop ends the WHOLE automation run, not
+                  just the ramp - on 2026-09-13 it fired at 07:35:39, killing the
+                  occupancy loop and the 60-minute cap, so the album kept playing
+                  (MA Autoplay refilled the queue at 07:52) and bedroom2_occupied
+                  was left on with nothing to clear it.
                 repeat:
                   while:
                   - condition: template
-                    value_template: '{{ repeat.index <= 8 and not (is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy'', ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy'', ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'', ''on'')) }}'
+                    value_template: '{{ repeat.index <= 8 and not (is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy'',
+                      ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy'',
+                      ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'',
+                      ''on'')) }}'
                   sequence:
                   - action: media_player.volume_set
                     target:
                       entity_id: media_player.office_2
                     data:
-                      volume_level: '{{ [0.2 - (repeat.index * 0.0225), 0.02] | max | round(3) }}'
+                      volume_level: '{{ [0.2 - (repeat.index * 0.0225), 0.02] | max
+                        | round(3) }}'
                   - delay:
                       seconds: 15
               - if:
                 - condition: template
-                  value_template: '{{ (is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy'', ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy'', ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'', ''on'')) }}'
+                  value_template: '{{ (is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy'',
+                    ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy'',
+                    ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'',
+                    ''on'')) }}'
                 then:
-                - alias: Occupancy returned - restore volume and carry on round the occupancy loop
+                - alias: Occupancy returned - restore volume and carry on round the
+                    occupancy loop
                   action: media_player.volume_set
                   target:
                     entity_id: media_player.office_2
@@ -6366,7 +6380,8 @@
                 - action: input_boolean.turn_off
                   target:
                     entity_id: input_boolean.bedroom2_occupied
-                - alias: Hand lighting control back to Smart Presence now that the routine is done
+                - alias: Hand lighting control back to Smart Presence now that the
+                    routine is done
                   action: automation.turn_on
                   target:
                     entity_id: automation.office_bedroom_2_smart_motion_presence_2
@@ -9298,15 +9313,15 @@
         data:
           shuffle: false
       - alias: 'Autoplay OFF for the opener. radio_mode: false does NOT stop Music
-          Assistant''s queue Autoplay ("Don''t stop the music") - on 09-13 MA still logged
-          "Fetching similar tracks for queue Bedroom" 15s after queueing, pre-buffered
+          Assistant''s queue Autoplay ("Don''t stop the music") - on 09-13 MA still
+          logged "Fetching similar tracks for queue Bedroom" 15s after queueing, pre-buffered
           House Of The Rising Sun on the Sonos, and the speaker rolled gaplessly into
           it at 07:03:46; HA saw the change a second later and media_stop cut it off
           mid-bar right before the greeting. With Autoplay off the queue simply ends
           after the opener and the player goes idle cleanly. Turned back on only once
-          the phase 2 playlist is loaded (or on the bail-out/failed paths), never while
-          the queue is at its end, since re-enabling on a nearly-empty queue makes MA
-          refill it within 5s.'
+          the phase 2 playlist is loaded (or on the bail-out/failed paths), never
+          while the queue is at its end, since re-enabling on a nearly-empty queue
+          makes MA refill it within 5s.'
         continue_on_error: true
         action: rest_command.ma_bedroom_autoplay
         data:
@@ -9410,29 +9425,37 @@
                   }}'
         - variables:
             opener_wait_start: '{{ now().timestamp() }}'
-        - alias: 'Wait for the opening track to finish. MA''s announcement path reports
+        - alias: Wait for the opening track to finish. MA's announcement path reports
             the player idle for the whole greeting - on 2026-09-13 a motion greeting
-            landed at 07:44:29, 4s before the opener ended, the player flipped to idle,
-            the old bare idle check completed and the stop below cut the song under
-            the greeting. So idle only counts while no announcement is in progress,
+            landed at 07:44:29, 4s before the opener ended, the player flipped to
+            idle, the old bare idle check completed and the stop below cut the song
+            under the greeting. So idle only counts while no announcement is in progress,
             and it must still hold 3s later, because after a greeting MA takes a moment
-            to report the resumed track as playing again. The content_id check is a
-            fallback in case Autoplay could not be switched off. Capped at 6 minutes
-            overall.'
+            to report the resumed track as playing again. The content_id check is
+            a fallback in case Autoplay could not be switched off. Capped at 6 minutes
+            overall.
           repeat:
             sequence:
-            - wait_template: '{{ (is_state(''media_player.bedroom_2'', ''idle'') and is_state(''input_boolean.good_morning_announcement_pending'', ''off'')) or ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'', ''media_content_id'') or '''') }}'
+            - wait_template: '{{ (is_state(''media_player.bedroom_2'', ''idle'') and
+                is_state(''input_boolean.good_morning_announcement_pending'', ''off''))
+                or ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'',
+                ''media_content_id'') or '''') }}'
               timeout:
-                seconds: '{{ [360 - (now().timestamp() - opener_wait_start | float), 1] | max | int }}'
+                seconds: '{{ [360 - (now().timestamp() - opener_wait_start | float),
+                  1] | max | int }}'
               continue_on_timeout: true
             - delay:
                 seconds: 3
             until:
             - condition: template
-              value_template: '{{ (now().timestamp() - opener_wait_start | float) > 360 or (is_state(''media_player.bedroom_2'', ''idle'') and is_state(''input_boolean.good_morning_announcement_pending'', ''off'')) or ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'', ''media_content_id'') or '''') }}'
-        - alias: Safety-net stop. With Autoplay off the player is normally already idle
-            here because the opener simply ended, so this is a no-op - it only matters
-            if Autoplay could not be switched off and MA rolled into a filled track.
+              value_template: '{{ (now().timestamp() - opener_wait_start | float)
+                > 360 or (is_state(''media_player.bedroom_2'', ''idle'') and is_state(''input_boolean.good_morning_announcement_pending'',
+                ''off'')) or ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'',
+                ''media_content_id'') or '''') }}'
+        - alias: Safety-net stop. With Autoplay off the player is normally already
+            idle here because the opener simply ended, so this is a no-op - it only
+            matters if Autoplay could not be switched off and MA rolled into a filled
+            track.
           continue_on_error: true
           action: media_player.media_stop
           target:
@@ -9720,9 +9743,10 @@
         data:
           type: daily
         response_variable: today_fc
-      - alias: If the music branch is already speaking its end-of-opener greeting, let
-          it finish first so the two greetings never talk over each other
-        wait_template: '{{ is_state(''input_boolean.good_morning_announcement_pending'', ''off'') }}'
+      - alias: If the music branch is already speaking its end-of-opener greeting,
+          let it finish first so the two greetings never talk over each other
+        wait_template: '{{ is_state(''input_boolean.good_morning_announcement_pending'',
+          ''off'') }}'
         timeout:
           seconds: 60
         continue_on_timeout: true
@@ -9760,10 +9784,10 @@
         target:
           entity_id: counter.good_morning_announcements
       - alias: Short settle before releasing the flag. tts.speak through MA blocks
-          until the greeting has finished playing (16-18s calls on 2026-09-13), so no
-          length-sized hold is needed - just a few seconds for MA to report the resumed
-          track as playing again, so the music branch's opener-finished wait does not
-          mistake the announcement's idle for the end of the song.
+          until the greeting has finished playing (16-18s calls on 2026-09-13), so
+          no length-sized hold is needed - just a few seconds for MA to report the
+          resumed track as playing again, so the music branch's opener-finished wait
+          does not mistake the announcement's idle for the end of the song.
         delay:
           seconds: 4
       - action: input_boolean.turn_off
@@ -10522,9 +10546,9 @@
     - if:
       - condition: template
         value_template: '{{ is_state(''input_boolean.good_morning_active'', ''off'')
-          or (state_attr(''automation.good_morning_routine_3'', ''current'') or 0) >
-          0 or (state_attr(''automation.good_morning_routine'', ''current'') or 0) >
-          0 }}'
+          or (state_attr(''automation.good_morning_routine_3'', ''current'') or 0)
+          > 0 or (state_attr(''automation.good_morning_routine'', ''current'') or
+          0) > 0 }}'
       then:
       - stop: Flag cleared or wake routine actively running - nothing to clean up
   - continue_on_error: true
