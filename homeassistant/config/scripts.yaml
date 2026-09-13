@@ -253,8 +253,7 @@ goodbye_routine_main:
 goodbye_routine_motion_tracking:
   alias: Goodbye Routine - Motion Tracking
   description: Decides home vs empty. First allows up to 5 min for Paul's own exit
-    motion (and the Big Bedroom ecobee sensor's 4-9 min occupancy hold) to clear,
-    then runs 5 consecutive 2-minute checks. Motion at any point during the checks
+    motion to clear, then runs 5 consecutive 2-minute checks. Motion at any point during the checks
     = someone is home. Returns {someone_home, detected}.
   sequence:
   - alias: Settle - let departure motion clear (still-on after 5 min fails check 1)
