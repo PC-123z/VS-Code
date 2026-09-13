@@ -8407,26 +8407,30 @@
     requiring both - the two are order-independent, because the Ring sensor can report
     open a few seconds before the beacon latch lands (the garage physically opens
     first). Requiring the sensor as a condition means it is still a hard gate either
-    way: the routine can never run with the door closed.'
+    way: the routine can never run with the door closed. Changed 2026-09-13: the Ring
+    garage door sensor opening is now the ONLY trigger (the pending-flag trigger was
+    removed, it caused a duplicate queued run on 9/13 when STAGE 1 re-set pending
+    at the same moment the door opened, replaying the album). The door-first race
+    is handled by waiting up to 60s for the pending flag inside the run instead. Mode
+    single instead of queued.'
   triggers:
   - alias: Ring garage door sensor reports open
     trigger: state
     entity_id: binary_sensor.garage_door
     to: 'on'
-  - alias: Pending flag armed (in case the door was already open when STAGE 1 finished)
-    trigger: state
-    entity_id: input_boolean.welcome_home_pending
-    to: 'on'
-  conditions:
-  - alias: STAGE 1 must have confirmed arrival
-    condition: state
-    entity_id: input_boolean.welcome_home_pending
-    state: 'on'
-  - alias: Ring garage door sensor must be open - the final piece of the puzzle
+  conditions: []
+  actions:
+  - alias: Garage door is the only trigger - give STAGE 1's arrival flag up to 60s
+      to land (the Ring sensor can report open a few seconds before the beacon latch);
+      if it never does, this was not a confirmed arrival and nothing runs
+    wait_template: '{{ is_state(''input_boolean.welcome_home_pending'',''on'') }}'
+    timeout:
+      seconds: 60
+    continue_on_timeout: false
+  - alias: Garage door must still be open - hard gate
     condition: state
     entity_id: binary_sensor.garage_door
     state: 'on'
-  actions:
   - alias: Clear the pending flag so this only runs once per arrival
     action: input_boolean.turn_off
     target:
@@ -8582,8 +8586,8 @@
               data:
                 shuffle: true
       continue_on_error: true
-  mode: queued
-  max: 4
+  mode: single
+  max_exceeded: silent
 - id: '1777484175033'
   alias: Arrival Latch - Set on Phone/Beacon Arrival
   description: Sets the arrival latch when any early arrival signal fires (phone geofence,
