@@ -503,18 +503,22 @@ funtime_play_playlist:
   icon: mdi:playlist-music
 kitchen_up_light_apply:
   alias: 'Kitchen - Up Light: Apply Mode Color'
-  description: 'Sets the Datura up light (light.hue_datura_top_1) for the current
-    kitchen mode. Normal: the complementary color of the white Adaptive Lighting is
-    giving the rest of the kitchen (warm white -> twilight indigo/blue, neutral ->
-    blush rose, cool daylight -> peach/amber; soft saturation, brightness 50% of AL,
-    min 10%), drifting slowly through 3 related colors: the complement, +35 deg hue,
-    -35 deg hue (18 min cycle, eased so it lingers on each; position is derived from
-    the clock so every caller lands on the same point of the cycle). Reads switch.al_kitchen, falling back to switch.al_garage (same 2000-5500K
-    / 40-100% curve) when Kitchen AL is momentarily off. Dishes window 23:45-23:55:
-    dim indigo 15%. Sleep mode: "Ember" deep amber-red 35% (up light is the prominent
-    night light; Kitchen - Down drops to 5% red in the Smart Motion automation). Turns
-    the light on - callers decide whether it should be on. Skips while kitchen manual
-    override is on.'
+  description: 'Sets the Datura up light (light.hue_datura_top_1) and the Kitchen
+    Lightstrip for the current kitchen mode. Normal: the up light gets the complementary
+    color of the white Adaptive Lighting is giving the rest of the kitchen (warm white
+    -> twilight indigo/blue, neutral -> blush rose, cool daylight -> peach/amber; soft
+    saturation, brightness 50% of AL, min 10%), drifting slowly through 3 related colors:
+    the complement, +35 deg hue, -35 deg hue (18 min cycle, eased so it lingers on
+    each; position is derived from the clock so every caller lands on the same point
+    of the cycle). The lightstrip (NOT on Kitchen - AL) gets a faint tint of the same
+    complement drifting the opposite way (mirror offset, ~45% of the up light saturation)
+    at the AL brightness. Reads switch.al_kitchen, falling back to switch.al_garage
+    (same 2000-5500K / 40-100% curve) when Kitchen AL is momentarily off. Dishes window
+    23:45-23:55: up dim indigo 15%, strip 2200K 60%. Sleep mode: up "Ember" deep amber-red
+    35% (the prominent night light; Kitchen - Down drops to 5% red in the Smart Motion
+    automation), strip red 24%. Turns the up light on - callers decide whether it should
+    be on. The strip is only touched if it is already on or turn_on_strip is true.
+    Skips while kitchen manual override is on.'
   icon: mdi:ceiling-light-multiple
   mode: restart
   fields:
@@ -526,6 +530,12 @@ kitchen_up_light_apply:
         number:
           min: 0
           max: 300
+    turn_on_strip:
+      name: Turn on lightstrip
+      description: Set the lightstrip even if it is currently off
+      default: false
+      selector:
+        boolean: {}
   sequence:
   - condition: state
     entity_id: input_boolean.kitchen_manual_override
@@ -533,6 +543,8 @@ kitchen_up_light_apply:
   - variables:
       sleep_mode: '{{ is_state(''switch.al_sleep_mode_kitchen'', ''on'') }}'
       dishes_window: '{{ today_at(''23:45'') <= now() < today_at(''23:55'') }}'
+      strip_on: '{{ turn_on_strip | default(false) | bool or is_state(''light.kitchen_lightstrip'',
+        ''on'') }}'
       al_source: '{{ ''switch.al_kitchen'' if state_attr(''switch.al_kitchen'', ''color_temp_kelvin'')
         is number else ''switch.al_garage'' }}'
       al_ct: '{{ state_attr(al_source, ''color_temp_kelvin'') | float(2700) }}'
@@ -545,12 +557,16 @@ kitchen_up_light_apply:
         ns.h = a[1] + (b[1] - a[1]) * f %}{% set ns.s = a[2] + (b[2] - a[2]) * f %}\n
         \ {% endif %}\n{% endfor %}\n{{ [(ns.h % 360) | round(1), ns.s | round(1)]
         }}"
-      drift_hs: "{% set base = complement_hs %}\n{% set offs = [0, 35, -35] %}\n{%
-        set cycle = 1080 %}\n{% set p = (now().timestamp() % cycle) / cycle * 3 %}\n{%
-        set i = p | int %}\n{% set f = p - i %}\n{% set e = (1 - cos(pi * f)) / 2
-        %}\n{% set a = offs[i] %}{% set b = offs[(i + 1) % 3] %}\n{% set h = base[0]
-        + a + (b - a) * e %}\n{{ [(h % 360) | round(1), base[1]] }}"
+      drift_offset: "{% set offs = [0, 35, -35] %}\n{% set cycle = 1080 %}\n{% set
+        p = (now().timestamp() % cycle) / cycle * 3 %}\n{% set i = p | int %}\n{% set
+        f = p - i %}\n{% set e = (1 - cos(pi * f)) / 2 %}\n{% set a = offs[i] %}{%
+        set b = offs[(i + 1) % 3] %}\n{{ (a + (b - a) * e) | round(1) }}"
+      drift_hs: '{{ [((complement_hs[0] + drift_offset) % 360) | round(1), complement_hs[1]]
+        }}'
+      strip_hs: '{{ [((complement_hs[0] - drift_offset) % 360) | round(1), (complement_hs[1]
+        * 0.45) | round(1)] }}'
       complement_bri: '{{ [(al_bri * 0.5) | round(0), 10] | max }}'
+      strip_bri: '{{ al_bri | round(0) }}'
       fade: '{{ transition | default(5) }}'
   - choose:
     - alias: Dishes window - dim indigo
@@ -567,6 +583,17 @@ kitchen_up_light_apply:
           - 75
           brightness_pct: 15
           transition: '{{ fade }}'
+      - if:
+        - condition: template
+          value_template: '{{ strip_on }}'
+        then:
+        - action: light.turn_on
+          target:
+            entity_id: light.kitchen_lightstrip
+          data:
+            color_temp_kelvin: 2200
+            brightness_pct: 60
+            transition: '{{ fade }}'
     - alias: Sleep mode - Ember
       conditions:
       - condition: template
@@ -581,6 +608,20 @@ kitchen_up_light_apply:
           - 100
           brightness_pct: 35
           transition: '{{ fade }}'
+      - if:
+        - condition: template
+          value_template: '{{ strip_on }}'
+        then:
+        - action: light.turn_on
+          target:
+            entity_id: light.kitchen_lightstrip
+          data:
+            rgb_color:
+            - 255
+            - 20
+            - 0
+            brightness_pct: 24
+            transition: '{{ fade }}'
     default:
     - alias: Complement of the AL white, drifting through 3 colors
       action: light.turn_on
@@ -590,3 +631,15 @@ kitchen_up_light_apply:
         hs_color: '{{ drift_hs }}'
         brightness_pct: '{{ complement_bri }}'
         transition: '{{ fade }}'
+    - alias: Lightstrip - faint tint drifting the opposite way
+      if:
+      - condition: template
+        value_template: '{{ strip_on }}'
+      then:
+      - action: light.turn_on
+        target:
+          entity_id: light.kitchen_lightstrip
+        data:
+          hs_color: '{{ strip_hs }}'
+          brightness_pct: '{{ strip_bri }}'
+          transition: '{{ fade }}'

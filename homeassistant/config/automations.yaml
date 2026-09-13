@@ -1254,7 +1254,8 @@
   alias: 'Kitchen: Smart Motion & Presence (Split Color/White)'
   description: 'Hue sensors trigger lights on immediately. All kitchen fixtures are
     Hue: 3 color lights (1 Color, 2 Color, Lightstrip) plus the Datura. Kitchen -
-    Down is on Kitchen - AL with the 3 color lights; Kitchen - Up is NOT on AL - script.kitchen_up_light_apply
+    Down is on Kitchen - AL with 1 Color and 2 Color; the Lightstrip is NOT on AL - the
+    same script gives it a faint drifting complement tint (turn_on_strip: true); Kitchen - Up is NOT on AL - script.kitchen_up_light_apply
     gives it the complementary color of the AL white (dishes: dim indigo; sleep: Ember
     35% while Down drops to 5% red), and ''Kitchen: Up Light Follows Adaptive Lighting''
     keeps it in step (the old Lutron ''Kitchen Main'' dimmer moved to the garage 2026-09-12
@@ -1304,7 +1305,7 @@
       | default([], true) %}
 
       {{ is_state(''switch.al_kitchen'', ''on'') and (mc | select(''in'', [''light.kitchen_1_color'',
-      ''light.kitchen_2_color'', ''light.kitchen_lightstrip'', ''light.hue_datura_bottom_1''])
+      ''light.kitchen_2_color'', ''light.hue_datura_bottom_1''])
       | list | count > 0) }}
 
       '
@@ -1319,7 +1320,7 @@
           | default([], true) %}
 
           {{ is_state(''switch.al_kitchen'', ''on'') and (mc | select(''in'', [''light.kitchen_1_color'',
-          ''light.kitchen_2_color'', ''light.kitchen_lightstrip'', ''light.hue_datura_bottom_1''])
+          ''light.kitchen_2_color'', ''light.hue_datura_bottom_1''])
           | list | count > 0) }}
 
           '
@@ -1334,7 +1335,7 @@
           | default([], true) %}
 
           {{ is_state(''switch.al_kitchen'', ''on'') and (mc | select(''in'', [''light.kitchen_1_color'',
-          ''light.kitchen_2_color'', ''light.kitchen_lightstrip'', ''light.hue_datura_bottom_1''])
+          ''light.kitchen_2_color'', ''light.hue_datura_bottom_1''])
           | list | count > 0) }}
 
           '
@@ -1381,6 +1382,7 @@
               / sleep Ember)'
             action: script.kitchen_up_light_apply
             data:
+              turn_on_strip: true
               transition: 5
         default:
         - action: light.turn_on
@@ -1411,6 +1413,7 @@
             / sleep Ember)'
           action: script.kitchen_up_light_apply
           data:
+            turn_on_strip: true
             transition: 30
     - conditions:
       - condition: trigger
@@ -1445,6 +1448,7 @@
               / sleep Ember)'
             action: script.kitchen_up_light_apply
             data:
+              turn_on_strip: true
               transition: 2
         - conditions:
           - condition: or
@@ -1485,6 +1489,7 @@
               / sleep Ember)'
             action: script.kitchen_up_light_apply
             data:
+              turn_on_strip: true
               transition: 5
         - conditions:
           - condition: state
@@ -1501,7 +1506,6 @@
               entity_id:
               - light.kitchen_1_color
               - light.kitchen_2_color
-              - light.kitchen_lightstrip
               - light.hue_datura_bottom_1
             data:
               transition: 2
@@ -1509,6 +1513,7 @@
               / sleep Ember)'
             action: script.kitchen_up_light_apply
             data:
+              turn_on_strip: true
               transition: 2
           - action: switch.turn_on
             target:
@@ -1520,7 +1525,6 @@
               lights:
               - light.kitchen_1_color
               - light.kitchen_2_color
-              - light.kitchen_lightstrip
               - light.hue_datura_bottom_1
               transition: 2
               adapt_color: true
@@ -1542,7 +1546,6 @@
               entity_id:
               - light.kitchen_1_color
               - light.kitchen_2_color
-              - light.kitchen_lightstrip
               - light.hue_datura_bottom_1
             data:
               transition: 2
@@ -1550,6 +1553,7 @@
               / sleep Ember)'
             action: script.kitchen_up_light_apply
             data:
+              turn_on_strip: true
               transition: 2
           - action: switch.turn_on
             target:
@@ -1561,7 +1565,6 @@
               lights:
               - light.kitchen_1_color
               - light.kitchen_2_color
-              - light.kitchen_lightstrip
               - light.hue_datura_bottom_1
               transition: 2
               adapt_color: true
@@ -1576,7 +1579,6 @@
             entity_id:
             - light.kitchen_1_color
             - light.kitchen_2_color
-            - light.kitchen_lightstrip
             - light.hue_datura_bottom_1
           data:
             brightness_pct: 40
@@ -1585,6 +1587,7 @@
             / sleep Ember)'
           action: script.kitchen_up_light_apply
           data:
+            turn_on_strip: true
             transition: 2
         - action: switch.turn_on
           target:
@@ -1596,7 +1599,6 @@
             lights:
             - light.kitchen_1_color
             - light.kitchen_2_color
-            - light.kitchen_lightstrip
             - light.hue_datura_bottom_1
             transition: 10
             adapt_color: true
@@ -1759,7 +1761,6 @@
           lights:
           - light.kitchen_1_color
           - light.kitchen_2_color
-          - light.kitchen_lightstrip
           - light.hue_datura_bottom_1
           transition: 150
           adapt_color: true
@@ -1853,7 +1854,6 @@
           lights:
           - light.kitchen_1_color
           - light.kitchen_2_color
-          - light.kitchen_lightstrip
           - light.hue_datura_bottom_1
           transition: 30
           adapt_color: true
