@@ -3114,7 +3114,11 @@
       seconds: 0
     id: override_cleared
   variables:
-    tv_playing: '{{ integration_entities(''jellyfin'') | select(''match'', ''^media_player\.'') | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'', ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''media_player.living_room_tv_3'', ''playing'') or is_state(''media_player.living_room'', ''playing'') }}'
+    tv_playing: '{{ integration_entities(''jellyfin'') | select(''match'', ''^media_player\.'')
+      | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'',
+      ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
+      ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''media_player.living_room_tv_3'',
+      ''playing'') or is_state(''media_player.living_room'', ''playing'') }}'
   actions:
   - choose:
     - conditions:
@@ -7617,8 +7621,8 @@
   alias: Departure - Volvo Cable Disconnect in Departure Window
   description: When the Volvo cable is disconnected during the departure window and
     Paul or the car then leaves, start the goodbye routine (which decides Stay vs
-    Away). Overlaps with AUTO AWAY on normal garage departures; the routine is
-    single-mode so only one run happens.
+    Away). Overlaps with AUTO AWAY on normal garage departures; the routine is single-mode
+    so only one run happens.
   triggers:
   - trigger: state
     entity_id: sensor.volvo_xc60_charging_connection_status
@@ -7641,8 +7645,8 @@
     timeout:
       minutes: 15
     continue_on_timeout: false
-  - alias: Hand off to the goodbye routine - it decides Stay vs Away (single-mode, so
-      a duplicate start from the other departure automation is ignored)
+  - alias: Hand off to the goodbye routine - it decides Stay vs Away (single-mode,
+      so a duplicate start from the other departure automation is ignored)
     action: script.turn_on
     target:
       entity_id: script.goodbye_routine_main
@@ -8237,21 +8241,21 @@
     - condition: template
       value_template: '{{ trigger.id != ''webhook'' }}'
     then:
-      - alias: Wait for Paul or car to be detected away
-        wait_for_trigger:
-        - trigger: state
-          entity_id: person.paul
-          to: not_home
-        - trigger: state
-          entity_id: device_tracker.bcpro_204982_08b8
-          to:
-          - not_home
-          - unavailable
-        timeout:
-          minutes: 15
-        continue_on_timeout: false
-  - alias: Hand off to the goodbye routine - it decides Stay vs Away (single-mode, so
-      a duplicate start from the other departure automation is ignored)
+    - alias: Wait for Paul or car to be detected away
+      wait_for_trigger:
+      - trigger: state
+        entity_id: person.paul
+        to: not_home
+      - trigger: state
+        entity_id: device_tracker.bcpro_204982_08b8
+        to:
+        - not_home
+        - unavailable
+      timeout:
+        minutes: 15
+      continue_on_timeout: false
+  - alias: Hand off to the goodbye routine - it decides Stay vs Away (single-mode,
+      so a duplicate start from the other departure automation is ignored)
     action: script.turn_on
     target:
       entity_id: script.goodbye_routine_main
@@ -9102,7 +9106,7 @@
     - thu
     - fri
   - trigger: time
-    at: 09:40:00
+    at: 07:00:00
     weekday:
     - sat
     - sun
