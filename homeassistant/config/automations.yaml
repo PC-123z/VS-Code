@@ -11859,3 +11859,87 @@
         entity_id: input_boolean.welcome_home_active
   mode: single
   max_exceeded: silent
+- id: '1789400000099'
+  alias: TEST - Welcome Home stop after 1 min (temporary)
+  description: Temporary test copy - delete after test.
+  triggers:
+  - trigger: event
+    event_type: wh_stop_test_never_fires
+  conditions: []
+  actions:
+  - alias: Let the music play for 9:40, unless the session ends first
+    wait_for_trigger:
+    - trigger: event
+      event_type: wh_stop_test_never_fires
+    timeout:
+      seconds: 50
+    continue_on_timeout: true
+  - alias: Only fade/stop our own Welcome Home music that is still playing
+    if:
+    - condition: template
+      value_template: '{{ wait.trigger is none }}'
+    - condition: state
+      entity_id: media_player.kitchen_2
+      state: playing
+    - alias: Still Music Assistant's queue, not a Spotify/Alexa takeover
+      condition: template
+      value_template: '{{ is_state_attr(''media_player.kitchen_2'',''app_id'',''music_assistant'')
+        }}'
+    then:
+    - alias: Capture every speaker in the kitchen group and its current volume
+      variables:
+        fade_targets: '{% set ns = namespace(l=[]) %}{% for m in (state_attr(''media_player.kitchen_2'',''group_members'')
+          or [''media_player.kitchen_2'']) %}{% set ns.l = ns.l + [{''entity'': m,
+          ''vol'': (state_attr(m,''volume_level'') | float(0))}] %}{% endfor %}{{
+          ns.l }}'
+    - alias: Fade all speakers to 0 over 20 seconds (10 steps x 2s)
+      repeat:
+        count: 5
+        sequence:
+        - variables:
+            step: '{{ repeat.index }}'
+        - repeat:
+            for_each: '{{ fade_targets }}'
+            sequence:
+            - continue_on_error: true
+              action: media_player.volume_set
+              target:
+                entity_id: '{{ repeat.item.entity }}'
+              data:
+                volume_level: '{{ [0, (repeat.item.vol * (1 - step / 5))] | max |
+                  round(3) }}'
+        - delay:
+            seconds: 2
+    - alias: Stop the music (stop, not pause)
+      continue_on_error: true
+      action: media_player.media_stop
+      target:
+        entity_id: media_player.kitchen_2
+    - alias: Cancel bathroom's own idle timer so it doesn't separately fade/unjoin
+      continue_on_error: true
+      action: timer.cancel
+      target:
+        entity_id: timer.bathroom_join_idle
+    - alias: Unjoin the satellite rooms from the kitchen group
+      repeat:
+        for_each: '{{ fade_targets | map(attribute=''entity'') | reject(''eq'',''media_player.kitchen_2'')
+          | list }}'
+        sequence:
+        - continue_on_error: true
+          action: media_player.unjoin
+          target:
+            entity_id: '{{ repeat.item }}'
+    - delay:
+        seconds: 2
+    - alias: Restore each speaker's pre-fade volume so nothing is left at 0 next time
+      repeat:
+        for_each: '{{ fade_targets }}'
+        sequence:
+        - continue_on_error: true
+          action: media_player.volume_set
+          target:
+            entity_id: '{{ repeat.item.entity }}'
+          data:
+            volume_level: '{{ repeat.item.vol }}'
+  mode: single
+  max_exceeded: silent
