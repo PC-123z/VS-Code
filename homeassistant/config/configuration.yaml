@@ -210,6 +210,21 @@ rest:
             off
           {% endif %}
 
+# Music Assistant JSON-RPC API. The HA integration exposes no service for the
+# queue's Autoplay ("Don't stop the music") toggle, which the Good Morning routine
+# must switch off while its single opening track plays - otherwise MA appends a
+# similar track and the Sonos rolls gaplessly into it before HA can react.
+rest_command:
+  ma_bedroom_autoplay:
+    url: http://192.168.70.155:8095/api
+    method: POST
+    headers:
+      Authorization: !secret music_assistant_api_bearer
+    content_type: application/json
+    payload: >-
+      {"command": "player_queues/autoplay", "args": {"queue_id": "RINCON_48A6B80529D101400",
+      "autoplay_enabled": {{ 'true' if enabled | bool else 'false' }}}}
+
 # The Emulated Hue Bridge
 emulated_hue:
   host_ip: 192.168.70.155

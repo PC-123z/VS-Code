@@ -9304,16 +9304,26 @@
           entity_id: media_player.bedroom_2
         data:
           shuffle: false
+      - alias: 'Autoplay OFF for the opener. radio_mode: false does NOT stop Music
+          Assistant''s queue Autoplay ("Don''t stop the music") - on 09-13 MA still logged
+          "Fetching similar tracks for queue Bedroom" 15s after queueing, pre-buffered
+          House Of The Rising Sun on the Sonos, and the speaker rolled gaplessly into
+          it at 07:03:46; HA saw the change a second later and media_stop cut it off
+          mid-bar right before the greeting. With Autoplay off the queue simply ends
+          after the opener and the player goes idle cleanly. Turned back on only once
+          the phase 2 playlist is loaded (or on the bail-out/failed paths), never while
+          the queue is at its end, since re-enabling on a nearly-empty queue makes MA
+          refill it within 5s.'
+        continue_on_error: true
+        action: rest_command.ma_bedroom_autoplay
+        data:
+          enabled: false
       - delay:
           seconds: 2
-      - alias: 'Queue ONLY the opening track, radio_mode off. A single-item queue
-          gives Music Assistant no next item to pre-buffer (see history below), but
-          leaving radio_mode unset let MA auto-fill ''similar tracks'' right after
-          queueing (09-12 morning: fetched similar tracks 4s after queueing, then
-          played 2 of them before the 6-min opener-finished wait timed out and forced
-          Phase 2 late). radio_mode: false stops that auto-fill so only the opener
-          plays. Nothing is pre-buffered here, so there is nothing to mismatch with
-          Phase 2''s shuffled playlist.'
+      - alias: 'Queue ONLY the opening track. With Autoplay off (previous step) the
+          queue holds nothing after it, so there is no next track for the Sonos to
+          pre-buffer or roll into. radio_mode: false is kept, but on its own it does
+          not stop the similar-tracks fill.'
         continue_on_error: true
         action: music_assistant.play_media
         target:
@@ -9385,6 +9395,12 @@
           action: input_boolean.turn_off
           target:
             entity_id: input_boolean.good_morning_expected_pause
+        - alias: Restore Autoplay - the opener never started, and the occupancy loop's
+            self-heal re-queues the playlist anyway
+          continue_on_error: true
+          action: rest_command.ma_bedroom_autoplay
+          data:
+            enabled: true
         else:
         - alias: Ramp volume from 0.05 to 0.15 over ~2.5 minutes (8 steps of 18s).
             The announcements branch waits for this to reach 0.15 before speaking.
@@ -9410,10 +9426,9 @@
           timeout:
             minutes: 6
           continue_on_timeout: true
-        - alias: Stop playback immediately. Whatever is playing at this point - the
-            opener''s genuine tail, or MA''s auto-filled stand-in track - gets killed
-            right here, so there is nothing left to overlap or duck. The second announcement
-            below then plays into silence, not over another song.
+        - alias: Safety-net stop. With Autoplay off the player is normally already idle
+            here because the opener simply ended, so this is a no-op - it only matters
+            if Autoplay could not be switched off and MA rolled into a filled track.
           continue_on_error: true
           action: media_player.media_stop
           target:
@@ -9430,6 +9445,16 @@
           - action: input_boolean.turn_off
             target:
               entity_id: input_boolean.good_morning_expected_pause
+          - alias: Clear the ended queue before restoring Autoplay, so MA has nothing
+              to refill from and cannot restart music after a cancel
+            continue_on_error: true
+            action: media_player.clear_playlist
+            target:
+              entity_id: media_player.bedroom_2
+          - continue_on_error: true
+            action: rest_command.ma_bedroom_autoplay
+            data:
+              enabled: true
           - stop: Routine was cancelled during the opening track
           else:
           - alias: Second announcement, only if the motion-triggered greeting hasn't
@@ -9488,6 +9513,12 @@
               media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
               media_type: playlist
               enqueue: replace
+          - alias: Autoplay back on now that the queue holds the full playlist - nothing
+              is near the end, so this triggers no refill
+            continue_on_error: true
+            action: rest_command.ma_bedroom_autoplay
+            data:
+              enabled: true
           - alias: 'Repeat back on. Deliberately set AFTER the playlist loads rather
               than before: it only matters once all 770 tracks have played, so it
               needs no settling time.'
