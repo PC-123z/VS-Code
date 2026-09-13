@@ -307,11 +307,6 @@
           - alias: Wait 40 seconds before insistent announcement
             delay:
               seconds: 40
-          - alias: Pause music for escalation TTS
-            action: media_player.media_pause
-            target:
-              entity_id: media_player.bedroom_2
-            data: {}
           - alias: Escalation TTS - alarm time, current time, please wake up
             action: tts.speak
             target:
@@ -324,13 +319,6 @@
                 up.
 
                 '
-          - alias: Short pause for TTS to finish
-            delay:
-              seconds: 2
-          - alias: Resume music
-            action: media_player.media_play
-            target:
-              entity_id: media_player.bedroom_2
           - alias: Boost music to 0.45
             action: media_player.volume_set
             target:
@@ -369,10 +357,6 @@
           else:
           - alias: Motion detected within 5 min - regular friendly announcement
             sequence:
-            - alias: Pause music for announcement
-              action: media_player.media_pause
-              target:
-                entity_id: media_player.bedroom_2
             - alias: TTS wake up announcement
               action: tts.speak
               target:
@@ -386,13 +370,6 @@
                   ''temperature'') }} degrees. Have a great evening!
 
                   '
-            - alias: Short pause for TTS to finish then resume
-              delay:
-                seconds: 2
-            - alias: Resume music
-              action: media_player.media_play
-              target:
-                entity_id: media_player.bedroom_2
         - alias: Occupancy-driven music loop using Sensor Group
           repeat:
             while:
@@ -6648,6 +6625,14 @@
     - condition: template
       value_template: '{{ not already_joined }}'
     then:
+    - variables:
+        pause_flag_was_on: '{{ is_state(''input_boolean.good_morning_expected_pause'',''on'')
+          }}'
+    - alias: Arm expected-pause flag - joining can briefly idle the Bedroom group,
+        which the stop-on-idle watchdog would treat as a manual stop
+      action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.good_morning_expected_pause
     - alias: Set kitchen volume low before joining to avoid blast
       action: media_player.volume_set
       target:
@@ -6661,6 +6646,24 @@
       data:
         group_members:
         - media_player.kitchen
+    - alias: Wait for Bedroom to be playing again after the join
+      wait_template: '{{ is_state(''media_player.bedroom_2'',''playing'') and is_state(''media_player.bedroom'',''playing'')
+        }}'
+      timeout:
+        seconds: 30
+      continue_on_timeout: true
+    - alias: Settle a few seconds so a late idle blip is still covered
+      delay:
+        seconds: 5
+    - alias: Disarm expected-pause flag only if this automation armed it (the main
+        Good Morning routine may hold it on for its own window)
+      if:
+      - condition: template
+        value_template: '{{ not pause_flag_was_on }}'
+      then:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.good_morning_expected_pause
     - alias: Ramp kitchen volume up to 0.15
       repeat:
         count: 5
