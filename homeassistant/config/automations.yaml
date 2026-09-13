@@ -11713,7 +11713,9 @@
   alias: 'Kitchen: Up Light Follows Adaptive Lighting'
   description: Whenever Kitchen - AL changes its target white or brightness (about
     every 90s as the sun moves), re-apply the complementary color to the Datura up
-    light via script.kitchen_up_light_apply. Only while Kitchen - AL is on, the up
+    light via script.kitchen_up_light_apply. Also ticks every minute (60s fade,
+    skipped in sleep mode / dishes window) so the color glides through its 3-color
+    drift cycle. Only while Kitchen - AL is on, the up
     light is on, and no manual override - sleep/dishes/transitional paths are driven
     explicitly by Kitchen Smart Motion.
   triggers:
@@ -11723,10 +11725,17 @@
   - trigger: state
     entity_id: switch.al_kitchen
     attribute: brightness_pct
+  - trigger: time_pattern
+    minutes: /1
+    id: drift
   conditions:
   - condition: state
     entity_id: switch.al_kitchen
     state: 'on'
+  - alias: Drift ticks only outside sleep mode and the dishes window
+    condition: template
+    value_template: '{{ trigger.id != ''drift'' or (is_state(''switch.al_sleep_mode_kitchen'',
+      ''off'') and not (today_at(''23:45'') <= now() < today_at(''23:55''))) }}'
   - condition: state
     entity_id: light.hue_datura_top_1
     state: 'on'
@@ -11736,5 +11745,5 @@
   actions:
   - action: script.kitchen_up_light_apply
     data:
-      transition: 10
+      transition: '{{ 60 if trigger.id == ''drift'' else 10 }}'
   mode: restart
