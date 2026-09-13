@@ -8327,7 +8327,14 @@
     the two-factor check waited forever even though the beacon confirmed arrival and
     the security panel''s own entry sensor tripped (went to "pending"). Now the panel''s
     own pending/entry-delay state also satisfies the garage half of the check, as
-    a fallback for when the smart garage integration desyncs.'
+    a fallback for when the smart garage integration desyncs. SECURITY FIX 2026-09-13
+    (user request): REMOVED the alarm_control_panel pending/entry-delay trigger that
+    stood in for the garage-open factor (added 2026-08-13). The panel going to entry
+    delay can be caused by anyone opening any door, so it must never count toward
+    arrival. Factors are now only things only Paul has: the garage cover opening,
+    plus an arrival signal (car BT beacon, Paul''s iPhone HA app/geofence, or his
+    iOS Shortcut webhook). If the garage cover ever misses reporting open again, disarm
+    manually rather than re-adding a panel-based fallback.'
   triggers:
   - id: garage
     trigger: state
@@ -8338,10 +8345,6 @@
     trigger: state
     entity_id: input_boolean.arrival_recent
     to: 'on'
-  - id: entry_delay
-    trigger: state
-    entity_id: alarm_control_panel.3302_alarm
-    to: pending
   conditions:
   - alias: Alarm must be armed (confirms we departed, not just opening garage at home)
     condition: or
@@ -8359,12 +8362,11 @@
   - alias: Latch this signal; only fall through to disarm if the OTHER signal already
       fired
     choose:
-    - alias: Garage opened (or panel's own entry-delay fired, in case the smart garage
-        entity missed reporting open) - if no arrival signal has confirmed yet, latch
-        and wait
+    - alias: Garage cover opened - if no arrival signal has confirmed yet, latch and
+        wait
       conditions:
       - condition: template
-        value_template: '{{ trigger.id in ["garage", "entry_delay"] and is_state("input_boolean.arrival_recent",
+        value_template: '{{ trigger.id == "garage" and is_state("input_boolean.arrival_recent",
           "off") }}'
       sequence:
       - alias: Set the garage-open latch
