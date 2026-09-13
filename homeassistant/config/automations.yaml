@@ -68,10 +68,10 @@
     grace. 60-minute hard cap from routine start.'
   triggers:
   - trigger: time
-    at: '17:30:00'
+    at: '15:30:00'
     weekday:
-    - sat
-    enabled: false
+    - sun
+    enabled: true
   - trigger: time
     at: '16:58:00'
     enabled: false
@@ -1254,19 +1254,20 @@
   alias: 'Kitchen: Smart Motion & Presence (Split Color/White)'
   description: 'Hue sensors trigger lights on immediately. All kitchen fixtures are
     Hue: 3 color lights (1 Color, 2 Color, Lightstrip) plus the Datura. Kitchen -
-    Down is on Kitchen - AL with 1 Color and 2 Color; the Lightstrip is NOT on AL - the
-    same script gives it a faint drifting complement tint (turn_on_strip: true); Kitchen - Up is NOT on AL - script.kitchen_up_light_apply
-    gives it the complementary color of the AL white (dishes: dim indigo; sleep: Ember
-    35% while Down drops to 5% red), and ''Kitchen: Up Light Follows Adaptive Lighting''
-    keeps it in step (the old Lutron ''Kitchen Main'' dimmer moved to the garage 2026-09-12
-    and its Pico to the bathroom, so neither is referenced here). Frigate confirmed
-    presence (3 min debounce) blocks shutoff while someone is sitting still. Sleep
-    mode overrides AL. Manual override flag auto-clears 60s after the room clears
-    (kitchen_cleared); lights fade off at 3:30. Late-night dishes mode (23:45-23:55)
-    keeps lights warm/usable when motion is active, right as kitchen sleep mode (kitchen_sleep_on,
-    23:45) is applied. AL is disabled BEFORE manual color changes in ALL paths to
-    prevent manual_control flag from triggering the override boolean spuriously. Mode
-    is queued (max 10) so long transitions can''t cause dropped triggers.
+    Down is on Kitchen - AL with 1 Color and 2 Color; the Lightstrip is NOT on AL
+    - the same script gives it a faint drifting complement tint (turn_on_strip: true);
+    Kitchen - Up is NOT on AL - script.kitchen_up_light_apply gives it the complementary
+    color of the AL white (dishes: dim indigo; sleep: Ember 35% while Down drops to
+    5% red), and ''Kitchen: Up Light Follows Adaptive Lighting'' keeps it in step
+    (the old Lutron ''Kitchen Main'' dimmer moved to the garage 2026-09-12 and its
+    Pico to the bathroom, so neither is referenced here). Frigate confirmed presence
+    (3 min debounce) blocks shutoff while someone is sitting still. Sleep mode overrides
+    AL. Manual override flag auto-clears 60s after the room clears (kitchen_cleared);
+    lights fade off at 3:30. Late-night dishes mode (23:45-23:55) keeps lights warm/usable
+    when motion is active, right as kitchen sleep mode (kitchen_sleep_on, 23:45) is
+    applied. AL is disabled BEFORE manual color changes in ALL paths to prevent manual_control
+    flag from triggering the override boolean spuriously. Mode is queued (max 10)
+    so long transitions can''t cause dropped triggers.
 
     '
   triggers:
@@ -1305,8 +1306,8 @@
       | default([], true) %}
 
       {{ is_state(''switch.al_kitchen'', ''on'') and (mc | select(''in'', [''light.kitchen_1_color'',
-      ''light.kitchen_2_color'', ''light.hue_datura_bottom_1''])
-      | list | count > 0) }}
+      ''light.kitchen_2_color'', ''light.hue_datura_bottom_1'']) | list | count >
+      0) }}
 
       '
     id: al_manual_control_changed
@@ -1320,8 +1321,8 @@
           | default([], true) %}
 
           {{ is_state(''switch.al_kitchen'', ''on'') and (mc | select(''in'', [''light.kitchen_1_color'',
-          ''light.kitchen_2_color'', ''light.hue_datura_bottom_1''])
-          | list | count > 0) }}
+          ''light.kitchen_2_color'', ''light.hue_datura_bottom_1'']) | list | count
+          > 0) }}
 
           '
       sequence:
@@ -1335,8 +1336,8 @@
           | default([], true) %}
 
           {{ is_state(''switch.al_kitchen'', ''on'') and (mc | select(''in'', [''light.kitchen_1_color'',
-          ''light.kitchen_2_color'', ''light.hue_datura_bottom_1''])
-          | list | count > 0) }}
+          ''light.kitchen_2_color'', ''light.hue_datura_bottom_1'']) | list | count
+          > 0) }}
 
           '
       - action: input_boolean.turn_on
@@ -11713,11 +11714,10 @@
   alias: 'Kitchen: Up Light Follows Adaptive Lighting'
   description: Whenever Kitchen - AL changes its target white or brightness (about
     every 90s as the sun moves), re-apply the complementary color to the Datura up
-    light via script.kitchen_up_light_apply. Also ticks every minute (60s fade,
-    skipped in sleep mode / dishes window) so the color glides through its 3-color
-    drift cycle. Only while Kitchen - AL is on, the up
-    light is on, and no manual override - sleep/dishes/transitional paths are driven
-    explicitly by Kitchen Smart Motion.
+    light via script.kitchen_up_light_apply. Also ticks every minute (60s fade, skipped
+    in sleep mode / dishes window) so the color glides through its 3-color drift cycle.
+    Only while Kitchen - AL is on, the up light is on, and no manual override - sleep/dishes/transitional
+    paths are driven explicitly by Kitchen Smart Motion.
   triggers:
   - trigger: state
     entity_id: switch.al_kitchen
