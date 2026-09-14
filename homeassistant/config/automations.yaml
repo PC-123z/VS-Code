@@ -11796,6 +11796,14 @@
     - condition: state
       entity_id: cover.garage
       state: open
+  - alias: Cover hasn't been opened since this Volvo start began (any change since
+      volvo_start_active turned on means someone already opened it this cycle - don't
+      re-open it after they close it). Replaces the old blanket 10-min recently-changed
+      block in script_volvo_start_core, which blocked the 2026-09-14 start because the
+      cover had been closed 9.5 min before the cycle began.
+    condition: template
+    value_template: '{{ states.cover.garage.last_changed <= states.input_boolean.volvo_start_active.last_changed
+      }}'
   actions:
   - action: cover.open_cover
     target:
