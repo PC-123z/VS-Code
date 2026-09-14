@@ -71,7 +71,7 @@
     at: '16:00:00'
     weekday:
     - sun
-    enabled: true
+    enabled: false
   - trigger: time
     at: '16:58:00'
     enabled: false
@@ -2637,7 +2637,8 @@
             target:
               entity_id: light.nano_sand_dune
             data:
-              brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'') | float(50) | round(0) }}'
+              brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
+                | float(50) | round(0) }}'
               transition: 5
         - conditions:
           - condition: time
@@ -2692,7 +2693,8 @@
             target:
               entity_id: light.nano_sand_dune
             data:
-              brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'') | float(30) | round(0) }}'
+              brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
+                | float(30) | round(0) }}'
               transition: 5
         - conditions:
           - condition: time
@@ -2754,7 +2756,8 @@
               target:
                 entity_id: light.nano_sand_dune
               data:
-                brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'') | float(30) | round(0) }}'
+                brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
+                  | float(30) | round(0) }}'
                 transition: 5
     - conditions:
       - condition: trigger
@@ -6991,7 +6994,8 @@
       target:
         entity_id: light.nano_sand_dune
       data:
-        brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'') | float(30) | round(0) }}'
+        brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
+          | float(30) | round(0) }}'
         transition: 2
   mode: single
 - id: '1776829563318'
@@ -12150,10 +12154,10 @@
   mode: restart
 - id: '1789400000002'
   alias: 'Big Bedroom: Nanoleaf Sundown Brightness Follows AL'
-  description: Evening/night (18:00-07:00) while the Nanoleaf is playing Sundown, keep its
-    brightness equal to Big Bedroom AL's brightness_pct. Only pushes when they differ
-    by 3% or more to avoid spamming the flaky Nanoleaf. Hands off in sleep mode, while
-    asleep, or when manual override is on.
+  description: Evening/night (18:00-07:00) while the Nanoleaf is playing Sundown,
+    keep its brightness equal to Big Bedroom AL's brightness_pct. Only pushes when
+    they differ by 3% or more to avoid spamming the flaky Nanoleaf. Hands off in sleep
+    mode, while asleep, or when manual override is on.
   triggers:
   - trigger: state
     entity_id: switch.al_big_bedroom
@@ -12189,10 +12193,10 @@
     state: 'off'
   - alias: Only when Nanoleaf is 3%+ away from AL brightness
     condition: template
-    value_template: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'') is
-      number and ((state_attr(''switch.al_big_bedroom'', ''brightness_pct'') | float)
-      - ((state_attr(''light.nano_sand_dune'', ''brightness'') | float(0)) / 2.55)) |
-      abs >= 3 }}'
+    value_template: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
+      is number and ((state_attr(''switch.al_big_bedroom'', ''brightness_pct'') |
+      float) - ((state_attr(''light.nano_sand_dune'', ''brightness'') | float(0))
+      / 2.55)) | abs >= 3 }}'
   actions:
   - action: light.turn_on
     target:
