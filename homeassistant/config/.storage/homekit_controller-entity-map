@@ -2797,7 +2797,7 @@
                       "hd"
                     ],
                     "format": "int",
-                    "value": -60
+                    "value": 0
                   },
                   {
                     "type": "2BD83CC7-6C60-11E5-A837-0800200C9A66",
