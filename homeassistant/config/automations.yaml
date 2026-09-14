@@ -7781,7 +7781,7 @@
   description: TV state drives living room lighting with time-of-day palette. Playing
     = deep dim scaled to daylight. Paused/Off = restore AL and presence. Dining room
     dims during playback if occupied. Kitchen lights fade off (30s) when playback
-    starts if the kitchen is empty. Galaxy projector off during playback, on when
+    starts if the kitchen is empty, or once the kitchen has been empty 30s during playback. Galaxy projector off during playback, on when
     paused/off.
   triggers:
   - alias: Jellyfin (any current/future Living Room client) - playing
@@ -7888,6 +7888,14 @@
     trigger: event
     event_type: living_room_tv_mode_reapply
     id: playing
+  - alias: Kitchen went empty during playback - fade kitchen lights now (the playing
+      branch only checks the kitchen at the moment play starts)
+    trigger: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    to: 'off'
+    for:
+      seconds: 30
+    id: kitchen_empty
   conditions: []
   actions:
   - choose:
@@ -7977,6 +7985,40 @@
           entity_id: light.dining_room_bottom
         data:
           brightness_pct: 2
+    - conditions:
+      - condition: trigger
+        id: kitchen_empty
+      - condition: template
+        value_template: '{{ integration_entities(''jellyfin'') | select(''match'',
+          ''^media_player\.'') | select(''in'', area_entities(''living_room'')) |
+          map(''states'') | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
+          ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or
+          is_state(''media_player.living_room_tv_3'', ''playing'') or is_state(''media_player.living_room'',
+          ''playing'') }}'
+      - condition: template
+        value_template: '{{ [''light.kitchen_1_color'', ''light.kitchen_2_color'',
+          ''light.kitchen_lightstrip'', ''light.hue_datura_top_1'', ''light.hue_datura_bottom_1'']
+          | select(''is_state'', ''on'') | list | count > 0 }}'
+      alias: Kitchen empty for 30s while media is playing - fade kitchen lights off
+      sequence:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.al_kitchen
+      - action: adaptive_lighting.set_manual_control
+        continue_on_error: true
+        data:
+          entity_id: switch.al_kitchen
+          manual_control: false
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.kitchen_1_color
+          - light.kitchen_2_color
+          - light.kitchen_lightstrip
+          - light.hue_datura_top_1
+          - light.hue_datura_bottom_1
+        data:
+          transition: 30
     - conditions:
       - condition: trigger
         id: paused
