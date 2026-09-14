@@ -2637,7 +2637,7 @@
             target:
               entity_id: light.nano_sand_dune
             data:
-              brightness_pct: 50
+              brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'') | float(50) | round(0) }}'
               transition: 5
         - conditions:
           - condition: time
@@ -12150,7 +12150,7 @@
   mode: restart
 - id: '1789400000002'
   alias: 'Big Bedroom: Nanoleaf Sundown Brightness Follows AL'
-  description: At night (22:00-07:00) while the Nanoleaf is playing Sundown, keep its
+  description: Evening/night (18:00-07:00) while the Nanoleaf is playing Sundown, keep its
     brightness equal to Big Bedroom AL's brightness_pct. Only pushes when they differ
     by 3% or more to avoid spamming the flaky Nanoleaf. Hands off in sleep mode, while
     asleep, or when manual override is on.
@@ -12166,7 +12166,7 @@
       seconds: 5
   conditions:
   - condition: time
-    after: '22:00:00'
+    after: '18:00:00'
     before: 07:00:00
   - condition: state
     entity_id: switch.al_big_bedroom
