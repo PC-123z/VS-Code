@@ -2768,15 +2768,6 @@
           - switch.al_big_bedroom
           - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_color_big_bedroom_al
           - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_brightness_big_bedroom_al
-      - alias: Re-enable sleep mode if it should be active (after 23:00)
-        if:
-        - condition: time
-          after: '23:00:00'
-          before: 07:00:00
-        then:
-        - action: switch.turn_on
-          target:
-            entity_id: switch.al_sleep_mode_big_bedroom
       - action: input_select.select_option
         target:
           entity_id: input_select.bedroom_scene_mode
