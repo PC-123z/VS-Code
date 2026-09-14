@@ -8041,6 +8041,10 @@
             - light.hue_datura_bottom_1
           data:
             transition: 30
+      - alias: Skip dining dim while dimmer override is active (On tap/hold)
+        condition: state
+        entity_id: input_boolean.dining_room_manual_override
+        state: 'off'
       - condition: state
         entity_id: binary_sensor.dining_room_sensor_group
         state: 'on'
@@ -8139,55 +8143,61 @@
       - action: light.turn_on
         target:
           entity_id: light.galaxy_projector
-      - alias: Dining room only stays dim during playback - restore or turn off now
+      - alias: Leave dining room alone while dimmer override is active (On tap/hold)
         if:
         - condition: state
-          entity_id: binary_sensor.dining_room_sensor_group
-          state: 'on'
+          entity_id: input_boolean.dining_room_manual_override
+          state: 'off'
         then:
-        - action: adaptive_lighting.set_manual_control
-          data:
-            entity_id: switch.al_dining_room_bottom
-            lights:
-            - light.dining_room_bottom
-            manual_control: false
-        - action: adaptive_lighting.set_manual_control
-          data:
-            entity_id: switch.al_dining_room_top
-            lights:
-            - light.dining_room_top
-            manual_control: false
-        - action: switch.turn_on
-          target:
-            entity_id:
-            - switch.al_dining_room_bottom
-            - switch.al_dining_room_top
-        - action: adaptive_lighting.apply
-          continue_on_error: true
-          data:
-            entity_id: switch.al_dining_room_bottom
-            lights:
-            - light.dining_room_bottom
-            transition: 3
-            adapt_color: true
-            adapt_brightness: true
-        - action: adaptive_lighting.apply
-          continue_on_error: true
-          data:
-            entity_id: switch.al_dining_room_top
-            lights:
-            - light.dining_room_top
-            transition: 3
-            adapt_color: true
-            adapt_brightness: true
-        else:
-        - action: light.turn_off
-          target:
-            entity_id:
-            - light.dining_room_bottom
-            - light.dining_room_top
-          data:
-            transition: 3
+        - alias: Dining room only stays dim during playback - restore or turn off now
+          if:
+          - condition: state
+            entity_id: binary_sensor.dining_room_sensor_group
+            state: 'on'
+          then:
+          - action: adaptive_lighting.set_manual_control
+            data:
+              entity_id: switch.al_dining_room_bottom
+              lights:
+              - light.dining_room_bottom
+              manual_control: false
+          - action: adaptive_lighting.set_manual_control
+            data:
+              entity_id: switch.al_dining_room_top
+              lights:
+              - light.dining_room_top
+              manual_control: false
+          - action: switch.turn_on
+            target:
+              entity_id:
+              - switch.al_dining_room_bottom
+              - switch.al_dining_room_top
+          - action: adaptive_lighting.apply
+            continue_on_error: true
+            data:
+              entity_id: switch.al_dining_room_bottom
+              lights:
+              - light.dining_room_bottom
+              transition: 3
+              adapt_color: true
+              adapt_brightness: true
+          - action: adaptive_lighting.apply
+            continue_on_error: true
+            data:
+              entity_id: switch.al_dining_room_top
+              lights:
+              - light.dining_room_top
+              transition: 3
+              adapt_color: true
+              adapt_brightness: true
+          else:
+          - action: light.turn_off
+            target:
+              entity_id:
+              - light.dining_room_bottom
+              - light.dining_room_top
+            data:
+              transition: 3
     - conditions:
       - condition: trigger
         id: tv_off
@@ -8252,55 +8262,61 @@
               - light.galaxy_projector
             data:
               transition: 3
-      - alias: Dining room only stays dim during playback - restore or turn off now
+      - alias: Leave dining room alone while dimmer override is active (On tap/hold)
         if:
         - condition: state
-          entity_id: binary_sensor.dining_room_sensor_group
-          state: 'on'
+          entity_id: input_boolean.dining_room_manual_override
+          state: 'off'
         then:
-        - action: adaptive_lighting.set_manual_control
-          data:
-            entity_id: switch.al_dining_room_bottom
-            lights:
-            - light.dining_room_bottom
-            manual_control: false
-        - action: adaptive_lighting.set_manual_control
-          data:
-            entity_id: switch.al_dining_room_top
-            lights:
-            - light.dining_room_top
-            manual_control: false
-        - action: switch.turn_on
-          target:
-            entity_id:
-            - switch.al_dining_room_bottom
-            - switch.al_dining_room_top
-        - action: adaptive_lighting.apply
-          continue_on_error: true
-          data:
-            entity_id: switch.al_dining_room_bottom
-            lights:
-            - light.dining_room_bottom
-            transition: 3
-            adapt_color: true
-            adapt_brightness: true
-        - action: adaptive_lighting.apply
-          continue_on_error: true
-          data:
-            entity_id: switch.al_dining_room_top
-            lights:
-            - light.dining_room_top
-            transition: 3
-            adapt_color: true
-            adapt_brightness: true
-        else:
-        - action: light.turn_off
-          target:
-            entity_id:
-            - light.dining_room_bottom
-            - light.dining_room_top
-          data:
-            transition: 3
+        - alias: Dining room only stays dim during playback - restore or turn off now
+          if:
+          - condition: state
+            entity_id: binary_sensor.dining_room_sensor_group
+            state: 'on'
+          then:
+          - action: adaptive_lighting.set_manual_control
+            data:
+              entity_id: switch.al_dining_room_bottom
+              lights:
+              - light.dining_room_bottom
+              manual_control: false
+          - action: adaptive_lighting.set_manual_control
+            data:
+              entity_id: switch.al_dining_room_top
+              lights:
+              - light.dining_room_top
+              manual_control: false
+          - action: switch.turn_on
+            target:
+              entity_id:
+              - switch.al_dining_room_bottom
+              - switch.al_dining_room_top
+          - action: adaptive_lighting.apply
+            continue_on_error: true
+            data:
+              entity_id: switch.al_dining_room_bottom
+              lights:
+              - light.dining_room_bottom
+              transition: 3
+              adapt_color: true
+              adapt_brightness: true
+          - action: adaptive_lighting.apply
+            continue_on_error: true
+            data:
+              entity_id: switch.al_dining_room_top
+              lights:
+              - light.dining_room_top
+              transition: 3
+              adapt_color: true
+              adapt_brightness: true
+          else:
+          - action: light.turn_off
+            target:
+              entity_id:
+              - light.dining_room_bottom
+              - light.dining_room_top
+            data:
+              transition: 3
   variables:
     sun_elev: '{{ state_attr(''sun.sun'', ''elevation'') | float(0) }}'
     tv_kelvin: '{% if sun_elev > 10 %}4000 {% elif sun_elev > -6 %}2700 {% else %}2200
@@ -12260,3 +12276,57 @@
         will fail. Re-authenticate in HA (Settings > Devices & services > Volvo, Local
         application credentials).
   mode: single
+- id: '1789600000003'
+  alias: 'Dining Room: Dimmer Hold Override'
+  description: Hold the Dining Room dimmer On button - sets input_boolean.dining_room_manual_override,
+    AL + sleep mode off, manual control, top and bottom 100% white (4000K). Sticks
+    until the room is empty 30 min (Smart Motion override_cleared) or the Off button.
+    Smart Motion and TV Mode skip the dining room while the override is on. (The initial_press
+    from the hold also fires the tap automation's time-of-day scene ~1s earlier; this
+    overwrites it.)
+  triggers:
+  - device_id: b553d4e94880b54012c3c4fbdec5c988
+    domain: hue
+    type: long_press
+    subtype: 1
+    unique_id: dining_room_button_1_hold
+    trigger: device
+  conditions: []
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.dining_room_manual_override
+  - action: switch.turn_off
+    target:
+      entity_id:
+      - switch.al_dining_room_bottom
+      - switch.al_dining_room_top
+      - switch.al_sleep_mode_dining_room_bottom
+      - switch.al_sleep_mode_dining_room_top
+  - action: adaptive_lighting.set_manual_control
+    continue_on_error: true
+    data:
+      entity_id: switch.al_dining_room_bottom
+      lights:
+      - light.dining_room_bottom
+      manual_control: true
+  - action: adaptive_lighting.set_manual_control
+    continue_on_error: true
+    data:
+      entity_id: switch.al_dining_room_top
+      lights:
+      - light.dining_room_top
+      manual_control: true
+  - action: light.turn_on
+    target:
+      label_id:
+      - dining_room_top
+      - dining_room_bottom
+      entity_id:
+      - light.dining_room_top
+      - light.dining_room_bottom
+    data:
+      brightness_pct: 100
+      color_temp_kelvin: 4000
+      transition: 1
+  mode: restart
