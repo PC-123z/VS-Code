@@ -9606,6 +9606,45 @@
           data:
             enabled: true
         else:
+        - alias: 'PHASE 2 is queued BEHIND the opener while it is still playing, so the
+            Sonos rolls straight from Here Comes The Sun into the first shuffled track
+            with no gap. The old design waited for the opener to end and then replaced
+            the queue, which cost ~14s of silence (re-check, MA''s 5s end-of-queue watch,
+            ~5s playlist fetch) and on 2026-09-14 raced that watch - MA started a second
+            play of its own, so ~3s of Rare jumped to You Belong With Me. With items after
+            the opener the queue never ends, so that watch never starts. Shuffle goes on
+            first (nothing is after the opener yet, so there is nothing to reorder or
+            invalidate); enqueue add inserts the playlist after the playing track, shuffled,
+            and never starts playback by itself. All of this runs ~15s into a 3-minute
+            song, far from the track boundary.'
+          continue_on_error: true
+          action: media_player.shuffle_set
+          target:
+            entity_id: media_player.bedroom_2
+          data:
+            shuffle: true
+        - continue_on_error: true
+          action: music_assistant.play_media
+          target:
+            entity_id: media_player.bedroom_2
+          data:
+            media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
+            media_type: playlist
+            enqueue: add
+        - alias: Autoplay back on - the queue now holds the whole playlist, so nothing is
+            near its end and this triggers no refill
+          continue_on_error: true
+          action: rest_command.ma_bedroom_autoplay
+          data:
+            enabled: true
+        - alias: Repeat all - set minutes before the opener ends, so updating the player's
+            next item here happens nowhere near the track boundary
+          continue_on_error: true
+          action: media_player.repeat_set
+          target:
+            entity_id: media_player.bedroom_2
+          data:
+            repeat: all
         - alias: Ramp volume from 0.05 to 0.15 over ~2.5 minutes (8 steps of 18s).
             The announcements branch waits for this to reach 0.15 before speaking.
           repeat:
@@ -9648,14 +9687,6 @@
                 > 360 or (is_state(''media_player.bedroom_2'', ''idle'') and is_state(''input_boolean.good_morning_announcement_pending'',
                 ''off'')) or ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'',
                 ''media_content_id'') or '''') }}'
-        - alias: Safety-net stop. With Autoplay off the player is normally already
-            idle here because the opener simply ended, so this is a no-op - it only
-            matters if Autoplay could not be switched off and MA rolled into a filled
-            track.
-          continue_on_error: true
-          action: media_player.media_stop
-          target:
-            entity_id: media_player.bedroom_2
         - alias: Bail out if the routine was cancelled while the opening track played
             - Goodbye, the sleep flag, or the hard cap can all clear good_morning_active
             mid-run, and without this check the whole shuffled playlist would still
@@ -9668,6 +9699,12 @@
           - action: input_boolean.turn_off
             target:
               entity_id: input_boolean.good_morning_expected_pause
+          - alias: Stop playback - the playlist is queued behind the opener, so the music
+              would otherwise carry on after a cancel
+            continue_on_error: true
+            action: media_player.media_stop
+            target:
+              entity_id: media_player.bedroom_2
           - alias: Clear the ended queue before restoring Autoplay, so MA has nothing
               to refill from and cannot restart music after a cancel
             continue_on_error: true
@@ -9716,53 +9753,6 @@
             - action: input_boolean.turn_off
               target:
                 entity_id: input_boolean.good_morning_announcement_pending
-          - alias: 'Let Music Assistant''s end-of-queue watch expire before loading
-              the playlist. When a queue plays its last item to the end, MA polls for 5
-              seconds and, if items appear in that window, starts playback by ITSELF at
-              the next index ("Items added to queue while idle, resuming playback"). On
-              2026-09-14 the greeting finished before the opener, so the playlist loaded
-              3s after the opener ended - the routine''s own play started index 0 (Rare)
-              and MA''s watch started index 1 a moment later, the two stream sessions
-              fought, and after ~3s of Rare the speaker jumped to You Belong With Me.
-              Waits until at least 9s have passed since the player went idle; when the
-              second greeting has just played this is already satisfied and adds nothing.'
-            delay:
-              seconds: '{{ [9 - (now() - states.media_player.bedroom_2.last_changed).total_seconds(), 0] | max | round(0, ''ceil'') | int }}'
-          - alias: Turn shuffle on BEFORE the playlist loads, never after. Toggling
-              shuffle once playback is under way invalidates Music Assistant's pre-buffered
-              next track, which is what used to play a few seconds of one song and
-              then jump to a different one at the first boundary.
-            continue_on_error: true
-            action: media_player.shuffle_set
-            target:
-              entity_id: media_player.bedroom_2
-            data:
-              shuffle: true
-          - alias: PHASE 2 - load the shuffled playlist. Shuffle is already on, so
-              the queue is built shuffled from the very first item.
-            continue_on_error: true
-            action: music_assistant.play_media
-            target:
-              entity_id: media_player.bedroom_2
-            data:
-              media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
-              media_type: playlist
-              enqueue: replace
-          - alias: Autoplay back on now that the queue holds the full playlist - nothing
-              is near the end, so this triggers no refill
-            continue_on_error: true
-            action: rest_command.ma_bedroom_autoplay
-            data:
-              enabled: true
-          - alias: 'Repeat back on. Deliberately set AFTER the playlist loads rather
-              than before: it only matters once all 770 tracks have played, so it
-              needs no settling time.'
-            continue_on_error: true
-            action: media_player.repeat_set
-            target:
-              entity_id: media_player.bedroom_2
-            data:
-              repeat: all
           - alias: Wait for the playlist to start
             wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
             timeout:
