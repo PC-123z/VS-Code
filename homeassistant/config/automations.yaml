@@ -2683,14 +2683,15 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
+          - action: select.select_option
+            target:
+              entity_id: select.nanoleaf_dynamic_scenes
+            data:
+              option: Sundown
           - action: light.turn_on
             target:
               entity_id: light.nano_sand_dune
             data:
-              rgb_color:
-              - 255
-              - 100
-              - 0
               brightness_pct: 30
               transition: 5
         - conditions:
@@ -2744,17 +2745,17 @@
                 adapt_color: true
                 adapt_brightness: true
                 prefer_rgb_color: true
+            - action: select.select_option
+              target:
+                entity_id: select.nanoleaf_dynamic_scenes
+              data:
+                option: Sundown
             - action: light.turn_on
               target:
                 entity_id: light.nano_sand_dune
               data:
-                rgb_color:
-                - 255
-                - 30
-                - 0
-                brightness_pct: '{{ [[50 - ((now().hour * 60 + now().minute - 23 *
-                  60) / 60 * 48) | round(0), 2] | max, 50] | min }}'
-                transition: 30
+                brightness_pct: 30
+                transition: 5
     - conditions:
       - condition: trigger
         id: stopped
@@ -6973,6 +6974,25 @@
       adapt_color: true
       adapt_brightness: true
       prefer_rgb_color: true
+  - alias: Nanoleaf Sundown at night (22:00-07:00) to complement warm AL
+    if:
+    - condition: time
+      after: '22:00:00'
+      before: 07:00:00
+    then:
+    - action: select.select_option
+      continue_on_error: true
+      target:
+        entity_id: select.nanoleaf_dynamic_scenes
+      data:
+        option: Sundown
+    - action: light.turn_on
+      continue_on_error: true
+      target:
+        entity_id: light.nano_sand_dune
+      data:
+        brightness_pct: 30
+        transition: 2
   mode: single
 - id: '1776829563318'
   alias: 'Pico Button 3 - Dim - Big Bedroom: TV Mode'
