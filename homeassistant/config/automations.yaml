@@ -12217,3 +12217,46 @@
       transition: 10
   mode: single
   max_exceeded: silent
+- id: '1789600000001'
+  alias: 'Volvo: Start Flag Stuck Watchdog'
+  description: A normal remote-start cycle clears input_boolean.volvo_start_active
+    after ~4 minutes. If it's still on after 20 minutes, script_volvo_start_core failed
+    partway (e.g. 2026-09-14 Volvo auth failure left it on for hours, keeping the garage
+    lights on) - turn it off and alert.
+  triggers:
+  - trigger: state
+    entity_id: input_boolean.volvo_start_active
+    to: 'on'
+    for:
+      minutes: 20
+  conditions: []
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.volvo_start_active
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Volvo Start Failed
+      message: Volvo start flag was stuck on for 20 minutes - the start routine failed
+        and the car may not have started. Flag has been cleared. Check the Volvo integration.
+  mode: single
+- id: '1789600000002'
+  alias: 'Volvo: Integration Offline Alert'
+  description: Alerts when the Volvo integration has been unavailable for 15 minutes
+    (usually an expired login that needs re-authentication), so it's caught before
+    the next remote start fails.
+  triggers:
+  - trigger: state
+    entity_id: lock.volvo_xc60_lock
+    to: unavailable
+    for:
+      minutes: 15
+  conditions: []
+  actions:
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Volvo Integration Offline
+      message: The Volvo integration has been unavailable for 15 minutes - remote start
+        will fail. Re-authenticate in HA (Settings > Devices & services > Volvo, Local
+        application credentials).
+  mode: single

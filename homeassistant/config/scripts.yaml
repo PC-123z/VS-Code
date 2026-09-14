@@ -54,7 +54,30 @@ script_volvo_start_core:
       data:
         title: Volvo Start Error
         message: Volvo start aborted - car is not detected as home.
+    - alias: Clear Volvo start active flag so it doesn't stay stuck on
+      action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.volvo_start_active
     - stop: Car is not home
+  - alias: Verify the Volvo integration is online before pressing climatization -
+      if it's logged out (e.g. 2026-09-14 token refresh 400) the press throws and
+      aborts the script silently, leaving volvo_start_active stuck on
+    if:
+    - condition: state
+      entity_id: lock.volvo_xc60_lock
+      state: unavailable
+    then:
+    - alias: Notify Volvo integration offline
+      action: notify.mobile_app_pc_iphone
+      data:
+        title: Volvo Start Failed
+        message: Car was NOT started - the Volvo integration is offline. Re-authenticate
+          it in HA (Settings > Devices & services > Volvo, Local application credentials).
+    - alias: Clear Volvo start active flag
+      action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.volvo_start_active
+    - stop: Volvo integration unavailable
   - alias: Turn on garage lights (Garage - AL sets brightness; Garage Lights automation
       turns them off 5 min after presence clears once this start cycle ends)
     action: light.turn_on
