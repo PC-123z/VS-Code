@@ -118,6 +118,10 @@ input_boolean:
   big_bedroom_manual_override:
     name: "Big Bedroom Manual Override"
     initial: off
+  living_room_manual_override:
+    name: "Living Room Manual Override"
+    icon: mdi:lightbulb-on
+    initial: off
   bathroom_volume_manual_override:
     name: "Bathroom Volume Manual Override"
     icon: mdi:volume-high

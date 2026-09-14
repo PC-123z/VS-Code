@@ -1694,15 +1694,21 @@
           transition: 150
           adapt_color: true
           adapt_brightness: true
-      - action: adaptive_lighting.apply
-        continue_on_error: true
-        data:
-          entity_id: switch.al_living_room
-          lights:
-          - light.living_room
-          transition: 150
-          adapt_color: true
-          adapt_brightness: true
+      - alias: Living room AL apply - skip while hold-for-100% override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.living_room_manual_override
+          state: 'off'
+        then:
+        - action: adaptive_lighting.apply
+          continue_on_error: true
+          data:
+            entity_id: switch.al_living_room
+            lights:
+            - light.living_room
+            transition: 150
+            adapt_color: true
+            adapt_brightness: true
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -1768,12 +1774,20 @@
           entity_id:
           - switch.al_hallway
           - switch.al_kitchen
-          - switch.al_living_room
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
           - switch.al_bathroom
           - switch.al_bathroom_main
           - switch.adaptive_lighting_office
+      - alias: Re-enable living room AL - skip while hold-for-100% override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.living_room_manual_override
+          state: 'off'
+        then:
+        - action: switch.turn_on
+          target:
+            entity_id: switch.al_living_room
       - alias: Clear manual_control so AL resumes adapting
         action: adaptive_lighting.set_manual_control
         continue_on_error: true
@@ -1785,11 +1799,17 @@
         data:
           entity_id: switch.al_kitchen
           manual_control: false
-      - action: adaptive_lighting.set_manual_control
-        continue_on_error: true
-        data:
-          entity_id: switch.al_living_room
-          manual_control: false
+      - alias: Living room AL reset - skip while hold-for-100% override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.living_room_manual_override
+          state: 'off'
+        then:
+        - action: adaptive_lighting.set_manual_control
+          continue_on_error: true
+          data:
+            entity_id: switch.al_living_room
+            manual_control: false
       - action: adaptive_lighting.set_manual_control
         continue_on_error: true
         data:
@@ -1836,15 +1856,21 @@
           transition: 30
           adapt_color: true
           adapt_brightness: true
-      - action: adaptive_lighting.apply
-        continue_on_error: true
-        data:
-          entity_id: switch.al_living_room
-          lights:
-          - light.living_room
-          transition: 30
-          adapt_color: true
-          adapt_brightness: true
+      - alias: Living room AL reset - skip while hold-for-100% override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.living_room_manual_override
+          state: 'off'
+        then:
+        - action: adaptive_lighting.apply
+          continue_on_error: true
+          data:
+            entity_id: switch.al_living_room
+            lights:
+            - light.living_room
+            transition: 30
+            adapt_color: true
+            adapt_brightness: true
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -1957,6 +1983,7 @@
       - input_boolean.kitchen_manual_override
       - input_boolean.dining_room_manual_override
       - input_boolean.big_bedroom_manual_override
+      - input_boolean.living_room_manual_override
   - alias: Re-enable garage auto-close (in case it was disabled for garage work)
     action: input_boolean.turn_on
     target:
@@ -2819,12 +2846,37 @@
     id: sleep_on
   - device_id: 046bda673f9c3613042de9612024694e
     domain: hue
-    type: initial_press
+    type: short_release
     subtype: 1
     unique_id: main_room_button_1
     trigger: device
-    id: detected
+    id: button_on
+    alias: Main Room dimmer On - short press (release, so a hold never fires this)
   actions:
+  - alias: Short press On ends the hold-for-100% override, then falls through to the
+      normal scene
+    if:
+    - condition: trigger
+      id: button_on
+    - condition: state
+      entity_id: input_boolean.living_room_manual_override
+      state: 'on'
+    then:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.living_room_manual_override
+    - action: adaptive_lighting.set_manual_control
+      continue_on_error: true
+      data:
+        entity_id: switch.al_living_room
+        lights:
+        - light.living_room
+        manual_control: false
+  - alias: Skip everything while the hold-for-100% override is active (Dimmer Hold
+      Override owns the lights and the 15-min empty shutoff)
+    condition: state
+    entity_id: input_boolean.living_room_manual_override
+    state: 'off'
   - choose:
     - conditions:
       - condition: trigger
@@ -2948,7 +3000,9 @@
           transition: 60
     - conditions:
       - condition: trigger
-        id: detected
+        id:
+        - detected
+        - button_on
       sequence:
       - choose:
         - conditions:
@@ -7772,8 +7826,8 @@
   description: TV state drives living room lighting with time-of-day palette. Playing
     = deep dim scaled to daylight. Paused/Off = restore AL and presence. Dining room
     dims during playback if occupied. Kitchen lights fade off (30s) when playback
-    starts if the kitchen is empty, or once the kitchen has been empty 30s during playback. Galaxy projector off during playback, on when
-    paused/off.
+    starts if the kitchen is empty, or once the kitchen has been empty 30s during
+    playback. Galaxy projector off during playback, on when paused/off.
   triggers:
   - alias: Jellyfin (any current/future Living Room client) - playing
     trigger: template
@@ -7907,6 +7961,10 @@
         - condition: state
           entity_id: light.living_room
           state: 'on'
+        - alias: Hold-for-100% override not active (override wins over TV dimming)
+          condition: state
+          entity_id: input_boolean.living_room_manual_override
+          state: 'off'
         then:
         - action: automation.turn_off
           target:
@@ -7930,8 +7988,8 @@
       - action: light.turn_off
         target:
           entity_id: light.galaxy_projector
-      - alias: Kitchen empty - fade its lights off now instead of waiting for the 3:30
-          clear (same steps as Kitchen Smart Motion's kitchen_cleared_hue)
+      - alias: Kitchen empty - fade its lights off now instead of waiting for the
+          3:30 clear (same steps as Kitchen Smart Motion's kitchen_cleared_hue)
         if:
         - condition: state
           entity_id: binary_sensor.kitchen_sensor_group
@@ -8014,28 +8072,46 @@
       - condition: trigger
         id: paused
       sequence:
-      - action: adaptive_lighting.set_manual_control
-        data:
-          entity_id: switch.al_living_room
-          lights:
-          - light.living_room
-          manual_control: false
-      - action: switch.turn_on
-        target:
-          entity_id: switch.al_living_room
+      - alias: Skip living room light restore while hold-for-100% override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.living_room_manual_override
+          state: 'off'
+        then:
+        - action: adaptive_lighting.set_manual_control
+          data:
+            entity_id: switch.al_living_room
+            lights:
+            - light.living_room
+            manual_control: false
+      - alias: Skip living room light restore while hold-for-100% override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.living_room_manual_override
+          state: 'off'
+        then:
+        - action: switch.turn_on
+          target:
+            entity_id: switch.al_living_room
       - action: automation.turn_on
         target:
           entity_id: automation.living_room_smart_motion_presence
-      - action: adaptive_lighting.apply
-        continue_on_error: true
-        data:
-          entity_id: switch.al_living_room
-          lights:
-          - light.living_room
-          transition: 3
-          adapt_color: true
-          adapt_brightness: true
-          prefer_rgb_color: true
+      - alias: Skip living room light restore while hold-for-100% override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.living_room_manual_override
+          state: 'off'
+        then:
+        - action: adaptive_lighting.apply
+          continue_on_error: true
+          data:
+            entity_id: switch.al_living_room
+            lights:
+            - light.living_room
+            transition: 3
+            adapt_color: true
+            adapt_brightness: true
+            prefer_rgb_color: true
       - action: light.turn_on
         target:
           entity_id: light.galaxy_projector
@@ -8092,48 +8168,66 @@
       - condition: trigger
         id: tv_off
       sequence:
-      - action: adaptive_lighting.set_manual_control
-        data:
-          entity_id: switch.al_living_room
-          lights:
-          - light.living_room
-          manual_control: false
-      - action: switch.turn_on
-        target:
-          entity_id: switch.al_living_room
-      - action: automation.turn_on
-        target:
-          entity_id: automation.living_room_smart_motion_presence
-      - alias: Only restore lights if someone is actually in the room
+      - alias: Skip living room light restore while hold-for-100% override is active
         if:
         - condition: state
-          entity_id: binary_sensor.living_room_sensor_group
-          state: 'on'
+          entity_id: input_boolean.living_room_manual_override
+          state: 'off'
         then:
-        - action: adaptive_lighting.apply
-          continue_on_error: true
+        - action: adaptive_lighting.set_manual_control
           data:
             entity_id: switch.al_living_room
             lights:
             - light.living_room
-            transition: 3
-            adapt_color: true
-            adapt_brightness: true
-            prefer_rgb_color: true
-        - action: light.turn_on
+            manual_control: false
+      - alias: Skip living room light restore while hold-for-100% override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.living_room_manual_override
+          state: 'off'
+        then:
+        - action: switch.turn_on
           target:
-            entity_id: light.galaxy_projector
-        else:
-        - action: fan.turn_off
-          target:
-            entity_id: fan.living_room_fan
-        - action: light.turn_off
-          target:
-            entity_id:
-            - light.living_room
-            - light.galaxy_projector
-          data:
-            transition: 3
+            entity_id: switch.al_living_room
+      - action: automation.turn_on
+        target:
+          entity_id: automation.living_room_smart_motion_presence
+      - alias: Skip living room light restore while hold-for-100% override is active
+        if:
+        - condition: state
+          entity_id: input_boolean.living_room_manual_override
+          state: 'off'
+        then:
+        - alias: Only restore lights if someone is actually in the room
+          if:
+          - condition: state
+            entity_id: binary_sensor.living_room_sensor_group
+            state: 'on'
+          then:
+          - action: adaptive_lighting.apply
+            continue_on_error: true
+            data:
+              entity_id: switch.al_living_room
+              lights:
+              - light.living_room
+              transition: 3
+              adapt_color: true
+              adapt_brightness: true
+              prefer_rgb_color: true
+          - action: light.turn_on
+            target:
+              entity_id: light.galaxy_projector
+          else:
+          - action: fan.turn_off
+            target:
+              entity_id: fan.living_room_fan
+          - action: light.turn_off
+            target:
+              entity_id:
+              - light.living_room
+              - light.galaxy_projector
+            data:
+              transition: 3
       - alias: Dining room only stays dim during playback - restore or turn off now
         if:
         - condition: state
@@ -9002,6 +9096,11 @@
   - alias: Dining room must also be empty
     condition: state
     entity_id: binary_sensor.dining_room_sensor_group
+    state: 'off'
+  - alias: Hold-for-100% override not active (Dimmer Hold Override does its own 15-min
+      shutoff)
+    condition: state
+    entity_id: input_boolean.living_room_manual_override
     state: 'off'
   actions:
   - alias: Warning - deep blue
@@ -11922,3 +12021,110 @@
         entity_id: input_boolean.welcome_home_active
   mode: single
   max_exceeded: silent
+- id: '1789500000001'
+  alias: 'Living Room: Dimmer Hold Override'
+  description: 'Hold the Main Room dimmer On button: AL off + manual control, lights
+    100% (4000K). Smart Motion, TV Mode, Unoccupied Shutoff and the global sleep/morning
+    AL resets skip the living room while input_boolean.living_room_manual_override
+    is on. Ends on: living room empty 15 min (full shutoff: TV, fan, lights), Off
+    button, or a short press of On (handled in Smart Motion).'
+  triggers:
+  - device_id: 046bda673f9c3613042de9612024694e
+    domain: hue
+    type: long_press
+    subtype: 1
+    unique_id: main_room_button_1
+    trigger: device
+    id: hold
+    alias: On button held
+  - device_id: 046bda673f9c3613042de9612024694e
+    domain: hue
+    type: short_release
+    subtype: 4
+    unique_id: main_room_button_4
+    trigger: device
+    id: off_button
+    alias: Off button pressed (bridge turns the lights off natively)
+  - trigger: template
+    id: empty
+    alias: Override on and living room empty for 15 min (counts from override start
+      if the room already read empty)
+    value_template: '{{ is_state(''input_boolean.living_room_manual_override'', ''on'')
+      and is_state(''binary_sensor.living_room_sensor_group'', ''off'') }}'
+    for:
+      minutes: 15
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: hold
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.living_room_manual_override
+      - action: switch.turn_off
+        target:
+          entity_id: switch.al_living_room
+      - action: adaptive_lighting.set_manual_control
+        continue_on_error: true
+        data:
+          entity_id: switch.al_living_room
+          lights:
+          - light.living_room
+          manual_control: true
+      - action: light.turn_on
+        target:
+          entity_id: light.living_room
+        data:
+          brightness_pct: 100
+          color_temp_kelvin: 4000
+          transition: 1
+    - conditions:
+      - condition: trigger
+        id: off_button
+      - condition: state
+        entity_id: input_boolean.living_room_manual_override
+        state: 'on'
+      sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.living_room_manual_override
+      - action: adaptive_lighting.set_manual_control
+        continue_on_error: true
+        data:
+          entity_id: switch.al_living_room
+          lights:
+          - light.living_room
+          manual_control: false
+    - conditions:
+      - condition: trigger
+        id: empty
+      sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.living_room_manual_override
+      - action: adaptive_lighting.set_manual_control
+        continue_on_error: true
+        data:
+          entity_id: switch.al_living_room
+          lights:
+          - light.living_room
+          manual_control: false
+      - alias: Turn off TV
+        action: media_player.turn_off
+        continue_on_error: true
+        target:
+          entity_id: media_player.living_room_tv_2
+      - alias: Turn off fan
+        action: fan.turn_off
+        continue_on_error: true
+        target:
+          entity_id: fan.living_room_fan
+      - alias: Turn off living room lights
+        action: light.turn_off
+        target:
+          entity_id:
+          - light.living_room
+          - light.galaxy_projector
+  mode: restart
