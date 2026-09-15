@@ -88,7 +88,7 @@ switch:
 
 input_boolean:
   volvo_garage_door_opened_this_cycle:
-    name: "Volvo Garage Door Opened (this cycle)"
+    name: "Volvo Garage to House Door Opened (this cycle)"
     icon: mdi:garage-open
     initial: off
   good_morning_expected_pause:
