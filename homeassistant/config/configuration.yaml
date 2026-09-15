@@ -130,6 +130,10 @@ input_boolean:
     name: "Big Bedroom Asleep"
   bedroom2_asleep:
     name: "Bedroom 2 Asleep"
+  bedroom2_announcement_pending:
+    name: "Bedroom 2 Announcement Pending"
+    icon: mdi:bullhorn
+    initial: off
   arrival_recent:
     name: "Arrival Recent (latch)"
     initial: off
