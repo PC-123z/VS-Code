@@ -5656,8 +5656,8 @@
         target:
           entity_id: input_boolean.bedroom2_occupied
       - alias: Late start (10:45pm or later, after hard lights out) - mark occupied
-          only, keep lights and Nanoleafs off so nobody gets woken. Condition ends this
-          run here.
+          only, keep lights and Nanoleafs off so nobody gets woken. Condition ends
+          this run here.
         condition: time
         after: '21:45:00'
         before: '22:45:00'
@@ -9135,8 +9135,9 @@
   mode: single
 - id: '1777520160440'
   alias: 'Living Room: Unoccupied Shutoff'
-  description: After 15 min of no living room presence (with dining room also empty),
-    warn with color-changing lights then shut down TV, fan, and lights.
+  description: After 8.5 min of no living room presence (with dining room also empty
+    - re-checked when the dining room empties later), warn with color-changing lights
+    (only if they are on) then shut down TV, fan, and lights.
   triggers:
   - trigger: state
     entity_id: binary_sensor.living_room_sensor_group
@@ -9144,11 +9145,21 @@
     for:
       minutes: 8
       seconds: 30
+    id: living_room_empty
+  - alias: Dining room emptied after the living room was already empty (the 8.5-min
+      living room trigger only checks the dining room once)
+    trigger: state
+    entity_id: binary_sensor.dining_room_sensor_group
+    to: 'off'
+    id: dining_room_empty
   conditions:
-  - alias: Living room must still be empty
+  - alias: Living room must still be empty, and for at least 8 min (covers the dining-room-emptied
+      trigger)
     condition: state
     entity_id: binary_sensor.living_room_sensor_group
     state: 'off'
+    for:
+      minutes: 8
   - alias: Dining room must also be empty
     condition: state
     entity_id: binary_sensor.dining_room_sensor_group
@@ -9159,108 +9170,115 @@
     entity_id: input_boolean.living_room_manual_override
     state: 'off'
   actions:
-  - alias: Warning - deep blue
-    action: light.turn_on
-    target:
-      entity_id: light.living_room
-    data:
-      rgb_color:
-      - 0
-      - 0
-      - 200
-      brightness_pct: 60
-      transition: 1
-  - alias: Hold blue - cancel if presence returns
-    wait_for_trigger:
-    - trigger: state
-      entity_id: binary_sensor.living_room_sensor_group
-      to: 'on'
-    - trigger: state
-      entity_id: binary_sensor.dining_room_sensor_group
-      to: 'on'
-    timeout:
-      seconds: 30
-    continue_on_timeout: true
-  - alias: Abort if presence detected during blue
+  - alias: Color warning only if the living room lights are on (at night Smart Motion
+      already turned them off at 5 min - do not relight an empty room)
     if:
-    - condition: template
-      value_template: '{{ wait.completed == true }}'
-    then:
-    - action: adaptive_lighting.set_manual_control
-      data:
-        entity_id: switch.al_living_room
-        lights:
-        - light.living_room
-        manual_control: false
-    - stop: Presence returned during warning - aborting shutoff
-  - alias: Warning - purple
-    action: light.turn_on
-    target:
+    - condition: state
       entity_id: light.living_room
-    data:
-      rgb_color:
-      - 128
-      - 0
-      - 200
-      brightness_pct: 60
-      transition: 1
-  - alias: Hold purple - cancel if presence returns
-    wait_for_trigger:
-    - trigger: state
-      entity_id: binary_sensor.living_room_sensor_group
-      to: 'on'
-    - trigger: state
-      entity_id: binary_sensor.dining_room_sensor_group
-      to: 'on'
-    timeout:
-      seconds: 30
-    continue_on_timeout: true
-  - alias: Abort if presence detected during purple
-    if:
-    - condition: template
-      value_template: '{{ wait.completed == true }}'
+      state: 'on'
     then:
-    - action: adaptive_lighting.set_manual_control
+    - alias: Warning - deep blue
+      action: light.turn_on
+      target:
+        entity_id: light.living_room
       data:
-        entity_id: switch.al_living_room
-        lights:
-        - light.living_room
-        manual_control: false
-    - stop: Presence returned during warning - aborting shutoff
-  - alias: Warning - red
-    action: light.turn_on
-    target:
-      entity_id: light.living_room
-    data:
-      rgb_color:
-      - 255
-      - 0
-      - 0
-      brightness_pct: 60
-      transition: 1
-  - alias: Hold red - cancel if presence returns
-    wait_for_trigger:
-    - trigger: state
-      entity_id: binary_sensor.living_room_sensor_group
-      to: 'on'
-    - trigger: state
-      entity_id: binary_sensor.dining_room_sensor_group
-      to: 'on'
-    timeout:
-      seconds: 30
-    continue_on_timeout: true
-  - alias: Abort if presence detected during red
-    if:
-    - condition: template
-      value_template: '{{ wait.completed == true }}'
-    then:
-    - action: adaptive_lighting.set_manual_control
+        rgb_color:
+        - 0
+        - 0
+        - 200
+        brightness_pct: 60
+        transition: 1
+    - alias: Hold blue - cancel if presence returns
+      wait_for_trigger:
+      - trigger: state
+        entity_id: binary_sensor.living_room_sensor_group
+        to: 'on'
+      - trigger: state
+        entity_id: binary_sensor.dining_room_sensor_group
+        to: 'on'
+      timeout:
+        seconds: 30
+      continue_on_timeout: true
+    - alias: Abort if presence detected during blue
+      if:
+      - condition: template
+        value_template: '{{ wait.completed == true }}'
+      then:
+      - action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.al_living_room
+          lights:
+          - light.living_room
+          manual_control: false
+      - stop: Presence returned during warning - aborting shutoff
+    - alias: Warning - purple
+      action: light.turn_on
+      target:
+        entity_id: light.living_room
       data:
-        entity_id: switch.al_living_room
-        lights:
-        - light.living_room
-        manual_control: false
-    - stop: Presence returned during warning - aborting shutoff
+        rgb_color:
+        - 128
+        - 0
+        - 200
+        brightness_pct: 60
+        transition: 1
+    - alias: Hold purple - cancel if presence returns
+      wait_for_trigger:
+      - trigger: state
+        entity_id: binary_sensor.living_room_sensor_group
+        to: 'on'
+      - trigger: state
+        entity_id: binary_sensor.dining_room_sensor_group
+        to: 'on'
+      timeout:
+        seconds: 30
+      continue_on_timeout: true
+    - alias: Abort if presence detected during purple
+      if:
+      - condition: template
+        value_template: '{{ wait.completed == true }}'
+      then:
+      - action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.al_living_room
+          lights:
+          - light.living_room
+          manual_control: false
+      - stop: Presence returned during warning - aborting shutoff
+    - alias: Warning - red
+      action: light.turn_on
+      target:
+        entity_id: light.living_room
+      data:
+        rgb_color:
+        - 255
+        - 0
+        - 0
+        brightness_pct: 60
+        transition: 1
+    - alias: Hold red - cancel if presence returns
+      wait_for_trigger:
+      - trigger: state
+        entity_id: binary_sensor.living_room_sensor_group
+        to: 'on'
+      - trigger: state
+        entity_id: binary_sensor.dining_room_sensor_group
+        to: 'on'
+      timeout:
+        seconds: 30
+      continue_on_timeout: true
+    - alias: Abort if presence detected during red
+      if:
+      - condition: template
+        value_template: '{{ wait.completed == true }}'
+      then:
+      - action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.al_living_room
+          lights:
+          - light.living_room
+          manual_control: false
+      - stop: Presence returned during warning - aborting shutoff
   - alias: Turn off TV
     action: media_player.turn_off
     target:
