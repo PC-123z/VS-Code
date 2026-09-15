@@ -8149,7 +8149,8 @@
           entity_id: input_boolean.dining_room_manual_override
           state: 'off'
         then:
-        - alias: Dining room only stays dim during playback - restore or turn off now
+        - alias: Dining room only stays dim during playback - restore or turn off
+            now
           if:
           - condition: state
             entity_id: binary_sensor.dining_room_sensor_group
@@ -8268,7 +8269,8 @@
           entity_id: input_boolean.dining_room_manual_override
           state: 'off'
         then:
-        - alias: Dining room only stays dim during playback - restore or turn off now
+        - alias: Dining room only stays dim during playback - restore or turn off
+            now
           if:
           - condition: state
             entity_id: binary_sensor.dining_room_sensor_group
@@ -9622,17 +9624,17 @@
           data:
             enabled: true
         else:
-        - alias: 'PHASE 2 is queued BEHIND the opener while it is still playing, so the
-            Sonos rolls straight from Here Comes The Sun into the first shuffled track
-            with no gap. The old design waited for the opener to end and then replaced
-            the queue, which cost ~14s of silence (re-check, MA''s 5s end-of-queue watch,
-            ~5s playlist fetch) and on 2026-09-14 raced that watch - MA started a second
-            play of its own, so ~3s of Rare jumped to You Belong With Me. With items after
-            the opener the queue never ends, so that watch never starts. Shuffle goes on
-            first (nothing is after the opener yet, so there is nothing to reorder or
-            invalidate); enqueue add inserts the playlist after the playing track, shuffled,
-            and never starts playback by itself. All of this runs ~15s into a 3-minute
-            song, far from the track boundary.'
+        - alias: PHASE 2 is queued BEHIND the opener while it is still playing, so
+            the Sonos rolls straight from Here Comes The Sun into the first shuffled
+            track with no gap. The old design waited for the opener to end and then
+            replaced the queue, which cost ~14s of silence (re-check, MA's 5s end-of-queue
+            watch, ~5s playlist fetch) and on 2026-09-14 raced that watch - MA started
+            a second play of its own, so ~3s of Rare jumped to You Belong With Me.
+            With items after the opener the queue never ends, so that watch never
+            starts. Shuffle goes on first (nothing is after the opener yet, so there
+            is nothing to reorder or invalidate); enqueue add inserts the playlist
+            after the playing track, shuffled, and never starts playback by itself.
+            All of this runs ~15s into a 3-minute song, far from the track boundary.
           continue_on_error: true
           action: media_player.shuffle_set
           target:
@@ -9647,14 +9649,14 @@
             media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
             media_type: playlist
             enqueue: add
-        - alias: Autoplay back on - the queue now holds the whole playlist, so nothing is
-            near its end and this triggers no refill
+        - alias: Autoplay back on - the queue now holds the whole playlist, so nothing
+            is near its end and this triggers no refill
           continue_on_error: true
           action: rest_command.ma_bedroom_autoplay
           data:
             enabled: true
-        - alias: Repeat all - set minutes before the opener ends, so updating the player's
-            next item here happens nowhere near the track boundary
+        - alias: Repeat all - set minutes before the opener ends, so updating the
+            player's next item here happens nowhere near the track boundary
           continue_on_error: true
           action: media_player.repeat_set
           target:
@@ -9715,8 +9717,8 @@
           - action: input_boolean.turn_off
             target:
               entity_id: input_boolean.good_morning_expected_pause
-          - alias: Stop playback - the playlist is queued behind the opener, so the music
-              would otherwise carry on after a cancel
+          - alias: Stop playback - the playlist is queued behind the opener, so the
+              music would otherwise carry on after a cancel
             continue_on_error: true
             action: media_player.media_stop
             target:
@@ -11601,137 +11603,6 @@
     target:
       entity_id: timer.bedroom_sleep_audio
   mode: single
-- id: '1779800000010'
-  alias: '*Bedroom 2: Goodnight Routine'
-  description: Manually triggered "going to sleep now" for Bedroom 2/Office - mirrors
-    the Big Bedroom Goodnight Button. Stops motion automation, marks the room occupied
-    (so Good Morning fires normally) and asleep, engages AL sleep mode, stops music,
-    fans up, and fades all lights off. No music (unlike the Bedtime Routine, which
-    is a wind-down with music still playing).
-  triggers: []
-  conditions: []
-  actions:
-  - alias: Disable motion automation so it can't re-light the room
-    action: automation.turn_off
-    target:
-      entity_id: automation.office_bedroom_2_smart_motion_presence_2
-    data:
-      stop_actions: true
-  - alias: Mark bedroom 2 occupied - Good Morning Routine and Late Night Lights Out
-      key off this, and it's a no-op if the Bedtime Routine already set it
-    action: input_boolean.turn_on
-    target:
-      entity_id: input_boolean.bedroom2_occupied
-  - alias: Set manual override so nothing re-adjusts lighting until Good Morning clears
-      it
-    action: input_boolean.turn_on
-    target:
-      entity_id: input_boolean.bedroom2_manual_override
-  - alias: Turn off AL switches and set manual control
-    action: switch.turn_off
-    target:
-      entity_id:
-      - switch.adaptive_lighting_office
-      - switch.adaptive_lighting_adapt_color_office
-      - switch.adaptive_lighting_adapt_brightness_office
-  - action: adaptive_lighting.set_manual_control
-    data:
-      entity_id: switch.adaptive_lighting_office
-      lights:
-      - light.office
-      - light.office_1
-      - light.office_2
-      - light.hue_white_lamp_1
-      manual_control: true
-  - alias: Engage AL sleep mode for office/bedroom 2
-    action: switch.turn_on
-    target:
-      entity_id: switch.adaptive_lighting_sleep_mode_office
-  - alias: Mark bedroom 2 asleep directly - the sleep mode switch above also syncs
-      this via the "Sync Asleep Flag with AL Sleep Mode" automation, but setting it
-      here too means this routine doesn't depend on that automation staying enabled
-    action: input_boolean.turn_on
-    target:
-      entity_id: input_boolean.bedroom2_asleep
-  - alias: Set bedroom 2 fan to 50%
-    action: fan.turn_on
-    data:
-      percentage: 50
-    target:
-      entity_id: fan.bedroom2_fan
-  - alias: Stop any music - goodnight means no music, unlike the Bedtime Routine (with
-      verify and retry)
-    repeat:
-      sequence:
-      - continue_on_error: true
-        action: media_player.media_stop
-        target:
-          entity_id: media_player.office_2
-      - delay:
-          seconds: 5
-      until:
-      - condition: or
-        conditions:
-        - condition: template
-          value_template: '{{ repeat.index >= 3 }}'
-        - condition: not
-          conditions:
-          - condition: state
-            entity_id: media_player.office_2
-            state: playing
-  - alias: Nanoleaf to deep red 2% as a night light
-    action: light.turn_on
-    target:
-      entity_id:
-      - light.ribbon
-      - light.fluttershy
-    data:
-      rgb_color:
-      - 255
-      - 30
-      - 0
-      brightness_pct: 2
-      transition: 1
-  - alias: Fade office lights off over 5 seconds - only if already on
-    if:
-    - condition: state
-      entity_id: light.office
-      state: 'on'
-    then:
-    - action: light.turn_off
-      target:
-        entity_id: light.office
-      data:
-        transition: 5
-  - alias: Fade the lamp off over 5 seconds - only if already on
-    if:
-    - condition: state
-      entity_id: light.hue_white_lamp_1
-      state: 'on'
-    then:
-    - action: light.turn_off
-      target:
-        entity_id: light.hue_white_lamp_1
-      data:
-        transition: 5
-  - alias: Turn off Nanoleaf night light after 15 minutes
-    delay:
-      minutes: 15
-  - alias: Turn off Nanoleaf (retry - it can drop offline and miss commands)
-    repeat:
-      count: 3
-      sequence:
-      - continue_on_error: true
-        action: light.turn_off
-        target:
-          entity_id:
-          - light.ribbon
-          - light.fluttershy
-        data:
-          transition: 5
-      - delay:
-          seconds: 5
-  mode: single
 - id: '1757545200000'
   alias: Garage Camera - Toggle Detection with Cover/Volvo Start
   description: Turns off Frigate garage detect+motion when the garage cover is closed
@@ -11805,8 +11676,8 @@
   - alias: Cover hasn't been opened since this Volvo start began (any change since
       volvo_start_active turned on means someone already opened it this cycle - don't
       re-open it after they close it). Replaces the old blanket 10-min recently-changed
-      block in script_volvo_start_core, which blocked the 2026-09-14 start because the
-      cover had been closed 9.5 min before the cycle began.
+      block in script_volvo_start_core, which blocked the 2026-09-14 start because
+      the cover had been closed 9.5 min before the cycle began.
     condition: template
     value_template: '{{ states.cover.garage.last_changed <= states.input_boolean.volvo_start_active.last_changed
       }}'
@@ -12237,8 +12108,8 @@
   alias: 'Volvo: Start Flag Stuck Watchdog'
   description: A normal remote-start cycle clears input_boolean.volvo_start_active
     after ~4 minutes. If it's still on after 20 minutes, script_volvo_start_core failed
-    partway (e.g. 2026-09-14 Volvo auth failure left it on for hours, keeping the garage
-    lights on) - turn it off and alert.
+    partway (e.g. 2026-09-14 Volvo auth failure left it on for hours, keeping the
+    garage lights on) - turn it off and alert.
   triggers:
   - trigger: state
     entity_id: input_boolean.volvo_start_active
@@ -12272,9 +12143,9 @@
   - action: notify.mobile_app_pc_iphone
     data:
       title: Volvo Integration Offline
-      message: The Volvo integration has been unavailable for 15 minutes - remote start
-        will fail. Re-authenticate in HA (Settings > Devices & services > Volvo, Local
-        application credentials).
+      message: The Volvo integration has been unavailable for 15 minutes - remote
+        start will fail. Re-authenticate in HA (Settings > Devices & services > Volvo,
+        Local application credentials).
   mode: single
 - id: '1789600000003'
   alias: 'Dining Room: Dimmer Hold Override'
