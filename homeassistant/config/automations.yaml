@@ -8598,7 +8598,7 @@
     happens first just latches its own flag (input_boolean.garage_open_recent or input_boolean.arrival_recent)
     and stops; whichever happens second finds the other flag already on. Changed 2026-08-22
     - this automation NO LONGER disarms or plays music. It only arms input_boolean.welcome_home_pending
-    (the waiting state). The Ring garage door sensor (binary_sensor.garage_door) is
+    (the waiting state). The Ring garage to house door sensor (binary_sensor.garage_door) is
     now the final gate: see "Arrival (Welcome Home) - STAGE 2" which does the actual
     disarm + lights + music. Alarm stays armed and the house stays silent until that
     sensor reports open.
@@ -8679,15 +8679,15 @@
     action: notify.mobile_app_pc_iphone
     data:
       title: Welcome Home armed
-      message: Arrival confirmed. Waiting on the garage door sensor to disarm and
+      message: Arrival confirmed. Waiting on the garage to house door sensor to disarm and
         start the routine.
     enabled: false
   mode: queued
   max: 4
 - id: '1777484175035'
-  alias: Arrival (Welcome Home) - STAGE 2 Execute on Ring Garage Door Open
+  alias: Arrival (Welcome Home) - STAGE 2 Execute on Ring Garage to House Door Open
   description: 'STAGE 2 of 2. Added 2026-08-22. Holds the whole welcome home routine
-    (disarm, hallway lights, music) until the Ring garage door sensor actually reports
+    (disarm, hallway lights, music) until the Ring garage to house door sensor actually reports
     open. STAGE 1 does the two-factor arrival detection and sets input_boolean.welcome_home_pending;
     nothing here runs until that flag is on AND binary_sensor.garage_door is open,
     so the alarm stays armed and the house stays silent in the meantime.
@@ -8697,26 +8697,26 @@
     open a few seconds before the beacon latch lands (the garage physically opens
     first). Requiring the sensor as a condition means it is still a hard gate either
     way: the routine can never run with the door closed. Changed 2026-09-13: the Ring
-    garage door sensor opening is now the ONLY trigger (the pending-flag trigger was
+    garage to house door sensor opening is now the ONLY trigger (the pending-flag trigger was
     removed, it caused a duplicate queued run on 9/13 when STAGE 1 re-set pending
     at the same moment the door opened, replaying the album). The door-first race
     is handled by waiting up to 60s for the pending flag inside the run instead. Mode
     single instead of queued.'
   triggers:
-  - alias: Ring garage door sensor reports open
+  - alias: Ring garage to house door sensor reports open
     trigger: state
     entity_id: binary_sensor.garage_door
     to: 'on'
   conditions: []
   actions:
-  - alias: Garage door is the only trigger - give STAGE 1's arrival flag up to 60s
+  - alias: Garage to house door is the only trigger - give STAGE 1's arrival flag up to 60s
       to land (the Ring sensor can report open a few seconds before the beacon latch);
       if it never does, this was not a confirmed arrival and nothing runs
     wait_template: '{{ is_state(''input_boolean.welcome_home_pending'',''on'') }}'
     timeout:
       seconds: 60
     continue_on_timeout: false
-  - alias: Garage door must still be open - hard gate
+  - alias: Garage to house door must still be open - hard gate
     condition: state
     entity_id: binary_sensor.garage_door
     state: 'on'
@@ -8917,7 +8917,7 @@
     unrelated future event). Clearing pending on disarm also means that letting yourself
     in some other way - keypad, front door - cancels the waiting routine instead of
     leaving it to fire the next time the garage opens. Extended from 15 min 2026-09-12
-    - a Ring garage-door-sensor delay/miss let the latch expire before STAGE 2 saw
+    - a Ring garage-to-house-door-sensor delay/miss let the latch expire before STAGE 2 saw
     the door as open, so the alarm never disarmed.
   triggers:
   - alias: Arrival latch has been on for 1 hour
@@ -11762,7 +11762,7 @@
   mode: single
 - id: '1778700000001'
   alias: 'Garage: Open on Presence During Volvo Start'
-  description: While a Volvo remote-start cycle is active and the garage man-door
+  description: While a Volvo remote-start cycle is active and the garage to house door
     has opened at least once this cycle (input_boolean.volvo_garage_door_opened_this_cycle),
     open the garage cover the moment the mmWave presence sensor sees anyone - no hold-time
     and no requirement that the door be open at that exact instant. Replaces the old
@@ -11773,7 +11773,7 @@
   - trigger: state
     entity_id: binary_sensor.garage_garage_people_detection_presence
     to: 'on'
-  - alias: 'Also fire when the man-door latch turns on, so it doesn''t matter whether
+  - alias: 'Also fire when the garage to house door latch turns on, so it doesn''t matter whether
       presence or the latch comes last. On 2026-09-15 presence came on at 07:36:51,
       before the latch (07:37:22), and stayed on - the presence trigger never fired
       again, so the cover never opened.'
@@ -11830,7 +11830,7 @@
   alias: 'Garage: Lights on Presence, Door/Cover Open, or Volvo Start'
   description: 'Lutron dimmer light.garage_lights (moved from the kitchen 2026-09-12).
     Turns on when presence is seen (mmWave group or Frigate person), when the overhead
-    cover or the man-door opens, or when anything else turns it on (e.g. script_volvo_start_core).
+    cover or the garage to house door opens, or when anything else turns it on (e.g. script_volvo_start_core).
     Brightness comes from Garage - AL (intercepts the turn_on). Turns off once presence
     (mmWave + Frigate person) has been clear for 5 minutes and no Volvo start cycle
     is active. Mode restart: every new trigger restarts the 5-minute clock. Re-arms

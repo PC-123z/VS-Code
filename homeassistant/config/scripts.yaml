@@ -165,7 +165,7 @@ script_volvo_start_core:
               entity_id: cover.garage
               state: open
           sequence:
-          - alias: 'Only wait for the man-door if it has NOT just been used. If it is open
+          - alias: 'Only wait for the garage to house door if it has NOT just been used. If it is open
               now, or opened/closed within the last 2 minutes, someone walked into the
               garage right before (or as) the start fired - skip the wait and latch straight
               away. On 2026-09-15 the door opened 1s before the start, the wait below only
@@ -176,7 +176,7 @@ script_volvo_start_core:
                 is not none and (now() - states.binary_sensor.garage_door.last_changed).total_seconds()
                 < 120)) }}'
             then:
-            - alias: Wait for the garage man-door to open (up to 10 minutes) - confirms
+            - alias: Wait for the garage to house door to open (up to 10 minutes) - confirms
                 someone actually walked into the garage before arming presence-based
                 open. Once it opens, the flag below stays on for the rest of this cycle
                 - opening no longer has to coincide with presence at that exact instant
@@ -198,7 +198,7 @@ script_volvo_start_core:
               entity_id: input_boolean.volvo_garage_door_opened_this_cycle
             data: {}
     - sequence:
-      - alias: Unlock immediately if the garage door contact sensor is already on
+      - alias: Unlock immediately if the garage to house door contact sensor is already on
           when this run starts (e.g. door was jostled right before climatization was
           pressed)
         if:

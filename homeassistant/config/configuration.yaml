@@ -141,7 +141,7 @@ input_boolean:
     name: "Garage Open Recent (latch)"
     initial: off
   welcome_home_pending:
-    name: "Welcome Home Pending (waiting on garage door sensor)"
+    name: "Welcome Home Pending (waiting on garage to house door sensor)"
     initial: off
 
 # Template switches + sensors
