@@ -5284,7 +5284,9 @@
     30 minutes (10:15pm-10:45pm) fade every light to 0% and off while the music fades
     to silence over its last 5 minutes. Hard stop/hard lights out at 10:45pm is the
     backstop for both, and the room stays dark from then on - see *Bedroom 2 Late
-    Night Lights Out.
+    Night Lights Out. Late starts (occupied after 10:45pm) only mark the room occupied
+    and start the fan - no lights, Nanoleafs, or music, so it runs once and lets them
+    sleep.
   triggers:
   - trigger: state
     entity_id:
@@ -5546,6 +5548,12 @@
         target:
           entity_id: fan.bedroom2_fan
         enabled: true
+      - alias: Late start (10:40pm or later) - fan only, no music, so a late bedtime
+          doesn't start music that nothing stops (the 10:40 fade/10:45 stop have already
+          run) and nobody gets woken. Condition ends this run here.
+        condition: time
+        after: '21:45:00'
+        before: '22:40:00'
       - alias: Unjoin office_2 from any Music Assistant group before playing sleep
           music - otherwise it plays to whatever it's currently grouped with (e.g.
           the kitchen)
@@ -5647,6 +5655,12 @@
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.bedroom2_occupied
+      - alias: Late start (10:45pm or later, after hard lights out) - mark occupied
+          only, keep lights and Nanoleafs off so nobody gets woken. Condition ends this
+          run here.
+        condition: time
+        after: '21:45:00'
+        before: '22:45:00'
       - alias: Skip light changes if dimmer override is active
         if:
         - condition: state
