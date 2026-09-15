@@ -2174,36 +2174,6 @@
               - light.bathroom_main_lights
             data:
               transition: 1
-        - conditions:
-          - condition: sun
-            before: sunrise
-          - condition: time
-            after: 06:30:00
-          sequence:
-          - action: light.turn_on
-            target:
-              entity_id:
-              - light.bathroom_shower
-              - light.bathroom_tub_1
-              - light.bathroom_tub_2
-              - light.bathroom_back
-            data:
-              transition: 1
-          - condition: template
-            value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
-              'manual_control') }}\n"
-          - action: adaptive_lighting.apply
-            continue_on_error: true
-            data:
-              entity_id: switch.al_bathroom
-              lights:
-              - light.bathroom_shower
-              - light.bathroom_tub_1
-              - light.bathroom_tub_2
-              - light.bathroom_back
-              transition: 1
-              adapt_color: true
-              adapt_brightness: true
         - conditions: []
           sequence:
           - action: light.turn_on
