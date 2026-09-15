@@ -12325,3 +12325,63 @@
       color_temp_kelvin: 4000
       transition: 1
   mode: restart
+- id: '1779000000101'
+  alias: 'Garage: Close Cover on Arrival When Garage to House Door Opens'
+  description: 'Added 2026-09-15. After an arrival (car beacon device_tracker.bcpro_204982_08b8
+    going not_home -> home), Paul opens the garage cover, parks, and walks in through
+    the garage to house door. When that door (binary_sensor.garage_door) opens within
+    10 minutes of the beacon arriving, close the garage cover if it is still open.
+    Safety: the cover must have opened within the last 5 minutes (so a cover someone
+    opened earlier to work in the garage is never closed), and it must have been
+    open at least 30 seconds before the close is sent (so a door opened while the
+    car is still pulling in doesn''t close onto it). Only an away -> home beacon change
+    counts - unavailable -> home flaps from the iBeacon reload watchdog are ignored.
+    Respects input_boolean.garage_auto_close_enabled as the kill switch.'
+  triggers:
+  - alias: Car beacon returns home after being away
+    trigger: state
+    entity_id: device_tracker.bcpro_204982_08b8
+    from: not_home
+    to: home
+  conditions:
+  - condition: state
+    entity_id: input_boolean.garage_auto_close_enabled
+    state: 'on'
+  actions:
+  - alias: Wait for Paul to walk in through the garage to house door
+    wait_for_trigger:
+    - trigger: state
+      entity_id: binary_sensor.garage_door
+      from: 'off'
+      to: 'on'
+    timeout:
+      minutes: 10
+    continue_on_timeout: false
+  - alias: Cover is still open
+    condition: state
+    entity_id: cover.garage
+    state: open
+  - alias: Cover opened within the last 5 minutes
+    condition: template
+    value_template: '{{ now() - states.cover.garage.last_changed < timedelta(minutes=5)
+      }}'
+  - alias: Make sure the cover has been open at least 30s (car is in, not still pulling
+      in)
+    delay:
+      seconds: '{{ [30 - (now() - states.cover.garage.last_changed).total_seconds(),
+        0] | max | int }}'
+  - alias: Re-check it's still open (Paul may have closed it himself meanwhile)
+    condition: state
+    entity_id: cover.garage
+    state: open
+  - action: cover.close_cover
+    target:
+      entity_id: cover.garage
+    data: {}
+  - continue_on_error: true
+    action: notify.mobile_app_pc_iphone
+    data:
+      title: Garage closed
+      message: You walked in through the garage to house door with the garage still
+        open, so it was closed automatically.
+  mode: single
