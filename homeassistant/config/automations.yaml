@@ -12378,10 +12378,4 @@
     target:
       entity_id: cover.garage
     data: {}
-  - continue_on_error: true
-    action: notify.mobile_app_pc_iphone
-    data:
-      title: Garage closed
-      message: You walked in through the garage to house door with the garage still
-        open, so it was closed automatically.
   mode: single
