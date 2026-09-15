@@ -11773,7 +11773,19 @@
   - trigger: state
     entity_id: binary_sensor.garage_garage_people_detection_presence
     to: 'on'
+  - alias: 'Also fire when the man-door latch turns on, so it doesn''t matter whether
+      presence or the latch comes last. On 2026-09-15 presence came on at 07:36:51,
+      before the latch (07:37:22), and stayed on - the presence trigger never fired
+      again, so the cover never opened.'
+    trigger: state
+    entity_id: input_boolean.volvo_garage_door_opened_this_cycle
+    to: 'on'
   conditions:
+  - alias: Someone is in the garage right now (needed because the latch can now be
+      the trigger)
+    condition: state
+    entity_id: binary_sensor.garage_garage_people_detection_presence
+    state: 'on'
   - condition: state
     entity_id: input_boolean.volvo_start_active
     state: 'on'

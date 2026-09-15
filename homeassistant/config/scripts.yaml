@@ -165,19 +165,30 @@ script_volvo_start_core:
               entity_id: cover.garage
               state: open
           sequence:
-          - alias: Wait for the garage man-door to open (up to 10 minutes) - confirms
-              someone actually walked into the garage before arming presence-based
-              open. Once it opens, the flag below stays on for the rest of this cycle
-              - opening no longer has to coincide with presence at that exact instant
-              (on 2026-09-11, door-open and presence-on didn't line up, so the old
-              same-moment check never fired).
-            wait_for_trigger:
-            - trigger: state
-              entity_id: binary_sensor.garage_door
-              to: 'on'
-            timeout:
-              minutes: 10
-            continue_on_timeout: false
+          - alias: 'Only wait for the man-door if it has NOT just been used. If it is open
+              now, or opened/closed within the last 2 minutes, someone walked into the
+              garage right before (or as) the start fired - skip the wait and latch straight
+              away. On 2026-09-15 the door opened 1s before the start, the wait below only
+              reacts to a NEW change, and the garage never opened on presence.'
+            if:
+            - condition: template
+              value_template: '{{ not (is_state(''binary_sensor.garage_door'', ''on'') or (states.binary_sensor.garage_door
+                is not none and (now() - states.binary_sensor.garage_door.last_changed).total_seconds()
+                < 120)) }}'
+            then:
+            - alias: Wait for the garage man-door to open (up to 10 minutes) - confirms
+                someone actually walked into the garage before arming presence-based
+                open. Once it opens, the flag below stays on for the rest of this cycle
+                - opening no longer has to coincide with presence at that exact instant
+                (on 2026-09-11, door-open and presence-on didn't line up, so the old
+                same-moment check never fired).
+              wait_for_trigger:
+              - trigger: state
+                entity_id: binary_sensor.garage_door
+                to: 'on'
+              timeout:
+                minutes: 10
+              continue_on_timeout: false
           - alias: Latch - door opened this cycle. A separate automation (Garage -
               Open on Presence During Volvo Start) watches presence and opens the
               cover any time this flag and volvo_start_active are both on, with no
