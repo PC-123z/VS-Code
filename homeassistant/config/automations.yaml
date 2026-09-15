@@ -6038,11 +6038,13 @@
         timeout:
           seconds: 5
         continue_on_timeout: true
-      - action: media_player.volume_set
+      - alias: Start at 0.05, where the wake ramp begins - starting at 0.1 made the
+          first ramp step dip the music down to 0.069 before climbing
+        action: media_player.volume_set
         target:
           entity_id: media_player.office_2
         data:
-          volume_level: 0.1
+          volume_level: 0.05
       - alias: Play wake album via Music Assistant
         continue_on_error: true
         action: music_assistant.play_media
@@ -6195,6 +6197,11 @@
           - alias: Let the new track settle so it is not ducked at position zero
             delay:
               seconds: 10
+        - alias: Flag the greeting as in progress so the manual-stop automation ignores
+            any pause/idle blip while it plays
+          action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.bedroom2_announcement_pending
         - alias: Set volume for first announcement
           action: media_player.volume_set
           target:
@@ -6225,6 +6232,9 @@
           timeout:
             seconds: 30
           continue_on_timeout: true
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.bedroom2_announcement_pending
         - alias: Wait for the next track boundary before the second announcement
           wait_for_trigger:
           - trigger: state
@@ -6239,6 +6249,11 @@
             the track restarting. Matches the settle the Big Bedroom routine uses.
           delay:
             seconds: 10
+        - alias: Flag the greeting as in progress so the manual-stop automation ignores
+            any pause/idle blip while it plays
+          action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.bedroom2_announcement_pending
         - alias: Bump volume for second announcement
           action: media_player.volume_set
           target:
@@ -6269,6 +6284,9 @@
           timeout:
             seconds: 30
           continue_on_timeout: true
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.bedroom2_announcement_pending
         - alias: Restore volume to 0.2 after announcements
           action: media_player.volume_set
           target:
@@ -6294,6 +6312,10 @@
                 - condition: state
                   entity_id: binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
                   state: 'on'
+                - alias: Weekdays keep the music going until the 60-minute cap (07:30 for
+                    the 06:30 run) even if the room empties while the kids get ready
+                  condition: template
+                  value_template: '{{ now().weekday() < 5 }}'
               then:
               - alias: Self-heal - re-queue the wake album if Music Assistant went
                   silent. Matches the Big Bedroom routine's self-heal for the same
@@ -6347,56 +6369,80 @@
               - delay:
                   seconds: 30
               else:
-              - alias: Ramp volume down over 2 minutes, abandoning the ramp the moment
-                  occupancy returns. This used to end with a bare stop action when
-                  occupancy came back, but stop ends the WHOLE automation run, not
-                  just the ramp - on 2026-09-13 it fired at 07:35:39, killing the
-                  occupancy loop and the 60-minute cap, so the album kept playing
-                  (MA Autoplay refilled the queue at 07:52) and bedroom2_occupied
-                  was left on with nothing to clear it.
-                repeat:
-                  while:
-                  - condition: template
-                    value_template: '{{ repeat.index <= 8 and not (is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy'',
-                      ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy'',
-                      ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'',
-                      ''on'')) }}'
-                  sequence:
-                  - action: media_player.volume_set
-                    target:
-                      entity_id: media_player.office_2
-                    data:
-                      volume_level: '{{ [0.2 - (repeat.index * 0.0225), 0.02] | max
-                        | round(3) }}'
-                  - delay:
-                      seconds: 15
+              - alias: Weekends only (weekdays never reach this branch) - wait for 10 unbroken
+                  minutes with nobody detected before ending. Any zone coming back on
+                  completes the wait and returns to the loop.
+                wait_for_trigger:
+                - trigger: state
+                  entity_id:
+                  - binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy
+                  - binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy
+                  - binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
+                  to: 'on'
+                timeout:
+                  minutes: 10
+                continue_on_timeout: true
               - if:
                 - condition: template
-                  value_template: '{{ (is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy'',
-                    ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy'',
-                    ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'',
-                    ''on'')) }}'
+                  value_template: '{{ wait.completed == true }}'
                 then:
-                - alias: Occupancy returned - restore volume and carry on round the
-                    occupancy loop
+                - alias: Someone came back within 10 minutes - keep the music at normal volume
                   action: media_player.volume_set
                   target:
                     entity_id: media_player.office_2
                   data:
                     volume_level: 0.2
                 else:
-                - action: media_player.media_stop
-                  target:
-                    entity_id: media_player.office_2
-                - action: input_boolean.turn_off
-                  target:
-                    entity_id: input_boolean.bedroom2_occupied
-                - alias: Hand lighting control back to Smart Presence now that the
-                    routine is done
-                  action: automation.turn_on
-                  target:
-                    entity_id: automation.office_bedroom_2_smart_motion_presence_2
-                - stop: Room cleared - routine complete
+                - alias: Ramp volume down over 2 minutes, abandoning the ramp the moment
+                    occupancy returns. This used to end with a bare stop action when
+                    occupancy came back, but stop ends the WHOLE automation run, not
+                    just the ramp - on 2026-09-13 it fired at 07:35:39, killing the
+                    occupancy loop and the 60-minute cap, so the album kept playing
+                    (MA Autoplay refilled the queue at 07:52) and bedroom2_occupied
+                    was left on with nothing to clear it.
+                  repeat:
+                    while:
+                    - condition: template
+                      value_template: '{{ repeat.index <= 8 and not (is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy'',
+                        ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy'',
+                        ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'',
+                        ''on'')) }}'
+                    sequence:
+                    - action: media_player.volume_set
+                      target:
+                        entity_id: media_player.office_2
+                      data:
+                        volume_level: '{{ [0.2 - (repeat.index * 0.0225), 0.02] | max
+                          | round(3) }}'
+                    - delay:
+                        seconds: 15
+                - if:
+                  - condition: template
+                    value_template: '{{ (is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy'',
+                      ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy'',
+                      ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'',
+                      ''on'')) }}'
+                  then:
+                  - alias: Occupancy returned - restore volume and carry on round the
+                      occupancy loop
+                    action: media_player.volume_set
+                    target:
+                      entity_id: media_player.office_2
+                    data:
+                      volume_level: 0.2
+                  else:
+                  - action: media_player.media_stop
+                    target:
+                      entity_id: media_player.office_2
+                  - action: input_boolean.turn_off
+                    target:
+                      entity_id: input_boolean.bedroom2_occupied
+                  - alias: Hand lighting control back to Smart Presence now that the
+                      routine is done
+                    action: automation.turn_on
+                    target:
+                      entity_id: automation.office_bedroom_2_smart_motion_presence_2
+                  - stop: Room cleared - routine complete
         - action: media_player.media_stop
           target:
             entity_id: media_player.office_2
@@ -6472,6 +6518,64 @@
         action: automation.turn_on
         target:
           entity_id: automation.office_bedroom_2_smart_motion_presence_2
+  mode: single
+- id: '1789415000001'
+  alias: '*Bedroom 2: Stop Good Morning when music stopped from speaker'
+  description: If the Office speaker is paused or stopped by hand while the Bedroom
+    2 Good Morning routine is running, end the run instead of letting its self-heal
+    restart the wake album 20 seconds later. Mirrors the Big Bedroom stop automation
+    - watches the Sonos entity (media_player.office) with a short debounce, since a
+    physical button press shows there reliably, and the Music Assistant entity (media_player.office_2)
+    with a longer one. Ignored while a greeting plays (input_boolean.bedroom2_announcement_pending)
+    and for the first 90 seconds of a run, when the routine's own unjoin and album
+    start can blip the player.
+  triggers:
+  - trigger: state
+    entity_id: media_player.office_2
+    from: playing
+    to: paused
+    for:
+      seconds: 8
+  - trigger: state
+    entity_id: media_player.office_2
+    from: playing
+    to: idle
+    for:
+      seconds: 8
+  - trigger: state
+    entity_id: media_player.office
+    from: playing
+    to: paused
+    for:
+      seconds: 2
+  - trigger: state
+    entity_id: media_player.office
+    from: playing
+    to: idle
+    for:
+      seconds: 2
+  conditions:
+  - alias: The Bedroom 2 Good Morning routine is running
+    condition: template
+    value_template: '{{ (state_attr(''automation.bedroom_2_good_morning_routine'', ''current'') | int(0)) > 0 }}'
+  - alias: Past the routine's own start-up (unjoin + album start)
+    condition: template
+    value_template: '{% set lt = state_attr(''automation.bedroom_2_good_morning_routine'', ''last_triggered'') %}{{ lt is not none and (now() - as_datetime(lt | string)).total_seconds() > 90 }}'
+  - alias: Not during a greeting
+    condition: state
+    entity_id: input_boolean.bedroom2_announcement_pending
+    state: 'off'
+  actions:
+  - alias: Stop the music player explicitly so Music Assistant can't resume it
+    continue_on_error: true
+    action: media_player.media_stop
+    target:
+      entity_id: media_player.office_2
+  - alias: End the run - the occupancy loop exits on this flag and hands lighting back
+      to Smart Presence
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.bedroom2_occupied
   mode: single
 - id: '1776382720393'
   alias: Bedroom 2 Daily Reset
@@ -11100,6 +11204,12 @@
     condition: state
     entity_id: input_boolean.bedroom2_manual_override
     state: 'off'
+  - alias: 'Stand down while the Bedroom 2 Good Morning routine is running. It owns
+      the panels from its 06:30 weekday start, inside this 23:45-07:00 window - on
+      2026-09-15 this watchdog kept turning them off while the routine''s self-heal
+      turned them back on, so they flapped every ~90s from 06:30 to 07:00.'
+    condition: template
+    value_template: '{{ (state_attr(''automation.bedroom_2_good_morning_routine'', ''current'') | int(0)) == 0 }}'
   actions:
   - alias: Retry the off it missed while offline
     action: light.turn_off
