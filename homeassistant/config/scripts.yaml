@@ -149,8 +149,8 @@ script_volvo_start_core:
         target:
           entity_id: input_boolean.volvo_start_active
     - sequence:
-      - alias: Open garage if Volvo start active, between 6:30AM-10:50PM, and cover not
-          already open (opened-since-start is checked in Garage - Open on Presence)
+      - alias: Open garage if Volvo start active, between 6:30AM-10:50PM, and cover
+          not already open (opened-since-start is checked in Garage - Open on Presence)
         choose:
         - conditions:
           - condition: state
@@ -165,23 +165,24 @@ script_volvo_start_core:
               entity_id: cover.garage
               state: open
           sequence:
-          - alias: 'Only wait for the garage to house door if it has NOT just been used. If it is open
-              now, or opened/closed within the last 2 minutes, someone walked into the
-              garage right before (or as) the start fired - skip the wait and latch straight
-              away. On 2026-09-15 the door opened 1s before the start, the wait below only
-              reacts to a NEW change, and the garage never opened on presence.'
+          - alias: Only wait for the garage to house door if it has NOT just been
+              used. If it is open now, or opened/closed within the last 2 minutes,
+              someone walked into the garage right before (or as) the start fired
+              - skip the wait and latch straight away. On 2026-09-15 the door opened
+              1s before the start, the wait below only reacts to a NEW change, and
+              the garage never opened on presence.
             if:
             - condition: template
-              value_template: '{{ not (is_state(''binary_sensor.garage_door'', ''on'') or (states.binary_sensor.garage_door
-                is not none and (now() - states.binary_sensor.garage_door.last_changed).total_seconds()
+              value_template: '{{ not (is_state(''binary_sensor.garage_door'', ''on'')
+                or (states.binary_sensor.garage_door is not none and (now() - states.binary_sensor.garage_door.last_changed).total_seconds()
                 < 120)) }}'
             then:
-            - alias: Wait for the garage to house door to open (up to 10 minutes) - confirms
-                someone actually walked into the garage before arming presence-based
-                open. Once it opens, the flag below stays on for the rest of this cycle
-                - opening no longer has to coincide with presence at that exact instant
-                (on 2026-09-11, door-open and presence-on didn't line up, so the old
-                same-moment check never fired).
+            - alias: Wait for the garage to house door to open (up to 10 minutes)
+                - confirms someone actually walked into the garage before arming presence-based
+                open. Once it opens, the flag below stays on for the rest of this
+                cycle - opening no longer has to coincide with presence at that exact
+                instant (on 2026-09-11, door-open and presence-on didn't line up,
+                so the old same-moment check never fired).
               wait_for_trigger:
               - trigger: state
                 entity_id: binary_sensor.garage_door
@@ -198,9 +199,9 @@ script_volvo_start_core:
               entity_id: input_boolean.volvo_garage_door_opened_this_cycle
             data: {}
     - sequence:
-      - alias: Unlock immediately if the garage to house door contact sensor is already on
-          when this run starts (e.g. door was jostled right before climatization was
-          pressed)
+      - alias: Unlock immediately if the garage to house door contact sensor is already
+          on when this run starts (e.g. door was jostled right before climatization
+          was pressed)
         if:
         - condition: state
           entity_id: binary_sensor.garage_door
@@ -284,18 +285,20 @@ goodbye_routine_main:
 goodbye_routine_motion_tracking:
   alias: Goodbye Routine - Motion Tracking
   description: Decides home vs empty. First allows up to 5 min for Paul's own exit
-    motion to clear, then runs 5 consecutive 2-minute checks. Motion at any point during the checks
-    = someone is home. Returns {someone_home, detected}.
+    motion to clear, then runs 5 consecutive 2-minute checks. Motion at any point
+    during the checks = someone is home. Returns {someone_home, detected}.
   sequence:
   - alias: Settle - let departure motion clear (still-on after 5 min fails check 1)
-    wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'') }}'
+    wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'')
+      }}'
     timeout:
       minutes: 5
     continue_on_timeout: true
   - repeat:
       count: 5
       sequence:
-      - wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''on'') }}'
+      - wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''on'')
+          }}'
         timeout:
           minutes: 2
         continue_on_timeout: true
@@ -349,8 +352,8 @@ goodbye_routine_someone_home_arm_stay:
   - action: notify.mobile_app_pc_iphone
     data:
       title: Someone's Home
-      message: 'Motion after you left ({{ detected }}). Alarm set to Stay - lights,
-        TVs and music left alone.'
+      message: Motion after you left ({{ detected }}). Alarm set to Stay - lights,
+        TVs and music left alone.
   mode: single
   icon: mdi:home-account
 goodbye_routine_all_clear_arm_and_power_off:
@@ -537,21 +540,21 @@ kitchen_up_light_apply:
   description: 'Sets the Datura up light (light.hue_datura_top_1) and the Kitchen
     Lightstrip for the current kitchen mode. Normal: the up light gets the complementary
     color of the white Adaptive Lighting is giving the rest of the kitchen (warm white
-    -> twilight indigo/blue, neutral -> blush rose, cool daylight -> peach/amber; soft
-    saturation, brightness 50% of AL, min 10%), drifting slowly through 3 related colors:
-    the complement, +35 deg hue, -35 deg hue (18 min cycle, eased so it lingers on
-    each; position is derived from the clock so every caller lands on the same point
-    of the cycle), and slowly breathes +/-15% in brightness on a 7 min sine (out of
-    step with the color cycle, so the combination rarely repeats; sleep/dishes unaffected).
-    The lightstrip (NOT on Kitchen - AL) gets a faint tint of the same
+    -> twilight indigo/blue, neutral -> blush rose, cool daylight -> peach/amber;
+    soft saturation, brightness 50% of AL, min 10%), drifting slowly through 3 related
+    colors: the complement, +35 deg hue, -35 deg hue (18 min cycle, eased so it lingers
+    on each; position is derived from the clock so every caller lands on the same
+    point of the cycle), and slowly breathes +/-15% in brightness on a 7 min sine
+    (out of step with the color cycle, so the combination rarely repeats; sleep/dishes
+    unaffected). The lightstrip (NOT on Kitchen - AL) gets a faint tint of the same
     complement drifting the opposite way (mirror offset, ~45% of the up light saturation)
     at the AL brightness. Reads switch.al_kitchen, falling back to switch.al_garage
     (same 2000-5500K / 40-100% curve) when Kitchen AL is momentarily off. Dishes window
     23:45-23:55: up dim indigo 15%, strip 2200K 60%. Sleep mode: up "Ember" deep amber-red
     35% (the prominent night light; Kitchen - Down drops to 5% red in the Smart Motion
-    automation), strip red 24%. Turns the up light on - callers decide whether it should
-    be on. The strip is only touched if it is already on or turn_on_strip is true.
-    Skips while kitchen manual override is on.'
+    automation), strip red 24%. Turns the up light on - callers decide whether it
+    should be on. The strip is only touched if it is already on or turn_on_strip is
+    true. Skips while kitchen manual override is on.'
   icon: mdi:ceiling-light-multiple
   mode: restart
   fields:
@@ -590,10 +593,21 @@ kitchen_up_light_apply:
         ns.h = a[1] + (b[1] - a[1]) * f %}{% set ns.s = a[2] + (b[2] - a[2]) * f %}\n
         \ {% endif %}\n{% endfor %}\n{{ [(ns.h % 360) | round(1), ns.s | round(1)]
         }}"
-      drift_offset: "{% set offs = [0, 35, -35] %}\n{% set cycle = 1080 %}\n{% set
-        p = (now().timestamp() % cycle) / cycle * 3 %}\n{% set i = p | int %}\n{% set
-        f = p - i %}\n{% set e = (1 - cos(pi * f)) / 2 %}\n{% set a = offs[i] %}{%
-        set b = offs[(i + 1) % 3] %}\n{{ (a + (b - a) * e) | round(1) }}"
+      drift_offset: '{% set offs = [0, 35, -35] %}
+
+        {% set cycle = 1080 %}
+
+        {% set p = (now().timestamp() % cycle) / cycle * 3 %}
+
+        {% set i = p | int %}
+
+        {% set f = p - i %}
+
+        {% set e = (1 - cos(pi * f)) / 2 %}
+
+        {% set a = offs[i] %}{% set b = offs[(i + 1) % 3] %}
+
+        {{ (a + (b - a) * e) | round(1) }}'
       drift_hs: '{{ [((complement_hs[0] + drift_offset) % 360) | round(1), complement_hs[1]]
         }}'
       strip_hs: '{{ [((complement_hs[0] - drift_offset) % 360) | round(1), (complement_hs[1]
@@ -678,3 +692,29 @@ kitchen_up_light_apply:
           hs_color: '{{ strip_hs }}'
           brightness_pct: '{{ strip_bri }}'
           transition: '{{ fade }}'
+zz_tmp_child:
+  alias: zz tmp child
+  sequence:
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.zz_missing
+    data:
+      value: 1
+  - stop: fail
+    error: true
+zz_tmp_parent:
+  alias: zz tmp parent
+  sequence:
+  - repeat:
+      sequence:
+      - action: script.zz_tmp_child
+        response_variable: r
+        continue_on_error: true
+      until:
+      - condition: template
+        value_template: '{{ (r is defined and r.ok) or repeat.index >= 2 }}'
+  - variables:
+      res:
+        defined: '{{ r is defined }}'
+  - stop: done
+    response_variable: res
