@@ -12379,3 +12379,49 @@
       entity_id: cover.garage
     data: {}
   mode: single
+- id: '1789600000017'
+  alias: 'Garage: Aladdin Connect Stale Watchdog'
+  description: Aladdin Connect polls every 15s and writes cover.garage each time. On
+    2026-09-15 7:29 PM the poll silently froze (no errors, update_entity did nothing)
+    and cover.garage stuck at closed, so the 2026-09-16 departure never triggered the
+    goodbye routine. If cover.garage hasn't been reported in 5 min (or is unavailable
+    5 min), reload the integration and notify. 10-min cooldown after each attempt.
+  triggers:
+  - trigger: template
+    value_template: '{{ states.cover.garage is not none and (now() - states.cover.garage.last_reported).total_seconds()
+      > 300 }}'
+    id: stale
+  - trigger: state
+    entity_id: cover.garage
+    to: unavailable
+    for:
+      minutes: 5
+    id: unavailable
+  conditions: []
+  actions:
+  - alias: Reload Aladdin Connect
+    action: homeassistant.reload_config_entry
+    target:
+      entity_id: cover.garage
+    continue_on_error: true
+  - alias: Give it a minute to poll
+    delay:
+      seconds: 60
+  - variables:
+      recovered: '{{ states(''cover.garage'') not in [''unavailable'', ''unknown'']
+        and (now() - states.cover.garage.last_reported).total_seconds() < 60 }}'
+  - alias: Notify
+    action: notify.mobile_app_pc_iphone
+    data:
+      title: Garage Door Status {{ 'Recovered' if recovered else 'Still Broken' }}
+      message: "{% if recovered %}Aladdin Connect had stopped updating ({{ trigger.id
+        }}) - reloaded it and the garage is reporting again ({{ states('cover.garage')
+        }}).{% else %}Aladdin Connect stopped updating ({{ trigger.id }}) and a reload
+        did NOT fix it. Garage open/close won't trigger departure automations until
+        it's fixed.{% endif %}"
+    continue_on_error: true
+  - alias: Cooldown so a persistent outage doesn't reload/notify every minute
+    delay:
+      minutes: 10
+  mode: single
+  max_exceeded: silent
