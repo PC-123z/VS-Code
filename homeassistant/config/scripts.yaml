@@ -34,6 +34,25 @@ good_morning_routine:
     data: {}
     continue_on_error: true
   mode: single
+script_volvo_press_climatization:
+  alias: 'Script: Volvo Press Climatization'
+  description: Presses the Volvo climatization button and returns {ok true}. If the
+    Volvo API rejects the command the press raises, this script errors, and the caller
+    (Volvo Start Core, via continue_on_error) gets no ok - so it can retry and alert
+    instead of dying.
+  icon: mdi:car-key
+  sequence:
+  - alias: Press climatization button
+    action: button.press
+    target:
+      entity_id: button.volvo_xc60_start_climatization
+    data: {}
+  - variables:
+      press_result:
+        ok: true
+  - stop: Climatization command accepted
+    response_variable: press_result
+  mode: single
 script_volvo_start_core:
   alias: 'Script: Volvo Start Core'
   description: Core climatization routine - starts car, activates scenes, announces
@@ -59,25 +78,11 @@ script_volvo_start_core:
       target:
         entity_id: input_boolean.volvo_start_active
     - stop: Car is not home
-  - alias: Verify the Volvo integration is online before pressing climatization -
-      if it's logged out (e.g. 2026-09-14 token refresh 400) the press throws and
-      aborts the script silently, leaving volvo_start_active stuck on
-    if:
-    - condition: state
-      entity_id: lock.volvo_xc60_lock
-      state: unavailable
-    then:
-    - alias: Notify Volvo integration offline
-      action: notify.mobile_app_pc_iphone
-      data:
-        title: Volvo Start Failed
-        message: Car was NOT started - the Volvo integration is offline. Re-authenticate
-          it in HA (Settings > Devices & services > Volvo, Local application credentials).
-    - alias: Clear Volvo start active flag
-      action: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.volvo_start_active
-    - stop: Volvo integration unavailable
+  - alias: Check the Volvo integration is online. If it's logged out (e.g. 2026-09-14
+      token refresh 400) the press can't work - skip it, but keep the rest of the routine
+      (garage open on presence, unlock, scenes, announcements) running
+    variables:
+      volvo_online: "{{ not is_state('lock.volvo_xc60_lock', 'unavailable') }}"
   - alias: Turn on garage lights (Garage - AL sets brightness; Garage Lights automation
       turns them off 5 min after presence clears once this start cycle ends)
     action: light.turn_on
@@ -85,39 +90,93 @@ script_volvo_start_core:
       entity_id: light.garage_lights
     data: {}
     continue_on_error: true
-  - alias: Press climatization button
-    action: button.press
-    target:
-      entity_id: button.volvo_xc60_start_climatization
-    data: {}
   - alias: Run main sequence and garage in parallel
     parallel:
     - sequence:
+      - alias: Press climatization - up to 3 attempts 30s apart. The press lives in
+          script.script_volvo_press_climatization, which only returns {ok:true} if the
+          press didn't raise. On 2026-09-16 the Volvo API returned 503 ("Could not fetch
+          opt-out list from service") and the uncaught error killed this whole script -
+          no garage open, no announcements, no alert. A failed press must never stop
+          the rest of the routine.
+        if:
+        - condition: template
+          value_template: '{{ volvo_online }}'
+        then:
+        - repeat:
+            sequence:
+            - if:
+              - condition: template
+                value_template: '{{ repeat.index > 1 }}'
+              then:
+              - delay:
+                  seconds: 30
+            - action: script.script_volvo_press_climatization
+              response_variable: climatization_press
+              continue_on_error: true
+            until:
+            - condition: template
+              value_template: '{{ (climatization_press is defined and climatization_press.ok
+                is defined and climatization_press.ok) or repeat.index >= 3 }}'
+      - variables:
+          car_started: '{{ climatization_press is defined and climatization_press.ok
+            is defined and climatization_press.ok == true }}'
       - alias: Activate initial scene (Malibu Pink)
         action: hue.activate_scene
         target:
           entity_id: scene.hallway_malibu_pink
         data:
           transition: 15
-      - alias: Announce departure with weather
-        action: notify.send_message
-        target:
-          entity_id:
-          - notify.paul_s_sonos_arc_announce
-          - notify.echo_show_kitchen_announce
-          - notify.office_speaker_announce
-          - notify.living_room_dot_announce
-          - notify.paul_s_sonos_one_second_edition_announce
-        data:
-          message: XC60 will be Ready to Depart in 5 Minutes. Current conditions are
-            {{ states('weather.forecast_home') }}, {{ state_attr('weather.forecast_home',
-            'temperature') }} degrees.
         continue_on_error: true
-      - alias: Send departure iPhone notification
-        action: notify.mobile_app_pc_iphone
-        data:
-          message: XC60 will be Ready to Depart in 5 Minutes
-          title: Volvo XC60
+      - if:
+        - condition: template
+          value_template: '{{ car_started }}'
+        then:
+        - alias: Announce departure with weather
+          action: notify.send_message
+          target:
+            entity_id:
+            - notify.paul_s_sonos_arc_announce
+            - notify.echo_show_kitchen_announce
+            - notify.office_speaker_announce
+            - notify.living_room_dot_announce
+            - notify.paul_s_sonos_one_second_edition_announce
+          data:
+            message: XC60 will be Ready to Depart in 5 Minutes. Current conditions are
+              {{ states('weather.forecast_home') }}, {{ state_attr('weather.forecast_home',
+              'temperature') }} degrees.
+          continue_on_error: true
+        - alias: Send departure iPhone notification
+          action: notify.mobile_app_pc_iphone
+          data:
+            message: XC60 will be Ready to Depart in 5 Minutes
+            title: Volvo XC60
+          continue_on_error: true
+        else:
+        - alias: Notify car NOT started (garage/unlock still running)
+          action: notify.mobile_app_pc_iphone
+          data:
+            title: Volvo Start Failed
+            message: "{% if volvo_online %}Car was NOT started - the Volvo API rejected
+              climatization 3 times (Volvo service error). {% else %}Car was NOT started
+              - the Volvo integration is offline. Re-authenticate it in HA (Settings >
+              Devices & services > Volvo, Local application credentials). {% endif %}Garage
+              will still open on presence."
+          continue_on_error: true
+        - alias: Announce car not started
+          action: notify.send_message
+          target:
+            entity_id:
+            - notify.paul_s_sonos_arc_announce
+            - notify.echo_show_kitchen_announce
+            - notify.office_speaker_announce
+            - notify.living_room_dot_announce
+            - notify.paul_s_sonos_one_second_edition_announce
+          data:
+            message: The XC60 could not be started remotely. Current conditions are
+              {{ states('weather.forecast_home') }}, {{ state_attr('weather.forecast_home',
+              'temperature') }} degrees.
+          continue_on_error: true
       - alias: Wait 4 minutes
         delay:
           minutes: 4
@@ -127,23 +186,29 @@ script_volvo_start_core:
           entity_id: scene.hallway_energize
         data:
           transition: 60
-      - alias: Announce ready
-        action: notify.send_message
-        target:
-          entity_id:
-          - notify.paul_s_sonos_arc_announce
-          - notify.echo_show_kitchen_announce
-          - notify.office_speaker_announce
-          - notify.living_room_dot_announce
-          - notify.paul_s_sonos_one_second_edition_announce
-        data:
-          message: 'Vehicle Ready, Time to Go!!!!  '
         continue_on_error: true
-      - alias: Send ready iPhone notification
-        action: notify.mobile_app_pc_iphone
-        data:
-          message: XC60 is Ready to Depart
-          title: Car Remote
+      - if:
+        - condition: template
+          value_template: '{{ car_started }}'
+        then:
+        - alias: Announce ready
+          action: notify.send_message
+          target:
+            entity_id:
+            - notify.paul_s_sonos_arc_announce
+            - notify.echo_show_kitchen_announce
+            - notify.office_speaker_announce
+            - notify.living_room_dot_announce
+            - notify.paul_s_sonos_one_second_edition_announce
+          data:
+            message: 'Vehicle Ready, Time to Go!!!!  '
+          continue_on_error: true
+        - alias: Send ready iPhone notification
+          action: notify.mobile_app_pc_iphone
+          data:
+            message: XC60 is Ready to Depart
+            title: Car Remote
+          continue_on_error: true
       - alias: Clear Volvo start active flag
         action: input_boolean.turn_off
         target:
@@ -211,6 +276,7 @@ script_volvo_start_core:
           target:
             entity_id: lock.volvo_xc60_lock
           data: {}
+          continue_on_error: true
       - alias: Re-unlock on every subsequent garage_door blip - the charge cable needs
           a fresh unlock press to release from the terminal, and the door can blip
           on/off several times before the garage actually opens - until the garage
@@ -243,6 +309,7 @@ script_volvo_start_core:
               target:
                 entity_id: lock.volvo_xc60_lock
               data: {}
+              continue_on_error: true
   mode: single
 script_good_morning_routine_core:
   alias: 'Script: Good Morning Routine Core'
@@ -692,29 +759,3 @@ kitchen_up_light_apply:
           hs_color: '{{ strip_hs }}'
           brightness_pct: '{{ strip_bri }}'
           transition: '{{ fade }}'
-zz_tmp_child:
-  alias: zz tmp child
-  sequence:
-  - action: input_number.set_value
-    target:
-      entity_id: input_number.zz_missing
-    data:
-      value: 1
-  - stop: fail
-    error: true
-zz_tmp_parent:
-  alias: zz tmp parent
-  sequence:
-  - repeat:
-      sequence:
-      - action: script.zz_tmp_child
-        response_variable: r
-        continue_on_error: true
-      until:
-      - condition: template
-        value_template: '{{ (r is defined and r.ok) or repeat.index >= 2 }}'
-  - variables:
-      res:
-        defined: '{{ r is defined }}'
-  - stop: done
-    response_variable: res
