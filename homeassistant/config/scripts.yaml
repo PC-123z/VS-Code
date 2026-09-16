@@ -173,9 +173,7 @@ script_volvo_start_core:
             - notify.living_room_dot_announce
             - notify.paul_s_sonos_one_second_edition_announce
           data:
-            message: The XC60 could not be started remotely. Current conditions are
-              {{ states('weather.forecast_home') }}, {{ state_attr('weather.forecast_home',
-              'temperature') }} degrees.
+            message: The XC60 could not be started remotely.
           continue_on_error: true
       - alias: Wait 4 minutes
         delay:
