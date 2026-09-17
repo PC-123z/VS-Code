@@ -1244,16 +1244,20 @@
     when motion is active, right as kitchen sleep mode (kitchen_sleep_on, 23:45) is
     applied. AL is disabled BEFORE manual color changes in ALL paths to prevent manual_control
     flag from triggering the override boolean spuriously. Mode is queued (max 10)
-    so long transitions can''t cause dropped triggers. The Kitchen Pico (device still
-    labeled "Bathroom Remote" from an abandoned relocation plan, area never actually
-    changed from kitchen) sets input_boolean.kitchen_manual_override directly via
-    "Kitchen Remote (Pico): Button Control" - same boolean this automation already
-    uses, so no separate stand-down guard is needed here. (2026-09-17: a guard here
-    that checked a nonexistent input_boolean.kitchen_remote_manual_override was removed
-    - it silently blocked every trigger since 2026-09-12, which is why overrides
-    weren''t resetting after presence cleared. The Pico automation was then found
-    to reference that same nonexistent helper and was repointed at
-    input_boolean.kitchen_manual_override, the one that actually exists.)
+    so long transitions can''t cause dropped triggers. The Kitchen Pico (device area
+    always kitchen; display name was stale as "Bathroom Remote" from an abandoned
+    relocation plan, renamed back 2026-09-17) sets input_boolean.kitchen_manual_override
+    directly via "Kitchen Remote (Pico): Button Control" - same boolean this automation
+    already uses, so no separate stand-down guard is needed here. The Pico also sets
+    input_boolean.kitchen_pico_hold, which this automation''s own 60-second
+    kitchen_cleared auto-clear (below) explicitly checks and skips, so the Pico''s
+    override survives the full intended 10 minutes instead of being cut short by
+    this automation''s shorter timer. (2026-09-17: a guard here that checked a
+    nonexistent input_boolean.kitchen_remote_manual_override was removed - it
+    silently blocked every trigger since 2026-09-12, which is why overrides weren''t
+    resetting after presence cleared. The Pico automation was then found to reference
+    that same nonexistent helper and was repointed at kitchen_manual_override, the
+    one that actually exists.)
 
     '
   triggers:
@@ -1594,8 +1598,12 @@
       - condition: trigger
         id: kitchen_cleared
       alias: 'Cleared 60s: clear manual override flag (lights stay on until the 3:30
-        fade)'
+        fade) - skipped while the Pico''s own 10-minute hold is active, so a
+        deliberate Pico Off doesn''t get undone by this shorter timer'
       sequence:
+      - condition: state
+        entity_id: input_boolean.kitchen_pico_hold
+        state: 'off'
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.kitchen_manual_override
@@ -12475,19 +12483,19 @@
     2026-09-12 because it targeted a nonexistent input_boolean.kitchen_remote_manual_override;
     repointed at the real helper, input_boolean.kitchen_manual_override, the same
     one "Kitchen: Smart Motion & Presence" already uses - so no separate stand-down
-    guard is needed there. Top (on) button: turns on all 5 kitchen Hue lights at 100%
-    brightness and sets input_boolean.kitchen_manual_override, which makes "Kitchen:
-    Smart Motion & Presence" stand down entirely. Off button: turns the lights off
-    and holds the same override so presence motion doesn''t immediately relight them.
-    Raise/Lower: step brightness on the current lights and also grab the override,
-    since a manual brightness tweak is a deliberate override too. NOTE: because this
-    now shares kitchen_manual_override with the main automation''s own 60-second
-    auto-clear (kitchen_cleared trigger, fires whenever the room reads empty for
-    1 minute, regardless of what set the flag), the Pico''s override effectively
-    only holds ~60s after the room clears, not the full 10 minutes described below
-    - the 10-minute clear automation is now a backstop that rarely gets to fire first.
-    Override is released by "Kitchen Remote: Clear Override After 10min Empty"
-    once the room reads clear for 10 minutes - see that automation.'
+    guard is needed there. All four buttons set both input_boolean.kitchen_manual_override
+    (which makes "Kitchen: Smart Motion & Presence" stand down) and
+    input_boolean.kitchen_pico_hold. Top (on): all 5 kitchen Hue lights to 100%.
+    Off: lights off, holding the override so presence motion doesn''t immediately
+    relight them. Raise/Lower: step brightness on the current lights - a manual
+    brightness tweak is a deliberate override too. 2026-09-17: kitchen_pico_hold
+    was added because sharing a single boolean with the main automation''s 60-second
+    auto-clear (kitchen_cleared) was cutting this override down to ~60s instead of
+    the intended 10 minutes; the main automation''s 60s clear now explicitly skips
+    while kitchen_pico_hold is on, so the Pico''s hold genuinely lasts the full 10
+    minutes again. Both flags are released together by "Kitchen Remote: Clear
+    Override After 10min Empty" once the room reads clear for 10 minutes - see that
+    automation.'
   triggers:
   - device_id: 864fec31db3ec90f02e244eb717c9cd4
     domain: lutron_caseta
@@ -12522,7 +12530,9 @@
       sequence:
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.kitchen_manual_override
+          entity_id:
+          - input_boolean.kitchen_manual_override
+          - input_boolean.kitchen_pico_hold
       - alias: Disable AL before the manual change so it can't fight it
         action: switch.turn_off
         target:
@@ -12555,7 +12565,9 @@
       sequence:
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.kitchen_manual_override
+          entity_id:
+          - input_boolean.kitchen_manual_override
+          - input_boolean.kitchen_pico_hold
       - action: switch.turn_off
         target:
           entity_id: switch.al_kitchen
@@ -12576,7 +12588,9 @@
       sequence:
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.kitchen_manual_override
+          entity_id:
+          - input_boolean.kitchen_manual_override
+          - input_boolean.kitchen_pico_hold
       - action: switch.turn_off
         target:
           entity_id: switch.al_kitchen
@@ -12597,7 +12611,9 @@
       sequence:
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.kitchen_manual_override
+          entity_id:
+          - input_boolean.kitchen_manual_override
+          - input_boolean.kitchen_pico_hold
       - action: switch.turn_off
         target:
           entity_id: switch.al_kitchen
@@ -12615,14 +12631,15 @@
   mode: restart
 - id: '1789700000002'
   alias: 'Kitchen Remote: Clear Override After 10min Empty'
-  description: 'Releases input_boolean.kitchen_manual_override (set by the
-    Kitchen Pico remote) once binary_sensor.kitchen_sensor_group has read clear for
-    10 straight minutes, handing control back to "Kitchen: Smart Motion & Presence".
-    Counts from override start if the room already reads empty when the button is
-    pressed. 2026-09-17: this boolean is shared with the main automation''s own
-    60-second clear (kitchen_cleared), which normally fires first - so in practice
-    this mostly serves as a backstop and as the thing that also clears AL''s
-    manual_control list, which the 60-second path does not do.'
+  description: 'Releases input_boolean.kitchen_manual_override and input_boolean.kitchen_pico_hold
+    (both set by the Kitchen Pico remote) once binary_sensor.kitchen_sensor_group
+    has read clear for 10 straight minutes, handing control back to "Kitchen: Smart
+    Motion & Presence". Counts from override start if the room already reads empty
+    when the button is pressed. 2026-09-17: added kitchen_pico_hold as a separate
+    flag so the Pico''s override survives the main automation''s own 60-second
+    clear (kitchen_cleared), which now explicitly skips clearing kitchen_manual_override
+    while kitchen_pico_hold is on - restoring the Pico''s intended 10-minute hold
+    instead of the ~60s it was getting when both paths shared one boolean.'
   triggers:
   - trigger: template
     id: empty
@@ -12635,7 +12652,9 @@
   actions:
   - action: input_boolean.turn_off
     target:
-      entity_id: input_boolean.kitchen_manual_override
+      entity_id:
+      - input_boolean.kitchen_manual_override
+      - input_boolean.kitchen_pico_hold
   - action: adaptive_lighting.set_manual_control
     continue_on_error: true
     data:

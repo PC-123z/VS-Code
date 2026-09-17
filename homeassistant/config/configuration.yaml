@@ -143,6 +143,10 @@ input_boolean:
   welcome_home_pending:
     name: "Welcome Home Pending (waiting on garage to house door sensor)"
     initial: off
+  kitchen_pico_hold:
+    name: "Kitchen Pico Hold (10-min override, distinct from the 60s auto-clear)"
+    icon: mdi:remote
+    initial: off
 
 # Template switches + sensors
 template:
