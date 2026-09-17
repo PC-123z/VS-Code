@@ -1244,10 +1244,11 @@
     when motion is active, right as kitchen sleep mode (kitchen_sleep_on, 23:45) is
     applied. AL is disabled BEFORE manual color changes in ALL paths to prevent manual_control
     flag from triggering the override boolean spuriously. Mode is queued (max 10)
-    so long transitions can''t cause dropped triggers. The Kitchen Pico remote (top
-    button) sets input_boolean.kitchen_remote_manual_override, which makes this whole
-    automation stand down until "Kitchen Remote: Clear Override After 10min Empty"
-    hands control back.
+    so long transitions can''t cause dropped triggers. (The old Pico hold-for-100%
+    guard was removed 2026-09-17: input_boolean.kitchen_remote_manual_override no
+    longer exists since the Pico moved to the bathroom 2026-09-12, and its dangling
+    reference here was silently blocking every trigger - motion, clearing, sleep -
+    which is why overrides weren''t resetting after presence cleared.)
 
     '
   triggers:
@@ -1292,11 +1293,6 @@
       '
     id: al_manual_control_changed
   actions:
-  - alias: Skip everything while the Pico remote's hold-for-100% override is active
-      (Kitchen Remote Button Control owns the lights and its own 10-min empty handoff)
-    condition: state
-    entity_id: input_boolean.kitchen_remote_manual_override
-    state: 'off'
   - choose:
     - conditions:
       - condition: trigger
@@ -2722,20 +2718,26 @@
         entity_id: input_boolean.big_bedroom_manual_override
         state: 'off'
       sequence:
-      - alias: Turn lights off first before re-enabling AL to prevent race condition
+      - alias: Lamps off first
         action: light.turn_off
         target:
           entity_id:
           - light.nano_sand_dune
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
           - light.bedroom_lamp_1
           - light.bedroom_lamp_2
         data:
           transition: 15
-      - alias: Wait for transition to complete before re-enabling AL
+      - alias: Ceiling lights fade off over the next 8 minutes
+        action: light.turn_off
+        target:
+          entity_id:
+          - light.bedroom_ceiling_1
+          - light.bedroom_ceiling_2
+        data:
+          transition: 480
+      - alias: Wait for ceiling fade to complete before re-enabling AL
         delay:
-          seconds: 16
+          seconds: 481
       - alias: Clear manual_control so AL can take over on next motion
         action: adaptive_lighting.set_manual_control
         data:
