@@ -1244,11 +1244,16 @@
     when motion is active, right as kitchen sleep mode (kitchen_sleep_on, 23:45) is
     applied. AL is disabled BEFORE manual color changes in ALL paths to prevent manual_control
     flag from triggering the override boolean spuriously. Mode is queued (max 10)
-    so long transitions can''t cause dropped triggers. (The old Pico hold-for-100%
-    guard was removed 2026-09-17: input_boolean.kitchen_remote_manual_override no
-    longer exists since the Pico moved to the bathroom 2026-09-12, and its dangling
-    reference here was silently blocking every trigger - motion, clearing, sleep -
-    which is why overrides weren''t resetting after presence cleared.)
+    so long transitions can''t cause dropped triggers. The Kitchen Pico (device still
+    labeled "Bathroom Remote" from an abandoned relocation plan, area never actually
+    changed from kitchen) sets input_boolean.kitchen_manual_override directly via
+    "Kitchen Remote (Pico): Button Control" - same boolean this automation already
+    uses, so no separate stand-down guard is needed here. (2026-09-17: a guard here
+    that checked a nonexistent input_boolean.kitchen_remote_manual_override was removed
+    - it silently blocked every trigger since 2026-09-12, which is why overrides
+    weren''t resetting after presence cleared. The Pico automation was then found
+    to reference that same nonexistent helper and was repointed at
+    input_boolean.kitchen_manual_override, the one that actually exists.)
 
     '
   triggers:
@@ -12415,7 +12420,7 @@
   alias: 'Kitchen Remote (Pico): Button Control'
   description: 'Kitchen Pico remote (relabeled back to Kitchen 2026-09-17, entities
     still prefixed kitchen_remote_* from its old "Bathroom Remote" name). Top (on)
-    button: turns on all 5 kitchen Hue lights at 100% brightness and sets input_boolean.kitchen_remote_manual_override,
+    button: turns on all 5 kitchen Hue lights at 100% brightness and sets input_boolean.kitchen_manual_override,
     which makes "Kitchen: Smart Motion & Presence" stand down entirely. Off button:
     turns the lights off and holds the same override so presence motion doesn''t
     immediately relight them. Raise/Lower: step brightness on the current lights and
@@ -12456,7 +12461,7 @@
       sequence:
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.kitchen_remote_manual_override
+          entity_id: input_boolean.kitchen_manual_override
       - alias: Disable AL before the manual change so it can't fight it
         action: switch.turn_off
         target:
@@ -12489,7 +12494,7 @@
       sequence:
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.kitchen_remote_manual_override
+          entity_id: input_boolean.kitchen_manual_override
       - action: switch.turn_off
         target:
           entity_id: switch.al_kitchen
@@ -12510,7 +12515,7 @@
       sequence:
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.kitchen_remote_manual_override
+          entity_id: input_boolean.kitchen_manual_override
       - action: switch.turn_off
         target:
           entity_id: switch.al_kitchen
@@ -12531,7 +12536,7 @@
       sequence:
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.kitchen_remote_manual_override
+          entity_id: input_boolean.kitchen_manual_override
       - action: switch.turn_off
         target:
           entity_id: switch.al_kitchen
@@ -12549,7 +12554,7 @@
   mode: restart
 - id: '1789700000002'
   alias: 'Kitchen Remote: Clear Override After 10min Empty'
-  description: 'Releases input_boolean.kitchen_remote_manual_override (set by the
+  description: 'Releases input_boolean.kitchen_manual_override (set by the
     Kitchen Pico remote) once binary_sensor.kitchen_sensor_group has read clear for
     10 straight minutes, handing control back to "Kitchen: Smart Motion & Presence".
     Counts from override start if the room already reads empty when the button is
@@ -12558,7 +12563,7 @@
   - trigger: template
     id: empty
     alias: Override on and kitchen empty for 10 min
-    value_template: '{{ is_state(''input_boolean.kitchen_remote_manual_override'',
+    value_template: '{{ is_state(''input_boolean.kitchen_manual_override'',
       ''on'') and is_state(''binary_sensor.kitchen_sensor_group'', ''off'') }}'
     for:
       minutes: 10
@@ -12566,7 +12571,7 @@
   actions:
   - action: input_boolean.turn_off
     target:
-      entity_id: input_boolean.kitchen_remote_manual_override
+      entity_id: input_boolean.kitchen_manual_override
   - action: adaptive_lighting.set_manual_control
     continue_on_error: true
     data:
