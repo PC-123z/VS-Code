@@ -12427,6 +12427,46 @@
       minutes: 10
   mode: single
   max_exceeded: silent
+- id: '1789700000003'
+  alias: 'System: Alert on Silent Automation Errors (Unknown Entity)'
+  description: 'Catches the class of bug found 2026-09-17: the Kitchen Pico and its
+    main motion automation both silently referenced a nonexistent input_boolean
+    (kitchen_remote_manual_override) for days with no visible symptom besides "the
+    lights feel off" - HA logged a WARNING on every trigger but nothing surfaced
+    it. Watches system_log_event for condition-evaluation failures on missing
+    entities and service calls targeting missing entities, and pushes a phone
+    notification with the offending automation/message so it gets caught same-day
+    instead of by chance. 60-minute cooldown (mode: single + trailing delay) so a
+    stuck automation retriggering every few seconds doesn''t spam the phone -
+    the goal is "notice today," not "notify every occurrence."'
+  triggers:
+  - trigger: event
+    event_type: system_log_event
+  conditions:
+  - condition: template
+    value_template: '{% set msg = trigger.event.data.message | join('' '') if trigger.event.data.message
+      is iterable and trigger.event.data.message is not string else trigger.event.data.message
+      | string %}
+
+      {{ trigger.event.data.level in [''WARNING'', ''ERROR''] and (''unknown entity''
+      in msg or ''is missing or not currently available'' in msg) }}
+
+      '
+  actions:
+  - variables:
+      log_name: '{{ trigger.event.data.name }}'
+      log_msg: '{% set msg = trigger.event.data.message | join('' '') if trigger.event.data.message
+        is iterable and trigger.event.data.message is not string else trigger.event.data.message
+        | string %}{{ msg }}'
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: HA Automation Referencing Missing Entity
+      message: '{{ log_name }}: {{ log_msg }}'
+  - alias: Cooldown so a persistently-broken automation doesn't spam every retrigger
+    delay:
+      minutes: 60
+  mode: single
+  max_exceeded: silent
 - id: '1789700000001'
   alias: 'Kitchen Remote (Pico): Button Control'
   description: '2026-09-17: confirmed this Pico never left the kitchen (device area_id
