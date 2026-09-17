@@ -2737,7 +2737,7 @@
           transition: 480
       - alias: Wait for ceiling fade to complete before re-enabling AL
         delay:
-          seconds: 300
+          seconds: 481
       - alias: Clear manual_control so AL can take over on next motion
         action: adaptive_lighting.set_manual_control
         data:
