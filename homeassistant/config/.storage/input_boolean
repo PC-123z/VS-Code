@@ -37,6 +37,11 @@
       {
         "id": "good_morning_announcement_pending",
         "name": "Good Morning Announcement Pending"
+      },
+      {
+        "id": "kitchen_remote_manual_override",
+        "name": "Kitchen Remote Manual Override",
+        "icon": "mdi:remote"
       }
     ]
   }

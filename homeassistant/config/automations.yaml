@@ -1244,7 +1244,10 @@
     when motion is active, right as kitchen sleep mode (kitchen_sleep_on, 23:45) is
     applied. AL is disabled BEFORE manual color changes in ALL paths to prevent manual_control
     flag from triggering the override boolean spuriously. Mode is queued (max 10)
-    so long transitions can''t cause dropped triggers.
+    so long transitions can''t cause dropped triggers. The Kitchen Pico remote (top
+    button) sets input_boolean.kitchen_remote_manual_override, which makes this whole
+    automation stand down until "Kitchen Remote: Clear Override After 10min Empty"
+    hands control back.
 
     '
   triggers:
@@ -1289,6 +1292,11 @@
       '
     id: al_manual_control_changed
   actions:
+  - alias: Skip everything while the Pico remote's hold-for-100% override is active
+      (Kitchen Remote Button Control owns the lights and its own 10-min empty handoff)
+    condition: state
+    entity_id: input_boolean.kitchen_remote_manual_override
+    state: 'off'
   - choose:
     - conditions:
       - condition: trigger
@@ -2112,12 +2120,7 @@
   actions:
   - action: light.turn_off
     target:
-      entity_id:
-      - light.bathroom_shower
-      - light.bathroom_tub_1
-      - light.bathroom_tub_2
-      - light.bathroom_back
-      - light.bathroom_main_lights
+      entity_id: light.bathroom
     data:
       transition: 20
   mode: single
@@ -12453,3 +12456,169 @@
       minutes: 10
   mode: single
   max_exceeded: silent
+- id: '1789700000001'
+  alias: 'Kitchen Remote (Pico): Button Control'
+  description: 'Kitchen Pico remote (relabeled back to Kitchen 2026-09-17, entities
+    still prefixed kitchen_remote_* from its old "Bathroom Remote" name). Top (on)
+    button: turns on all 5 kitchen Hue lights at 100% brightness and sets input_boolean.kitchen_remote_manual_override,
+    which makes "Kitchen: Smart Motion & Presence" stand down entirely. Off button:
+    turns the lights off and holds the same override so presence motion doesn''t
+    immediately relight them. Raise/Lower: step brightness on the current lights and
+    also grab the override, since a manual brightness tweak is a deliberate override
+    too. Override is released by "Kitchen Remote: Clear Override After 10min Empty"
+    once the room reads clear for 10 minutes - see that automation.'
+  triggers:
+  - device_id: 864fec31db3ec90f02e244eb717c9cd4
+    domain: lutron_caseta
+    type: press
+    subtype: 'on'
+    trigger: device
+    id: 'on'
+  - device_id: 864fec31db3ec90f02e244eb717c9cd4
+    domain: lutron_caseta
+    type: press
+    subtype: 'off'
+    trigger: device
+    id: 'off'
+  - device_id: 864fec31db3ec90f02e244eb717c9cd4
+    domain: lutron_caseta
+    type: press
+    subtype: raise
+    trigger: device
+    id: raise
+  - device_id: 864fec31db3ec90f02e244eb717c9cd4
+    domain: lutron_caseta
+    type: press
+    subtype: lower
+    trigger: device
+    id: lower
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: 'on'
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.kitchen_remote_manual_override
+      - alias: Disable AL before the manual change so it can't fight it
+        action: switch.turn_off
+        target:
+          entity_id: switch.al_kitchen
+      - action: adaptive_lighting.set_manual_control
+        continue_on_error: true
+        data:
+          entity_id: switch.al_kitchen
+          lights:
+          - light.kitchen_1_color
+          - light.kitchen_2_color
+          - light.hue_datura_bottom_1
+          manual_control: true
+      - alias: All 5 kitchen Hue lights on, bright 100%
+        action: light.turn_on
+        target:
+          entity_id:
+          - light.kitchen_1_color
+          - light.kitchen_2_color
+          - light.kitchen_lightstrip
+          - light.hue_datura_top_1
+          - light.hue_datura_bottom_1
+        data:
+          brightness_pct: 100
+          color_temp_kelvin: 4000
+          transition: 1
+    - conditions:
+      - condition: trigger
+        id: 'off'
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.kitchen_remote_manual_override
+      - action: switch.turn_off
+        target:
+          entity_id: switch.al_kitchen
+      - alias: All 5 kitchen Hue lights off
+        action: light.turn_off
+        target:
+          entity_id:
+          - light.kitchen_1_color
+          - light.kitchen_2_color
+          - light.kitchen_lightstrip
+          - light.hue_datura_top_1
+          - light.hue_datura_bottom_1
+        data:
+          transition: 1
+    - conditions:
+      - condition: trigger
+        id: raise
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.kitchen_remote_manual_override
+      - action: switch.turn_off
+        target:
+          entity_id: switch.al_kitchen
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.kitchen_1_color
+          - light.kitchen_2_color
+          - light.kitchen_lightstrip
+          - light.hue_datura_top_1
+          - light.hue_datura_bottom_1
+        data:
+          brightness_step_pct: 10
+          transition: 1
+    - conditions:
+      - condition: trigger
+        id: lower
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.kitchen_remote_manual_override
+      - action: switch.turn_off
+        target:
+          entity_id: switch.al_kitchen
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.kitchen_1_color
+          - light.kitchen_2_color
+          - light.kitchen_lightstrip
+          - light.hue_datura_top_1
+          - light.hue_datura_bottom_1
+        data:
+          brightness_step_pct: -10
+          transition: 1
+  mode: restart
+- id: '1789700000002'
+  alias: 'Kitchen Remote: Clear Override After 10min Empty'
+  description: 'Releases input_boolean.kitchen_remote_manual_override (set by the
+    Kitchen Pico remote) once binary_sensor.kitchen_sensor_group has read clear for
+    10 straight minutes, handing control back to "Kitchen: Smart Motion & Presence".
+    Counts from override start if the room already reads empty when the button is
+    pressed.'
+  triggers:
+  - trigger: template
+    id: empty
+    alias: Override on and kitchen empty for 10 min
+    value_template: '{{ is_state(''input_boolean.kitchen_remote_manual_override'',
+      ''on'') and is_state(''binary_sensor.kitchen_sensor_group'', ''off'') }}'
+    for:
+      minutes: 10
+  conditions: []
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.kitchen_remote_manual_override
+  - action: adaptive_lighting.set_manual_control
+    continue_on_error: true
+    data:
+      entity_id: switch.al_kitchen
+      lights:
+      - light.kitchen_1_color
+      - light.kitchen_2_color
+      - light.hue_datura_bottom_1
+      manual_control: false
+  mode: single
