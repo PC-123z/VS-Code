@@ -2423,6 +2423,17 @@
         entity_id: input_boolean.big_bedroom_asleep
         state: 'off'
       sequence:
+      - alias: Clear manual_control in case motion resumed mid ramp-down, before
+          the ramp-down's own clear step ran
+        action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.al_big_bedroom
+          lights:
+          - light.bedroom_ceiling_1
+          - light.bedroom_ceiling_2
+          - light.bedroom_lamp_1
+          - light.bedroom_lamp_2
+          manual_control: false
       - choose:
         - conditions:
           - condition: time
