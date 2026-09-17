@@ -12418,14 +12418,24 @@
   max_exceeded: silent
 - id: '1789700000001'
   alias: 'Kitchen Remote (Pico): Button Control'
-  description: 'Kitchen Pico remote (relabeled back to Kitchen 2026-09-17, entities
-    still prefixed kitchen_remote_* from its old "Bathroom Remote" name). Top (on)
-    button: turns on all 5 kitchen Hue lights at 100% brightness and sets input_boolean.kitchen_manual_override,
-    which makes "Kitchen: Smart Motion & Presence" stand down entirely. Off button:
-    turns the lights off and holds the same override so presence motion doesn''t
-    immediately relight them. Raise/Lower: step brightness on the current lights and
-    also grab the override, since a manual brightness tweak is a deliberate override
-    too. Override is released by "Kitchen Remote: Clear Override After 10min Empty"
+  description: '2026-09-17: confirmed this Pico never left the kitchen (device area_id
+    has always been kitchen) - only its Lutron device display name is stale ("Bathroom
+    Remote", left over from an abandoned relocation plan). It was silently dead since
+    2026-09-12 because it targeted a nonexistent input_boolean.kitchen_remote_manual_override;
+    repointed at the real helper, input_boolean.kitchen_manual_override, the same
+    one "Kitchen: Smart Motion & Presence" already uses - so no separate stand-down
+    guard is needed there. Top (on) button: turns on all 5 kitchen Hue lights at 100%
+    brightness and sets input_boolean.kitchen_manual_override, which makes "Kitchen:
+    Smart Motion & Presence" stand down entirely. Off button: turns the lights off
+    and holds the same override so presence motion doesn''t immediately relight them.
+    Raise/Lower: step brightness on the current lights and also grab the override,
+    since a manual brightness tweak is a deliberate override too. NOTE: because this
+    now shares kitchen_manual_override with the main automation''s own 60-second
+    auto-clear (kitchen_cleared trigger, fires whenever the room reads empty for
+    1 minute, regardless of what set the flag), the Pico''s override effectively
+    only holds ~60s after the room clears, not the full 10 minutes described below
+    - the 10-minute clear automation is now a backstop that rarely gets to fire first.
+    Override is released by "Kitchen Remote: Clear Override After 10min Empty"
     once the room reads clear for 10 minutes - see that automation.'
   triggers:
   - device_id: 864fec31db3ec90f02e244eb717c9cd4
@@ -12558,7 +12568,10 @@
     Kitchen Pico remote) once binary_sensor.kitchen_sensor_group has read clear for
     10 straight minutes, handing control back to "Kitchen: Smart Motion & Presence".
     Counts from override start if the room already reads empty when the button is
-    pressed.'
+    pressed. 2026-09-17: this boolean is shared with the main automation''s own
+    60-second clear (kitchen_cleared), which normally fires first - so in practice
+    this mostly serves as a backstop and as the thing that also clears AL''s
+    manual_control list, which the 60-second path does not do.'
   triggers:
   - trigger: template
     id: empty
