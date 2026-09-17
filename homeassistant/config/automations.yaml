@@ -2093,6 +2093,33 @@
         AL restored.'
     enabled: false
   mode: single
+- id: '1758150000000'
+  alias: 'Pico Center - Bathroom: Fade Off if No Motion'
+  description: Bathroom Pico center button. If bathroom motion is currently off,
+    fade all bathroom lights off over 20 seconds. Does nothing if motion is present,
+    leaving Bathroom Smart Motion & Presence in control.
+  triggers:
+  - device_id: 864fec31db3ec90f02e244eb717c9cd4
+    domain: lutron_caseta
+    type: press
+    subtype: stop
+    trigger: device
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.bathroom_motion
+    state: 'off'
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id:
+      - light.bathroom_shower
+      - light.bathroom_tub_1
+      - light.bathroom_tub_2
+      - light.bathroom_back
+      - light.bathroom_main_lights
+    data:
+      transition: 20
+  mode: single
 - id: '1775373515241'
   alias: 'Bathroom: Smart Motion & Presence (Split Color/White)'
   triggers:
