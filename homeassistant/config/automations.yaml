@@ -2726,7 +2726,7 @@
           - light.bedroom_lamp_1
           - light.bedroom_lamp_2
         data:
-          transition: 15
+          transition: 60
       - alias: Ceiling lights fade off over the next 8 minutes
         action: light.turn_off
         target:
@@ -2737,7 +2737,7 @@
           transition: 480
       - alias: Wait for ceiling fade to complete before re-enabling AL
         delay:
-          seconds: 481
+          seconds: 300
       - alias: Clear manual_control so AL can take over on next motion
         action: adaptive_lighting.set_manual_control
         data:
