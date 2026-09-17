@@ -2093,13 +2093,14 @@
         AL restored.'
     enabled: false
   mode: single
-- id: '1758150000000'
-  alias: 'Pico Center - Bathroom: Fade Off if No Motion'
-  description: Bathroom Pico center button. If bathroom motion is currently off,
-    fade all bathroom lights off over 20 seconds. Does nothing if motion is present,
-    leaving Bathroom Smart Motion & Presence in control.
+- id: '1758150000001'
+  alias: 'Pico Center - Big Bedroom: Fade Bathroom Off if No Motion'
+  description: Piggybacks on the Big Bedroom Pico's center (short-press) Fun Button
+    trigger. If bathroom motion is currently off, fades all bathroom lights off
+    over 20 seconds. Does nothing if bathroom motion is present, leaving Bathroom
+    Smart Motion & Presence in control.
   triggers:
-  - device_id: 864fec31db3ec90f02e244eb717c9cd4
+  - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
     type: press
     subtype: stop
