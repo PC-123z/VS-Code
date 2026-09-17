@@ -2126,6 +2126,9 @@
   mode: single
 - id: '1775373515241'
   alias: 'Bathroom: Smart Motion & Presence (Split Color/White)'
+  description: 'Staggered no-motion off: main lights off at 7 min, shower/tub/back
+    lights fade off over the following 8 min (done by 15 min) so the room never
+    goes dark all at once.'
   triggers:
   - trigger: state
     entity_id: binary_sensor.bathroom_motion
@@ -2134,19 +2137,9 @@
   - trigger: state
     entity_id: binary_sensor.bathroom_motion
     to: 'off'
-    id: stopped
-  - trigger: state
-    entity_id: binary_sensor.bathroom_motion
-    to: 'off'
     for:
-      minutes: 15
-    id: catch_all
-  - trigger: state
-    entity_id: binary_sensor.bathroom_motion
-    to: 'off'
-    for:
-      minutes: 30
-    id: hard_off
+      minutes: 7
+    id: mains_off
   - trigger: state
     entity_id:
     - light.bathroom_shower
@@ -2250,55 +2243,16 @@
               adapt_brightness: true
     - conditions:
       - condition: trigger
-        id: stopped
-      sequence:
-      - wait_for_trigger:
-        - trigger: state
-          entity_id: binary_sensor.bathroom_motion
-          to: 'on'
-        timeout: 00:02:00
-        continue_on_timeout: true
+        id: mains_off
       - condition: state
         entity_id: binary_sensor.bathroom_motion
         state: 'off'
-      - wait_for_trigger:
-        - trigger: state
-          entity_id: binary_sensor.bathroom_motion
-          to: 'on'
-        timeout: "{{ '00:10:00' if (now().hour >= 23 or now().hour < 7)\n   else '00:15:00'
-          }}\n"
-        continue_on_timeout: true
-      - condition: state
-        entity_id: binary_sensor.bathroom_motion
-        state: 'off'
-      - action: light.turn_off
-        target:
-          entity_id:
-          - light.bathroom_shower
-          - light.bathroom_tub_1
-          - light.bathroom_tub_2
-          - light.bathroom_back
-          - light.bathroom_main_lights
-        data:
-          transition: 300
-    - conditions:
-      - condition: trigger
-        id: catch_all
       sequence:
       - action: light.turn_off
         target:
-          entity_id:
-          - light.bathroom_shower
-          - light.bathroom_tub_1
-          - light.bathroom_tub_2
-          - light.bathroom_back
-          - light.bathroom_main_lights
+          entity_id: light.bathroom_main_lights
         data:
-          transition: 300
-    - conditions:
-      - condition: trigger
-        id: hard_off
-      sequence:
+          transition: 60
       - action: light.turn_off
         target:
           entity_id:
@@ -2306,9 +2260,8 @@
           - light.bathroom_tub_1
           - light.bathroom_tub_2
           - light.bathroom_back
-          - light.bathroom_main_lights
         data:
-          transition: 5
+          transition: 480
     - conditions:
       - condition: trigger
         id: failsafe
