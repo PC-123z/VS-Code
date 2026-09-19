@@ -239,6 +239,17 @@ rest_command:
     payload: >-
       {"command": "player_queues/autoplay", "args": {"queue_id": "RINCON_48A6B80529D101400",
       "autoplay_enabled": {{ 'true' if enabled | bool else 'false' }}}}
+  # Drops the duplicate opener the Good Morning playlist add leaves at queue index 1
+  # (the playlist's first track IS Here Comes The Sun, which phase 1 already played).
+  ma_bedroom_delete_item:
+    url: http://192.168.70.155:8095/api
+    method: POST
+    headers:
+      Authorization: !secret music_assistant_api_bearer
+    content_type: application/json
+    payload: >-
+      {"command": "player_queues/delete_item", "args": {"queue_id": "RINCON_48A6B80529D101400",
+      "item_id_or_index": {{ index | int }}}}
 
 # The Emulated Hue Bridge
 emulated_hue:
