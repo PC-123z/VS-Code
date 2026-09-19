@@ -2369,7 +2369,7 @@
     for:
       hours: 0
       minutes: 0
-      seconds: 10
+      seconds: 2
     id: detected
   - trigger: state
     entity_id:
