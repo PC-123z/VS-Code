@@ -39,9 +39,9 @@
         "name": "Good Morning Announcement Pending"
       },
       {
-        "id": "kitchen_remote_manual_override",
-        "name": "Kitchen Remote Manual Override",
-        "icon": "mdi:remote"
+        "id": "good_morning_music_started",
+        "name": "Good Morning music started",
+        "icon": "mdi:music"
       }
     ]
   }

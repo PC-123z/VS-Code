@@ -21,6 +21,15 @@
         "unit_of_measurement": "%",
         "mode": "box",
         "step": 1.0
+      },
+      {
+        "id": "good_morning_playlist_position",
+        "name": "Good Morning playlist position",
+        "min": 0.0,
+        "max": 5000.0,
+        "step": 1.0,
+        "mode": "box",
+        "icon": "mdi:playlist-music"
       }
     ]
   }

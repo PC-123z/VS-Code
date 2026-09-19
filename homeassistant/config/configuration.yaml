@@ -239,17 +239,20 @@ rest_command:
     payload: >-
       {"command": "player_queues/autoplay", "args": {"queue_id": "RINCON_48A6B80529D101400",
       "autoplay_enabled": {{ 'true' if enabled | bool else 'false' }}}}
-  # Drops the duplicate opener the Good Morning playlist add leaves at queue index 1
-  # (the playlist's first track IS Here Comes The Sun, which phase 1 already played).
-  ma_bedroom_delete_item:
+  # Starts the Good Morning playlist as ONE playlist item at a chosen track (start_item is
+  # a track URI from the playlist). The HA integration's play_media has no start_item, and
+  # expanding the playlist into per-track URIs hung the call on 2026-09-19. With an empty
+  # start_item it simply starts at the top.
+  ma_bedroom_play_from:
     url: http://192.168.70.155:8095/api
     method: POST
     headers:
       Authorization: !secret music_assistant_api_bearer
     content_type: application/json
     payload: >-
-      {"command": "player_queues/delete_item", "args": {"queue_id": "RINCON_48A6B80529D101400",
-      "item_id_or_index": {{ index | int }}}}
+      {"command": "player_queues/play_media", "args": {"queue_id": "RINCON_48A6B80529D101400",
+      "media": "ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H", "option": "replace",
+      "radio_mode": false{% if start_item | default('') | length > 0 %}, "start_item": "{{ start_item }}"{% endif %}}}
 
 # The Emulated Hue Bridge
 emulated_hue:
