@@ -9752,16 +9752,19 @@
             watch, ~5s playlist fetch) and on 2026-09-14 raced that watch - MA started
             a second play of its own, so ~3s of Rare jumped to You Belong With Me.
             With items after the opener the queue never ends, so that watch never
-            starts. Shuffle goes on first (nothing is after the opener yet, so there
-            is nothing to reorder or invalidate); enqueue add inserts the playlist
-            after the playing track, shuffled, and never starts playback by itself.
+            starts. Shuffle stays OFF so the curator's order is kept (true MA shuffle
+            put an upbeat track straight before a slow one on 2026-09-18). The playlist
+            goes in as ONE playlist item - never expand it into per-track URIs - on
+            2026-09-19 sending all 769 track URIs hung the call and phase 2 never
+            queued. enqueue add inserts it after the playing track and never starts
+            playback by itself.
             All of this runs ~15s into a 3-minute song, far from the track boundary.
           continue_on_error: true
           action: media_player.shuffle_set
           target:
             entity_id: media_player.bedroom_2
           data:
-            shuffle: true
+            shuffle: false
         - continue_on_error: true
           action: music_assistant.play_media
           target:
@@ -9927,7 +9930,7 @@
                   entity_id: input_boolean.good_morning_active
                   state: 'on'
                 then:
-                - alias: Set shuffle BEFORE re-queueing, never after. The player is
+                - alias: Set shuffle OFF BEFORE re-queueing, never after. The player is
                     idle at this point (that is what triggered the self-heal), so
                     there is no pre-buffered next track to invalidate. Setting it
                     after play_media is what used to make the boundary play a few
@@ -9937,8 +9940,8 @@
                   target:
                     entity_id: media_player.bedroom_2
                   data:
-                    shuffle: true
-                - alias: Re-queue the playlist, already shuffled, in one replace call
+                    shuffle: false
+                - alias: Re-queue the playlist in curator order as ONE playlist item (never per-track URIs)
                   continue_on_error: true
                   action: music_assistant.play_media
                   target:
