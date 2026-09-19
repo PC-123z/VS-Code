@@ -9741,6 +9741,10 @@
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.good_morning_announcement_pending
+  - alias: Clear the music-started flag - the announcement branch waits on it, so a stale on from yesterday must never let it greet before this run's music is up
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.good_morning_music_started
   - alias: Clear asleep flag - presence lighting allowed again
     action: input_boolean.turn_off
     target:
@@ -9890,52 +9894,43 @@
           entity_id: media_player.bedroom
         data:
           volume_level: 0.05
-      - alias: 'PHASE 1 - Here Comes The Sun on its own. Repeat MUST be off here:
-          it is persistent queue state and is normally left on ''all'', and an all-repeat
-          on a one-track queue replays the same song forever, which is the original
-          failure from 2026-08-18. Shuffle off too, so nothing reorders a single item.'
+      - alias: Shuffle off - the playlist plays in the curator's order
         continue_on_error: true
-        action: media_player.repeat_set
-        target:
-          entity_id: media_player.bedroom_2
-        data:
-          repeat: 'off'
-      - continue_on_error: true
         action: media_player.shuffle_set
         target:
           entity_id: media_player.bedroom_2
         data:
           shuffle: false
-      - alias: 'Autoplay OFF for the opener. radio_mode: false does NOT stop Music
-          Assistant''s queue Autoplay ("Don''t stop the music") - on 09-13 MA still
-          logged "Fetching similar tracks for queue Bedroom" 15s after queueing, pre-buffered
-          House Of The Rising Sun on the Sonos, and the speaker rolled gaplessly into
-          it at 07:03:46; HA saw the change a second later and media_stop cut it off
-          mid-bar right before the greeting. With Autoplay off the queue simply ends
-          after the opener and the player goes idle cleanly. Turned back on only once
-          the phase 2 playlist is loaded (or on the bail-out/failed paths), never
-          while the queue is at its end, since re-enabling on a nearly-empty queue
-          makes MA refill it within 5s.'
+      - alias: Repeat all and Autoplay on - a normal playlist queue with hundreds of items behind the playing track, so the queue never runs dry
         continue_on_error: true
-        action: rest_command.ma_bedroom_autoplay
-        data:
-          enabled: false
-      - delay:
-          seconds: 2
-      - alias: 'Queue ONLY the opening track. With Autoplay off (previous step) the
-          queue holds nothing after it, so there is no next track for the Sonos to
-          pre-buffer or roll into. radio_mode: false is kept, but on its own it does
-          not stop the similar-tracks fill.'
-        continue_on_error: true
-        action: music_assistant.play_media
+        action: media_player.repeat_set
         target:
           entity_id: media_player.bedroom_2
         data:
-          media_id: ytmusic://track/xUNqsfFUwhY
-          media_type: track
-          enqueue: replace
-          radio_mode: false
-      - alias: Wait for the opening track to actually start
+          repeat: all
+      - continue_on_error: true
+        action: rest_command.ma_bedroom_autoplay
+        data:
+          enabled: true
+      - alias: Browse the playlist to get the track list in the curator's order (a listing only, it is never sent back to Music Assistant)
+        continue_on_error: true
+        action: media_player.browse_media
+        target:
+          entity_id: media_player.bedroom_2
+        data:
+          media_content_type: playlist
+          media_content_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
+        response_variable: gm_browse
+      - alias: Pick today's start track from the position helper. The helper holds the next unplayed track (the tracker automation advances it as tracks start). Falls back to the top if it is past the end or the browse failed.
+        variables:
+          gm_tracks: '{{ (gm_browse[''media_player.bedroom_2''].children | map(attribute=''media_content_id'') | list) if (gm_browse is defined and gm_browse and ''media_player.bedroom_2'' in gm_browse) else [] }}'
+          gm_start_uri: '{% set p = states(''input_number.good_morning_playlist_position'') | int(0) %}{% if gm_tracks | length > 0 %}{{ gm_tracks[p] if p < (gm_tracks | length) else gm_tracks[0] }}{% endif %}'
+      - alias: Start the playlist as ONE playlist item at that track. Never expand it into per-track URIs - on 2026-09-19 sending all 769 URIs hung the call and nothing played.
+        continue_on_error: true
+        action: rest_command.ma_bedroom_play_from
+        data:
+          start_item: '{{ gm_start_uri }}'
+      - alias: Wait for the playlist to actually start
         wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
         timeout:
           seconds: 30
@@ -9950,10 +9945,7 @@
       - alias: Wait 10 seconds then check if music is playing
         delay:
           seconds: 10
-      - alias: Arm the expected-pause flag - everything from here through the shuffled
-          playlist starting is a deliberate silence/idle window (waiting for the opener
-          to finish, then the announcement), not a manual stop. Cleared again once
-          phase 2 is underway or the music-failed branch has spoken.
+      - alias: Arm the expected-pause flag - the window until the playlist is confirmed playing is a deliberate silence/idle window, not a manual stop. Cleared once the playlist is up or the music-failed branch has spoken.
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.good_morning_expected_pause
@@ -9997,69 +9989,16 @@
           action: input_boolean.turn_off
           target:
             entity_id: input_boolean.good_morning_expected_pause
-        - alias: Restore Autoplay - the opener never started, and the occupancy loop's
-            self-heal re-queues the playlist anyway
-          continue_on_error: true
-          action: rest_command.ma_bedroom_autoplay
-          data:
-            enabled: true
         else:
-        - alias: PHASE 2 is queued BEHIND the opener while it is still playing, so
-            the Sonos rolls straight from Here Comes The Sun into the first shuffled
-            track with no gap. The old design waited for the opener to end and then
-            replaced the queue, which cost ~14s of silence (re-check, MA's 5s end-of-queue
-            watch, ~5s playlist fetch) and on 2026-09-14 raced that watch - MA started
-            a second play of its own, so ~3s of Rare jumped to You Belong With Me.
-            With items after the opener the queue never ends, so that watch never
-            starts. Shuffle stays OFF so the curator's order is kept (true MA shuffle
-            put an upbeat track straight before a slow one on 2026-09-18). The playlist
-            goes in as ONE playlist item - never expand it into per-track URIs - on
-            2026-09-19 sending all 769 track URIs hung the call and phase 2 never
-            queued. enqueue add inserts it after the playing track and never starts
-            playback by itself.
-            All of this runs ~15s into a 3-minute song, far from the track boundary.
-          continue_on_error: true
-          action: media_player.shuffle_set
+        - alias: Disarm the expected-pause flag - the playlist is playing, so a later stop is a real stop
+          action: input_boolean.turn_off
           target:
-            entity_id: media_player.bedroom_2
-          data:
-            shuffle: false
-        - continue_on_error: true
-          action: music_assistant.play_media
+            entity_id: input_boolean.good_morning_expected_pause
+        - alias: Flag that this run's music is up. The announcement branch waits on this rather than on a specific track, so it never greets over overnight sleep audio.
+          action: input_boolean.turn_on
           target:
-            entity_id: media_player.bedroom_2
-          data:
-            media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
-            media_type: playlist
-            enqueue: add
-        - alias: Give MA time to load the playlist into the queue (its first track is
-            the opener itself, so the queue now reads opener, opener, ...). Loaded
-            within 8s in testing on 2026-09-19.
-          delay:
-            seconds: 8
-        - alias: Drop the duplicate opener at queue index 1 so Here Comes The Sun does
-            not play twice back to back. Only removes an upcoming queue item, never
-            the playing track.
-          continue_on_error: true
-          action: rest_command.ma_bedroom_delete_item
-          data:
-            index: 1
-        - alias: Autoplay back on - the queue now holds the whole playlist, so nothing
-            is near its end and this triggers no refill
-          continue_on_error: true
-          action: rest_command.ma_bedroom_autoplay
-          data:
-            enabled: true
-        - alias: Repeat all - set minutes before the opener ends, so updating the
-            player's next item here happens nowhere near the track boundary
-          continue_on_error: true
-          action: media_player.repeat_set
-          target:
-            entity_id: media_player.bedroom_2
-          data:
-            repeat: all
-        - alias: Ramp volume from 0.05 to 0.15 over ~2.5 minutes (8 steps of 18s).
-            The announcements branch waits for this to reach 0.15 before speaking.
+            entity_id: input_boolean.good_morning_music_started
+        - alias: Ramp volume from 0.05 to 0.15 over ~2.5 minutes (8 steps of 18s). The announcements branch waits for this to reach 0.15 before speaking.
           repeat:
             count: 8
             sequence:
@@ -10069,113 +10008,47 @@
               target:
                 entity_id: media_player.bedroom
               data:
-                volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3)
-                  }}'
-        - variables:
-            opener_wait_start: '{{ now().timestamp() }}'
-        - alias: Wait for the opening track to finish. MA's announcement path reports
-            the player idle for the whole greeting - on 2026-09-13 a motion greeting
-            landed at 07:44:29, 4s before the opener ended, the player flipped to
-            idle, the old bare idle check completed and the stop below cut the song
-            under the greeting. So idle only counts while no announcement is in progress,
-            and it must still hold 3s later, because after a greeting MA takes a moment
-            to report the resumed track as playing again. The content_id check is
-            a fallback in case Autoplay could not be switched off. Capped at 6 minutes
-            overall.
-          repeat:
-            sequence:
-            - wait_template: '{{ (is_state(''media_player.bedroom_2'', ''idle'') and
-                is_state(''input_boolean.good_morning_announcement_pending'', ''off''))
-                or ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'',
-                ''media_content_id'') or '''') }}'
-              timeout:
-                seconds: '{{ [360 - (now().timestamp() - opener_wait_start | float),
-                  1] | max | int }}'
-              continue_on_timeout: true
-            - delay:
-                seconds: 3
-            until:
-            - condition: template
-              value_template: '{{ (now().timestamp() - opener_wait_start | float)
-                > 360 or (is_state(''media_player.bedroom_2'', ''idle'') and is_state(''input_boolean.good_morning_announcement_pending'',
-                ''off'')) or ''xUNqsfFUwhY'' not in (state_attr(''media_player.bedroom_2'',
-                ''media_content_id'') or '''') }}'
-        - alias: Bail out if the routine was cancelled while the opening track played
-            - Goodbye, the sleep flag, or the hard cap can all clear good_morning_active
-            mid-run, and without this check the whole shuffled playlist would still
-            start up afterwards.
+                volume_level: '{{ [0.05 + (repeat.index * 0.0125), 0.15] | min | round(3) }}'
+        - alias: Bail out if the routine was cancelled during the ramp - Goodbye, the sleep flag, or the hard cap can all clear good_morning_active mid-run
           if:
           - condition: state
             entity_id: input_boolean.good_morning_active
             state: 'off'
           then:
-          - action: input_boolean.turn_off
-            target:
-              entity_id: input_boolean.good_morning_expected_pause
-          - alias: Stop playback - the playlist is queued behind the opener, so the
-              music would otherwise carry on after a cancel
+          - alias: Stop playback so the playlist does not carry on after a cancel
             continue_on_error: true
             action: media_player.media_stop
             target:
               entity_id: media_player.bedroom_2
-          - alias: Clear the ended queue before restoring Autoplay, so MA has nothing
-              to refill from and cannot restart music after a cancel
+          - alias: Clear the queue so nothing can restart after a cancel
             continue_on_error: true
             action: media_player.clear_playlist
             target:
               entity_id: media_player.bedroom_2
-          - continue_on_error: true
-            action: rest_command.ma_bedroom_autoplay
-            data:
-              enabled: true
-          - stop: Routine was cancelled during the opening track
-          else:
-          - alias: Second announcement, only if the motion-triggered greeting hasn't
-              already played this morning - no need to repeat the same greeting into
-              silence. No hold afterward either - the shuffled playlist loads immediately
-              once it's spoken.
-            if:
-            - condition: state
-              entity_id: counter.good_morning_announcements
-              state: '0'
-            then:
-            - action: input_boolean.turn_on
-              target:
-                entity_id: input_boolean.good_morning_announcement_pending
-            - continue_on_error: true
-              action: tts.speak
-              target:
-                entity_id: tts.piper
-              data:
-                cache: false
-                media_player_entity_id: media_player.bedroom_2
-                message: '{% set fc = today_fc[''weather.forecast_home''][''forecast'']
-                  if (today_fc is defined and today_fc and ''weather.forecast_home''
-                  in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good
-                  morning! Today is {{ now().strftime(''%A, %B %-d'') }} and the time
-                  is {{ now().strftime(''%-I:%M %p'') }}. Right now it''s {{ states(''weather.forecast_home'')
-                  | replace(''-'', '' '') }} and {{ (state_attr(''weather.forecast_home'',
-                  ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today
-                  will be {{ f.condition | replace(''-'', '' '') }}, with a high of
-                  {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow
-                  | float(0)) | round | int }} degrees.{% endif %} I hope you have
-                  a wonderful day!'
-            - action: counter.increment
-              target:
-                entity_id: counter.good_morning_announcements
-            - action: input_boolean.turn_off
-              target:
-                entity_id: input_boolean.good_morning_announcement_pending
-          - alias: Wait for the playlist to start
-            wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
-            timeout:
-              seconds: 30
-            continue_on_timeout: true
-          - alias: Disarm the expected-pause flag - phase 2 is underway (or we gave
-              up waiting), so a later stop should be treated as real again
-            action: input_boolean.turn_off
+          - stop: Routine was cancelled during the volume ramp
+        - alias: Second announcement, only if the motion-triggered greeting hasn't already played this morning - no need to repeat the same greeting into silence. Spoken over the music through MA's announcement path, which nothing pauses.
+          if:
+          - condition: state
+            entity_id: counter.good_morning_announcements
+            state: '0'
+          then:
+          - action: input_boolean.turn_on
             target:
-              entity_id: input_boolean.good_morning_expected_pause
+              entity_id: input_boolean.good_morning_announcement_pending
+          - continue_on_error: true
+            action: tts.speak
+            target:
+              entity_id: tts.piper
+            data:
+              cache: false
+              media_player_entity_id: media_player.bedroom_2
+              message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning! Today is {{ now().strftime(''%A, %B %-d'') }} and the time is {{ now().strftime(''%-I:%M %p'') }}. Right now it''s {{ states(''weather.forecast_home'') | replace(''-'', '' '') }} and {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} I hope you have a wonderful day!'
+          - action: counter.increment
+            target:
+              entity_id: counter.good_morning_announcements
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.good_morning_announcement_pending
         - alias: Occupancy-driven music loop using Sensor Group
           repeat:
             while:
@@ -10201,26 +10074,27 @@
                   entity_id: input_boolean.good_morning_active
                   state: 'on'
                 then:
-                - alias: Set shuffle OFF BEFORE re-queueing, never after. The player is
-                    idle at this point (that is what triggered the self-heal), so
-                    there is no pre-buffered next track to invalidate. Setting it
-                    after play_media is what used to make the boundary play a few
-                    seconds of one song before jumping to a different one.
+                - alias: Shuffle off before re-queueing, never after
                   continue_on_error: true
                   action: media_player.shuffle_set
                   target:
                     entity_id: media_player.bedroom_2
                   data:
                     shuffle: false
-                - alias: Re-queue the playlist in curator order as ONE playlist item (never per-track URIs)
+                - alias: Browse the playlist for the track list so the re-queue resumes at the saved position (the tracker keeps it at the next unplayed track)
                   continue_on_error: true
-                  action: music_assistant.play_media
+                  action: media_player.browse_media
                   target:
                     entity_id: media_player.bedroom_2
                   data:
-                    media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
-                    media_type: playlist
-                    enqueue: replace
+                    media_content_type: playlist
+                    media_content_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
+                  response_variable: gm_heal_browse
+                - alias: Re-queue as ONE playlist item starting at the saved position
+                  continue_on_error: true
+                  action: rest_command.ma_bedroom_play_from
+                  data:
+                    start_item: '{% set t = (gm_heal_browse[''media_player.bedroom_2''].children | map(attribute=''media_content_id'') | list) if (gm_heal_browse is defined and gm_heal_browse and ''media_player.bedroom_2'' in gm_heal_browse) else [] %}{% set p = states(''input_number.good_morning_playlist_position'') | int(0) %}{% if t | length > 0 %}{{ t[p] if p < (t | length) else t[0] }}{% endif %}'
               - action: media_player.volume_set
                 target:
                   entity_id: media_player.bedroom
@@ -10282,26 +10156,19 @@
           when an 8-minute timeout expired - about eleven minutes into the routine
           (06:56 and 07:41 on 2026-08-31), long after the room had emptied. Nothing
           in this branch waits on queue state: the only inputs are the music being
-          up, motion, and the clock. First wait for the routine''s OWN opening track
-          to be playing, matched on its track id rather than just on the player being
-          playing - overnight sleep audio can still be running at 06:45, and a bare
-          playing check would greet the room over that, seconds before the routine
-          unjoins the speaker and replaces the queue underneath it. The same track
-          id appears in the play_media call in the music branch and in that branch''s
-          end-of-opener wait; all three move together if the opening song changes.'
-        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and ''xUNqsfFUwhY''
-          in (state_attr(''media_player.bedroom_2'', ''media_content_id'') or '''')
-          }}'
+          up, motion, and the clock. First wait for the music branch to raise input_boolean.good_morning_music_started,
+          set only once the routine''s OWN playlist is confirmed playing - overnight
+          sleep audio can still be running at 06:45, and a bare playing check would
+          greet the room over that, seconds before the routine unjoins the speaker
+          and replaces the queue underneath it.'
+        wait_template: '{{ is_state(''input_boolean.good_morning_music_started'', ''on'') }}'
         timeout:
           minutes: 4
         continue_on_timeout: true
-      - alias: If the opening track never came up, the music branch has already spoken
-          its own music-failed greeting on the Sonos entity directly - there is nothing
-          to add here, so end this branch.
-        condition: template
-        value_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') and
-          ''xUNqsfFUwhY'' in (state_attr(''media_player.bedroom_2'', ''media_content_id'')
-          or '''') }}'
+      - alias: If the music never came up, the music branch has already spoken its own music-failed greeting on the Sonos entity directly - there is nothing to add here, so end this branch.
+        condition: state
+        entity_id: input_boolean.good_morning_music_started
+        state: 'on'
       - alias: Hold the greeting until the wake-up volume ramp has finished, so it
           never lands over near-silent music. The ramp climbs media_player.bedroom
           from 0.05 in eight 18-second steps and caps at 0.15, which is also the level
@@ -12944,3 +12811,50 @@
       - light.hue_datura_bottom_1
       manual_control: false
   mode: single
+- id: '1789400000101'
+  alias: Good Morning - Track playlist position
+  description: Keeps input_number.good_morning_playlist_position at the next unplayed
+    track of the Good Morning playlist, so tomorrow's run resumes where today left
+    off, in the curator's order. Runs on every track change while the routine is active,
+    looks the playing track up in the playlist's browse listing, and stores its position
+    plus one. Wraps to the top once fewer than 20 tracks remain, because the queue
+    started from a position holds only that track onward and a short tail would just
+    loop. Leaves the value alone when the playing item is not a playlist track (an
+    announcement, say).
+  triggers:
+  - trigger: state
+    entity_id: media_player.bedroom_2
+    attribute: media_content_id
+  conditions:
+  - condition: state
+    entity_id: input_boolean.good_morning_active
+    state: 'on'
+  - condition: state
+    entity_id: media_player.bedroom_2
+    state: playing
+  actions:
+  - alias: Browse the playlist for its track order
+    continue_on_error: true
+    action: media_player.browse_media
+    target:
+      entity_id: media_player.bedroom_2
+    data:
+      media_content_type: playlist
+      media_content_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
+    response_variable: gm_track_browse
+  - alias: Store the next position, only if the playing track is in the playlist
+    if:
+    - condition: template
+      value_template: '{{ gm_track_browse is defined and gm_track_browse and ''media_player.bedroom_2''
+        in gm_track_browse and state_attr(''media_player.bedroom_2'', ''media_content_id'')
+        in (gm_track_browse[''media_player.bedroom_2''].children | map(attribute=''media_content_id'')
+        | list) }}'
+    then:
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.good_morning_playlist_position
+      data:
+        value: '{% set t = gm_track_browse[''media_player.bedroom_2''].children | map(attribute=''media_content_id'')
+          | list %}{% set nxt = t.index(state_attr(''media_player.bedroom_2'', ''media_content_id''))
+          + 1 %}{{ 0 if nxt >= (t | length - 20) else nxt }}'
+  mode: restart
