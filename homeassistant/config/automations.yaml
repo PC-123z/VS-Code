@@ -2366,6 +2366,10 @@
     - binary_sensor.big_bedroom_sensor_group
     to:
     - 'on'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
     id: detected
   - trigger: state
     entity_id:
