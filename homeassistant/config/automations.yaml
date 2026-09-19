@@ -1249,15 +1249,14 @@
     relocation plan, renamed back 2026-09-17) sets input_boolean.kitchen_manual_override
     directly via "Kitchen Remote (Pico): Button Control" - same boolean this automation
     already uses, so no separate stand-down guard is needed here. The Pico also sets
-    input_boolean.kitchen_pico_hold, which this automation''s own 60-second
-    kitchen_cleared auto-clear (below) explicitly checks and skips, so the Pico''s
-    override survives the full intended 10 minutes instead of being cut short by
-    this automation''s shorter timer. (2026-09-17: a guard here that checked a
-    nonexistent input_boolean.kitchen_remote_manual_override was removed - it
-    silently blocked every trigger since 2026-09-12, which is why overrides weren''t
-    resetting after presence cleared. The Pico automation was then found to reference
-    that same nonexistent helper and was repointed at kitchen_manual_override, the
-    one that actually exists.)
+    input_boolean.kitchen_pico_hold, which this automation''s own 60-second kitchen_cleared
+    auto-clear (below) explicitly checks and skips, so the Pico''s override survives
+    the full intended 10 minutes instead of being cut short by this automation''s
+    shorter timer. (2026-09-17: a guard here that checked a nonexistent input_boolean.kitchen_remote_manual_override
+    was removed - it silently blocked every trigger since 2026-09-12, which is why
+    overrides weren''t resetting after presence cleared. The Pico automation was then
+    found to reference that same nonexistent helper and was repointed at kitchen_manual_override,
+    the one that actually exists.)
 
     '
   triggers:
@@ -1598,8 +1597,8 @@
       - condition: trigger
         id: kitchen_cleared
       alias: 'Cleared 60s: clear manual override flag (lights stay on until the 3:30
-        fade) - skipped while the Pico''s own 10-minute hold is active, so a
-        deliberate Pico Off doesn''t get undone by this shorter timer'
+        fade) - skipped while the Pico''s own 10-minute hold is active, so a deliberate
+        Pico Off doesn''t get undone by this shorter timer'
       sequence:
       - condition: state
         entity_id: input_boolean.kitchen_pico_hold
@@ -2113,9 +2112,9 @@
 - id: '1758150000001'
   alias: 'Pico Center - Big Bedroom: Fade Bathroom Off if No Motion'
   description: Piggybacks on the Big Bedroom Pico's center (short-press) Fun Button
-    trigger. If bathroom motion is currently off, fades all bathroom lights off
-    over 20 seconds. Does nothing if bathroom motion is present, leaving Bathroom
-    Smart Motion & Presence in control.
+    trigger. If bathroom motion is currently off, fades all bathroom lights off over
+    20 seconds. Does nothing if bathroom motion is present, leaving Bathroom Smart
+    Motion & Presence in control.
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
@@ -2136,8 +2135,8 @@
 - id: '1775373515241'
   alias: 'Bathroom: Smart Motion & Presence (Split Color/White)'
   description: 'Staggered no-motion off: main lights off at 7 min, shower/tub/back
-    lights fade off over the following 8 min (done by 15 min) so the room never
-    goes dark all at once.'
+    lights fade off over the following 8 min (done by 15 min) so the room never goes
+    dark all at once.'
   triggers:
   - trigger: state
     entity_id: binary_sensor.bathroom_motion
@@ -2431,8 +2430,8 @@
         entity_id: input_boolean.big_bedroom_asleep
         state: 'off'
       sequence:
-      - alias: Clear manual_control in case motion resumed mid ramp-down, before
-          the ramp-down's own clear step ran
+      - alias: Clear manual_control in case motion resumed mid ramp-down, before the
+          ramp-down's own clear step ran
         action: adaptive_lighting.set_manual_control
         data:
           entity_id: switch.al_big_bedroom
@@ -6322,8 +6321,9 @@
                 - condition: state
                   entity_id: binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
                   state: 'on'
-                - alias: Weekdays keep the music going until the 60-minute cap (07:30 for
-                    the 06:30 run) even if the room empties while the kids get ready
+                - alias: Weekdays keep the music going until the 60-minute cap (07:30
+                    for the 06:30 run) even if the room empties while the kids get
+                    ready
                   condition: template
                   value_template: '{{ now().weekday() < 5 }}'
               then:
@@ -6379,9 +6379,9 @@
               - delay:
                   seconds: 30
               else:
-              - alias: Weekends only (weekdays never reach this branch) - wait for 10 unbroken
-                  minutes with nobody detected before ending. Any zone coming back on
-                  completes the wait and returns to the loop.
+              - alias: Weekends only (weekdays never reach this branch) - wait for
+                  10 unbroken minutes with nobody detected before ending. Any zone
+                  coming back on completes the wait and returns to the loop.
                 wait_for_trigger:
                 - trigger: state
                   entity_id:
@@ -6396,18 +6396,19 @@
                 - condition: template
                   value_template: '{{ wait.completed == true }}'
                 then:
-                - alias: Someone came back within 10 minutes - keep the music at normal volume
+                - alias: Someone came back within 10 minutes - keep the music at normal
+                    volume
                   action: media_player.volume_set
                   target:
                     entity_id: media_player.office_2
                   data:
                     volume_level: 0.2
                 else:
-                - alias: Ramp volume down over 2 minutes, abandoning the ramp the moment
-                    occupancy returns. This used to end with a bare stop action when
-                    occupancy came back, but stop ends the WHOLE automation run, not
-                    just the ramp - on 2026-09-13 it fired at 07:35:39, killing the
-                    occupancy loop and the 60-minute cap, so the album kept playing
+                - alias: Ramp volume down over 2 minutes, abandoning the ramp the
+                    moment occupancy returns. This used to end with a bare stop action
+                    when occupancy came back, but stop ends the WHOLE automation run,
+                    not just the ramp - on 2026-09-13 it fired at 07:35:39, killing
+                    the occupancy loop and the 60-minute cap, so the album kept playing
                     (MA Autoplay refilled the queue at 07:52) and bedroom2_occupied
                     was left on with nothing to clear it.
                   repeat:
@@ -6422,8 +6423,8 @@
                       target:
                         entity_id: media_player.office_2
                       data:
-                        volume_level: '{{ [0.2 - (repeat.index * 0.0225), 0.02] | max
-                          | round(3) }}'
+                        volume_level: '{{ [0.2 - (repeat.index * 0.0225), 0.02] |
+                          max | round(3) }}'
                     - delay:
                         seconds: 15
                 - if:
@@ -6433,8 +6434,8 @@
                       ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'',
                       ''on'')) }}'
                   then:
-                  - alias: Occupancy returned - restore volume and carry on round the
-                      occupancy loop
+                  - alias: Occupancy returned - restore volume and carry on round
+                      the occupancy loop
                     action: media_player.volume_set
                     target:
                       entity_id: media_player.office_2
@@ -6534,8 +6535,8 @@
   description: If the Office speaker is paused or stopped by hand while the Bedroom
     2 Good Morning routine is running, end the run instead of letting its self-heal
     restart the wake album 20 seconds later. Mirrors the Big Bedroom stop automation
-    - watches the Sonos entity (media_player.office) with a short debounce, since a
-    physical button press shows there reliably, and the Music Assistant entity (media_player.office_2)
+    - watches the Sonos entity (media_player.office) with a short debounce, since
+    a physical button press shows there reliably, and the Music Assistant entity (media_player.office_2)
     with a longer one. Ignored while a greeting plays (input_boolean.bedroom2_announcement_pending)
     and for the first 90 seconds of a run, when the routine's own unjoin and album
     start can blip the player.
@@ -6567,10 +6568,13 @@
   conditions:
   - alias: The Bedroom 2 Good Morning routine is running
     condition: template
-    value_template: '{{ (state_attr(''automation.bedroom_2_good_morning_routine'', ''current'') | int(0)) > 0 }}'
+    value_template: '{{ (state_attr(''automation.bedroom_2_good_morning_routine'',
+      ''current'') | int(0)) > 0 }}'
   - alias: Past the routine's own start-up (unjoin + album start)
     condition: template
-    value_template: '{% set lt = state_attr(''automation.bedroom_2_good_morning_routine'', ''last_triggered'') %}{{ lt is not none and (now() - as_datetime(lt | string)).total_seconds() > 90 }}'
+    value_template: '{% set lt = state_attr(''automation.bedroom_2_good_morning_routine'',
+      ''last_triggered'') %}{{ lt is not none and (now() - as_datetime(lt | string)).total_seconds()
+      > 90 }}'
   - alias: Not during a greeting
     condition: state
     entity_id: input_boolean.bedroom2_announcement_pending
@@ -6581,8 +6585,8 @@
     action: media_player.media_stop
     target:
       entity_id: media_player.office_2
-  - alias: End the run - the occupancy loop exits on this flag and hands lighting back
-      to Smart Presence
+  - alias: End the run - the occupancy loop exits on this flag and hands lighting
+      back to Smart Presence
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.bedroom2_occupied
@@ -8608,8 +8612,8 @@
     happens first just latches its own flag (input_boolean.garage_open_recent or input_boolean.arrival_recent)
     and stops; whichever happens second finds the other flag already on. Changed 2026-08-22
     - this automation NO LONGER disarms or plays music. It only arms input_boolean.welcome_home_pending
-    (the waiting state). The Ring garage to house door sensor (binary_sensor.garage_door) is
-    now the final gate: see "Arrival (Welcome Home) - STAGE 2" which does the actual
+    (the waiting state). The Ring garage to house door sensor (binary_sensor.garage_door)
+    is now the final gate: see "Arrival (Welcome Home) - STAGE 2" which does the actual
     disarm + lights + music. Alarm stays armed and the house stays silent until that
     sensor reports open.
 
@@ -8689,16 +8693,16 @@
     action: notify.mobile_app_pc_iphone
     data:
       title: Welcome Home armed
-      message: Arrival confirmed. Waiting on the garage to house door sensor to disarm and
-        start the routine.
+      message: Arrival confirmed. Waiting on the garage to house door sensor to disarm
+        and start the routine.
     enabled: false
   mode: queued
   max: 4
 - id: '1777484175035'
   alias: Arrival (Welcome Home) - STAGE 2 Execute on Ring Garage to House Door Open
   description: 'STAGE 2 of 2. Added 2026-08-22. Holds the whole welcome home routine
-    (disarm, hallway lights, music) until the Ring garage to house door sensor actually reports
-    open. STAGE 1 does the two-factor arrival detection and sets input_boolean.welcome_home_pending;
+    (disarm, hallway lights, music) until the Ring garage to house door sensor actually
+    reports open. STAGE 1 does the two-factor arrival detection and sets input_boolean.welcome_home_pending;
     nothing here runs until that flag is on AND binary_sensor.garage_door is open,
     so the alarm stays armed and the house stays silent in the meantime.
 
@@ -8707,11 +8711,11 @@
     open a few seconds before the beacon latch lands (the garage physically opens
     first). Requiring the sensor as a condition means it is still a hard gate either
     way: the routine can never run with the door closed. Changed 2026-09-13: the Ring
-    garage to house door sensor opening is now the ONLY trigger (the pending-flag trigger was
-    removed, it caused a duplicate queued run on 9/13 when STAGE 1 re-set pending
-    at the same moment the door opened, replaying the album). The door-first race
-    is handled by waiting up to 60s for the pending flag inside the run instead. Mode
-    single instead of queued.'
+    garage to house door sensor opening is now the ONLY trigger (the pending-flag
+    trigger was removed, it caused a duplicate queued run on 9/13 when STAGE 1 re-set
+    pending at the same moment the door opened, replaying the album). The door-first
+    race is handled by waiting up to 60s for the pending flag inside the run instead.
+    Mode single instead of queued.'
   triggers:
   - alias: Ring garage to house door sensor reports open
     trigger: state
@@ -8719,9 +8723,10 @@
     to: 'on'
   conditions: []
   actions:
-  - alias: Garage to house door is the only trigger - give STAGE 1's arrival flag up to 60s
-      to land (the Ring sensor can report open a few seconds before the beacon latch);
-      if it never does, this was not a confirmed arrival and nothing runs
+  - alias: Garage to house door is the only trigger - give STAGE 1's arrival flag
+      up to 60s to land (the Ring sensor can report open a few seconds before the
+      beacon latch); if it never does, this was not a confirmed arrival and nothing
+      runs
     wait_template: '{{ is_state(''input_boolean.welcome_home_pending'',''on'') }}'
     timeout:
       seconds: 60
@@ -8927,8 +8932,8 @@
     unrelated future event). Clearing pending on disarm also means that letting yourself
     in some other way - keypad, front door - cancels the waiting routine instead of
     leaving it to fire the next time the garage opens. Extended from 15 min 2026-09-12
-    - a Ring garage-to-house-door-sensor delay/miss let the latch expire before STAGE 2 saw
-    the door as open, so the alarm never disarmed.
+    - a Ring garage-to-house-door-sensor delay/miss let the latch expire before STAGE
+    2 saw the door as open, so the alarm never disarmed.
   triggers:
   - alias: Arrival latch has been on for 1 hour
     trigger: state
@@ -9444,7 +9449,7 @@
     - thu
     - fri
   - trigger: time
-    at: 07:00:00
+    at: 08:30:00
     weekday:
     - sat
     - sun
@@ -9769,21 +9774,19 @@
             entity_id: media_player.bedroom_2
           data:
             shuffle: false
-        - alias: Queue the playlist in its original order, rotated to start on a
-            different track each day (day-of-year mod track count) so the same songs
-            don't play every morning, while keeping the curator's song-to-song ordering
-            intact. enqueue add inserts it after the playing opener track and never
-            starts playback by itself.
+        - alias: Queue the playlist in its original order, rotated to start on a different
+            track each day (day-of-year mod track count) so the same songs don't play
+            every morning, while keeping the curator's song-to-song ordering intact.
+            enqueue add inserts it after the playing opener track and never starts
+            playback by itself.
           continue_on_error: true
           action: music_assistant.play_media
           target:
             entity_id: media_player.bedroom_2
           data:
-            media_id: >-
-              {% set tracks = gm_playlist_browse['media_player.bedroom_2'].children
-              | map(attribute='media_content_id') | list %}
-              {% set start = now().strftime('%j') | int % (tracks | length) %}
-              {{ tracks[start:] + tracks[:start] }}
+            media_id: '{% set tracks = gm_playlist_browse[''media_player.bedroom_2''].children
+              | map(attribute=''media_content_id'') | list %} {% set start = now().strftime(''%j'')
+              | int % (tracks | length) %} {{ tracks[start:] + tracks[:start] }}'
             media_type: track
             enqueue: add
         - alias: Autoplay back on - the queue now holds the whole playlist, so nothing
@@ -9969,12 +9972,10 @@
                   target:
                     entity_id: media_player.bedroom_2
                   data:
-                    media_id: >-
-                      {% set tracks = gm_selfheal_playlist_browse['media_player.bedroom_2'].children
-                      | map(attribute='media_content_id') | list %}
-                      {% set start = now().strftime('%j') | int % (tracks | length)
-                      %}
-                      {{ tracks[start:] + tracks[:start] }}
+                    media_id: '{% set tracks = gm_selfheal_playlist_browse[''media_player.bedroom_2''].children
+                      | map(attribute=''media_content_id'') | list %} {% set start
+                      = now().strftime(''%j'') | int % (tracks | length) %} {{ tracks[start:]
+                      + tracks[:start] }}'
                     media_type: track
                     enqueue: replace
               - action: media_player.volume_set
@@ -11249,12 +11250,13 @@
     condition: state
     entity_id: input_boolean.bedroom2_manual_override
     state: 'off'
-  - alias: 'Stand down while the Bedroom 2 Good Morning routine is running. It owns
+  - alias: Stand down while the Bedroom 2 Good Morning routine is running. It owns
       the panels from its 06:30 weekday start, inside this 23:45-07:00 window - on
-      2026-09-15 this watchdog kept turning them off while the routine''s self-heal
-      turned them back on, so they flapped every ~90s from 06:30 to 07:00.'
+      2026-09-15 this watchdog kept turning them off while the routine's self-heal
+      turned them back on, so they flapped every ~90s from 06:30 to 07:00.
     condition: template
-    value_template: '{{ (state_attr(''automation.bedroom_2_good_morning_routine'', ''current'') | int(0)) == 0 }}'
+    value_template: '{{ (state_attr(''automation.bedroom_2_good_morning_routine'',
+      ''current'') | int(0)) == 0 }}'
   actions:
   - alias: Retry the off it missed while offline
     action: light.turn_off
@@ -11807,8 +11809,8 @@
   mode: single
 - id: '1778700000001'
   alias: 'Garage: Open on Presence During Volvo Start'
-  description: While a Volvo remote-start cycle is active and the garage to house door
-    has opened at least once this cycle (input_boolean.volvo_garage_door_opened_this_cycle),
+  description: While a Volvo remote-start cycle is active and the garage to house
+    door has opened at least once this cycle (input_boolean.volvo_garage_door_opened_this_cycle),
     open the garage cover the moment the mmWave presence sensor sees anyone - no hold-time
     and no requirement that the door be open at that exact instant. Replaces the old
     same-moment door+3s-presence check in script_volvo_start_core, which never fired
@@ -11818,10 +11820,10 @@
   - trigger: state
     entity_id: binary_sensor.garage_garage_people_detection_presence
     to: 'on'
-  - alias: 'Also fire when the garage to house door latch turns on, so it doesn''t matter whether
-      presence or the latch comes last. On 2026-09-15 presence came on at 07:36:51,
-      before the latch (07:37:22), and stayed on - the presence trigger never fired
-      again, so the cover never opened.'
+  - alias: Also fire when the garage to house door latch turns on, so it doesn't matter
+      whether presence or the latch comes last. On 2026-09-15 presence came on at
+      07:36:51, before the latch (07:37:22), and stayed on - the presence trigger
+      never fired again, so the cover never opened.
     trigger: state
     entity_id: input_boolean.volvo_garage_door_opened_this_cycle
     to: 'on'
@@ -11875,11 +11877,12 @@
   alias: 'Garage: Lights on Presence, Door/Cover Open, or Volvo Start'
   description: 'Lutron dimmer light.garage_lights (moved from the kitchen 2026-09-12).
     Turns on when presence is seen (mmWave group or Frigate person), when the overhead
-    cover or the garage to house door opens, or when anything else turns it on (e.g. script_volvo_start_core).
-    Brightness comes from Garage - AL (intercepts the turn_on). Turns off once presence
-    (mmWave + Frigate person) has been clear for 5 minutes and no Volvo start cycle
-    is active. Mode restart: every new trigger restarts the 5-minute clock. Re-arms
-    the off-timer after HA restart / automation reload if the light was left on.'
+    cover or the garage to house door opens, or when anything else turns it on (e.g.
+    script_volvo_start_core). Brightness comes from Garage - AL (intercepts the turn_on).
+    Turns off once presence (mmWave + Frigate person) has been clear for 5 minutes
+    and no Volvo start cycle is active. Mode restart: every new trigger restarts the
+    5-minute clock. Re-arms the off-timer after HA restart / automation reload if
+    the light was left on.'
   triggers:
   - trigger: state
     entity_id: binary_sensor.garage_occupancy_group
@@ -12377,11 +12380,11 @@
     the garage to house door. When that door (binary_sensor.garage_door) opens within
     10 minutes of the beacon arriving, close the garage cover if it is still open.
     Safety: the cover must have opened within the last 5 minutes (so a cover someone
-    opened earlier to work in the garage is never closed), and it must have been
-    open at least 30 seconds before the close is sent (so a door opened while the
-    car is still pulling in doesn''t close onto it). Only an away -> home beacon change
-    counts - unavailable -> home flaps from the iBeacon reload watchdog are ignored.
-    Respects input_boolean.garage_auto_close_enabled as the kill switch.'
+    opened earlier to work in the garage is never closed), and it must have been open
+    at least 30 seconds before the close is sent (so a door opened while the car is
+    still pulling in doesn''t close onto it). Only an away -> home beacon change counts
+    - unavailable -> home flaps from the iBeacon reload watchdog are ignored. Respects
+    input_boolean.garage_auto_close_enabled as the kill switch.'
   triggers:
   - alias: Car beacon returns home after being away
     trigger: state
@@ -12426,10 +12429,10 @@
   mode: single
 - id: '1789600000017'
   alias: 'Garage: Aladdin Connect Stale Watchdog'
-  description: Aladdin Connect polls every 15s and writes cover.garage each time. On
-    2026-09-15 7:29 PM the poll silently froze (no errors, update_entity did nothing)
-    and cover.garage stuck at closed, so the 2026-09-16 departure never triggered the
-    goodbye routine. If cover.garage hasn't been reported in 5 min (or is unavailable
+  description: Aladdin Connect polls every 15s and writes cover.garage each time.
+    On 2026-09-15 7:29 PM the poll silently froze (no errors, update_entity did nothing)
+    and cover.garage stuck at closed, so the 2026-09-16 departure never triggered
+    the goodbye routine. If cover.garage hasn't been reported in 5 min (or is unavailable
     5 min), reload the integration and notify. 10-min cooldown after each attempt.
   triggers:
   - trigger: template
@@ -12459,11 +12462,11 @@
     action: notify.mobile_app_pc_iphone
     data:
       title: Garage Door Status {{ 'Recovered' if recovered else 'Still Broken' }}
-      message: "{% if recovered %}Aladdin Connect had stopped updating ({{ trigger.id
-        }}) - reloaded it and the garage is reporting again ({{ states('cover.garage')
+      message: '{% if recovered %}Aladdin Connect had stopped updating ({{ trigger.id
+        }}) - reloaded it and the garage is reporting again ({{ states(''cover.garage'')
         }}).{% else %}Aladdin Connect stopped updating ({{ trigger.id }}) and a reload
-        did NOT fix it. Garage open/close won't trigger departure automations until
-        it's fixed.{% endif %}"
+        did NOT fix it. Garage open/close won''t trigger departure automations until
+        it''s fixed.{% endif %}'
     continue_on_error: true
   - alias: Cooldown so a persistent outage doesn't reload/notify every minute
     delay:
@@ -12473,14 +12476,13 @@
 - id: '1789700000003'
   alias: 'System: Alert on Silent Automation Errors (Unknown Entity)'
   description: 'Catches the class of bug found 2026-09-17: the Kitchen Pico and its
-    main motion automation both silently referenced a nonexistent input_boolean
-    (kitchen_remote_manual_override) for days with no visible symptom besides "the
-    lights feel off" - HA logged a WARNING on every trigger but nothing surfaced
-    it. Watches system_log_event for condition-evaluation failures on missing
-    entities and service calls targeting missing entities, and pushes a phone
-    notification with the offending automation/message so it gets caught same-day
-    instead of by chance. 60-minute cooldown (mode: single + trailing delay) so a
-    stuck automation retriggering every few seconds doesn''t spam the phone -
+    main motion automation both silently referenced a nonexistent input_boolean (kitchen_remote_manual_override)
+    for days with no visible symptom besides "the lights feel off" - HA logged a WARNING
+    on every trigger but nothing surfaced it. Watches system_log_event for condition-evaluation
+    failures on missing entities and service calls targeting missing entities, and
+    pushes a phone notification with the offending automation/message so it gets caught
+    same-day instead of by chance. 60-minute cooldown (mode: single + trailing delay)
+    so a stuck automation retriggering every few seconds doesn''t spam the phone -
     the goal is "notice today," not "notify every occurrence."'
   triggers:
   - trigger: event
@@ -12519,18 +12521,17 @@
     repointed at the real helper, input_boolean.kitchen_manual_override, the same
     one "Kitchen: Smart Motion & Presence" already uses - so no separate stand-down
     guard is needed there. All four buttons set both input_boolean.kitchen_manual_override
-    (which makes "Kitchen: Smart Motion & Presence" stand down) and
-    input_boolean.kitchen_pico_hold. Top (on): all 5 kitchen Hue lights to 100%.
-    Off: lights off, holding the override so presence motion doesn''t immediately
-    relight them. Raise/Lower: step brightness on the current lights - a manual
-    brightness tweak is a deliberate override too. 2026-09-17: kitchen_pico_hold
-    was added because sharing a single boolean with the main automation''s 60-second
-    auto-clear (kitchen_cleared) was cutting this override down to ~60s instead of
-    the intended 10 minutes; the main automation''s 60s clear now explicitly skips
-    while kitchen_pico_hold is on, so the Pico''s hold genuinely lasts the full 10
-    minutes again. Both flags are released together by "Kitchen Remote: Clear
-    Override After 10min Empty" once the room reads clear for 10 minutes - see that
-    automation.'
+    (which makes "Kitchen: Smart Motion & Presence" stand down) and input_boolean.kitchen_pico_hold.
+    Top (on): all 5 kitchen Hue lights to 100%. Off: lights off, holding the override
+    so presence motion doesn''t immediately relight them. Raise/Lower: step brightness
+    on the current lights - a manual brightness tweak is a deliberate override too.
+    2026-09-17: kitchen_pico_hold was added because sharing a single boolean with
+    the main automation''s 60-second auto-clear (kitchen_cleared) was cutting this
+    override down to ~60s instead of the intended 10 minutes; the main automation''s
+    60s clear now explicitly skips while kitchen_pico_hold is on, so the Pico''s hold
+    genuinely lasts the full 10 minutes again. Both flags are released together by
+    "Kitchen Remote: Clear Override After 10min Empty" once the room reads clear for
+    10 minutes - see that automation.'
   triggers:
   - device_id: 864fec31db3ec90f02e244eb717c9cd4
     domain: lutron_caseta
@@ -12671,16 +12672,16 @@
     has read clear for 10 straight minutes, handing control back to "Kitchen: Smart
     Motion & Presence". Counts from override start if the room already reads empty
     when the button is pressed. 2026-09-17: added kitchen_pico_hold as a separate
-    flag so the Pico''s override survives the main automation''s own 60-second
-    clear (kitchen_cleared), which now explicitly skips clearing kitchen_manual_override
+    flag so the Pico''s override survives the main automation''s own 60-second clear
+    (kitchen_cleared), which now explicitly skips clearing kitchen_manual_override
     while kitchen_pico_hold is on - restoring the Pico''s intended 10-minute hold
     instead of the ~60s it was getting when both paths shared one boolean.'
   triggers:
   - trigger: template
     id: empty
     alias: Override on and kitchen empty for 10 min
-    value_template: '{{ is_state(''input_boolean.kitchen_manual_override'',
-      ''on'') and is_state(''binary_sensor.kitchen_sensor_group'', ''off'') }}'
+    value_template: '{{ is_state(''input_boolean.kitchen_manual_override'', ''on'')
+      and is_state(''binary_sensor.kitchen_sensor_group'', ''off'') }}'
     for:
       minutes: 10
   conditions: []
