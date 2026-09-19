@@ -9746,48 +9746,29 @@
             enabled: true
         else:
         - alias: PHASE 2 is queued BEHIND the opener while it is still playing, so
-            the Sonos rolls straight from Here Comes The Sun into the first playlist
+            the Sonos rolls straight from Here Comes The Sun into the first shuffled
             track with no gap. The old design waited for the opener to end and then
             replaced the queue, which cost ~14s of silence (re-check, MA's 5s end-of-queue
             watch, ~5s playlist fetch) and on 2026-09-14 raced that watch - MA started
             a second play of its own, so ~3s of Rare jumped to You Belong With Me.
             With items after the opener the queue never ends, so that watch never
-            starts. Browse the playlist first to get its tracks in curated order.
+            starts. Shuffle goes on first (nothing is after the opener yet, so there
+            is nothing to reorder or invalidate); enqueue add inserts the playlist
+            after the playing track, shuffled, and never starts playback by itself.
             All of this runs ~15s into a 3-minute song, far from the track boundary.
-          continue_on_error: true
-          action: media_player.browse_media
-          target:
-            entity_id: media_player.bedroom_2
-          data:
-            media_content_type: playlist
-            media_content_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
-          response_variable: gm_playlist_browse
-        - alias: Shuffle OFF - true MA shuffle reorders the whole queue randomly,
-            which on 2026-09-18 put Everybody Talks (upbeat) directly before a much
-            slower track with no crossfade and no track boundary in between - a jarring
-            cut that sounded like a crash. Keeping the curator's original order avoids
-            that; the next step rotates the starting point instead so it isn't the
-            same songs every morning.
           continue_on_error: true
           action: media_player.shuffle_set
           target:
             entity_id: media_player.bedroom_2
           data:
-            shuffle: false
-        - alias: Queue the playlist in its original order, rotated to start on a different
-            track each day (day-of-year mod track count) so the same songs don't play
-            every morning, while keeping the curator's song-to-song ordering intact.
-            enqueue add inserts it after the playing opener track and never starts
-            playback by itself.
-          continue_on_error: true
+            shuffle: true
+        - continue_on_error: true
           action: music_assistant.play_media
           target:
             entity_id: media_player.bedroom_2
           data:
-            media_id: '{% set tracks = gm_playlist_browse[''media_player.bedroom_2''].children
-              | map(attribute=''media_content_id'') | list %} {% set start = now().strftime(''%j'')
-              | int % (tracks | length) %} {{ tracks[start:] + tracks[:start] }}'
-            media_type: track
+            media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
+            media_type: playlist
             enqueue: add
         - alias: Autoplay back on - the queue now holds the whole playlist, so nothing
             is near its end and this triggers no refill
@@ -9946,37 +9927,25 @@
                   entity_id: input_boolean.good_morning_active
                   state: 'on'
                 then:
-                - alias: Browse the playlist to get its tracks in curated order before
-                    re-queueing. The player is idle at this point (that is what triggered
-                    the self-heal), so there is no pre-buffered next track to invalidate.
-                  continue_on_error: true
-                  action: media_player.browse_media
-                  target:
-                    entity_id: media_player.bedroom_2
-                  data:
-                    media_content_type: playlist
-                    media_content_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
-                  response_variable: gm_selfheal_playlist_browse
-                - alias: Shuffle OFF - keep the curator's order (no jarring random
-                    mood jumps); the re-queue below rotates the start point instead.
+                - alias: Set shuffle BEFORE re-queueing, never after. The player is
+                    idle at this point (that is what triggered the self-heal), so
+                    there is no pre-buffered next track to invalidate. Setting it
+                    after play_media is what used to make the boundary play a few
+                    seconds of one song before jumping to a different one.
                   continue_on_error: true
                   action: media_player.shuffle_set
                   target:
                     entity_id: media_player.bedroom_2
                   data:
-                    shuffle: false
-                - alias: Re-queue the playlist in original order, rotated to today's
-                    starting point (day-of-year mod track count), in one replace call
+                    shuffle: true
+                - alias: Re-queue the playlist, already shuffled, in one replace call
                   continue_on_error: true
                   action: music_assistant.play_media
                   target:
                     entity_id: media_player.bedroom_2
                   data:
-                    media_id: '{% set tracks = gm_selfheal_playlist_browse[''media_player.bedroom_2''].children
-                      | map(attribute=''media_content_id'') | list %} {% set start
-                      = now().strftime(''%j'') | int % (tracks | length) %} {{ tracks[start:]
-                      + tracks[:start] }}'
-                    media_type: track
+                    media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
+                    media_type: playlist
                     enqueue: replace
               - action: media_player.volume_set
                 target:
