@@ -10032,6 +10032,18 @@
             media_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
             media_type: playlist
             enqueue: add
+        - alias: Give MA time to load the playlist into the queue (its first track is
+            the opener itself, so the queue now reads opener, opener, ...). Loaded
+            within 8s in testing on 2026-09-19.
+          delay:
+            seconds: 8
+        - alias: Drop the duplicate opener at queue index 1 so Here Comes The Sun does
+            not play twice back to back. Only removes an upcoming queue item, never
+            the playing track.
+          continue_on_error: true
+          action: rest_command.ma_bedroom_delete_item
+          data:
+            index: 1
         - alias: Autoplay back on - the queue now holds the whole playlist, so nothing
             is near its end and this triggers no refill
           continue_on_error: true
