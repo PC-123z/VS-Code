@@ -543,7 +543,7 @@ funtime_play_playlist:
     media_id:
       description: Music Assistant media_id URI to play (e.g. spotify://playlist/...
         or ytmusic://playlist/...)
-      example: spotify://playlist/1GrWlZZ7Kb49epRDuiXUCz
+      example: spotify://playlist/0sXpI5zODRoKxKLBKlXwGS
   sequence:
   - alias: Set Sonos volume to 20%
     action: media_player.volume_set
