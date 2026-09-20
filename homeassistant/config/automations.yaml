@@ -857,8 +857,8 @@
   mode: single
 - id: '1774970377473'
   alias: 'Pico Button 1 - Big Bedroom: Bright/Mood Override'
-  description: 'Press: time-based bright/functional scene. Hold: time-based cozy/mood
-    scene. Both override AL/sleep until sensor clears for 10 min.'
+  description: 'Press: time-based bright/functional scene. Overrides AL/sleep until sensor
+    clears for 10 min. (Hold is not wired up - only a short press is handled.)'
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
@@ -10807,15 +10807,15 @@
   max: 10
 - id: '1778197535595'
   alias: 'Pico Center - Big Bedroom: Fun Button / Sexy Time'
-  description: 'Center circle press, only when starting a fresh session (timer.funtime_bedtime_countdown
-    idle), sets mood mode: deep red lighting at 40% (matching Bedtime Button), bedroom
-    fan to 50%, alarm to home, TV off, and plays playlist 1 (Spotify), resetting counter.funtime_playlist_index
-    to 1. Raise button always forces the opposite time-of-day playlist (chill vs upbeat)
-    regardless of session state, and sets the counter to 4. Repeat center presses
-    within the hour are handled by the separate "Fun Button - Cycle Playlist" automation
-    instead, which only changes music. Every press/hold (re)starts the shared 1-hour
-    timer.funtime_bedtime_countdown, which triggers the Bedtime Button routine when
-    it runs out untouched.'
+  description: 'Fun Button / Sexy Time. Center circle press, only when starting a fresh
+    session (timer.funtime_bedtime_countdown idle): sets mood mode (deep red lights -
+    ceiling 25%, lamps and Nanoleaf 10%, fans 50%, alarm to Home/Stay, TV off) and plays
+    playlist 1 (Sultry Sexy Tunes), resetting counter.funtime_playlist_index to 1.
+    Raise button runs the same mood setup at any time, even mid-session, but plays the
+    instrumental fallback playlist and sets the counter to 4. Repeat center presses
+    within the hour are handled by the separate "Fun Button - Cycle Playlist" automation,
+    which only changes music. Every press (re)starts the shared 1-hour timer.funtime_bedtime_countdown,
+    which triggers the Bedtime Button routine when it runs out untouched.'
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
@@ -10960,12 +10960,11 @@
   mode: restart
 - id: '1778197535596'
   alias: 'Pico Center - Big Bedroom: Fun Button - Cycle Playlist'
-  description: Center circle press while a Funtime session is already active (timer.funtime_bedtime_countdown
-    running, i.e. within an hour of the last press/hold) only advances counter.funtime_playlist_index
-    (wrapping 1 Spotify -> 2 YouTube Music -> 3 YouTube Music -> 4 time-of-day pick
-    -> back to 1) and plays the matching playlist. Lights, fan, alarm, and TV are
-    left untouched. Restarts the same shared 1-hour countdown as the main Fun Button
-    automation.
+  description: 'Center circle press while a Funtime session is already active (timer.funtime_bedtime_countdown
+    running, i.e. within an hour of the last press) only advances counter.funtime_playlist_index
+    (wrapping 1 Sultry Sexy Tunes -> 2 late night R&B -> 3 Sexy Chill Lounge -> 4 instrumentals
+    -> back to 1) and plays the matching playlist. Lights, fan, alarm, and TV are left
+    untouched. Restarts the same shared 1-hour countdown as the main Fun Button automation.'
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
