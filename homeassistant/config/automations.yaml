@@ -11537,7 +11537,12 @@
     always silences the room even if nobody's watching kitchen occupancy. Reverted
     2026-09-10 to join/broadcast mode - kitchen is the fixed anchor again, so stopping
     kitchen (and unjoining satellites) is enough to end the whole group regardless
-    of who's still joined to it.
+    of who's still joined to it. Updated 2026-09-20 - at the cap, fade every speaker
+    in the kitchen group to 0 over 3 minutes (36 steps x 5s) for a subtle departure,
+    then stop, unjoin, restore each speaker's pre-fade volume and clear the flag.
+    The flag stays on during the fade so the deactivation/unjoin automations don't
+    cut it short; if another automation ends the session mid-fade (nobody present,
+    manual pause), the fade aborts and volumes are still restored.
   triggers:
   - trigger: state
     entity_id: input_boolean.welcome_home_active
@@ -11546,6 +11551,44 @@
       minutes: 30
   conditions: []
   actions:
+  - alias: Capture every speaker in the kitchen group and its current volume
+    variables:
+      fade_targets: '{% set ns = namespace(l=[]) %}{% for m in (state_attr(''media_player.kitchen_2'',''group_members'')
+        or [''media_player.kitchen_2'']) %}{% set ns.l = ns.l + [{''entity'': m, ''vol'':
+        (state_attr(m,''volume_level'') | float(0))}] %}{% endfor %}{{ ns.l }}'
+      fade_needed: '{{ is_state(''media_player.kitchen_2'',''playing'') and is_state_attr(''media_player.kitchen_2'',''app_id'',''music_assistant'')
+        }}'
+  - alias: Fade all speakers to 0 over 3 minutes (36 steps x 5s); abort if the session
+      ends or the kitchen stops being Music Assistant's playing queue
+    if:
+    - condition: template
+      value_template: '{{ fade_needed }}'
+    then:
+    - repeat:
+        while:
+        - condition: template
+          value_template: '{{ repeat.index <= 36 }}'
+        - condition: state
+          entity_id: input_boolean.welcome_home_active
+          state: 'on'
+        - condition: state
+          entity_id: media_player.kitchen_2
+          state: playing
+        sequence:
+        - variables:
+            step: '{{ repeat.index }}'
+        - repeat:
+            for_each: '{{ fade_targets }}'
+            sequence:
+            - continue_on_error: true
+              action: media_player.volume_set
+              target:
+                entity_id: '{{ repeat.item.entity }}'
+              data:
+                volume_level: '{{ [0, (repeat.item.vol * (1 - step / 36))] | max |
+                  round(3) }}'
+        - delay:
+            seconds: 5
   - alias: Unjoin satellite rooms
     continue_on_error: true
     action: media_player.unjoin
@@ -11562,6 +11605,22 @@
     action: media_player.media_stop
     target:
       entity_id: media_player.kitchen
+  - alias: Restore each speaker's pre-fade volume so nothing is left at 0 next time
+    if:
+    - condition: template
+      value_template: '{{ fade_needed }}'
+    then:
+    - delay:
+        seconds: 2
+    - repeat:
+        for_each: '{{ fade_targets }}'
+        sequence:
+        - continue_on_error: true
+          action: media_player.volume_set
+          target:
+            entity_id: '{{ repeat.item.entity }}'
+          data:
+            volume_level: '{{ repeat.item.vol }}'
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.welcome_home_active
