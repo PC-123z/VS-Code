@@ -8221,8 +8221,8 @@
   alias: 'Living Room: TV Mode (Unified)'
   description: TV state drives living room lighting with time-of-day palette. Playing
     = deep dim scaled to daylight. Paused/Off = restore AL and presence. Dining room
-    dims during playback if occupied. Kitchen lights fade off (30s) when playback
-    starts if the kitchen is empty, or once the kitchen has been empty 30s during
+    dims during playback if occupied. Kitchen lights fade off (30s fade) when playback
+    starts if the kitchen is empty, or once the kitchen has been empty 5s during
     playback. Galaxy projector off during playback, on when paused/off.
   triggers:
   - alias: Jellyfin (any current/future Living Room client) - playing
@@ -8335,7 +8335,7 @@
     entity_id: binary_sensor.kitchen_sensor_group
     to: 'off'
     for:
-      seconds: 30
+      seconds: 5
     id: kitchen_empty
   conditions: []
   actions:
@@ -8448,7 +8448,7 @@
         value_template: '{{ [''light.kitchen_1_color'', ''light.kitchen_2_color'',
           ''light.kitchen_lightstrip'', ''light.hue_datura_top_1'', ''light.hue_datura_bottom_1'']
           | select(''is_state'', ''on'') | list | count > 0 }}'
-      alias: Kitchen empty for 30s while media is playing - fade kitchen lights off
+      alias: Kitchen empty for 5s while media is playing - fade kitchen lights off
       sequence:
       - action: switch.turn_off
         target:
