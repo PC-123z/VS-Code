@@ -857,8 +857,8 @@
   mode: single
 - id: '1774970377473'
   alias: 'Pico Button 1 - Big Bedroom: Bright/Mood Override'
-  description: 'Press: time-based bright/functional scene. Overrides AL/sleep until sensor
-    clears for 10 min. (Hold is not wired up - only a short press is handled.)'
+  description: 'Press: time-based bright/functional scene. Overrides AL/sleep until
+    sensor clears for 10 min. (Hold is not wired up - only a short press is handled.)'
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
@@ -6925,98 +6925,6 @@
     target:
       entity_id: automation.bedroom_2_after_midnight_lights_out
   mode: single
-- id: '1781237174423'
-  alias: '*Bedroom 2 Late Night Lights Out'
-  description: From 10:45pm onward - the Bedtime Routine's hard lights out - while
-    bedroom2_occupied is on, any Bedroom 2 / Office light that stays on for 60 seconds
-    fades back off, so the room stays dark until the Good Morning Routine restores
-    the lights. Ignores the dimmer manual override so the kids can't defeat it from
-    the wall dimmer. The 10:46:30pm and midnight sweeps catch lights already on when
-    the window opens (10:46:30 rather than 10:45 so it doesn't cut short hard lights
-    out's own 60-second fade), and the startup sweep catches lights already on when
-    HA restarts overnight (restored states don't fire the state trigger). Primarily
-    stopped by Good Morning turning this automation off the moment it runs (see its
-    first action) - that's what actually needs to track Good Morning's trigger time,
-    not a hardcoded cutoff here, since that trigger time changes. Re-armed nightly
-    by the Occupancy Latch. The time window below is just a generous fallback in case
-    Good Morning never fires one morning; bedroom2_occupied being force-cleared by
-    Daily Reset (9:30am weekdays/11am weekends) is the ultimate backstop either way.
-  triggers:
-  - trigger: state
-    entity_id:
-    - light.ribbon
-    - light.fluttershy
-    - light.office
-    - light.hue_white_lamp_1
-    to: 'on'
-    for:
-      seconds: 60
-    id: light_on
-  - alias: Sweep just after the window opens - 10:45pm hard lights out plus its 60-second
-      fade, so this doesn't shorten that fade with its own 30s transition
-    trigger: time
-    at: '22:46:30'
-    id: sweep
-  - trigger: time
-    at: 00:00:30
-    id: sweep
-  - trigger: homeassistant
-    event: start
-    id: sweep
-  conditions:
-  - condition: state
-    entity_id: input_boolean.bedroom2_occupied
-    state: 'on'
-  - alias: From 11:30pm until the morning sunrise ramp starts
-    condition: or
-    conditions:
-    - alias: Late evening - 10:45pm to midnight, every night
-      condition: time
-      after: '22:45:00'
-      before: 00:00:00
-    - condition: time
-      after: 00:00:00
-      before: 09:30:00
-      weekday:
-      - mon
-      - tue
-      - wed
-      - thu
-      - fri
-    - condition: time
-      after: 00:00:00
-      before: '11:00:00'
-      weekday:
-      - sat
-      - sun
-  actions:
-  - choose:
-    - conditions:
-      - condition: trigger
-        id: sweep
-      sequence:
-      - alias: Fade off anything left on at midnight or HA startup
-        action: light.turn_off
-        target:
-          entity_id:
-          - light.ribbon
-          - light.fluttershy
-          - light.office
-          - light.hue_white_lamp_1
-        data:
-          transition: 30
-    - conditions:
-      - condition: trigger
-        id: light_on
-      sequence:
-      - alias: Fade the light that was turned on back off
-        action: light.turn_off
-        target:
-          entity_id: '{{ trigger.entity_id }}'
-        data:
-          transition: 30
-  mode: parallel
-  max: 6
 - id: '1776427656334'
   alias: Good Morning - Kitchen Speaker Join
   description: During the good morning routine, joins kitchen speaker on first motion
@@ -8222,8 +8130,8 @@
   description: TV state drives living room lighting with time-of-day palette. Playing
     = deep dim scaled to daylight. Paused/Off = restore AL and presence. Dining room
     dims during playback if occupied. Kitchen lights fade off (30s fade) when playback
-    starts if the kitchen is empty, or once the kitchen has been empty 5s during
-    playback. Galaxy projector off during playback, on when paused/off.
+    starts if the kitchen is empty, or once the kitchen has been empty 5s during playback.
+    Galaxy projector off during playback, on when paused/off.
   triggers:
   - alias: Jellyfin (any current/future Living Room client) - playing
     trigger: template
@@ -9250,10 +9158,11 @@
     so a stray premature flag-clear (e.g. from the music-pause guard) can't leave
     kitchen music orphaned with no automation watching it. Updated 2026-09-20 - this
     is now the ONLY normal end of a session (the fixed 10-minute 'Stop Music After
-    10 Minutes' automation was deleted), so music keeps playing until kitchen and every
-    satellite room (Big Bedroom, Bedroom 2/Office, Bathroom) has been empty for 10
-    continuous minutes, with the 30-minute cap as backstop. Living Room removed from
-    the presence check - it is not a satellite and is not joined to the kitchen group.
+    10 Minutes' automation was deleted), so music keeps playing until kitchen and
+    every satellite room (Big Bedroom, Bedroom 2/Office, Bathroom) has been empty
+    for 10 continuous minutes, with the 30-minute cap as backstop. Living Room removed
+    from the presence check - it is not a satellite and is not joined to the kitchen
+    group.
   triggers:
   - trigger: state
     entity_id:
@@ -10807,15 +10716,16 @@
   max: 10
 - id: '1778197535595'
   alias: 'Pico Center - Big Bedroom: Fun Button / Sexy Time'
-  description: 'Fun Button / Sexy Time. Center circle press, only when starting a fresh
-    session (timer.funtime_bedtime_countdown idle): sets mood mode (deep red lights -
-    ceiling 25%, lamps and Nanoleaf 10%, fans 50%, alarm to Home/Stay, TV off) and plays
-    playlist 1 (Sultry Sexy Tunes), resetting counter.funtime_playlist_index to 1.
-    Raise button runs the same mood setup at any time, even mid-session, but plays the
-    instrumental fallback playlist and sets the counter to 4. Repeat center presses
-    within the hour are handled by the separate "Fun Button - Cycle Playlist" automation,
-    which only changes music. Every press (re)starts the shared 1-hour timer.funtime_bedtime_countdown,
-    which triggers the Bedtime Button routine when it runs out untouched.'
+  description: 'Fun Button / Sexy Time. Center circle press, only when starting a
+    fresh session (timer.funtime_bedtime_countdown idle): sets mood mode (deep red
+    lights - ceiling 25%, lamps and Nanoleaf 10%, fans 50%, alarm to Home/Stay, TV
+    off) and plays playlist 1 (Sultry Sexy Tunes), resetting counter.funtime_playlist_index
+    to 1. Raise button runs the same mood setup at any time, even mid-session, but
+    plays the instrumental fallback playlist and sets the counter to 4. Repeat center
+    presses within the hour are handled by the separate "Fun Button - Cycle Playlist"
+    automation, which only changes music. Every press (re)starts the shared 1-hour
+    timer.funtime_bedtime_countdown, which triggers the Bedtime Button routine when
+    it runs out untouched.'
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
@@ -10960,11 +10870,12 @@
   mode: restart
 - id: '1778197535596'
   alias: 'Pico Center - Big Bedroom: Fun Button - Cycle Playlist'
-  description: 'Center circle press while a Funtime session is already active (timer.funtime_bedtime_countdown
+  description: Center circle press while a Funtime session is already active (timer.funtime_bedtime_countdown
     running, i.e. within an hour of the last press) only advances counter.funtime_playlist_index
-    (wrapping 1 Sultry Sexy Tunes -> 2 late night R&B -> 3 Sexy Chill Lounge -> 4 instrumentals
-    -> back to 1) and plays the matching playlist. Lights, fan, alarm, and TV are left
-    untouched. Restarts the same shared 1-hour countdown as the main Fun Button automation.'
+    (wrapping 1 Sultry Sexy Tunes -> 2 late night R&B -> 3 Sexy Chill Lounge -> 4
+    instrumentals -> back to 1) and plays the matching playlist. Lights, fan, alarm,
+    and TV are left untouched. Restarts the same shared 1-hour countdown as the main
+    Fun Button automation.
   triggers:
   - device_id: 439cd94b6d0b7203c2c0e131aee2cc31
     domain: lutron_caseta
