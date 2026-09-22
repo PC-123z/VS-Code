@@ -8245,6 +8245,19 @@
     for:
       seconds: 5
     id: kitchen_empty
+  - alias: Real motion (not presence) in living room, dining room or kitchen while
+      TV Mode still has the room dimmed and nothing is playing - brighten now instead
+      of waiting for another pause event
+    trigger: state
+    entity_id:
+    - binary_sensor.living_room_motion
+    - binary_sensor.dining_room_apollo_ld2450_moving_target
+    - binary_sensor.kitchen_motion
+    - binary_sensor.kitchen_motion_2
+    - binary_sensor.kitchen_motion_3
+    - binary_sensor.kitchen_occupancy_sensor_radar_moving_target
+    to: 'on'
+    id: motion_while_stopped
   conditions: []
   actions:
   - choose:
@@ -8377,8 +8390,21 @@
         data:
           transition: 30
     - conditions:
-      - condition: trigger
-        id: paused
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: paused
+        - condition: trigger
+          id: motion_while_stopped
+      - alias: Only brighten if real motion (not presence) is behind it - a fresh
+          pause/idle only restores when someone's actually moving right now, and a
+          later motion event only counts while TV Mode still has the room dimmed
+          and nothing is playing (once restored, Smart Motion & Presence owns it)
+        condition: template
+        value_template: >-
+          {{ (trigger.id == 'paused' and motion_active) or (trigger.id ==
+          'motion_while_stopped' and is_state('switch.al_living_room', 'off') and
+          not is_playing_now) }}
       sequence:
       - alias: Skip living room light restore while hold-for-100% override is active
         if:
@@ -8605,6 +8631,16 @@
       {% endif %}'
     playing_brightness: '{% if sun_elev > 10 %}15 {% elif sun_elev > -6 %}5 {% else
       %}2 {% endif %}'
+    is_playing_now: '{{ integration_entities(''jellyfin'') | select(''match'', ''^media_player\.'')
+      | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'',
+      ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
+      ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''media_player.living_room_tv_3'',
+      ''playing'') or is_state(''media_player.living_room'', ''playing'') }}'
+    motion_active: '{{ is_state(''binary_sensor.living_room_motion'', ''on'') or
+      is_state(''binary_sensor.dining_room_apollo_ld2450_moving_target'', ''on'')
+      or is_state(''binary_sensor.kitchen_motion'', ''on'') or is_state(''binary_sensor.kitchen_motion_2'',
+      ''on'') or is_state(''binary_sensor.kitchen_motion_3'', ''on'') or is_state(''binary_sensor.kitchen_occupancy_sensor_radar_moving_target'',
+      ''on'') }}'
   mode: restart
 - id: '1777317910121'
   alias: Office Fan Alexa Control
