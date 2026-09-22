@@ -2366,10 +2366,6 @@
     - binary_sensor.big_bedroom_sensor_group
     to:
     - 'on'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 2
     id: detected
   - trigger: state
     entity_id:
@@ -2470,10 +2466,10 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
-          - alias: Hold 5s of presence before lamps
+          - alias: Hold 2s of presence before other lights fade in
             wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
               }}'
-            timeout: 00:00:05
+            timeout: 00:00:02
             continue_on_timeout: true
           - alias: Presence dropped - fade ceilings back off and skip lamps
             if:
@@ -2517,7 +2513,7 @@
               entity_id: light.nano_sand_dune
             data:
               brightness_pct: 80
-              transition: 5
+              transition: 10
         - conditions:
           - condition: time
             after: '10:00:00'
@@ -2542,10 +2538,10 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
-          - alias: Hold 5s of presence before lamps
+          - alias: Hold 2s of presence before other lights fade in
             wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
               }}'
-            timeout: 00:00:05
+            timeout: 00:00:02
             continue_on_timeout: true
           - alias: Presence dropped - fade ceilings back off and skip lamps
             if:
@@ -2589,7 +2585,7 @@
               entity_id: light.nano_sand_dune
             data:
               brightness_pct: 80
-              transition: 5
+              transition: 10
         - conditions:
           - condition: time
             after: '12:00:00'
@@ -2614,10 +2610,10 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
-          - alias: Hold 5s of presence before lamps
+          - alias: Hold 2s of presence before other lights fade in
             wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
               }}'
-            timeout: 00:00:05
+            timeout: 00:00:02
             continue_on_timeout: true
           - alias: Presence dropped - fade ceilings back off and skip lamps
             if:
@@ -2661,7 +2657,7 @@
               entity_id: light.nano_sand_dune
             data:
               brightness_pct: 70
-              transition: 5
+              transition: 10
         - conditions:
           - condition: time
             after: '15:00:00'
@@ -2686,10 +2682,10 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
-          - alias: Hold 5s of presence before lamps
+          - alias: Hold 2s of presence before other lights fade in
             wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
               }}'
-            timeout: 00:00:05
+            timeout: 00:00:02
             continue_on_timeout: true
           - alias: Presence dropped - fade ceilings back off and skip lamps
             if:
@@ -2733,7 +2729,7 @@
               entity_id: light.nano_sand_dune
             data:
               brightness_pct: 70
-              transition: 5
+              transition: 10
         - conditions:
           - condition: time
             after: '18:00:00'
@@ -2758,10 +2754,10 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
-          - alias: Hold 5s of presence before lamps
+          - alias: Hold 2s of presence before other lights fade in
             wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
               }}'
-            timeout: 00:00:05
+            timeout: 00:00:02
             continue_on_timeout: true
           - alias: Presence dropped - fade ceilings back off and skip lamps
             if:
@@ -2806,7 +2802,7 @@
             data:
               brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
                 | float(50) | round(0) }}'
-              transition: 5
+              transition: 10
         - conditions:
           - condition: time
             after: '20:00:00'
@@ -2840,8 +2836,8 @@
               - light.bedroom_ceiling_2
             data:
               transition: 0
-            alias: Ceilings first - instant, not the gentle 30s fade lamps/Nanoleaf
-              still use, so walking in doesn't mean waiting on the light
+            alias: Ceilings first - instant, not the 10s fade lamps/Nanoleaf still
+              use, so walking in doesn't mean waiting on the light
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2853,10 +2849,10 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
-          - alias: Hold 5s of presence before lamps
+          - alias: Hold 2s of presence before other lights fade in
             wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
               }}'
-            timeout: 00:00:05
+            timeout: 00:00:02
             continue_on_timeout: true
           - alias: Presence dropped - fade ceilings back off and skip lamps
             if:
@@ -2877,7 +2873,7 @@
               - light.bedroom_lamp_1
               - light.bedroom_lamp_2
             data:
-              transition: 30
+              transition: 10
             alias: Lamps fade in
           - action: adaptive_lighting.apply
             continue_on_error: true
@@ -2886,7 +2882,7 @@
               lights:
               - light.bedroom_lamp_1
               - light.bedroom_lamp_2
-              transition: 30
+              transition: 10
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
@@ -2901,7 +2897,7 @@
             data:
               brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
                 | float(30) | round(0) }}'
-              transition: 5
+              transition: 10
         - conditions:
           - condition: time
             after: '23:00:00'
@@ -2942,8 +2938,8 @@
                 - light.bedroom_ceiling_2
               data:
                 transition: 0
-              alias: Ceilings first - instant, not the gentle 30s fade lamps/Nanoleaf
-                still use, so walking in doesn't mean waiting on the light
+              alias: Ceilings first - instant, not the 10s fade lamps/Nanoleaf still
+                use, so walking in doesn't mean waiting on the light
             - action: adaptive_lighting.apply
               continue_on_error: true
               data:
@@ -2955,10 +2951,10 @@
                 adapt_color: true
                 adapt_brightness: true
                 prefer_rgb_color: true
-            - alias: Hold 5s of presence before lamps
+            - alias: Hold 2s of presence before other lights fade in
               wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
                 }}'
-              timeout: 00:00:05
+              timeout: 00:00:02
               continue_on_timeout: true
             - alias: Presence dropped - fade ceilings back off and skip lamps
               if:
@@ -2979,7 +2975,7 @@
                 - light.bedroom_lamp_1
                 - light.bedroom_lamp_2
               data:
-                transition: 30
+                transition: 10
               alias: Lamps fade in
             - action: adaptive_lighting.apply
               continue_on_error: true
@@ -2988,7 +2984,7 @@
                 lights:
                 - light.bedroom_lamp_1
                 - light.bedroom_lamp_2
-                transition: 30
+                transition: 10
                 adapt_color: true
                 adapt_brightness: true
                 prefer_rgb_color: true
@@ -3003,7 +2999,7 @@
               data:
                 brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
                   | float(30) | round(0) }}'
-                transition: 5
+                transition: 10
     - conditions:
       - condition: trigger
         id: stopped
