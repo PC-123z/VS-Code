@@ -8461,9 +8461,6 @@
             adapt_color: true
             adapt_brightness: true
             prefer_rgb_color: true
-      - action: light.turn_on
-        target:
-          entity_id: light.galaxy_projector
       - alias: Leave dining room alone while dimmer override is active (On tap/hold)
         if:
         - condition: state
