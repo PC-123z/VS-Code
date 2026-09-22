@@ -2839,8 +2839,9 @@
               - light.bedroom_ceiling_1
               - light.bedroom_ceiling_2
             data:
-              transition: 30
-            alias: Ceilings first
+              transition: 0
+            alias: Ceilings first - instant, not the gentle 30s fade lamps/Nanoleaf
+              still use, so walking in doesn't mean waiting on the light
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -2848,7 +2849,7 @@
               lights:
               - light.bedroom_ceiling_1
               - light.bedroom_ceiling_2
-              transition: 30
+              transition: 0
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
@@ -2940,8 +2941,9 @@
                 - light.bedroom_ceiling_1
                 - light.bedroom_ceiling_2
               data:
-                transition: 30
-              alias: Ceilings first
+                transition: 0
+              alias: Ceilings first - instant, not the gentle 30s fade lamps/Nanoleaf
+                still use, so walking in doesn't mean waiting on the light
             - action: adaptive_lighting.apply
               continue_on_error: true
               data:
@@ -2949,7 +2951,7 @@
                 lights:
                 - light.bedroom_ceiling_1
                 - light.bedroom_ceiling_2
-                transition: 30
+                transition: 0
                 adapt_color: true
                 adapt_brightness: true
                 prefer_rgb_color: true
