@@ -8720,16 +8720,20 @@
     - fri
     - sun
     - sat
-  - alias: Skip the spoken announcement while Big Bedroom is asleep (sleep mode or
-      nap via Hue Button 2/3)
-    condition: and
-    conditions:
-    - condition: state
-      entity_id: switch.al_sleep_mode_big_bedroom
-      state: 'off'
-    - condition: state
-      entity_id: input_boolean.big_bedroom_asleep
-      state: 'off'
+  - alias: Skip the spoken announcement while any room is in sleep/goodnight mode
+    condition: template
+    value_template: >-
+      {{ not (is_state('switch.al_sleep_mode_bathroom', 'on')
+      or is_state('switch.al_sleep_mode_bathroom_main', 'on')
+      or is_state('switch.al_sleep_mode_big_bedroom', 'on')
+      or is_state('switch.al_sleep_mode_dining_room_bottom', 'on')
+      or is_state('switch.al_sleep_mode_dining_room_top', 'on')
+      or is_state('switch.al_sleep_mode_hallway', 'on')
+      or is_state('switch.al_sleep_mode_kitchen', 'on')
+      or is_state('switch.al_sleep_mode_living_room', 'on')
+      or is_state('switch.adaptive_lighting_sleep_mode_office', 'on')
+      or is_state('input_boolean.big_bedroom_asleep', 'on')
+      or is_state('input_boolean.bedroom2_asleep', 'on')) }}
   - data:
       message: 'Alert: {{ trigger.payload_json.after.label | capitalize }} detected
         at {% if trigger.payload_json.after.camera == ''driveway'' %}Driveway {% elif
@@ -11110,7 +11114,8 @@
   mode: single
 - id: washer_announcement
   alias: Washer Announcement
-  description: Done announcement only, between 8AM and 10:30PM
+  description: Done announcement only, between 8AM and 10:30PM, skipped entirely
+    if any room is in sleep/goodnight mode
   triggers:
   - trigger: state
     id: done
@@ -11121,6 +11126,21 @@
   - condition: time
     after: 08:00:00
     before: '22:30:00'
+  - alias: Skip entirely if any room is in sleep/goodnight mode - the living room/kitchen
+      Echo announcements are audible too, not just the bedroom TTS
+    condition: template
+    value_template: >-
+      {{ not (is_state('switch.al_sleep_mode_bathroom', 'on')
+      or is_state('switch.al_sleep_mode_bathroom_main', 'on')
+      or is_state('switch.al_sleep_mode_big_bedroom', 'on')
+      or is_state('switch.al_sleep_mode_dining_room_bottom', 'on')
+      or is_state('switch.al_sleep_mode_dining_room_top', 'on')
+      or is_state('switch.al_sleep_mode_hallway', 'on')
+      or is_state('switch.al_sleep_mode_kitchen', 'on')
+      or is_state('switch.al_sleep_mode_living_room', 'on')
+      or is_state('switch.adaptive_lighting_sleep_mode_office', 'on')
+      or is_state('input_boolean.big_bedroom_asleep', 'on')
+      or is_state('input_boolean.bedroom2_asleep', 'on')) }}
   actions:
   - action: notify.send_message
     target:
@@ -11132,14 +11152,6 @@
       entity_id: notify.echo_show_kitchen_announce
     data:
       message: The washer is done!
-  - condition: template
-    alias: Skip if either bedroom's sleep mode is on - big bedroom's manual bedtime
-      flag or its nightly schedule switch, or Bedroom 2 / Office's sleep mode switch.
-      tts.piper on media_player.bedroom would otherwise duck/interrupt sleep music
-      and audibly announce into both rooms.
-    value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'', ''on'')
-      or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'') or is_state(''switch.adaptive_lighting_sleep_mode_office'',
-      ''on'')) }}'
   - action: tts.speak
     target:
       entity_id: tts.piper
@@ -11150,7 +11162,8 @@
   mode: single
 - id: dryer_announcement
   alias: Dryer Announcement
-  description: Done announcement only, between 8AM and 10:30PM
+  description: Done announcement only, between 8AM and 10:30PM, skipped entirely
+    if any room is in sleep/goodnight mode
   triggers:
   - trigger: state
     id: done
@@ -11161,6 +11174,21 @@
   - condition: time
     after: 08:00:00
     before: '22:30:00'
+  - alias: Skip entirely if any room is in sleep/goodnight mode - the living room/kitchen
+      Echo announcements are audible too, not just the bedroom TTS
+    condition: template
+    value_template: >-
+      {{ not (is_state('switch.al_sleep_mode_bathroom', 'on')
+      or is_state('switch.al_sleep_mode_bathroom_main', 'on')
+      or is_state('switch.al_sleep_mode_big_bedroom', 'on')
+      or is_state('switch.al_sleep_mode_dining_room_bottom', 'on')
+      or is_state('switch.al_sleep_mode_dining_room_top', 'on')
+      or is_state('switch.al_sleep_mode_hallway', 'on')
+      or is_state('switch.al_sleep_mode_kitchen', 'on')
+      or is_state('switch.al_sleep_mode_living_room', 'on')
+      or is_state('switch.adaptive_lighting_sleep_mode_office', 'on')
+      or is_state('input_boolean.big_bedroom_asleep', 'on')
+      or is_state('input_boolean.bedroom2_asleep', 'on')) }}
   actions:
   - action: notify.send_message
     target:
@@ -11172,14 +11200,6 @@
       entity_id: notify.echo_show_kitchen_announce
     data:
       message: The dryer is done!
-  - condition: template
-    alias: Skip if either bedroom's sleep mode is on - big bedroom's manual bedtime
-      flag or its nightly schedule switch, or Bedroom 2 / Office's sleep mode switch.
-      tts.piper on media_player.bedroom would otherwise duck/interrupt sleep music
-      and audibly announce into both rooms.
-    value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'', ''on'')
-      or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'') or is_state(''switch.adaptive_lighting_sleep_mode_office'',
-      ''on'')) }}'
   - action: tts.speak
     target:
       entity_id: tts.piper
