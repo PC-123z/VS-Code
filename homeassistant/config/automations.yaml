@@ -47,6 +47,16 @@
   - condition: state
     entity_id: input_boolean.good_morning_expected_pause
     state: 'off'
+  - alias: Only end the routine if the room is actually clear - if presence is
+      still detected, this is more likely Music Assistant failing to advance
+      the queue than a deliberate manual stop, so let the routine's own
+      occupancy-driven self-heal loop try to resume playback instead of ending
+      Good Morning out from under someone still in the room. Tolerates the
+      sensor group's flicker with the same 2-minute window used elsewhere.
+    condition: template
+    value_template: '{% set s = states.binary_sensor.big_bedroom_sensor_group
+      %} {{ s is none or (s.state != ''on'' and (now() - s.last_changed).total_seconds()
+      >= 120) }}'
   actions:
   - alias: Stop the music player explicitly
     action: media_player.media_stop
@@ -10159,15 +10169,20 @@
         timeout:
           minutes: 5
         continue_on_timeout: true
-      - alias: First announcement then fires on motion. If the room is already occupied
-          when the ramp finishes the radar is normally already reporting a moving
-          target, so this falls straight through and the greeting lands as soon as
-          the music is up to volume; otherwise it waits for the first movement in
-          the room.
+      - alias: First announcement then fires on motion. Tolerates the radar's own
+          flicker - apollo_msr_2_big_bedroom_radar_moving_target pulses on/off in
+          short (under 2s) bursts even during continuous motion, so a strict on/off
+          check at this exact instant can land in a gap between pulses and miss
+          real presence (happened 2026-09-22 - motion was clearly happening seconds
+          before this check, but the radar had just dropped to off). Treat the room
+          as occupied if the radar is on now or fired within the last 2 minutes,
+          same tolerance as the presence check further down; otherwise wait for the
+          next pulse.
         if:
-        - condition: state
-          entity_id: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
-          state: 'off'
+        - condition: template
+          value_template: '{% set s = states.binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
+            %} {{ s is none or (s.state != ''on'' and (now() - s.last_changed).total_seconds()
+            >= 120) }}'
         then:
         - wait_for_trigger:
           - trigger: state
