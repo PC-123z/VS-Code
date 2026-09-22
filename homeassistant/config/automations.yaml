@@ -47,16 +47,24 @@
   - condition: state
     entity_id: input_boolean.good_morning_expected_pause
     state: 'off'
-  - alias: Only end the routine if the room is actually clear - if presence is
-      still detected, this is more likely Music Assistant failing to advance
-      the queue than a deliberate manual stop, so let the routine's own
-      occupancy-driven self-heal loop try to resume playback instead of ending
-      Good Morning out from under someone still in the room. Tolerates the
-      sensor group's flicker with the same 2-minute window used elsewhere.
+  - alias: Only end the routine if you've actually left the morning area - if
+      presence is still detected in the bedroom, bathroom, or kitchen, this is
+      more likely Music Assistant failing to advance the queue than a
+      deliberate manual stop, so let the routine's own occupancy-driven
+      self-heal loop try to resume playback instead of ending Good Morning
+      while you're still moving through your morning routine. Tolerates each
+      sensor's flicker with the same 2-minute window used elsewhere.
     condition: template
-    value_template: '{% set s = states.binary_sensor.big_bedroom_sensor_group
-      %} {{ s is none or (s.state != ''on'' and (now() - s.last_changed).total_seconds()
-      >= 120) }}'
+    value_template: >-
+      {% set ns = namespace(occupied=false) %}
+      {% for eid in ['binary_sensor.big_bedroom_sensor_group',
+        'binary_sensor.bathroom_motion', 'binary_sensor.kitchen_sensor_group'] %}
+        {% set s = states[eid] %}
+        {% if s is not none and (s.state == 'on' or (now() - s.last_changed).total_seconds() < 120) %}
+          {% set ns.occupied = true %}
+        {% endif %}
+      {% endfor %}
+      {{ not ns.occupied }}
   actions:
   - alias: Stop the music player explicitly
     action: media_player.media_stop
