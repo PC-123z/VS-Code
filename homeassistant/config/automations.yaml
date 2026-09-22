@@ -2188,7 +2188,7 @@
               - 139
               - 0
               - 0
-              transition: 1
+              transition: 5
         - conditions:
           - condition: time
             after: '20:30:00'
@@ -2205,14 +2205,14 @@
               - light.bathroom_back
               - light.bathroom_main_lights
             data:
-              transition: 1
+              transition: 5
         - conditions: []
           sequence:
           - action: light.turn_on
             target:
               entity_id: light.bathroom_main_lights
             data:
-              transition: 1
+              transition: 5
           - condition: template
             value_template: "{{ 'light.bathroom_main_lights' not in\n   state_attr('switch.al_bathroom_main',
               'manual_control') }}\n"
@@ -2222,7 +2222,7 @@
               entity_id: switch.al_bathroom_main
               lights:
               - light.bathroom_main_lights
-              transition: 1
+              transition: 5
               adapt_color: true
               adapt_brightness: true
           - action: light.turn_on
@@ -2233,7 +2233,7 @@
               - light.bathroom_tub_2
               - light.bathroom_back
             data:
-              transition: 1
+              transition: 5
           - condition: template
             value_template: "{{ 'light.bathroom_shower' not in\n   state_attr('switch.al_bathroom',
               'manual_control') }}\n"
@@ -2246,7 +2246,7 @@
               - light.bathroom_tub_1
               - light.bathroom_tub_2
               - light.bathroom_back
-              transition: 1
+              transition: 5
               adapt_color: true
               adapt_brightness: true
     - conditions:
@@ -4633,12 +4633,12 @@
       entity_id: fan.air_circulator
     data:
       percentage: 25
-  - alias: Set Sonos volume to 12%
+  - alias: Set Sonos volume to 10%
     action: media_player.volume_set
     target:
       entity_id: media_player.bedroom_2
     data:
-      volume_level: 0.12
+      volume_level: 0.1
   - alias: Play white noise via Music Assistant (with retry)
     repeat:
       sequence:
@@ -4914,12 +4914,12 @@
       entity_id: fan.air_circulator
     data:
       percentage: 25
-  - alias: Set Sonos volume to 12%
+  - alias: Set Sonos volume to 10%
     action: media_player.volume_set
     target:
       entity_id: media_player.bedroom_2
     data:
-      volume_level: 0.12
+      volume_level: 0.1
   - alias: Play Max Richter Sleep via Music Assistant (with retry)
     repeat:
       sequence:
