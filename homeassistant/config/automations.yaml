@@ -8257,6 +8257,8 @@
     - binary_sensor.kitchen_motion_3
     - binary_sensor.kitchen_occupancy_sensor_radar_moving_target
     to: 'on'
+    for:
+      seconds: 8
     id: motion_while_stopped
   conditions: []
   actions:
@@ -8396,16 +8398,29 @@
           id: paused
         - condition: trigger
           id: motion_while_stopped
-      - alias: Only brighten if real motion (not presence) is behind it - a fresh
-          pause/idle only restores when someone's actually moving right now, and a
-          later motion event only counts while TV Mode still has the room dimmed
-          and nothing is playing (once restored, Smart Motion & Presence owns it)
-        condition: template
-        value_template: >-
-          {{ (trigger.id == 'paused' and motion_active) or (trigger.id ==
-          'motion_while_stopped' and is_state('switch.al_living_room', 'off') and
-          not is_playing_now) }}
       sequence:
+      - alias: Only react to a motion_while_stopped run if TV Mode still has the
+          room dimmed and nothing is playing - otherwise the playing branch or
+          Smart Motion & Presence (after tv_off) already owns this
+        if:
+        - condition: template
+          value_template: "{{ trigger.id == 'motion_while_stopped' }}"
+        then:
+        - condition: template
+          value_template: "{{ is_state('switch.al_living_room', 'off') and not is_playing_now }}"
+      - alias: A plain pause/idle alone isn't enough - reaching for the remote to
+          pause is itself motion. Wait to let that settle, then require motion to
+          still be active - stays dim if nobody's actually moving. A
+          motion_while_stopped run skips this; its own 8-second wait already
+          proved the motion was real, not a blip
+        if:
+        - condition: template
+          value_template: "{{ trigger.id == 'paused' }}"
+        then:
+        - delay:
+            seconds: 8
+        - condition: template
+          value_template: '{{ motion_active }}'
       - alias: Skip living room light restore while hold-for-100% override is active
         if:
         - condition: state
