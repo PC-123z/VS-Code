@@ -11110,14 +11110,8 @@
   mode: single
 - id: washer_announcement
   alias: Washer Announcement
-  description: 5 min warning and done announcement between 8AM and 10:30PM
+  description: Done announcement only, between 8AM and 10:30PM
   triggers:
-  - trigger: template
-    id: five_minutes
-    value_template: "{{ states('sensor.washer_machine_state') == 'run'\n   and states('sensor.washer_completion_time')
-      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.washer_completion_time'))
-      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.washer_completion_time'))
-      - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.washer_machine_state
@@ -11128,72 +11122,36 @@
     after: 08:00:00
     before: '22:30:00'
   actions:
-  - if:
-    - condition: template
-      value_template: '{{ trigger.id == ''five_minutes'' }}'
-    then:
-    - action: notify.send_message
-      target:
-        entity_id: notify.living_room_dot_announce
-      data:
-        message: The washer will be done in 5 minutes.
-    - action: notify.send_message
-      target:
-        entity_id: notify.echo_show_kitchen_announce
-      data:
-        message: The washer will be done in 5 minutes.
-    - condition: template
-      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual bedtime
-        flag or its nightly schedule switch, or Bedroom 2 / Office's sleep mode switch.
-        tts.piper on media_player.bedroom would otherwise duck/interrupt sleep music
-        and audibly announce into both rooms.
-      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'', ''on'')
-        or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'') or is_state(''switch.adaptive_lighting_sleep_mode_office'',
-        ''on'')) }}'
-    - action: tts.speak
-      target:
-        entity_id: tts.piper
-      data:
-        cache: false
-        media_player_entity_id: media_player.bedroom
-        message: The washer will be done in 5 minutes.
-    else:
-    - action: notify.send_message
-      target:
-        entity_id: notify.living_room_dot_announce
-      data:
-        message: The washer is done!
-    - action: notify.send_message
-      target:
-        entity_id: notify.echo_show_kitchen_announce
-      data:
-        message: The washer is done!
-    - condition: template
-      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual bedtime
-        flag or its nightly schedule switch, or Bedroom 2 / Office's sleep mode switch.
-        tts.piper on media_player.bedroom would otherwise duck/interrupt sleep music
-        and audibly announce into both rooms.
-      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'', ''on'')
-        or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'') or is_state(''switch.adaptive_lighting_sleep_mode_office'',
-        ''on'')) }}'
-    - action: tts.speak
-      target:
-        entity_id: tts.piper
-      data:
-        cache: false
-        media_player_entity_id: media_player.bedroom
-        message: The washer is done!
+  - action: notify.send_message
+    target:
+      entity_id: notify.living_room_dot_announce
+    data:
+      message: The washer is done!
+  - action: notify.send_message
+    target:
+      entity_id: notify.echo_show_kitchen_announce
+    data:
+      message: The washer is done!
+  - condition: template
+    alias: Skip if either bedroom's sleep mode is on - big bedroom's manual bedtime
+      flag or its nightly schedule switch, or Bedroom 2 / Office's sleep mode switch.
+      tts.piper on media_player.bedroom would otherwise duck/interrupt sleep music
+      and audibly announce into both rooms.
+    value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'', ''on'')
+      or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'') or is_state(''switch.adaptive_lighting_sleep_mode_office'',
+      ''on'')) }}'
+  - action: tts.speak
+    target:
+      entity_id: tts.piper
+    data:
+      cache: false
+      media_player_entity_id: media_player.bedroom
+      message: The washer is done!
   mode: single
 - id: dryer_announcement
   alias: Dryer Announcement
-  description: 5 min warning and done announcement between 8AM and 10:30PM
+  description: Done announcement only, between 8AM and 10:30PM
   triggers:
-  - trigger: template
-    id: five_minutes
-    value_template: "{{ states('sensor.dryer_machine_state') == 'run'\n   and states('sensor.dryer_completion_time')
-      not in ['unavailable', 'unknown', 'none']\n   and (as_timestamp(states('sensor.dryer_completion_time'))
-      - as_timestamp(now())) | int <= 300\n   and (as_timestamp(states('sensor.dryer_completion_time'))
-      - as_timestamp(now())) | int > 0 }}"
   - trigger: state
     id: done
     entity_id: sensor.dryer_machine_state
@@ -11204,61 +11162,31 @@
     after: 08:00:00
     before: '22:30:00'
   actions:
-  - if:
-    - condition: template
-      value_template: '{{ trigger.id == ''five_minutes'' }}'
-    then:
-    - action: notify.send_message
-      target:
-        entity_id: notify.living_room_dot_announce
-      data:
-        message: The dryer will be done in 5 minutes.
-    - action: notify.send_message
-      target:
-        entity_id: notify.echo_show_kitchen_announce
-      data:
-        message: The dryer will be done in 5 minutes.
-    - condition: template
-      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual bedtime
-        flag or its nightly schedule switch, or Bedroom 2 / Office's sleep mode switch.
-        tts.piper on media_player.bedroom would otherwise duck/interrupt sleep music
-        and audibly announce into both rooms.
-      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'', ''on'')
-        or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'') or is_state(''switch.adaptive_lighting_sleep_mode_office'',
-        ''on'')) }}'
-    - action: tts.speak
-      target:
-        entity_id: tts.piper
-      data:
-        cache: false
-        media_player_entity_id: media_player.bedroom
-        message: The dryer will be done in 5 minutes.
-    else:
-    - action: notify.send_message
-      target:
-        entity_id: notify.living_room_dot_announce
-      data:
-        message: The dryer is done!
-    - action: notify.send_message
-      target:
-        entity_id: notify.echo_show_kitchen_announce
-      data:
-        message: The dryer is done!
-    - condition: template
-      alias: Skip if either bedroom's sleep mode is on - big bedroom's manual bedtime
-        flag or its nightly schedule switch, or Bedroom 2 / Office's sleep mode switch.
-        tts.piper on media_player.bedroom would otherwise duck/interrupt sleep music
-        and audibly announce into both rooms.
-      value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'', ''on'')
-        or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'') or is_state(''switch.adaptive_lighting_sleep_mode_office'',
-        ''on'')) }}'
-    - action: tts.speak
-      target:
-        entity_id: tts.piper
-      data:
-        cache: false
-        media_player_entity_id: media_player.bedroom
-        message: The dryer is done!
+  - action: notify.send_message
+    target:
+      entity_id: notify.living_room_dot_announce
+    data:
+      message: The dryer is done!
+  - action: notify.send_message
+    target:
+      entity_id: notify.echo_show_kitchen_announce
+    data:
+      message: The dryer is done!
+  - condition: template
+    alias: Skip if either bedroom's sleep mode is on - big bedroom's manual bedtime
+      flag or its nightly schedule switch, or Bedroom 2 / Office's sleep mode switch.
+      tts.piper on media_player.bedroom would otherwise duck/interrupt sleep music
+      and audibly announce into both rooms.
+    value_template: '{{ not (is_state(''input_boolean.big_bedroom_asleep'', ''on'')
+      or is_state(''switch.al_sleep_mode_big_bedroom'', ''on'') or is_state(''switch.adaptive_lighting_sleep_mode_office'',
+      ''on'')) }}'
+  - action: tts.speak
+    target:
+      entity_id: tts.piper
+    data:
+      cache: false
+      media_player_entity_id: media_player.bedroom
+      message: The dryer is done!
   mode: single
 - id: wake_office_pc_via_boolean
   alias: Wake Office PC via Boolean
