@@ -2387,6 +2387,14 @@
     - conditions:
       - condition: trigger
         id: sleep_on
+      - alias: Skip if Bedtime/Goodnight button already marked the room asleep -
+          this branch is only for the global sleep-mode schedule kicking in while
+          still up and awake, not for the manual bedtime routine (which disables
+          this automation and enables the sleep switch within milliseconds of each
+          other, close enough to race this trigger before the disable takes hold)
+        condition: state
+        entity_id: input_boolean.big_bedroom_asleep
+        state: 'off'
       sequence:
       - alias: Clear manual override - explicit sleep mode always wins
         action: input_boolean.turn_off
@@ -3960,6 +3968,11 @@
     - conditions:
       - condition: trigger
         id: tv_off
+      - alias: Don't re-enable presence if bedtime/goodnight was pressed - only Good
+          Morning should re-arm the room then
+        condition: state
+        entity_id: input_boolean.big_bedroom_asleep
+        state: 'off'
       sequence:
       - action: automation.turn_on
         target:
