@@ -3418,7 +3418,7 @@
       | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'',
       ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
       ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''media_player.living_room_tv_3'',
-      ''playing'') or is_state(''media_player.living_room'', ''playing'') or is_state(''input_boolean.dining_room_tv_dark'',
+      ''playing'') or is_state(''media_player.living_room'', ''playing'') or is_state(''input_boolean.dining_room_tv_dim'',
       ''on'') }}'
   actions:
   - choose:
@@ -3478,7 +3478,7 @@
         then:
         - action: input_boolean.turn_off
           target:
-            entity_id: input_boolean.dining_room_tv_dark
+            entity_id: input_boolean.dining_room_tv_dim
       - alias: Clear manual override after 30 minutes empty
         action: input_boolean.turn_off
         target:
@@ -3551,7 +3551,7 @@
         then:
         - action: input_boolean.turn_off
           target:
-            entity_id: input_boolean.dining_room_tv_dark
+            entity_id: input_boolean.dining_room_tv_dim
       - action: light.turn_off
         target:
           label_id: dining_room_bottom
@@ -3765,13 +3765,24 @@
       sequence:
       - choose:
         - conditions:
-          - alias: Living room TV playing, or TV Mode still has dining dark after
-              playback - presence must NOT light it; TV Mode restores on real dining
+          - alias: Living room TV playing, or TV Mode still owns dining after playback
+              - presence only gets the dim level; TV Mode restores AL on real dining
               motion
             condition: template
             value_template: '{{ tv_playing }}'
           sequence:
-          - stop: TV Mode owns the dining room (stays off)
+          - action: light.turn_on
+            target:
+              label_id: dining_room_bottom
+              entity_id: light.dining_room_bottom
+            data:
+              brightness_pct: 2
+          - action: light.turn_on
+            target:
+              label_id: dining_room_top
+              entity_id: light.dining_room_top
+            data:
+              brightness_pct: 2
         - conditions:
           - condition: or
             conditions:
@@ -8334,22 +8345,28 @@
         condition: state
         entity_id: input_boolean.dining_room_manual_override
         state: 'off'
-      - alias: Dining room stays OFF for the whole show. The flag keeps Smart Motion
-          & Presence out and means only real dining motion after playback stops
-          brings it back
+      - alias: Flag that TV Mode owns dining - keeps Smart Motion & Presence at the
+          dim level, and only real dining motion after playback stops restores AL
         action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.dining_room_tv_dark
-      - action: light.turn_off
+          entity_id: input_boolean.dining_room_tv_dim
+      - condition: state
+        entity_id: binary_sensor.dining_room_sensor_group
+        state: 'on'
+      - action: light.turn_on
+        metadata: {}
         target:
-          label_id:
-          - dining_room_top
-          - dining_room_bottom
-          entity_id:
-          - light.dining_room_top
-          - light.dining_room_bottom
+          label_id: dining_room_top
+          entity_id: light.dining_room_top
         data:
-          transition: 3
+          brightness_pct: 2
+      - action: light.turn_on
+        metadata: {}
+        target:
+          label_id: dining_room_bottom
+          entity_id: light.dining_room_bottom
+        data:
+          brightness_pct: 2
     - conditions:
       - condition: trigger
         id: kitchen_empty
@@ -8392,10 +8409,10 @@
         - condition: trigger
           id: motion_while_stopped
       - alias: Nothing playing. A motion_while_stopped run also needs something TV
-          Mode still has dark (living room AL off, or dining flagged dark) - otherwise
+          Mode still has dimmed (living room AL off, or dining flagged) - otherwise
           Smart Motion & Presence already owns the rooms
         condition: template
-        value_template: "{{ not is_playing_now and (trigger.id == 'paused' or is_state('switch.al_living_room', 'off') or is_state('input_boolean.dining_room_tv_dark', 'on')) }}"
+        value_template: "{{ not is_playing_now and (trigger.id == 'paused' or is_state('switch.al_living_room', 'off') or is_state('input_boolean.dining_room_tv_dim', 'on')) }}"
       sequence:
       - alias: A plain pause/idle isn't enough - reaching for the remote to pause
           is itself motion. Wait to let that settle; the gate below then requires
@@ -8453,12 +8470,12 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
-      - alias: Dining room - restore AL only if TV Mode darkened it, dimmer override
+      - alias: Dining room - restore AL only if TV Mode dimmed it, dimmer override
           is off, and there's real motion in the dining room itself (presence alone
-          keeps it dark; a later dining motion_while_stopped run restores it)
+          keeps it dim; a later dining motion_while_stopped run restores it)
         if:
         - condition: state
-          entity_id: input_boolean.dining_room_tv_dark
+          entity_id: input_boolean.dining_room_tv_dim
           state: 'on'
         - condition: state
           entity_id: input_boolean.dining_room_manual_override
@@ -8469,7 +8486,7 @@
         then:
         - action: input_boolean.turn_off
           target:
-            entity_id: input_boolean.dining_room_tv_dark
+            entity_id: input_boolean.dining_room_tv_dim
         - action: adaptive_lighting.set_manual_control
           data:
             entity_id: switch.al_dining_room_bottom
@@ -8571,12 +8588,12 @@
               - light.galaxy_projector
             data:
               transition: 3
-      - alias: Dining room - restore AL only if TV Mode darkened it, dimmer override
+      - alias: Dining room - restore AL only if TV Mode dimmed it, dimmer override
           is off, and there's real motion in the dining room itself (presence alone
-          keeps it dark; a later dining motion_while_stopped run restores it)
+          keeps it dim; a later dining motion_while_stopped run restores it)
         if:
         - condition: state
-          entity_id: input_boolean.dining_room_tv_dark
+          entity_id: input_boolean.dining_room_tv_dim
           state: 'on'
         - condition: state
           entity_id: input_boolean.dining_room_manual_override
@@ -8587,7 +8604,7 @@
         then:
         - action: input_boolean.turn_off
           target:
-            entity_id: input_boolean.dining_room_tv_dark
+            entity_id: input_boolean.dining_room_tv_dim
         - action: adaptive_lighting.set_manual_control
           data:
             entity_id: switch.al_dining_room_bottom

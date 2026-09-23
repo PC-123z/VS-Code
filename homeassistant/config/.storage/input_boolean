@@ -44,8 +44,8 @@
         "icon": "mdi:music"
       },
       {
-        "id": "dining_room_tv_dark",
-        "name": "Dining Room TV Dark",
+        "id": "dining_room_tv_dim",
+        "name": "Dining Room TV Dim",
         "icon": "mdi:television-ambient-light"
       }
     ]
