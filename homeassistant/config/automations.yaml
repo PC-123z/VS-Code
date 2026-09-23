@@ -47,24 +47,19 @@
   - condition: state
     entity_id: input_boolean.good_morning_expected_pause
     state: 'off'
-  - alias: Only end the routine if you've actually left the morning area - if
-      presence is still detected in the bedroom, bathroom, or kitchen, this is
-      more likely Music Assistant failing to advance the queue than a
-      deliberate manual stop, so let the routine's own occupancy-driven
-      self-heal loop try to resume playback instead of ending Good Morning
-      while you're still moving through your morning routine. Tolerates each
-      sensor's flicker with the same 2-minute window used elsewhere.
+  - alias: Only end the routine if you've actually left the morning area - if presence
+      is still detected in the bedroom, bathroom, or kitchen, this is more likely
+      Music Assistant failing to advance the queue than a deliberate manual stop,
+      so let the routine's own occupancy-driven self-heal loop try to resume playback
+      instead of ending Good Morning while you're still moving through your morning
+      routine. Tolerates each sensor's flicker with the same 2-minute window used
+      elsewhere.
     condition: template
-    value_template: >-
-      {% set ns = namespace(occupied=false) %}
-      {% for eid in ['binary_sensor.big_bedroom_sensor_group',
-        'binary_sensor.bathroom_motion', 'binary_sensor.kitchen_sensor_group'] %}
-        {% set s = states[eid] %}
-        {% if s is not none and (s.state == 'on' or (now() - s.last_changed).total_seconds() < 120) %}
-          {% set ns.occupied = true %}
-        {% endif %}
-      {% endfor %}
-      {{ not ns.occupied }}
+    value_template: "{% set ns = namespace(occupied=false) %} {% for eid in ['binary_sensor.big_bedroom_sensor_group',\n
+      \ 'binary_sensor.bathroom_motion', 'binary_sensor.kitchen_sensor_group'] %}\n
+      \ {% set s = states[eid] %}\n  {% if s is not none and (s.state == 'on' or (now()
+      - s.last_changed).total_seconds() < 120) %}\n    {% set ns.occupied = true %}\n
+      \ {% endif %}\n{% endfor %} {{ not ns.occupied }}"
   actions:
   - alias: Stop the music player explicitly
     action: media_player.media_stop
@@ -2405,11 +2400,11 @@
     - conditions:
       - condition: trigger
         id: sleep_on
-      - alias: Skip if Bedtime/Goodnight button already marked the room asleep -
-          this branch is only for the global sleep-mode schedule kicking in while
-          still up and awake, not for the manual bedtime routine (which disables
-          this automation and enables the sleep switch within milliseconds of each
-          other, close enough to race this trigger before the disable takes hold)
+      - alias: Skip if Bedtime/Goodnight button already marked the room asleep - this
+          branch is only for the global sleep-mode schedule kicking in while still
+          up and awake, not for the manual bedtime routine (which disables this automation
+          and enables the sleep switch within milliseconds of each other, close enough
+          to race this trigger before the disable takes hold)
         condition: state
         entity_id: input_boolean.big_bedroom_asleep
         state: 'off'
@@ -3474,7 +3469,12 @@
       - alias: Dining empty and nothing playing - hand the room back to presence lighting
         if:
         - condition: template
-          value_template: "{{ not (integration_entities('jellyfin') | select('match', '^media_player\\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count > 0 or is_state('sensor.jellyfin_tiny_living_room_state', 'playing') or is_state('media_player.living_room_tv', 'playing') or is_state('media_player.living_room_tv_3', 'playing') or is_state('media_player.living_room', 'playing')) }}"
+          value_template: '{{ not (integration_entities(''jellyfin'') | select(''match'',
+            ''^media_player\.'') | select(''in'', area_entities(''living_room''))
+            | map(''states'') | select(''eq'', ''playing'') | list | count > 0 or
+            is_state(''sensor.jellyfin_tiny_living_room_state'', ''playing'') or is_state(''media_player.living_room_tv'',
+            ''playing'') or is_state(''media_player.living_room_tv_3'', ''playing'')
+            or is_state(''media_player.living_room'', ''playing'')) }}'
         then:
         - action: input_boolean.turn_off
           target:
@@ -3547,7 +3547,12 @@
           lighting
         if:
         - condition: template
-          value_template: "{{ not (integration_entities('jellyfin') | select('match', '^media_player\\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count > 0 or is_state('sensor.jellyfin_tiny_living_room_state', 'playing') or is_state('media_player.living_room_tv', 'playing') or is_state('media_player.living_room_tv_3', 'playing') or is_state('media_player.living_room', 'playing')) }}"
+          value_template: '{{ not (integration_entities(''jellyfin'') | select(''match'',
+            ''^media_player\.'') | select(''in'', area_entities(''living_room''))
+            | map(''states'') | select(''eq'', ''playing'') | list | count > 0 or
+            is_state(''sensor.jellyfin_tiny_living_room_state'', ''playing'') or is_state(''media_player.living_room_tv'',
+            ''playing'') or is_state(''media_player.living_room_tv_3'', ''playing'')
+            or is_state(''media_player.living_room'', ''playing'')) }}'
         then:
         - action: input_boolean.turn_off
           target:
@@ -6924,11 +6929,6 @@
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.bedroom2_occupied
-  - alias: Re-arm Late Night Lights Out for the night - Good Morning disables it when
-      it runs, whatever time that ends up being
-    action: automation.turn_on
-    target:
-      entity_id: automation.bedroom_2_after_midnight_lights_out
   mode: single
 - id: '1776427656334'
   alias: Good Morning - Kitchen Speaker Join
@@ -8418,15 +8418,16 @@
           Mode still has dimmed (living room AL off, or dining flagged) - otherwise
           Smart Motion & Presence already owns the rooms
         condition: template
-        value_template: "{{ not is_playing_now and (trigger.id == 'paused' or is_state('switch.al_living_room', 'off') or is_state('input_boolean.dining_room_tv_dim', 'on')) }}"
+        value_template: '{{ not is_playing_now and (trigger.id == ''paused'' or is_state(''switch.al_living_room'',
+          ''off'') or is_state(''input_boolean.dining_room_tv_dim'', ''on'')) }}'
       sequence:
       - alias: A plain pause/idle isn't enough - reaching for the remote to pause
           is itself motion. Wait to let that settle; the gate below then requires
-          motion to still be active. A motion_while_stopped run's own 8-second
-          trigger wait already proved the motion was real
+          motion to still be active. A motion_while_stopped run's own 8-second trigger
+          wait already proved the motion was real
         if:
         - condition: template
-          value_template: "{{ trigger.id == 'paused' }}"
+          value_template: '{{ trigger.id == ''paused'' }}'
         then:
         - delay:
             seconds: 8
@@ -8434,7 +8435,16 @@
           not the run - that let motion during playback restore the lights). Re-checked
           live after the delay - still nothing playing, and real motion (not presence)
         condition: template
-        value_template: "{{ not (integration_entities('jellyfin') | select('match', '^media_player\\.') | select('in', area_entities('living_room')) | map('states') | select('eq', 'playing') | list | count > 0 or is_state('sensor.jellyfin_tiny_living_room_state', 'playing') or is_state('media_player.living_room_tv', 'playing') or is_state('media_player.living_room_tv_3', 'playing') or is_state('media_player.living_room', 'playing')) and (trigger.id == 'motion_while_stopped' or (is_state('binary_sensor.living_room_motion', 'on') or is_state('binary_sensor.dining_room_apollo_ld2450_moving_target', 'on') or is_state('binary_sensor.kitchen_motion', 'on') or is_state('binary_sensor.kitchen_motion_2', 'on') or is_state('binary_sensor.kitchen_motion_3', 'on') or is_state('binary_sensor.kitchen_occupancy_sensor_radar_moving_target', 'on'))) }}"
+        value_template: '{{ not (integration_entities(''jellyfin'') | select(''match'',
+          ''^media_player\.'') | select(''in'', area_entities(''living_room'')) |
+          map(''states'') | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
+          ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or
+          is_state(''media_player.living_room_tv_3'', ''playing'') or is_state(''media_player.living_room'',
+          ''playing'')) and (trigger.id == ''motion_while_stopped'' or (is_state(''binary_sensor.living_room_motion'',
+          ''on'') or is_state(''binary_sensor.dining_room_apollo_ld2450_moving_target'',
+          ''on'') or is_state(''binary_sensor.kitchen_motion'', ''on'') or is_state(''binary_sensor.kitchen_motion_2'',
+          ''on'') or is_state(''binary_sensor.kitchen_motion_3'', ''on'') or is_state(''binary_sensor.kitchen_occupancy_sensor_radar_moving_target'',
+          ''on''))) }}'
       - alias: Living room restore - only if TV Mode actually dimmed it (AL off);
           otherwise don't clobber whatever it is now
         if:
@@ -8659,9 +8669,8 @@
       ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
       ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''media_player.living_room_tv_3'',
       ''playing'') or is_state(''media_player.living_room'', ''playing'') }}'
-    motion_active: '{{ is_state(''binary_sensor.living_room_motion'', ''on'') or
-      is_state(''binary_sensor.dining_room_apollo_ld2450_moving_target'', ''on'')
-      or is_state(''binary_sensor.kitchen_motion'', ''on'') or is_state(''binary_sensor.kitchen_motion_2'',
+    motion_active: '{{ is_state(''binary_sensor.living_room_motion'', ''on'') or is_state(''binary_sensor.dining_room_apollo_ld2450_moving_target'',
+      ''on'') or is_state(''binary_sensor.kitchen_motion'', ''on'') or is_state(''binary_sensor.kitchen_motion_2'',
       ''on'') or is_state(''binary_sensor.kitchen_motion_3'', ''on'') or is_state(''binary_sensor.kitchen_occupancy_sensor_radar_moving_target'',
       ''on'') }}'
   mode: restart
@@ -8748,18 +8757,14 @@
     - sat
   - alias: Skip the spoken announcement while any room is in sleep/goodnight mode
     condition: template
-    value_template: >-
-      {{ not (is_state('switch.al_sleep_mode_bathroom', 'on')
-      or is_state('switch.al_sleep_mode_bathroom_main', 'on')
-      or is_state('switch.al_sleep_mode_big_bedroom', 'on')
-      or is_state('switch.al_sleep_mode_dining_room_bottom', 'on')
-      or is_state('switch.al_sleep_mode_dining_room_top', 'on')
-      or is_state('switch.al_sleep_mode_hallway', 'on')
-      or is_state('switch.al_sleep_mode_kitchen', 'on')
-      or is_state('switch.al_sleep_mode_living_room', 'on')
-      or is_state('switch.adaptive_lighting_sleep_mode_office', 'on')
-      or is_state('input_boolean.big_bedroom_asleep', 'on')
-      or is_state('input_boolean.bedroom2_asleep', 'on')) }}
+    value_template: '{{ not (is_state(''switch.al_sleep_mode_bathroom'', ''on'') or
+      is_state(''switch.al_sleep_mode_bathroom_main'', ''on'') or is_state(''switch.al_sleep_mode_big_bedroom'',
+      ''on'') or is_state(''switch.al_sleep_mode_dining_room_bottom'', ''on'') or
+      is_state(''switch.al_sleep_mode_dining_room_top'', ''on'') or is_state(''switch.al_sleep_mode_hallway'',
+      ''on'') or is_state(''switch.al_sleep_mode_kitchen'', ''on'') or is_state(''switch.al_sleep_mode_living_room'',
+      ''on'') or is_state(''switch.adaptive_lighting_sleep_mode_office'', ''on'')
+      or is_state(''input_boolean.big_bedroom_asleep'', ''on'') or is_state(''input_boolean.bedroom2_asleep'',
+      ''on'')) }}'
   - data:
       message: 'Alert: {{ trigger.payload_json.after.label | capitalize }} detected
         at {% if trigger.payload_json.after.camera == ''driveway'' %}Driveway {% elif
@@ -9690,6 +9695,15 @@
     - wed
     - thu
     - fri
+    enabled: false
+  - trigger: time
+    at: 07:15:00
+    weekday:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
   - trigger: time
     at: 08:30:00
     weekday:
@@ -10210,12 +10224,11 @@
       - alias: First announcement then fires on motion. Tolerates the radar's own
           flicker - apollo_msr_2_big_bedroom_radar_moving_target pulses on/off in
           short (under 2s) bursts even during continuous motion, so a strict on/off
-          check at this exact instant can land in a gap between pulses and miss
-          real presence (happened 2026-09-22 - motion was clearly happening seconds
-          before this check, but the radar had just dropped to off). Treat the room
-          as occupied if the radar is on now or fired within the last 2 minutes,
-          same tolerance as the presence check further down; otherwise wait for the
-          next pulse.
+          check at this exact instant can land in a gap between pulses and miss real
+          presence (happened 2026-09-22 - motion was clearly happening seconds before
+          this check, but the radar had just dropped to off). Treat the room as occupied
+          if the radar is on now or fired within the last 2 minutes, same tolerance
+          as the presence check further down; otherwise wait for the next pulse.
         if:
         - condition: template
           value_template: '{% set s = states.binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
@@ -11140,8 +11153,8 @@
   mode: single
 - id: washer_announcement
   alias: Washer Announcement
-  description: Done announcement only, between 8AM and 10:30PM, skipped entirely
-    if any room is in sleep/goodnight mode
+  description: Done announcement only, between 8AM and 10:30PM, skipped entirely if
+    any room is in sleep/goodnight mode
   triggers:
   - trigger: state
     id: done
@@ -11155,18 +11168,14 @@
   - alias: Skip entirely if any room is in sleep/goodnight mode - the living room/kitchen
       Echo announcements are audible too, not just the bedroom TTS
     condition: template
-    value_template: >-
-      {{ not (is_state('switch.al_sleep_mode_bathroom', 'on')
-      or is_state('switch.al_sleep_mode_bathroom_main', 'on')
-      or is_state('switch.al_sleep_mode_big_bedroom', 'on')
-      or is_state('switch.al_sleep_mode_dining_room_bottom', 'on')
-      or is_state('switch.al_sleep_mode_dining_room_top', 'on')
-      or is_state('switch.al_sleep_mode_hallway', 'on')
-      or is_state('switch.al_sleep_mode_kitchen', 'on')
-      or is_state('switch.al_sleep_mode_living_room', 'on')
-      or is_state('switch.adaptive_lighting_sleep_mode_office', 'on')
-      or is_state('input_boolean.big_bedroom_asleep', 'on')
-      or is_state('input_boolean.bedroom2_asleep', 'on')) }}
+    value_template: '{{ not (is_state(''switch.al_sleep_mode_bathroom'', ''on'') or
+      is_state(''switch.al_sleep_mode_bathroom_main'', ''on'') or is_state(''switch.al_sleep_mode_big_bedroom'',
+      ''on'') or is_state(''switch.al_sleep_mode_dining_room_bottom'', ''on'') or
+      is_state(''switch.al_sleep_mode_dining_room_top'', ''on'') or is_state(''switch.al_sleep_mode_hallway'',
+      ''on'') or is_state(''switch.al_sleep_mode_kitchen'', ''on'') or is_state(''switch.al_sleep_mode_living_room'',
+      ''on'') or is_state(''switch.adaptive_lighting_sleep_mode_office'', ''on'')
+      or is_state(''input_boolean.big_bedroom_asleep'', ''on'') or is_state(''input_boolean.bedroom2_asleep'',
+      ''on'')) }}'
   actions:
   - action: notify.send_message
     target:
@@ -11188,8 +11197,8 @@
   mode: single
 - id: dryer_announcement
   alias: Dryer Announcement
-  description: Done announcement only, between 8AM and 10:30PM, skipped entirely
-    if any room is in sleep/goodnight mode
+  description: Done announcement only, between 8AM and 10:30PM, skipped entirely if
+    any room is in sleep/goodnight mode
   triggers:
   - trigger: state
     id: done
@@ -11203,18 +11212,14 @@
   - alias: Skip entirely if any room is in sleep/goodnight mode - the living room/kitchen
       Echo announcements are audible too, not just the bedroom TTS
     condition: template
-    value_template: >-
-      {{ not (is_state('switch.al_sleep_mode_bathroom', 'on')
-      or is_state('switch.al_sleep_mode_bathroom_main', 'on')
-      or is_state('switch.al_sleep_mode_big_bedroom', 'on')
-      or is_state('switch.al_sleep_mode_dining_room_bottom', 'on')
-      or is_state('switch.al_sleep_mode_dining_room_top', 'on')
-      or is_state('switch.al_sleep_mode_hallway', 'on')
-      or is_state('switch.al_sleep_mode_kitchen', 'on')
-      or is_state('switch.al_sleep_mode_living_room', 'on')
-      or is_state('switch.adaptive_lighting_sleep_mode_office', 'on')
-      or is_state('input_boolean.big_bedroom_asleep', 'on')
-      or is_state('input_boolean.bedroom2_asleep', 'on')) }}
+    value_template: '{{ not (is_state(''switch.al_sleep_mode_bathroom'', ''on'') or
+      is_state(''switch.al_sleep_mode_bathroom_main'', ''on'') or is_state(''switch.al_sleep_mode_big_bedroom'',
+      ''on'') or is_state(''switch.al_sleep_mode_dining_room_bottom'', ''on'') or
+      is_state(''switch.al_sleep_mode_dining_room_top'', ''on'') or is_state(''switch.al_sleep_mode_hallway'',
+      ''on'') or is_state(''switch.al_sleep_mode_kitchen'', ''on'') or is_state(''switch.al_sleep_mode_living_room'',
+      ''on'') or is_state(''switch.adaptive_lighting_sleep_mode_office'', ''on'')
+      or is_state(''input_boolean.big_bedroom_asleep'', ''on'') or is_state(''input_boolean.bedroom2_asleep'',
+      ''on'')) }}'
   actions:
   - action: notify.send_message
     target:
