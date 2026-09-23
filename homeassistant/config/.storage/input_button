@@ -3,12 +3,6 @@
   "minor_version": 1,
   "key": "input_button",
   "data": {
-    "items": [
-      {
-        "id": "bedroom_2_test_trigger",
-        "name": "Bedroom 2 Test Trigger",
-        "icon": "mdi:bunk-bed-outline"
-      }
-    ]
+    "items": []
   }
 }
