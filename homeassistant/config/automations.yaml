@@ -11163,6 +11163,7 @@
   alias: 'Living Room: Turn off TV when PS5 and Apple TV both off'
   description: When PS5 turns off and no Apple TV is playing, announce and turn off
     the TV after 30 seconds.
+  enabled: false
   triggers:
   - trigger: state
     entity_id: binary_sensor.ps5_living_room
