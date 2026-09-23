@@ -3771,6 +3771,12 @@
             condition: template
             value_template: '{{ tv_playing }}'
           sequence:
+          - alias: AL off first or it re-adapts the lights right over the 2%
+            action: switch.turn_off
+            target:
+              entity_id:
+              - switch.al_dining_room_bottom
+              - switch.al_dining_room_top
           - action: light.turn_on
             target:
               label_id: dining_room_bottom
@@ -8353,6 +8359,12 @@
       - condition: state
         entity_id: binary_sensor.dining_room_sensor_group
         state: 'on'
+      - alias: AL off first or it re-adapts the lights right over the 2%
+        action: switch.turn_off
+        target:
+          entity_id:
+          - switch.al_dining_room_bottom
+          - switch.al_dining_room_top
       - action: light.turn_on
         metadata: {}
         target:
