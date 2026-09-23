@@ -173,7 +173,7 @@
       },
       {
         "id": "visual_studio_code",
-        "show_in_sidebar": true,
+        "show_in_sidebar": false,
         "icon": "mdi:microsoft-visual-studio-code",
         "title": "Visual Studio Code",
         "require_admin": true,
