@@ -9356,8 +9356,9 @@
     targets 0.12, Big Bedroom targets 0.14. Living Room branch added 2026-09-23 -
     joins the Yamaha RX-A2A receiver via its Music Assistant player entity
     (media_player.rx_a2a_733ceb, not the native yamaha_musiccast entity) on living
-    room motion, targeting 0.15. Renamed from "...Bedroom Speakers..." since it now
-    covers more than bedrooms.'
+    room motion, targeting 0.25 (the receiver''s own observed volume level, used
+    as a sane ceiling rather than an arbitrary guess). Renamed from "...Bedroom Speakers..."
+    since it now covers more than bedrooms.'
   triggers:
   - trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
@@ -9509,7 +9510,8 @@
           entity_id: media_player.rx_a2a_733ceb
         data:
           volume_level: 0.05
-      - alias: Ramp receiver volume up to 0.15 over 20 seconds
+      - alias: Ramp receiver volume up to 0.25 over 20 seconds (0.25 is the receiver's
+          own observed volume level as of 2026-09-23, used as a sane ceiling)
         repeat:
           count: 5
           sequence:
@@ -9519,7 +9521,7 @@
             target:
               entity_id: media_player.rx_a2a_733ceb
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((0.15 - 0.05) / 5)),\n    0.15]
+              volume_level: "{{ [0.05 + (repeat.index * ((0.25 - 0.05) / 5)),\n    0.25]
                 | min | round(3) }}"
   mode: single
 - id: '1777520160440'
