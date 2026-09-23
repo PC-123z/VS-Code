@@ -9337,7 +9337,7 @@
     data: {}
   mode: single
 - id: '1777890200001'
-  alias: 'Welcome Home: Auto Join Bedroom Speakers on Motion'
+  alias: 'Welcome Home: Auto Join Room Speakers on Motion'
   description: 'Reverted 2026-09-10 - true handoff (transfer_queue) moved the whole
     stream on every room change, including kitchen, which wasn''t wanted; back to
     join/broadcast mode so kitchen stays the anchor and other rooms just add in on
@@ -9353,7 +9353,11 @@
     which this automation was missing. Added the same re-apply-after-join step here.
     Also switched from ramping to kitchen''s current volume to fixed per-room targets,
     and shortened the ramp to 20 seconds total (5 steps of 4s) - office/bedroom_2
-    targets 0.12, Big Bedroom targets 0.14.'
+    targets 0.12, Big Bedroom targets 0.14. Living Room branch added 2026-09-23 -
+    joins the Yamaha RX-A2A receiver via its Music Assistant player entity
+    (media_player.rx_a2a_733ceb, not the native yamaha_musiccast entity) on living
+    room motion, targeting 0.15. Renamed from "...Bedroom Speakers..." since it now
+    covers more than bedrooms.'
   triggers:
   - trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
@@ -9364,6 +9368,10 @@
     entity_id: binary_sensor.big_bedroom_sensor_group
     to: 'on'
     id: big_bedroom_motion
+  - trigger: state
+    entity_id: binary_sensor.living_room_sensor_group
+    to: 'on'
+    id: living_room_motion
   conditions:
   - condition: state
     entity_id: input_boolean.welcome_home_active
@@ -9467,6 +9475,51 @@
               entity_id: media_player.bedroom_2
             data:
               volume_level: "{{ [0.05 + (repeat.index * ((0.14 - 0.05) / 5)),\n    0.14]
+                | min | round(3) }}"
+    - alias: Living room sensor - join the Yamaha receiver (via its Music Assistant
+        player) at a capped, ramped volume rather than whatever it was left at last
+      conditions:
+      - condition: trigger
+        id: living_room_motion
+      - alias: Skip if the receiver is already in the kitchen group - motion re-triggers
+          constantly while the room is occupied, and without this the whole volume-drop/join/ramp
+          sequence re-ran on every retrigger, causing the exact audible cutouts this
+          was meant to prevent
+        condition: template
+        value_template: "{{ 'media_player.rx_a2a_733ceb' not in\n   (state_attr('media_player.kitchen_2',\n
+          \  'group_members') | default([])) }}"
+      sequence:
+      - action: media_player.volume_set
+        target:
+          entity_id: media_player.rx_a2a_733ceb
+        data:
+          volume_level: 0.05
+      - action: media_player.join
+        target:
+          entity_id: media_player.kitchen_2
+        data:
+          group_members:
+          - media_player.rx_a2a_733ceb
+      - alias: Re-apply the low volume after joining - joining a group can silently
+          restore a remembered volume for this player, overwriting the volume_set
+          that ran right before the join (same issue "Bathroom Speaker Join on Motion
+          v2" already worked around with its own "unmute again after join" step)
+        action: media_player.volume_set
+        target:
+          entity_id: media_player.rx_a2a_733ceb
+        data:
+          volume_level: 0.05
+      - alias: Ramp receiver volume up to 0.15 over 20 seconds
+        repeat:
+          count: 5
+          sequence:
+          - delay:
+              seconds: 4
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.rx_a2a_733ceb
+            data:
+              volume_level: "{{ [0.05 + (repeat.index * ((0.15 - 0.05) / 5)),\n    0.15]
                 | min | round(3) }}"
   mode: single
 - id: '1777520160440'
@@ -11610,7 +11663,9 @@
     directly (30-min auto-expire, music-paused kill switch, Big Bedroom sleep cancel)
     previously left whatever was still joined - joined, with nothing left watching
     to split it. Fires on every deactivation path uniformly and covers the _2 entities
-    the older per-room unjoins miss.
+    the older per-room unjoins miss. Added the Living Room receiver (media_player.rx_a2a_733ceb)
+    2026-09-23 - it has no per-room "unjoin after N min idle" automation of its own
+    yet, so this catch-all is its only cleanup path.
   triggers:
   - trigger: state
     entity_id: input_boolean.welcome_home_active
@@ -11628,6 +11683,7 @@
       - media_player.office_2
       - media_player.bathroom
       - media_player.bathroom_2
+      - media_player.rx_a2a_733ceb
       - media_player.kitchen_2
     data: {}
   mode: single
