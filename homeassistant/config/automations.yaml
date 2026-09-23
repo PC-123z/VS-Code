@@ -11257,6 +11257,53 @@
     target:
       entity_id: input_boolean.office_pc_wake
   mode: single
+- id: '1790100000001'
+  alias: 'Big Bedroom: Presence Sensor Stuck-On Watchdog'
+  description: The Apollo MSR-2 radar (Big Bedroom) occasionally reports a phantom
+    still-target and stays "on" for hours with the room empty. Restarts just the
+    radar (not a full ESP reboot) once it's been continuously on for 3+ hours, then
+    keeps retrying every 30 min if still stuck. Skips while asleep (legitimately
+    long occupancy) or under manual override.
+  triggers:
+  - alias: First crosses the stuck threshold
+    trigger: state
+    entity_id: binary_sensor.big_bedroom_sensor_group
+    to: 'on'
+    for:
+      hours: 3
+    id: stuck
+  - alias: Safety-net retry in case the first restart didn't clear it
+    trigger: time_pattern
+    minutes: /30
+    id: periodic
+  conditions:
+  - alias: Still stuck on
+    condition: state
+    entity_id: binary_sensor.big_bedroom_sensor_group
+    state: 'on'
+    for:
+      hours: 3
+  - alias: Don't restart while legitimately asleep for hours
+    condition: state
+    entity_id: input_boolean.big_bedroom_asleep
+    state: 'off'
+  - alias: Respect the manual dimmer override
+    condition: state
+    entity_id: input_boolean.big_bedroom_manual_override
+    state: 'off'
+  actions:
+  - alias: Notify so it's visible when this fires
+    action: notify.mobile_app_pc_iphone
+    continue_on_error: true
+    data:
+      message: Big Bedroom presence sensor stuck on 3+ hrs with room reading empty
+        - restarting the radar.
+      title: Big Bedroom Sensor Watchdog
+  - alias: Restart just the radar module
+    action: button.press
+    target:
+      entity_id: button.apollo_msr_2_big_bedroom_restart_radar
+  mode: single
 - id: '1775510700000'
   alias: 'Big Bedroom: Nanoleaf stuck-on watchdog'
   description: The Nanoleaf frequently drops offline (unavailable) and can miss the
