@@ -11260,8 +11260,9 @@
 - id: '1790100000001'
   alias: 'Big Bedroom: Presence Sensor Stuck-On Watchdog'
   description: The Apollo MSR-2 radar (Big Bedroom) occasionally reports a phantom
-    still-target and stays "on" for hours with the room empty. Restarts just the
-    radar (not a full ESP reboot) once it's been continuously on for 3+ hours, then
+    still-target and stays "on" for hours with the room empty. A radar-only restart
+    wasn't enough (2026-09-23 - it just relocated the phantom to a different zone),
+    so this does a full ESP reboot once it's been continuously on for 3+ hours, then
     keeps retrying every 30 min if still stuck. Skips while asleep (legitimately
     long occupancy) or under manual override.
   triggers:
@@ -11297,12 +11298,12 @@
     continue_on_error: true
     data:
       message: Big Bedroom presence sensor stuck on 3+ hrs with room reading empty
-        - restarting the radar.
+        - rebooting the sensor.
       title: Big Bedroom Sensor Watchdog
-  - alias: Restart just the radar module
+  - alias: Full ESP reboot (radar-only restart wasn't reliable enough)
     action: button.press
     target:
-      entity_id: button.apollo_msr_2_big_bedroom_restart_radar
+      entity_id: button.apollo_msr_2_big_bedroom_esp_reboot
   mode: single
 - id: '1775510700000'
   alias: 'Big Bedroom: Nanoleaf stuck-on watchdog'
