@@ -11162,8 +11162,14 @@
 - id: '1749150000000'
   alias: 'Living Room: Turn off TV when PS5 and Apple TV both off'
   description: When PS5 turns off and no Apple TV is playing, announce and turn off
-    the TV after 30 seconds.
-  enabled: false
+    the TV after 30 seconds. Fixed 2026-09-23 - despite the name, the "Apple TV"
+    check never looked at Apple TV's own state (media_player.living_room, the native
+    apple_tv entity) - it only checked whether the Jellyfin app was playing, which
+    is a different thing. Switching from PS5 straight to Apple TV (Netflix, YouTube,
+    AirPlay, anything not Jellyfin) tripped the "no Apple TV" condition and killed
+    the TV out from under you. Added a real check on media_player.living_room's
+    own state (disabled 2026-09-23 to stop that until fixed, re-enabled now with
+    the fix).
   triggers:
   - trigger: state
     entity_id: binary_sensor.ps5_living_room
@@ -11178,7 +11184,8 @@
     value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\.')
       | select('in', area_entities('living_room')) | map('states') | select('eq',
       'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')
-      != 'playing') }}"
+      != 'playing')\n   and (states('media_player.living_room') in ['off', 'standby'])
+      }}"
   - condition: state
     entity_id: media_player.living_room_tv_2
     state: 'on'
@@ -11202,7 +11209,8 @@
     value_template: "{{ (integration_entities('jellyfin') | select('match', '^media_player\\.')
       | select('in', area_entities('living_room')) | map('states') | select('eq',
       'playing') | list | count == 0)\n   and (states('sensor.jellyfin_tiny_living_room_state')
-      != 'playing') }}"
+      != 'playing')\n   and (states('media_player.living_room') in ['off', 'standby'])
+      }}"
   - action: media_player.turn_off
     target:
       entity_id: media_player.living_room_tv_2

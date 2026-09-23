@@ -241,13 +241,6 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_1130928743_tags/v0.10.0"
-      },
-      {
-        "created": "2026-09-23T19:24:45.988597+00:00",
-        "dismissed_version": null,
-        "domain": "automation",
-        "is_persistent": false,
-        "issue_id": "automation.living_room_turn_off_tv_when_ps5_and_apple_tv_both_off_validation_failed_schema"
       }
     ]
   }
