@@ -12166,8 +12166,9 @@
   description: 'Hold the Main Room dimmer On button: AL off + manual control, lights
     100% (4000K). Smart Motion, TV Mode, Unoccupied Shutoff and the global sleep/morning
     AL resets skip the living room while input_boolean.living_room_manual_override
-    is on. Ends on: living room empty 15 min (full shutoff: TV, fan, lights), Off
-    button, or a short press of On (handled in Smart Motion).'
+    is on. Ends on: living room empty 15 min (full shutoff: TV, fan, lights), a short
+    press of On (handled in Smart Motion), or a short press of Off (lights only,
+    bridge turns them off natively). Holding Off also shuts off TV and fan.'
   triggers:
   - device_id: 046bda673f9c3613042de9612024694e
     domain: hue
@@ -12185,6 +12186,14 @@
     trigger: device
     id: off_button
     alias: Off button pressed (bridge turns the lights off natively)
+  - device_id: 046bda673f9c3613042de9612024694e
+    domain: hue
+    type: long_press
+    subtype: 4
+    unique_id: main_room_button_4
+    trigger: device
+    id: hold_off
+    alias: Off button held - also shuts off TV and fan
   - trigger: template
     id: empty
     alias: Override on and living room empty for 15 min (counts from override start
@@ -12237,6 +12246,30 @@
           lights:
           - light.living_room
           manual_control: false
+    - conditions:
+      - condition: trigger
+        id: hold_off
+      sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.living_room_manual_override
+      - action: adaptive_lighting.set_manual_control
+        continue_on_error: true
+        data:
+          entity_id: switch.al_living_room
+          lights:
+          - light.living_room
+          manual_control: false
+      - alias: Turn off TV
+        action: media_player.turn_off
+        continue_on_error: true
+        target:
+          entity_id: media_player.living_room_tv_2
+      - alias: Turn off fan
+        action: fan.turn_off
+        continue_on_error: true
+        target:
+          entity_id: fan.living_room_fan
     - conditions:
       - condition: trigger
         id: empty
