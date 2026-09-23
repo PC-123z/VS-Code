@@ -5556,6 +5556,7 @@
   - trigger: state
     entity_id:
     - binary_sensor.bedroom2_sensor_apollo_radar_moving_target
+    - binary_sensor.bedroom2_office_bedroom2_door_presence
     to: 'on'
     id: motion_detected
   - trigger: state
@@ -6365,7 +6366,9 @@
         - alias: Wait for moving target before announcement (music failed path)
           wait_for_trigger:
           - trigger: state
-            entity_id: binary_sensor.bedroom2_sensor_apollo_radar_moving_target
+            entity_id:
+            - binary_sensor.bedroom2_sensor_apollo_radar_moving_target
+            - binary_sensor.bedroom2_office_bedroom2_door_presence
             to: 'on'
           timeout:
             minutes: 45
@@ -6444,7 +6447,9 @@
         - alias: Wait for moving target before announcement
           wait_for_trigger:
           - trigger: state
-            entity_id: binary_sensor.bedroom2_sensor_apollo_radar_moving_target
+            entity_id:
+            - binary_sensor.bedroom2_sensor_apollo_radar_moving_target
+            - binary_sensor.bedroom2_office_bedroom2_door_presence
             to: 'on'
           timeout:
             minutes: 45
@@ -6593,13 +6598,7 @@
               - condition: or
                 conditions:
                 - condition: state
-                  entity_id: binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy
-                  state: 'on'
-                - condition: state
-                  entity_id: binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy
-                  state: 'on'
-                - condition: state
-                  entity_id: binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
+                  entity_id: binary_sensor.bedroom_2_sensor_group
                   state: 'on'
                 - alias: Weekdays keep the music going until the 60-minute cap (07:30
                     for the 06:30 run) even if the room empties while the kids get
@@ -6664,10 +6663,7 @@
                   coming back on completes the wait and returns to the loop.
                 wait_for_trigger:
                 - trigger: state
-                  entity_id:
-                  - binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy
-                  - binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy
-                  - binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
+                  entity_id: binary_sensor.bedroom_2_sensor_group
                   to: 'on'
                 timeout:
                   minutes: 10
@@ -6694,10 +6690,7 @@
                   repeat:
                     while:
                     - condition: template
-                      value_template: '{{ repeat.index <= 8 and not (is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy'',
-                        ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy'',
-                        ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'',
-                        ''on'')) }}'
+                      value_template: '{{ repeat.index <= 8 and not is_state(''binary_sensor.bedroom_2_sensor_group'', ''on'') }}'
                     sequence:
                     - action: media_player.volume_set
                       target:
@@ -6709,10 +6702,7 @@
                         seconds: 15
                 - if:
                   - condition: template
-                    value_template: '{{ (is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy'',
-                      ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy'',
-                      ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'',
-                      ''on'')) }}'
+                    value_template: '{{ is_state(''binary_sensor.bedroom_2_sensor_group'', ''on'') }}'
                   then:
                   - alias: Occupancy returned - restore volume and carry on round
                       the occupancy loop
@@ -6766,13 +6756,7 @@
         - condition: or
           conditions:
           - condition: state
-            entity_id: binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy
-            state: 'on'
-          - condition: state
-            entity_id: binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy
-            state: 'on'
-          - condition: state
-            entity_id: binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
+            entity_id: binary_sensor.bedroom_2_sensor_group
             state: 'on'
         then:
         - action: light.turn_on
@@ -7613,6 +7597,7 @@
   - trigger: state
     entity_id:
     - binary_sensor.bedroom2_sensor_apollo_radar_moving_target
+    - binary_sensor.bedroom2_office_bedroom2_door_presence
     to:
     - 'on'
     id: detected
