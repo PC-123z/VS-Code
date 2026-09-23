@@ -11668,7 +11668,12 @@
     to split it. Fires on every deactivation path uniformly and covers the _2 entities
     the older per-room unjoins miss. Added the Living Room receiver (media_player.rx_a2a_733ceb)
     2026-09-23 - it has no per-room "unjoin after N min idle" automation of its own
-    yet, so this catch-all is its only cleanup path.
+    yet, so this catch-all is its only cleanup path. Also 2026-09-23 - unlike the
+    Sonos satellites, unjoining the receiver does NOT stop it; observed it resume
+    playing solo (unsynced) seconds after being unjoined. Added an explicit stop
+    (via the Music Assistant entity, which can stop but not power off) followed by
+    a real power-off (via the native yamaha_musiccast entity, which can't join/unjoin
+    groups but can turn_off) so it goes fully silent instead of coasting on its own.
   triggers:
   - trigger: state
     entity_id: input_boolean.welcome_home_active
@@ -11689,6 +11694,16 @@
       - media_player.rx_a2a_733ceb
       - media_player.kitchen_2
     data: {}
+  - alias: Stop the receiver's stream - unjoin alone leaves it playing solo
+    continue_on_error: true
+    action: media_player.media_stop
+    target:
+      entity_id: media_player.rx_a2a_733ceb
+  - alias: Power off the receiver itself (native entity - the MA entity can't turn_off)
+    continue_on_error: true
+    action: media_player.turn_off
+    target:
+      entity_id: media_player.living_room_av
   mode: single
 - id: '1779800000002'
   alias: 'Welcome Home: Unjoin Satellite or Disable on Kitchen Stop'
