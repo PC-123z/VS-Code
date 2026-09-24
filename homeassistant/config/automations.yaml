@@ -11590,27 +11590,36 @@
   mode: single
 - id: '1779800000001'
   alias: 'Welcome Home: Auto-Expire After 30 Minutes'
-  description: Hard cap so a welcome home session never runs longer than 30 minutes
-    total - turns off input_boolean.welcome_home_active 30 minutes after it's set,
-    unless it's already been turned off. It won't re-arm until the next real departure
-    + arrival cycle, since only the arrival automation turns it on. Fixed 2026-09-08
-    to stop audio directly instead of relying on kitchen occupancy alone, so expiry
-    always silences the room even if nobody's watching kitchen occupancy. Reverted
-    2026-09-10 to join/broadcast mode - kitchen is the fixed anchor again, so stopping
-    kitchen (and unjoining satellites) is enough to end the whole group regardless
-    of who's still joined to it. Updated 2026-09-20 - at the cap, fade every speaker
-    in the kitchen group to 0 over 3 minutes (36 steps x 5s) for a subtle departure,
-    then stop, unjoin, restore each speaker's pre-fade volume and clear the flag.
-    The flag stays on during the fade so the deactivation/unjoin automations don't
-    cut it short; if another automation ends the session mid-fade (nobody present,
-    manual pause), the fade aborts and volumes are still restored.
+  description: 'Updated 2026-09-24. Soft cap at 30 minutes: ends the session (fade
+    every speaker in the kitchen group to 0 over 3 minutes, stop, unjoin, restore volumes,
+    clear the flag) ONLY if no tracked room (kitchen, Big Bedroom, Bedroom 2, bathroom,
+    living room) shows presence - someone sitting in the living room keeps listening.
+    Hard cap at 60 minutes: ends it regardless of presence. Between them the ''Nobody
+    Present Anywhere 10 Min'' automation ends the session once every room has been
+    empty for 10 minutes. The flag stays on during the fade so the deactivation/unjoin
+    automations don''t cut it short; if another automation ends the session mid-fade
+    (nobody present, manual pause), the fade aborts and volumes are still restored.
+    Sensors that get stuck ON are reset by ''Presence Sensor Stuck-On Watchdog''.
+    (Alias keeps its old name so the entity id stays stable.)'
   triggers:
-  - trigger: state
+  - alias: Soft cap - 30 minutes, skipped while anyone is present
+    trigger: state
     entity_id: input_boolean.welcome_home_active
     to: 'on'
     for:
       minutes: 30
-  conditions: []
+    id: soft
+  - alias: Hard cap - 60 minutes, even with presence
+    trigger: state
+    entity_id: input_boolean.welcome_home_active
+    to: 'on'
+    for:
+      minutes: 60
+    id: hard
+  conditions:
+  - alias: Hard cap always runs; the soft cap only runs when every tracked room is empty
+    condition: template
+    value_template: "{{ trigger.id == 'hard' or not (\n  is_state('binary_sensor.kitchen_sensor_group','on')\n  or is_state('binary_sensor.big_bedroom_sensor_group','on')\n  or is_state('binary_sensor.bedroom_2_sensor_group','on')\n  or is_state('binary_sensor.bathroom_motion','on')\n  or is_state('binary_sensor.living_room_sensor_group','on')) }}"
   actions:
   - alias: Capture every speaker in the kitchen group and its current volume
     variables:
@@ -13069,3 +13078,82 @@
         data: {}
   mode: queued
   max: 3
+- id: '1790100000002'
+  alias: 'Presence Sensor Stuck-On Watchdog (Kitchen, Bedroom 2, Living Room)'
+  description: 'Added 2026-09-24. Checks every 30 min. If a radar presence sensor has
+    been continuously ON for 3+ hours it is treated as stuck (phantom still-target)
+    and its ESP is fully rebooted, with a phone notification; if it is still stuck
+    30 min later it retries. Presence that never clears keeps music, lights and fans
+    running, so this pairs with the Welcome Home 60-minute hard cap. Same approach
+    as ''Big Bedroom: Presence Sensor Stuck-On Watchdog'' (a full ESP reboot, not just
+    a radar restart). Skips legitimate long occupancy: Bedroom 2 while occupied/asleep,
+    Living Room while the TV or Apple TV is playing. Bathroom (Hue motion) has no
+    reset button so it is not covered.'
+  triggers:
+  - trigger: time_pattern
+    minutes: /30
+  conditions: []
+  actions:
+  - variables:
+      watch:
+      - name: Kitchen radar
+        sensors:
+        - binary_sensor.kitchen_occupancy_sensor_radar_zone_1_occupancy
+        - binary_sensor.kitchen_occupancy_sensor_radar_zone_2_occupancy
+        - binary_sensor.kitchen_occupancy_sensor_radar_zone_3_occupancy
+        button: button.kitchen_occupancy_sensor_esp_reboot
+        skip: []
+      - name: Bedroom 2 radar (Apollo)
+        sensors:
+        - binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy
+        - binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy
+        - binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
+        button: button.bedroom2_sensor_apollo_esp_reboot
+        skip:
+        - input_boolean.bedroom2_occupied
+        - input_boolean.bedroom2_asleep
+      - name: Bedroom 2 door radar
+        sensors:
+        - binary_sensor.bedroom2_office_bedroom2_door_presence
+        button: button.bedroom2_office_bedroom2_door_04_esp32_restart
+        skip:
+        - input_boolean.bedroom2_occupied
+        - input_boolean.bedroom2_asleep
+      - name: Living Room radar
+        sensors:
+        - binary_sensor.apollo_r_pro_1_740624_ld2450_presence
+        button: button.apollo_r_pro_1_740624_esp_reboot
+        skip:
+        - media_player.living_room_tv_3
+        - media_player.living_room_appletv_2
+  - repeat:
+      for_each: '{{ watch }}'
+      sequence:
+      - variables:
+          stuck: >-
+            {% set ns = namespace(l=[]) %}{% for e in repeat.item.sensors %}{% set
+            st = states[e] %}{% if st is not none and st.state == 'on' and (now() -
+            st.last_changed).total_seconds() >= 10800 %}{% set ns.l = ns.l + [e] %}{%
+            endif %}{% endfor %}{{ ns.l }}
+          skipped: >-
+            {% set ns = namespace(v=false) %}{% for e in repeat.item.skip %}{% if is_state(e,
+            'on') or is_state(e, 'playing') %}{% set ns.v = true %}{% endif %}{% endfor
+            %}{{ ns.v }}
+      - alias: Sensor stuck on 3+ hours and not a legitimate long occupancy
+        if:
+        - condition: template
+          value_template: '{{ stuck | length > 0 and not skipped }}'
+        then:
+        - alias: Notify so it's visible when this fires
+          continue_on_error: true
+          action: notify.mobile_app_pc_iphone
+          data:
+            title: Presence Sensor Watchdog
+            message: '{{ repeat.item.name }} has read occupied for 3+ hours ({{ stuck
+              | join('', '') }}) - rebooting the sensor.'
+        - alias: Full ESP reboot
+          continue_on_error: true
+          action: button.press
+          target:
+            entity_id: '{{ repeat.item.button }}'
+  mode: single
