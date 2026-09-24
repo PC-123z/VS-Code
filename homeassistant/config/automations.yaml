@@ -9365,17 +9365,34 @@
     entity_id: binary_sensor.living_room_sensor_group
     to: 'on'
     id: living_room_motion
+  - alias: Welcome Home just started - join rooms that were ALREADY occupied (their
+      sensor never flips off->on after the session starts, so the motion triggers
+      above miss them; seen with Bedroom 2 on 2026-09-24)
+    trigger: state
+    entity_id: input_boolean.welcome_home_active
+    to: 'on'
+    id: session_start
   conditions:
   - condition: state
     entity_id: input_boolean.welcome_home_active
     state: 'on'
   actions:
+  - alias: On session start, wait for the kitchen stream to actually be playing first
+    if:
+    - condition: template
+      value_template: '{{ trigger.id == ''session_start'' }}'
+    then:
+    - wait_template: '{{ is_state(''media_player.kitchen_2'', ''playing'') }}'
+      timeout:
+        seconds: 90
+      continue_on_timeout: false
   - choose:
     - alias: Bedroom 2 sensor - join office speaker at a capped, ramped volume rather
         than whatever it was left at last
       conditions:
-      - condition: trigger
-        id: bedroom_2_motion
+      - alias: Room motion, or session just started with the room already occupied
+        condition: template
+        value_template: "{{ trigger.id == 'bedroom_2_motion' or (trigger.id == 'session_start' and is_state('binary_sensor.bedroom_2_sensor_group', 'on')) }}"
       - alias: Skip while Bedroom 2 is asleep
         condition: state
         entity_id: input_boolean.bedroom2_asleep
@@ -9421,11 +9438,13 @@
             data:
               volume_level: "{{ [0.05 + (repeat.index * ((0.12 - 0.05) / 5)),\n    0.12]
                 | min | round(3) }}"
+  - choose:
     - alias: Big bedroom sensor - join bedroom speaker at a capped, ramped volume
         rather than whatever it was left at last
       conditions:
-      - condition: trigger
-        id: big_bedroom_motion
+      - alias: Room motion, or session just started with the room already occupied
+        condition: template
+        value_template: "{{ trigger.id == 'big_bedroom_motion' or (trigger.id == 'session_start' and is_state('binary_sensor.big_bedroom_sensor_group', 'on')) }}"
       - alias: Skip while Big Bedroom is asleep
         condition: state
         entity_id: input_boolean.big_bedroom_asleep
@@ -9469,11 +9488,13 @@
             data:
               volume_level: "{{ [0.05 + (repeat.index * ((0.14 - 0.05) / 5)),\n    0.14]
                 | min | round(3) }}"
+  - choose:
     - alias: Living room sensor - join the Yamaha receiver (via its Music Assistant
         player) at a capped, ramped volume rather than whatever it was left at last
       conditions:
-      - condition: trigger
-        id: living_room_motion
+      - alias: Room motion, or session just started with the room already occupied
+        condition: template
+        value_template: "{{ trigger.id == 'living_room_motion' or (trigger.id == 'session_start' and is_state('binary_sensor.living_room_sensor_group', 'on')) }}"
       - alias: Skip if the receiver is already in the kitchen group - motion re-triggers
           constantly while the room is occupied, and without this the whole volume-drop/join/ramp
           sequence re-ran on every retrigger, causing the exact audible cutouts this
@@ -9502,8 +9523,8 @@
           entity_id: media_player.rx_a2a_733ceb
         data:
           volume_level: 0.05
-      - alias: Ramp receiver volume up to 0.25 over 20 seconds (0.25 is the receiver's
-          own observed volume level as of 2026-09-23, used as a sane ceiling)
+      - alias: Ramp receiver volume up to 0.30 over 20 seconds (raised from 0.25 on 2026-09-24
+          - user wanted one notch louder)
         repeat:
           count: 5
           sequence:
@@ -9513,9 +9534,10 @@
             target:
               entity_id: media_player.rx_a2a_733ceb
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((0.25 - 0.05) / 5)),\n    0.25]
+              volume_level: "{{ [0.05 + (repeat.index * ((0.30 - 0.05) / 5)),\n    0.30]
                 | min | round(3) }}"
-  mode: single
+  mode: queued
+  max: 6
 - id: '1777520160440'
   alias: 'Living Room: Unoccupied Shutoff'
   description: After 8.5 min of no living room presence (with dining room also empty
