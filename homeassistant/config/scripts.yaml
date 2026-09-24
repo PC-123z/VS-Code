@@ -135,12 +135,8 @@ script_volvo_start_core:
         - alias: Announce departure with weather
           action: notify.send_message
           target:
-            entity_id:
-            - notify.paul_s_sonos_arc_announce
-            - notify.echo_show_kitchen_announce
-            - notify.office_speaker_announce
-            - notify.living_room_dot_announce
-            - notify.paul_s_sonos_one_second_edition_announce
+            # Single speaker only, to avoid overlapping duplicates: Big Bedroom if occupied, else Kitchen
+            entity_id: "{{ 'notify.bedroom_dot_announce' if is_state('binary_sensor.big_bedroom_sensor_group', 'on') else 'notify.echo_show_kitchen_announce' }}"
           data:
             message: XC60 will be Ready to Depart in 5 Minutes. Current conditions are
               {{ states('weather.forecast_home') }}, {{ state_attr('weather.forecast_home',
@@ -166,12 +162,8 @@ script_volvo_start_core:
         - alias: Announce car not started
           action: notify.send_message
           target:
-            entity_id:
-            - notify.paul_s_sonos_arc_announce
-            - notify.echo_show_kitchen_announce
-            - notify.office_speaker_announce
-            - notify.living_room_dot_announce
-            - notify.paul_s_sonos_one_second_edition_announce
+            # Single speaker only, to avoid overlapping duplicates: Big Bedroom if occupied, else Kitchen
+            entity_id: "{{ 'notify.bedroom_dot_announce' if is_state('binary_sensor.big_bedroom_sensor_group', 'on') else 'notify.echo_show_kitchen_announce' }}"
           data:
             message: The XC60 could not be started remotely.
           continue_on_error: true
@@ -192,12 +184,8 @@ script_volvo_start_core:
         - alias: Announce ready
           action: notify.send_message
           target:
-            entity_id:
-            - notify.paul_s_sonos_arc_announce
-            - notify.echo_show_kitchen_announce
-            - notify.office_speaker_announce
-            - notify.living_room_dot_announce
-            - notify.paul_s_sonos_one_second_edition_announce
+            # Single speaker only, to avoid overlapping duplicates: Big Bedroom if occupied, else Kitchen
+            entity_id: "{{ 'notify.bedroom_dot_announce' if is_state('binary_sensor.big_bedroom_sensor_group', 'on') else 'notify.echo_show_kitchen_announce' }}"
           data:
             message: 'Vehicle Ready, Time to Go!!!!  '
           continue_on_error: true
