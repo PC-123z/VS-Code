@@ -11363,53 +11363,73 @@
     target:
       entity_id: input_boolean.office_pc_wake
   mode: single
-- id: '1790100000001'
-  alias: 'Big Bedroom: Presence Sensor Stuck-On Watchdog'
-  description: The Apollo MSR-2 radar (Big Bedroom) occasionally reports a phantom
-    still-target and stays "on" for hours with the room empty. A radar-only restart
-    wasn't enough (2026-09-23 - it just relocated the phantom to a different zone),
-    so this does a full ESP reboot once it's been continuously on for 3+ hours, then
-    keeps retrying every 30 min if still stuck. Skips while asleep (legitimately
-    long occupancy) or under manual override.
+- id: '1790100000002'
+  alias: 'Presence Sensors: Stuck-On Watchdog'
+  description: Every 30 min, checks each radar-based room sensor group. If a group has
+    been continuously on longer than its threshold (and its room isn't legitimately
+    occupied for hours, e.g. asleep), sends a phone notification and does a full ESP
+    reboot of that room's sensor(s). Retries every 30 min while still stuck. Replaces
+    the Big Bedroom-only watchdog (2026-09-24). A radar-only restart proved unreliable
+    (Big Bedroom 2026-09-23 just moved the ghost to another zone), so the whole ESP
+    reboots. Bedrooms use 3 h and skip while the asleep flag is on; living/dining/kitchen
+    use 6 h because a long movie or meal is legitimate. Not covered - Garage (camera
+    based) and the ecobee room-sensor occupancy entities (HomeKit, no reset available).
   triggers:
-  - alias: First crosses the stuck threshold
-    trigger: state
-    entity_id: binary_sensor.big_bedroom_sensor_group
-    to: 'on'
-    for:
-      hours: 3
-    id: stuck
-  - alias: Safety-net retry in case the first restart didn't clear it
-    trigger: time_pattern
+  - trigger: time_pattern
     minutes: /30
     id: periodic
-  conditions:
-  - alias: Still stuck on
-    condition: state
-    entity_id: binary_sensor.big_bedroom_sensor_group
-    state: 'on'
-    for:
-      hours: 3
-  - alias: Don't restart while legitimately asleep for hours
-    condition: state
-    entity_id: input_boolean.big_bedroom_asleep
-    state: 'off'
-  - alias: Respect the manual dimmer override
-    condition: state
-    entity_id: input_boolean.big_bedroom_manual_override
-    state: 'off'
+  conditions: []
   actions:
-  - alias: Notify so it's visible when this fires
-    action: notify.mobile_app_pc_iphone
-    continue_on_error: true
-    data:
-      message: Big Bedroom presence sensor stuck on 3+ hrs with room reading empty
-        - rebooting the sensor.
-      title: Big Bedroom Sensor Watchdog
-  - alias: Full ESP reboot (radar-only restart wasn't reliable enough)
-    action: button.press
-    target:
-      entity_id: button.apollo_msr_2_big_bedroom_esp_reboot
+  - alias: Check each sensor group
+    repeat:
+      for_each:
+      - name: Big Bedroom
+        group: binary_sensor.big_bedroom_sensor_group
+        hours: 3
+        asleep: input_boolean.big_bedroom_asleep
+        buttons:
+        - button.apollo_msr_2_big_bedroom_esp_reboot
+      - name: Bedroom 2
+        group: binary_sensor.bedroom_2_sensor_group
+        hours: 3
+        asleep: input_boolean.bedroom2_asleep
+        buttons:
+        - button.bedroom2_sensor_apollo_esp_reboot
+        - button.bedroom2_office_bedroom2_door_04_esp32_restart
+      - name: Living Room
+        group: binary_sensor.living_room_sensor_group
+        hours: 6
+        asleep: ''
+        buttons:
+        - button.apollo_r_pro_1_740624_esp_reboot
+      - name: Dining Room
+        group: binary_sensor.dining_room_sensor_group
+        hours: 6
+        asleep: ''
+        buttons:
+        - button.dining_room_apollo_esp_reboot
+      - name: Kitchen
+        group: binary_sensor.kitchen_sensor_group
+        hours: 6
+        asleep: ''
+        buttons:
+        - button.kitchen_occupancy_sensor_esp_reboot
+      sequence:
+      - if:
+        - condition: template
+          value_template: "{{ is_state(repeat.item.group, 'on')\n  and (now() - states[repeat.item.group].last_changed).total_seconds()\n  > repeat.item.hours * 3600\n  and (repeat.item.asleep == '' or is_state(repeat.item.asleep, 'off')) }}"
+        then:
+        - alias: Notify so it's visible when this fires
+          action: notify.mobile_app_pc_iphone
+          continue_on_error: true
+          data:
+            title: Presence Sensor Watchdog
+            message: "{{ repeat.item.name }} sensor has read occupied for over {{ repeat.item.hours }} hrs - rebooting it."
+        - alias: Full ESP reboot
+          action: button.press
+          continue_on_error: true
+          target:
+            entity_id: "{{ repeat.item.buttons }}"
   mode: single
 - id: '1775510700000'
   alias: 'Big Bedroom: Nanoleaf stuck-on watchdog'

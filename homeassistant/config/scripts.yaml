@@ -787,10 +787,17 @@ stop_room_speaker_safely:
         target:
           entity_id: '{{ entity_id }}'
     else:
-    - alias: Not in a group - a plain stop only affects this speaker
-      continue_on_error: true
-      action: media_player.media_stop
-      target:
-        entity_id: '{{ entity_id }}'
+    - alias: Not in a group - only stop it if it is actually playing/paused on its own.
+        Sending a stop to an IDLE speaker that recently left a group still makes
+        Music Assistant tear down the whole shared session (16:45 on 2026-09-24
+        killed Kitchen/Bathroom/Office/receiver via an idle Big Bedroom)
+      if:
+      - condition: template
+        value_template: '{{ states(entity_id) in [''playing'', ''paused'', ''buffering''] }}'
+      then:
+      - continue_on_error: true
+        action: media_player.media_stop
+        target:
+          entity_id: '{{ entity_id }}'
   mode: parallel
   max: 10
