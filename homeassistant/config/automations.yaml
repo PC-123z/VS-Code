@@ -11750,6 +11750,16 @@
     to: 'off'
   conditions: []
   actions:
+  - alias: Stop the shared stream at its leader FIRST (added 2026-09-24) - with AirPlay
+      grouping, unjoining the kitchen leader while members remain hands leadership to
+      the receiver and the music briefly resumes on the leftover group; stopping first
+      ends the whole session cleanly, then the unjoins just tidy up
+    continue_on_error: true
+    action: media_player.media_stop
+    target:
+      entity_id: media_player.kitchen_2
+  - delay:
+      seconds: 2
   - alias: Unjoin every satellite from the kitchen group
     continue_on_error: true
     action: media_player.unjoin
