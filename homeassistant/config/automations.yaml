@@ -9223,7 +9223,6 @@
     - binary_sensor.big_bedroom_sensor_group
     - binary_sensor.bedroom_2_sensor_group
     - binary_sensor.bathroom_motion
-    - binary_sensor.living_room_sensor_group
     to: 'off'
     for:
       minutes: 10
@@ -9254,11 +9253,6 @@
   - alias: Bathroom must actually be empty right now
     condition: state
     entity_id: binary_sensor.bathroom_motion
-    state: 'off'
-  - alias: Living Room must actually be empty right now - added back 2026-09-24, the
-      stream can now be moved there (receiver) and kitchen sits empty
-    condition: state
-    entity_id: binary_sensor.living_room_sensor_group
     state: 'off'
   actions:
   - alias: Clear welcome home flag
@@ -9468,64 +9462,39 @@
             data:
               volume_level: "{{ [0.05 + (repeat.index * ((0.14 - 0.05) / 5)),\n    0.14]
                 | min | round(3) }}"
-    - alias: Living room sensor - MOVE the stream to the Yamaha receiver (via its Music
-        Assistant player) and silence every other room. Replaced join 2026-09-24
-        - joining forced MA to switch the kitchen group from native Sonos to AirPlay
-        mid-play, which tore the group down and killed the receiver's stream (8:53
-        AM incident). The receiver now plays solo, so no mixed Sonos/AirPlay group
-        is ever built.
+    - alias: Living room sensor - join the Yamaha receiver (via its Music Assistant
+        player) at a capped, ramped volume rather than whatever it was left at last
       conditions:
       - condition: trigger
         id: living_room_motion
-      - alias: Only move a stream that is actually playing in the kitchen group -
-          motion re-triggers constantly, and once moved the receiver is the one playing
-        condition: state
-        entity_id: media_player.kitchen_2
-        state: playing
-      - alias: Skip if the receiver already has the stream
-        condition: not
-        conditions:
-        - condition: state
-          entity_id: media_player.rx_a2a_733ceb
-          state: playing
+      - alias: Skip if the receiver is already in the kitchen group - motion re-triggers
+          constantly while the room is occupied, and without this the whole volume-drop/join/ramp
+          sequence re-ran on every retrigger, causing the exact audible cutouts this
+          was meant to prevent
+        condition: template
+        value_template: "{{ 'media_player.rx_a2a_733ceb' not in\n   (state_attr('media_player.kitchen_2',\n
+          \  'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
           entity_id: media_player.rx_a2a_733ceb
         data:
           volume_level: 0.05
-      - alias: Drop satellites out of the kitchen group first so the queue moves
-          alone
-        continue_on_error: true
-        action: media_player.unjoin
+      - action: media_player.join
         target:
-          entity_id:
-          - media_player.bedroom_2
-          - media_player.office_2
-          - media_player.bathroom_2
-        data: {}
-      - alias: Move the queue to the receiver and start it
-        action: music_assistant.transfer_queue
-        target:
-          entity_id: media_player.rx_a2a_733ceb
+          entity_id: media_player.kitchen_2
         data:
-          source_player: media_player.kitchen_2
-          auto_play: true
-      - alias: Re-apply the low volume after the move
+          group_members:
+          - media_player.rx_a2a_733ceb
+      - alias: Re-apply the low volume after joining - joining a group can silently
+          restore a remembered volume for this player, overwriting the volume_set
+          that ran right before the join (same issue "Bathroom Speaker Join on Motion
+          v2" already worked around with its own "unmute again after join" step)
         action: media_player.volume_set
         target:
           entity_id: media_player.rx_a2a_733ceb
         data:
           volume_level: 0.05
-      - alias: Make sure every other room is silent
-        continue_on_error: true
-        action: media_player.media_stop
-        target:
-          entity_id:
-          - media_player.kitchen_2
-          - media_player.bedroom_2
-          - media_player.office_2
-          - media_player.bathroom_2
       - alias: Ramp receiver volume up to 0.25 over 20 seconds (0.25 is the receiver's
           own observed volume level as of 2026-09-23, used as a sane ceiling)
         repeat:
