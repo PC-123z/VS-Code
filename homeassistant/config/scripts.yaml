@@ -771,7 +771,10 @@ stop_room_speaker_safely:
       description: The Music Assistant media_player entity of the room speaker to stop
       example: media_player.office_2
   sequence:
-  - alias: Leave the shared group first, only if others are in it
+  - alias: In a shared group - just leave it. Do NOT send media_stop afterwards - Music
+      Assistant still routes that stop to the group's session and kills the stream
+      for everyone (confirmed in the 2026-09-24 test), while the unjoin alone already
+      silences this speaker
     if:
     - condition: template
       value_template: '{{ (state_attr(entity_id, ''group_members'') | default([], true)
@@ -783,11 +786,23 @@ stop_room_speaker_safely:
         entity_id: '{{ entity_id }}'
       data: {}
     - delay:
-        seconds: 2
-  - alias: Now stop just this speaker
-    continue_on_error: true
-    action: media_player.media_stop
-    target:
-      entity_id: '{{ entity_id }}'
+        seconds: 3
+    - alias: Only if it somehow kept playing on its own after leaving, stop it now that
+        it is solo
+      if:
+      - condition: template
+        value_template: '{{ is_state(entity_id, ''playing'') and (state_attr(entity_id,
+          ''group_members'') | default([], true) | length) <= 1 }}'
+      then:
+      - continue_on_error: true
+        action: media_player.media_stop
+        target:
+          entity_id: '{{ entity_id }}'
+    else:
+    - alias: Not in a group - a plain stop only affects this speaker
+      continue_on_error: true
+      action: media_player.media_stop
+      target:
+        entity_id: '{{ entity_id }}'
   mode: parallel
   max: 10
