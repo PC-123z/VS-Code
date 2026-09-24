@@ -795,12 +795,11 @@
       - fan.bedroom_purifier
       - fan.big_bedroom_fan
     data: {}
-  - action: media_player.media_stop
-    metadata: {}
-    target:
-      entity_id:
-      - media_player.bedroom_2
-    data: {}
+  - alias: Stop music - leaves the shared Welcome Home/receiver group first so it never
+      kills the stream for people listening in other rooms
+    action: script.stop_room_speaker_safely
+    data:
+      entity_id: media_player.bedroom_2
   mode: single
 - id: '1748800000001'
   alias: 'Big Bedroom: Reset Override When Empty'
@@ -8079,9 +8078,10 @@
     entity_id: input_boolean.bedroom2_occupied
     state: 'off'
   actions:
-  - alias: Stop music
-    action: media_player.media_stop
-    target:
+  - alias: Stop music - leaves the shared Welcome Home/receiver group first so it never
+      kills the stream for people listening in other rooms
+    action: script.stop_room_speaker_safely
+    data:
       entity_id: media_player.office_2
   - alias: Turn off all lights
     action: light.turn_off
@@ -9223,6 +9223,7 @@
     - binary_sensor.big_bedroom_sensor_group
     - binary_sensor.bedroom_2_sensor_group
     - binary_sensor.bathroom_motion
+    - binary_sensor.living_room_sensor_group
     to: 'off'
     for:
       minutes: 10
@@ -9253,6 +9254,12 @@
   - alias: Bathroom must actually be empty right now
     condition: state
     entity_id: binary_sensor.bathroom_motion
+    state: 'off'
+  - alias: Living Room must actually be empty right now - added back 2026-09-24, the
+      receiver is now joined to the session's stream, so someone listening there
+      must keep it alive
+    condition: state
+    entity_id: binary_sensor.living_room_sensor_group
     state: 'off'
   actions:
   - alias: Clear welcome home flag

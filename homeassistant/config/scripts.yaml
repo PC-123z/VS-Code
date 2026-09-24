@@ -757,3 +757,37 @@ kitchen_up_light_apply:
           hs_color: '{{ strip_hs }}'
           brightness_pct: '{{ strip_bri }}'
           transition: '{{ fade }}'
+stop_room_speaker_safely:
+  alias: 'Script: Stop Room Speaker Without Killing a Shared Stream'
+  description: 'Added 2026-09-24. Stops one room speaker, but if it shares a group with
+    other speakers (e.g. Welcome Home kitchen/receiver AirPlay group) it leaves the
+    group first. With AirPlay grouping, media_stop on a member stops the WHOLE group
+    (MA redirects it to the leader and tears down every session), so an "empty room
+    - turn off" automation would kill the music for people still listening elsewhere.
+    Unjoin first, then stop, so only this room goes quiet. Used by the room-empty
+    automations (Bedroom 2 - Off When Empty, Big Bedroom Empty - Off).'
+  fields:
+    entity_id:
+      description: The Music Assistant media_player entity of the room speaker to stop
+      example: media_player.office_2
+  sequence:
+  - alias: Leave the shared group first, only if others are in it
+    if:
+    - condition: template
+      value_template: '{{ (state_attr(entity_id, ''group_members'') | default([], true)
+        | length) > 1 }}'
+    then:
+    - continue_on_error: true
+      action: media_player.unjoin
+      target:
+        entity_id: '{{ entity_id }}'
+      data: {}
+    - delay:
+        seconds: 2
+  - alias: Now stop just this speaker
+    continue_on_error: true
+    action: media_player.media_stop
+    target:
+      entity_id: '{{ entity_id }}'
+  mode: parallel
+  max: 10
