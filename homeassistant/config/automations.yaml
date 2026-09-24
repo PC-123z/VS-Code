@@ -13002,3 +13002,94 @@
           map(attribute=''media_content_id'') | list %}{% set nxt = t.index(state_attr(''media_player.bedroom_2'',
           ''media_content_id'')) + 1 %}{{ 0 if nxt >= (t | length - 20) else nxt }}'
   mode: restart
+- id: '1785000000001'
+  alias: 'Kitchen: Join Living Room Receiver Stream on Presence'
+  description: 'Added 2026-09-24. Independent of Welcome Home, 8 AM - 10 PM daily. While
+    the Living Room receiver (media_player.rx_a2a_733ceb, via Music Assistant) is playing,
+    kitchen presence joins the kitchen Sonos (media_player.kitchen_2) into the receiver''s
+    group so both play together, with the receiver as leader. Kitchen ramps up from
+    0.05 to 0.15 over 20 seconds. Kitchen is unjoined after 10 minutes with no kitchen
+    presence. Skips if kitchen is already playing something itself (never hijack it) or is
+    already in the receiver group (presence re-triggers constantly). Receiver leading
+    a fresh AirPlay join avoids the native-to-AirPlay switch mid-play that collapsed the
+    kitchen group at 8:53 AM on 2026-09-24.'
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    to: 'on'
+    id: kitchen_present
+  - trigger: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    to: 'off'
+    for:
+      minutes: 10
+    id: kitchen_empty
+  conditions: []
+  actions:
+  - choose:
+    - alias: Kitchen occupied while the receiver is playing - join it in
+      conditions:
+      - condition: trigger
+        id: kitchen_present
+      - condition: time
+        after: 08:00:00
+        before: '22:00:00'
+      - condition: state
+        entity_id: media_player.rx_a2a_733ceb
+        state: playing
+      - alias: Never hijack a kitchen that is playing its own stream
+        condition: not
+        conditions:
+        - condition: state
+          entity_id: media_player.kitchen_2
+          state: playing
+      - alias: Skip if kitchen is already in the receiver group
+        condition: template
+        value_template: '{{ ''media_player.kitchen_2'' not in (state_attr(''media_player.rx_a2a_733ceb'',
+          ''group_members'') | default([], true)) }}'
+      sequence:
+      - action: media_player.volume_set
+        target:
+          entity_id: media_player.kitchen_2
+        data:
+          volume_level: 0.05
+      - action: media_player.join
+        target:
+          entity_id: media_player.rx_a2a_733ceb
+        data:
+          group_members:
+          - media_player.kitchen_2
+      - alias: Re-apply the low volume after joining - joining can restore a remembered
+          volume
+        action: media_player.volume_set
+        target:
+          entity_id: media_player.kitchen_2
+        data:
+          volume_level: 0.05
+      - alias: Ramp kitchen volume up to 0.15 over 20 seconds
+        repeat:
+          count: 5
+          sequence:
+          - delay:
+              seconds: 4
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.kitchen_2
+            data:
+              volume_level: '{{ [0.05 + (repeat.index * ((0.15 - 0.05) / 5)), 0.15]
+                | min | round(3) }}'
+    - alias: Kitchen empty 10 minutes - drop it out of the receiver group
+      conditions:
+      - condition: trigger
+        id: kitchen_empty
+      - condition: template
+        value_template: '{{ ''media_player.kitchen_2'' in (state_attr(''media_player.rx_a2a_733ceb'',
+          ''group_members'') | default([], true)) }}'
+      sequence:
+      - continue_on_error: true
+        action: media_player.unjoin
+        target:
+          entity_id: media_player.kitchen_2
+        data: {}
+  mode: queued
+  max: 3
