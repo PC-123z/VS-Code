@@ -10084,6 +10084,14 @@
             target:
               entity_id: media_player.bedroom_2
           - stop: Routine was cancelled during the volume ramp
+        - alias: If the motion-triggered greeting is speaking right now, let it finish
+            and register in the counter before deciding - otherwise this branch sees
+            the counter still at 0 mid-speech and talks straight after it
+          wait_template: '{{ is_state(''input_boolean.good_morning_announcement_pending'',
+            ''off'') }}'
+          timeout:
+            seconds: 60
+          continue_on_timeout: true
         - alias: Second announcement, only if the motion-triggered greeting hasn't
             already played this morning - no need to repeat the same greeting into
             silence. Spoken over the music through MA's announcement path, which nothing
@@ -10312,6 +10320,26 @@
         timeout:
           seconds: 60
         continue_on_timeout: true
+      - alias: Keep the two greetings at least 3 minutes apart. If the music branch's
+          greeting already played (counter above 0), wait out the rest of the 3 minutes
+          measured from when it finished (the counter is incremented right after the
+          speech ends). Before this, the motion greeting spoke the instant the flag
+          cleared, so the two played back to back (2026-09-24 06:48:15 then 06:48:34).
+        if:
+        - condition: template
+          value_template: '{{ states(''counter.good_morning_announcements'') | int(0)
+            > 0 }}'
+        then:
+        - delay:
+            seconds: '{{ [180 - (now() - states.counter.good_morning_announcements.last_changed).total_seconds(),
+              0] | max | round(0) | int }}'
+        - alias: Re-check after the wait - the routine may have been cancelled or the
+            room emptied while we held off
+          condition: template
+          value_template: '{% set s = states.binary_sensor.big_bedroom_sensor_group
+            %} {{ is_state(''input_boolean.good_morning_active'', ''on'') and s is
+            not none and (s.state == ''on'' or (now() - s.last_changed).total_seconds()
+            < 120) }}'
       - alias: Hold the announcement-in-progress flag while speaking, so the music
           branch cannot replace the queue underneath the greeting
         action: input_boolean.turn_on
