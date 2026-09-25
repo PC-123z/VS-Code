@@ -388,8 +388,7 @@ goodbye_routine_motion_tracking:
           continue_on_timeout: true
       - if:
         - condition: template
-          value_template: '{{ already_on or (wait is defined and wait.completed | default(false))
-            }}'
+          value_template: '{{ already_on or (wait is defined and wait.trigger is not none) }}'
         then:
         - variables:
             result:
@@ -438,9 +437,79 @@ goodbye_routine_someone_home_arm_stay:
     data:
       title: Someone's Home
       message: Motion after you left ({{ detected }}). Alarm set to Stay - lights,
-        TVs and music left alone.
+        TVs and music left alone. Re-checking every few minutes; if everything stays
+        clear for 10 min it will switch to Away and power down.
+  - alias: Keep watching - upgrade to Away if the house turns out to be empty
+    action: script.turn_on
+    target:
+      entity_id: script.goodbye_routine_stay_recheck
   mode: single
   icon: mdi:home-account
+goodbye_routine_stay_recheck:
+  alias: Goodbye Routine - Stay Re-check
+  description: 'Added 2026-09-25. After the routine armed Stay because of motion, keep
+    watching while Paul is away. Once every goodbye motion sensor has been clear for
+    10 continuous minutes (and the alarm is still on Stay), run the all-clear arm
+    Away + power down. Gives up when the car beacon shows home, the alarm leaves Stay
+    (someone disarmed/changed it), or after ~6 hours.'
+  sequence:
+  - repeat:
+      sequence:
+      - alias: Wait until the house has been motion-free for 10 continuous minutes
+        if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: binary_sensor.goodbye_motion_sensors
+            state: 'off'
+            for:
+              minutes: 10
+        then:
+        - wait_for_trigger:
+          - trigger: state
+            entity_id: binary_sensor.goodbye_motion_sensors
+            to: 'off'
+            for:
+              minutes: 10
+          timeout:
+            minutes: 30
+          continue_on_timeout: true
+      - alias: Still away, still on Stay, and the house has been empty 10 min - upgrade
+        if:
+        - condition: not
+          conditions:
+          - condition: state
+            entity_id: device_tracker.bcpro_204982_08b8
+            state: home
+        - condition: state
+          entity_id: alarm_control_panel.3302_alarm
+          state: armed_home
+        - condition: state
+          entity_id: binary_sensor.goodbye_motion_sensors
+          state: 'off'
+          for:
+            minutes: 10
+        then:
+        - action: notify.mobile_app_pc_iphone
+          data:
+            title: House Empty - Arming Away
+            message: No motion for 10 minutes since you left. Switching the alarm
+              from Stay to Away and powering the house down.
+        - action: script.goodbye_routine_all_clear_arm_and_power_off
+        - stop: Upgraded to Away
+      while:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: device_tracker.bcpro_204982_08b8
+          state: home
+      - condition: state
+        entity_id: alarm_control_panel.3302_alarm
+        state: armed_home
+      - condition: template
+        value_template: '{{ repeat.index <= 12 }}'
+  mode: single
+  icon: mdi:shield-refresh
 goodbye_routine_all_clear_arm_and_power_off:
   alias: Goodbye Routine - All Clear, Arm and Power Off
   description: House confirmed empty by motion tracking - arm Away, then power down.
@@ -523,6 +592,11 @@ goodbye_routine_all_clear_arm_and_power_off:
       - fan.bedroom2_fan
     action: fan.turn_off
     data: {}
+  - alias: House is empty - end any Welcome Home session (unjoin/cleanup automations
+      key off this flag)
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.welcome_home_active
   - target:
       entity_id: input_boolean.goodbye_routine_active
     action: input_boolean.turn_off
