@@ -85,22 +85,6 @@
                     },
                     {
                       "type": "section",
-                      "label": "Bedroom 2 Entry"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom2_office_bedroom2_door_presence",
-                      "name": "Presence"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom2_office_bedroom2_door_moving_target",
-                      "name": "Moving Target"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom2_office_bedroom2_door_still_target",
-                      "name": "Still Target"
-                    },
-                    {
-                      "type": "section",
                       "label": "Dining Room"
                     },
                     {
