@@ -337,27 +337,59 @@ goodbye_routine_main:
   icon: mdi:logout
 goodbye_routine_motion_tracking:
   alias: Goodbye Routine - Motion Tracking
-  description: Decides home vs empty. First allows up to 5 min for Paul's own exit
-    motion to clear, then runs 5 consecutive 2-minute checks. Motion at any point
-    during the checks = someone is home. Returns {someone_home, detected}.
+  description: 'Decides home vs empty. First allows up to 5 min for Paul''s own exit
+    motion to clear (must stay clear for 30 s), then runs 5 consecutive 2-minute checks.
+    Motion only counts if it stays on for 30 s, so a radar blip or a sensor flapping
+    for a second cannot decide the outcome (2026-09-25: a Bedroom 2 radar zone flap
+    ended the settle wait and tripped check 1 in 2 seconds). Returns {someone_home,
+    detected}.'
   sequence:
-  - alias: Settle - let departure motion clear (still-on after 5 min fails check 1)
-    wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''off'')
-      }}'
-    timeout:
-      minutes: 5
-    continue_on_timeout: true
+  - alias: Settle - let departure motion clear (must be off 30 s; still-on after 5
+      min fails check 1)
+    if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: binary_sensor.goodbye_motion_sensors
+        state: 'off'
+        for:
+          seconds: 30
+    then:
+    - wait_for_trigger:
+      - trigger: state
+        entity_id: binary_sensor.goodbye_motion_sensors
+        to: 'off'
+        for:
+          seconds: 30
+      timeout:
+        minutes: 5
+      continue_on_timeout: true
   - repeat:
       count: 5
       sequence:
-      - wait_template: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''on'')
-          }}'
-        timeout:
-          minutes: 2
-        continue_on_timeout: true
+      - alias: Sustained motion (on 30 s) at any point in this 2-minute window = someone
+          is home
+        variables:
+          already_on: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''on'')
+            and (now() - states.binary_sensor.goodbye_motion_sensors.last_changed).total_seconds()
+            >= 30 }}'
       - if:
         - condition: template
-          value_template: '{{ wait.completed }}'
+          value_template: '{{ not already_on }}'
+        then:
+        - wait_for_trigger:
+          - trigger: state
+            entity_id: binary_sensor.goodbye_motion_sensors
+            to: 'on'
+            for:
+              seconds: 30
+          timeout:
+            minutes: 2
+          continue_on_timeout: true
+      - if:
+        - condition: template
+          value_template: '{{ already_on or (wait is defined and wait.completed | default(false))
+            }}'
         then:
         - variables:
             result:
