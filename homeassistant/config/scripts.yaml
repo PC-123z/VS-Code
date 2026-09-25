@@ -442,7 +442,7 @@ goodbye_routine_someone_home_arm_stay:
   - alias: Keep watching - upgrade to Away if the house turns out to be empty
     action: script.turn_on
     target:
-      entity_id: script.goodbye_routine_stay_recheck
+      entity_id: script.goodbye_routine_stay_re_check
   mode: single
   icon: mdi:home-account
 goodbye_routine_stay_recheck:
