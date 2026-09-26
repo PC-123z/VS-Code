@@ -81,7 +81,7 @@
     grace. 60-minute hard cap from routine start.'
   triggers:
   - trigger: time
-    at: '20:00:00'
+    at: '19:00:00'
     weekday:
     - sat
     enabled: true
@@ -795,8 +795,8 @@
       - fan.bedroom_purifier
       - fan.big_bedroom_fan
     data: {}
-  - alias: Stop music - leaves the shared Welcome Home/receiver group first so it never
-      kills the stream for people listening in other rooms
+  - alias: Stop music - leaves the shared Welcome Home/receiver group first so it
+      never kills the stream for people listening in other rooms
     action: script.stop_room_speaker_safely
     data:
       entity_id: media_player.bedroom_2
@@ -6689,7 +6689,8 @@
                   repeat:
                     while:
                     - condition: template
-                      value_template: '{{ repeat.index <= 8 and not is_state(''binary_sensor.bedroom_2_sensor_group'', ''on'') }}'
+                      value_template: '{{ repeat.index <= 8 and not is_state(''binary_sensor.bedroom_2_sensor_group'',
+                        ''on'') }}'
                     sequence:
                     - action: media_player.volume_set
                       target:
@@ -6701,7 +6702,8 @@
                         seconds: 15
                 - if:
                   - condition: template
-                    value_template: '{{ is_state(''binary_sensor.bedroom_2_sensor_group'', ''on'') }}'
+                    value_template: '{{ is_state(''binary_sensor.bedroom_2_sensor_group'',
+                      ''on'') }}'
                   then:
                   - alias: Occupancy returned - restore volume and carry on round
                       the occupancy loop
@@ -7608,10 +7610,10 @@
     for:
       minutes: 20
     id: stopped
-  - alias: Radar blip that never flipped the sensor group on (2026-09-26 - a 2s
-      moving-target blip turned the lights on and the group-off trigger above never
-      fired because the group was already off, so lights stayed on 3+ hours); the
-      condition on the stopped branch re-checks the group is off
+  - alias: Radar blip that never flipped the sensor group on (2026-09-26 - a 2s moving-target
+      blip turned the lights on and the group-off trigger above never fired because
+      the group was already off, so lights stayed on 3+ hours); the condition on the
+      stopped branch re-checks the group is off
     trigger: state
     entity_id:
     - binary_sensor.bedroom2_sensor_apollo_radar_moving_target
@@ -8095,8 +8097,8 @@
     entity_id: input_boolean.bedroom2_occupied
     state: 'off'
   actions:
-  - alias: Stop music - leaves the shared Welcome Home/receiver group first so it never
-      kills the stream for people listening in other rooms
+  - alias: Stop music - leaves the shared Welcome Home/receiver group first so it
+      never kills the stream for people listening in other rooms
     action: script.stop_room_speaker_safely
     data:
       entity_id: media_player.office_2
@@ -9273,8 +9275,8 @@
     entity_id: binary_sensor.bathroom_motion
     state: 'off'
   - alias: Living Room must actually be empty right now - added back 2026-09-24, the
-      receiver is now joined to the session's stream, so someone listening there
-      must keep it alive
+      receiver is now joined to the session's stream, so someone listening there must
+      keep it alive
     condition: state
     entity_id: binary_sensor.living_room_sensor_group
     state: 'off'
@@ -9363,11 +9365,11 @@
     Also switched from ramping to kitchen''s current volume to fixed per-room targets,
     and shortened the ramp to 20 seconds total (5 steps of 4s) - office/bedroom_2
     targets 0.12, Big Bedroom targets 0.14. Living Room branch added 2026-09-23 -
-    joins the Yamaha RX-A2A receiver via its Music Assistant player entity
-    (media_player.rx_a2a_733ceb, not the native yamaha_musiccast entity) on living
-    room motion, targeting 0.25 (the receiver''s own observed volume level, used
-    as a sane ceiling rather than an arbitrary guess). Renamed from "...Bedroom Speakers..."
-    since it now covers more than bedrooms.'
+    joins the Yamaha RX-A2A receiver via its Music Assistant player entity (media_player.rx_a2a_733ceb,
+    not the native yamaha_musiccast entity) on living room motion, targeting 0.25
+    (the receiver''s own observed volume level, used as a sane ceiling rather than
+    an arbitrary guess). Renamed from "...Bedroom Speakers..." since it now covers
+    more than bedrooms.'
   triggers:
   - trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
@@ -9409,7 +9411,8 @@
       conditions:
       - alias: Room motion, or session just started with the room already occupied
         condition: template
-        value_template: "{{ trigger.id == 'bedroom_2_motion' or (trigger.id == 'session_start' and is_state('binary_sensor.bedroom_2_sensor_group', 'on')) }}"
+        value_template: '{{ trigger.id == ''bedroom_2_motion'' or (trigger.id == ''session_start''
+          and is_state(''binary_sensor.bedroom_2_sensor_group'', ''on'')) }}'
       - alias: Skip while Bedroom 2 is asleep
         condition: state
         entity_id: input_boolean.bedroom2_asleep
@@ -9461,7 +9464,9 @@
       conditions:
       - alias: Room motion, or session just started with the room already occupied
         condition: template
-        value_template: "{{ trigger.id == 'big_bedroom_motion' or (trigger.id == 'session_start' and is_state('binary_sensor.big_bedroom_sensor_group', 'on')) }}"
+        value_template: '{{ trigger.id == ''big_bedroom_motion'' or (trigger.id ==
+          ''session_start'' and is_state(''binary_sensor.big_bedroom_sensor_group'',
+          ''on'')) }}'
       - alias: Skip while Big Bedroom is asleep
         condition: state
         entity_id: input_boolean.big_bedroom_asleep
@@ -9511,7 +9516,9 @@
       conditions:
       - alias: Room motion, or session just started with the room already occupied
         condition: template
-        value_template: "{{ trigger.id == 'living_room_motion' or (trigger.id == 'session_start' and is_state('binary_sensor.living_room_sensor_group', 'on')) }}"
+        value_template: '{{ trigger.id == ''living_room_motion'' or (trigger.id ==
+          ''session_start'' and is_state(''binary_sensor.living_room_sensor_group'',
+          ''on'')) }}'
       - alias: Skip if the receiver is already in the kitchen group - motion re-triggers
           constantly while the room is occupied, and without this the whole volume-drop/join/ramp
           sequence re-ran on every retrigger, causing the exact audible cutouts this
@@ -9551,8 +9558,8 @@
             target:
               entity_id: media_player.rx_a2a_733ceb
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((0.42 - 0.05) / 5)),\n
-                \   0.42] | min | round(3) }}"
+              volume_level: "{{ [0.05 + (repeat.index * ((0.42 - 0.05) / 5)),\n    0.42]
+                | min | round(3) }}"
   mode: queued
   max: 6
 - id: '1777520160440'
@@ -10379,8 +10386,8 @@
         - delay:
             seconds: '{{ [180 - (now() - states.counter.good_morning_announcements.last_changed).total_seconds(),
               0] | max | round(0) | int }}'
-        - alias: Re-check after the wait - the routine may have been cancelled or the
-            room emptied while we held off
+        - alias: Re-check after the wait - the routine may have been cancelled or
+            the room emptied while we held off
           condition: template
           value_template: '{% set s = states.binary_sensor.big_bedroom_sensor_group
             %} {{ is_state(''input_boolean.good_morning_active'', ''on'') and s is
@@ -11221,14 +11228,13 @@
 - id: '1749150000000'
   alias: 'Living Room: Turn off TV when PS5 and Apple TV both off'
   description: When PS5 turns off and no Apple TV is playing, announce and turn off
-    the TV after 30 seconds. Fixed 2026-09-23 - despite the name, the "Apple TV"
-    check never looked at Apple TV's own state (media_player.living_room, the native
-    apple_tv entity) - it only checked whether the Jellyfin app was playing, which
-    is a different thing. Switching from PS5 straight to Apple TV (Netflix, YouTube,
-    AirPlay, anything not Jellyfin) tripped the "no Apple TV" condition and killed
-    the TV out from under you. Added a real check on media_player.living_room's
-    own state (disabled 2026-09-23 to stop that until fixed, re-enabled now with
-    the fix).
+    the TV after 30 seconds. Fixed 2026-09-23 - despite the name, the "Apple TV" check
+    never looked at Apple TV's own state (media_player.living_room, the native apple_tv
+    entity) - it only checked whether the Jellyfin app was playing, which is a different
+    thing. Switching from PS5 straight to Apple TV (Netflix, YouTube, AirPlay, anything
+    not Jellyfin) tripped the "no Apple TV" condition and killed the TV out from under
+    you. Added a real check on media_player.living_room's own state (disabled 2026-09-23
+    to stop that until fixed, re-enabled now with the fix).
   triggers:
   - trigger: state
     entity_id: binary_sensor.ps5_living_room
@@ -11381,13 +11387,13 @@
       entity_id: input_boolean.office_pc_wake
   mode: single
 - id: '1790100000003'
-  alias: 'Presence Sensor Stuck-On Watchdog (Big Bedroom, Dining Room)'
-  description: 'Added 2026-09-24. Companion to ''Presence Sensor Stuck-On Watchdog
-    (Kitchen, Bedroom 2, Living Room)'' - same 30-min check and full ESP reboot with
-    a phone notification, for the two radar groups it does not cover. Replaces the
-    earlier Big Bedroom-only watchdog. Big Bedroom skips while the asleep flag is on
-    (legitimate long occupancy). A radar-only restart was unreliable (2026-09-23 it
-    only moved the ghost to another zone), hence the full reboot.'
+  alias: Presence Sensor Stuck-On Watchdog (Big Bedroom, Dining Room)
+  description: Added 2026-09-24. Companion to 'Presence Sensor Stuck-On Watchdog (Kitchen,
+    Bedroom 2, Living Room)' - same 30-min check and full ESP reboot with a phone
+    notification, for the two radar groups it does not cover. Replaces the earlier
+    Big Bedroom-only watchdog. Big Bedroom skips while the asleep flag is on (legitimate
+    long occupancy). A radar-only restart was unreliable (2026-09-23 it only moved
+    the ghost to another zone), hence the full reboot.
   triggers:
   - trigger: time_pattern
     minutes: /30
@@ -11412,15 +11418,13 @@
       for_each: '{{ watch }}'
       sequence:
       - variables:
-          stuck: >-
-            {% set ns = namespace(l=[]) %}{% for e in repeat.item.sensors %}{% set
-            st = states[e] %}{% if st is not none and st.state == 'on' and (now() -
-            st.last_changed).total_seconds() >= 10800 %}{% set ns.l = ns.l + [e] %}{%
-            endif %}{% endfor %}{{ ns.l }}
-          skipped: >-
-            {% set ns = namespace(v=false) %}{% for e in repeat.item.skip %}{% if is_state(e,
-            'on') or is_state(e, 'playing') %}{% set ns.v = true %}{% endif %}{% endfor
-            %}{{ ns.v }}
+          stuck: '{% set ns = namespace(l=[]) %}{% for e in repeat.item.sensors %}{%
+            set st = states[e] %}{% if st is not none and st.state == ''on'' and (now()
+            - st.last_changed).total_seconds() >= 10800 %}{% set ns.l = ns.l + [e]
+            %}{% endif %}{% endfor %}{{ ns.l }}'
+          skipped: '{% set ns = namespace(v=false) %}{% for e in repeat.item.skip
+            %}{% if is_state(e, ''on'') or is_state(e, ''playing'') %}{% set ns.v
+            = true %}{% endif %}{% endfor %}{{ ns.v }}'
       - alias: Sensor stuck on 3+ hours and not a legitimate long occupancy
         if:
         - condition: template
@@ -11641,12 +11645,12 @@
 - id: '1779800000001'
   alias: 'Welcome Home: Auto-Expire After 30 Minutes'
   description: 'Updated 2026-09-24. Soft cap at 30 minutes: ends the session (fade
-    every speaker in the kitchen group to 0 over 3 minutes, stop, unjoin, restore volumes,
-    clear the flag) ONLY if no tracked room (kitchen, Big Bedroom, Bedroom 2, bathroom,
-    living room) shows presence - someone sitting in the living room keeps listening.
-    Hard cap at 60 minutes: ends it regardless of presence. Between them the ''Nobody
-    Present Anywhere 10 Min'' automation ends the session once every room has been
-    empty for 10 minutes. The flag stays on during the fade so the deactivation/unjoin
+    every speaker in the kitchen group to 0 over 3 minutes, stop, unjoin, restore
+    volumes, clear the flag) ONLY if no tracked room (kitchen, Big Bedroom, Bedroom
+    2, bathroom, living room) shows presence - someone sitting in the living room
+    keeps listening. Hard cap at 60 minutes: ends it regardless of presence. Between
+    them the ''Nobody Present Anywhere 10 Min'' automation ends the session once every
+    room has been empty for 10 minutes. The flag stays on during the fade so the deactivation/unjoin
     automations don''t cut it short; if another automation ends the session mid-fade
     (nobody present, manual pause), the fade aborts and volumes are still restored.
     Sensors that get stuck ON are reset by ''Presence Sensor Stuck-On Watchdog''.
@@ -11667,9 +11671,13 @@
       minutes: 60
     id: hard
   conditions:
-  - alias: Hard cap always runs; the soft cap only runs when every tracked room is empty
+  - alias: Hard cap always runs; the soft cap only runs when every tracked room is
+      empty
     condition: template
-    value_template: "{{ trigger.id == 'hard' or not (\n  is_state('binary_sensor.kitchen_sensor_group','on')\n  or is_state('binary_sensor.big_bedroom_sensor_group','on')\n  or is_state('binary_sensor.bedroom_2_sensor_group','on')\n  or is_state('binary_sensor.bathroom_motion','on')\n  or is_state('binary_sensor.living_room_sensor_group','on')) }}"
+    value_template: "{{ trigger.id == 'hard' or not (\n  is_state('binary_sensor.kitchen_sensor_group','on')\n
+      \ or is_state('binary_sensor.big_bedroom_sensor_group','on')\n  or is_state('binary_sensor.bedroom_2_sensor_group','on')\n
+      \ or is_state('binary_sensor.bathroom_motion','on')\n  or is_state('binary_sensor.living_room_sensor_group','on'))
+      }}"
   actions:
   - alias: Capture every speaker in the kitchen group and its current volume
     variables:
@@ -11757,10 +11765,10 @@
     2026-09-23 - it has no per-room "unjoin after N min idle" automation of its own
     yet, so this catch-all is its only cleanup path. Also 2026-09-23 - unlike the
     Sonos satellites, unjoining the receiver does NOT stop it; observed it resume
-    playing solo (unsynced) seconds after being unjoined. Added an explicit stop
-    (via the Music Assistant entity, which can stop but not power off) followed by
-    a real power-off (via the native yamaha_musiccast entity, which can't join/unjoin
-    groups but can turn_off) so it goes fully silent instead of coasting on its own.
+    playing solo (unsynced) seconds after being unjoined. Added an explicit stop (via
+    the Music Assistant entity, which can stop but not power off) followed by a real
+    power-off (via the native yamaha_musiccast entity, which can't join/unjoin groups
+    but can turn_off) so it goes fully silent instead of coasting on its own.
   triggers:
   - trigger: state
     entity_id: input_boolean.welcome_home_active
@@ -11768,9 +11776,9 @@
   conditions: []
   actions:
   - alias: Stop the shared stream at its leader FIRST (added 2026-09-24) - with AirPlay
-      grouping, unjoining the kitchen leader while members remain hands leadership to
-      the receiver and the music briefly resumes on the leftover group; stopping first
-      ends the whole session cleanly, then the unjoins just tidy up
+      grouping, unjoining the kitchen leader while members remain hands leadership
+      to the receiver and the music briefly resumes on the leftover group; stopping
+      first ends the whole session cleanly, then the unjoins just tidy up
     continue_on_error: true
     action: media_player.media_stop
     target:
@@ -12386,8 +12394,8 @@
     100% (4000K). Smart Motion, TV Mode, Unoccupied Shutoff and the global sleep/morning
     AL resets skip the living room while input_boolean.living_room_manual_override
     is on. Ends on: living room empty 15 min (full shutoff: TV, fan, lights), a short
-    press of On (handled in Smart Motion), or a short press of Off (lights only,
-    bridge turns them off natively). Holding Off also shuts off TV and fan.'
+    press of On (handled in Smart Motion), or a short press of Off (lights only, bridge
+    turns them off natively). Holding Off also shuts off TV and fan.'
   triggers:
   - device_id: 046bda673f9c3613042de9612024694e
     domain: hue
@@ -13049,15 +13057,15 @@
   mode: restart
 - id: '1785000000001'
   alias: 'Kitchen: Join Living Room Receiver Stream on Presence'
-  description: 'Added 2026-09-24. Independent of Welcome Home, 8 AM - 10 PM daily. While
-    the Living Room receiver (media_player.rx_a2a_733ceb, via Music Assistant) is playing,
-    kitchen presence joins the kitchen Sonos (media_player.kitchen_2) into the receiver''s
-    group so both play together, with the receiver as leader. Kitchen ramps up from
-    0.05 to 0.15 over 20 seconds. Kitchen is unjoined after 10 minutes with no kitchen
-    presence. Skips if kitchen is already playing something itself (never hijack it) or is
-    already in the receiver group (presence re-triggers constantly). Receiver leading
-    a fresh AirPlay join avoids the native-to-AirPlay switch mid-play that collapsed the
-    kitchen group at 8:53 AM on 2026-09-24.'
+  description: Added 2026-09-24. Independent of Welcome Home, 8 AM - 10 PM daily.
+    While the Living Room receiver (media_player.rx_a2a_733ceb, via Music Assistant)
+    is playing, kitchen presence joins the kitchen Sonos (media_player.kitchen_2)
+    into the receiver's group so both play together, with the receiver as leader.
+    Kitchen ramps up from 0.05 to 0.15 over 20 seconds. Kitchen is unjoined after
+    10 minutes with no kitchen presence. Skips if kitchen is already playing something
+    itself (never hijack it) or is already in the receiver group (presence re-triggers
+    constantly). Receiver leading a fresh AirPlay join avoids the native-to-AirPlay
+    switch mid-play that collapsed the kitchen group at 8:53 AM on 2026-09-24.
   triggers:
   - trigger: state
     entity_id: binary_sensor.kitchen_sensor_group
@@ -13139,14 +13147,14 @@
   mode: queued
   max: 3
 - id: '1790100000002'
-  alias: 'Presence Sensor Stuck-On Watchdog (Kitchen, Bedroom 2, Living Room)'
-  description: 'Added 2026-09-24. Checks every 30 min. If a radar presence sensor has
-    been continuously ON for 3+ hours it is treated as stuck (phantom still-target)
+  alias: Presence Sensor Stuck-On Watchdog (Kitchen, Bedroom 2, Living Room)
+  description: 'Added 2026-09-24. Checks every 30 min. If a radar presence sensor
+    has been continuously ON for 3+ hours it is treated as stuck (phantom still-target)
     and its ESP is fully rebooted, with a phone notification; if it is still stuck
     30 min later it retries. Presence that never clears keeps music, lights and fans
     running, so this pairs with the Welcome Home 60-minute hard cap. Same approach
-    as ''Big Bedroom: Presence Sensor Stuck-On Watchdog'' (a full ESP reboot, not just
-    a radar restart). Skips legitimate long occupancy: Bedroom 2 while occupied/asleep,
+    as ''Big Bedroom: Presence Sensor Stuck-On Watchdog'' (a full ESP reboot, not
+    just a radar restart). Skips legitimate long occupancy: Bedroom 2 while occupied/asleep,
     Living Room while the TV or Apple TV is playing. Bathroom (Hue motion) has no
     reset button so it is not covered.'
   triggers:
@@ -13190,15 +13198,13 @@
       for_each: '{{ watch }}'
       sequence:
       - variables:
-          stuck: >-
-            {% set ns = namespace(l=[]) %}{% for e in repeat.item.sensors %}{% set
-            st = states[e] %}{% if st is not none and st.state == 'on' and (now() -
-            st.last_changed).total_seconds() >= 10800 %}{% set ns.l = ns.l + [e] %}{%
-            endif %}{% endfor %}{{ ns.l }}
-          skipped: >-
-            {% set ns = namespace(v=false) %}{% for e in repeat.item.skip %}{% if is_state(e,
-            'on') or is_state(e, 'playing') %}{% set ns.v = true %}{% endif %}{% endfor
-            %}{{ ns.v }}
+          stuck: '{% set ns = namespace(l=[]) %}{% for e in repeat.item.sensors %}{%
+            set st = states[e] %}{% if st is not none and st.state == ''on'' and (now()
+            - st.last_changed).total_seconds() >= 10800 %}{% set ns.l = ns.l + [e]
+            %}{% endif %}{% endfor %}{{ ns.l }}'
+          skipped: '{% set ns = namespace(v=false) %}{% for e in repeat.item.skip
+            %}{% if is_state(e, ''on'') or is_state(e, ''playing'') %}{% set ns.v
+            = true %}{% endif %}{% endfor %}{{ ns.v }}'
       - alias: Sensor stuck on 3+ hours and not a legitimate long occupancy
         if:
         - condition: template
