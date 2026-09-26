@@ -7613,7 +7613,9 @@
       fired because the group was already off, so lights stayed on 3+ hours); the
       condition on the stopped branch re-checks the group is off
     trigger: state
-    entity_id: binary_sensor.bedroom2_sensor_apollo_radar_moving_target
+    entity_id:
+    - binary_sensor.bedroom2_sensor_apollo_radar_moving_target
+    - binary_sensor.bedroom2_office_bedroom2_door_presence
     to:
     - 'off'
     for:
