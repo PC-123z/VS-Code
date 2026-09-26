@@ -7608,6 +7608,17 @@
     for:
       minutes: 20
     id: stopped
+  - alias: Radar blip that never flipped the sensor group on (2026-09-26 - a 2s
+      moving-target blip turned the lights on and the group-off trigger above never
+      fired because the group was already off, so lights stayed on 3+ hours); the
+      condition on the stopped branch re-checks the group is off
+    trigger: state
+    entity_id: binary_sensor.bedroom2_sensor_apollo_radar_moving_target
+    to:
+    - 'off'
+    for:
+      minutes: 20
+    id: stopped
   - trigger: state
     entity_id: switch.adaptive_lighting_sleep_mode_office
     to: 'on'
@@ -7903,6 +7914,10 @@
     - conditions:
       - condition: trigger
         id: stopped
+      - alias: Only when the room is really empty (needed for the radar-blip trigger)
+        condition: state
+        entity_id: binary_sensor.bedroom_2_sensor_group
+        state: 'off'
       - alias: Skip if hard-off window (11:45 PM - 7 AM) - let Bedtime/Morning routines
           own this
         condition: time
