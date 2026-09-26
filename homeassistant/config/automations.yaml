@@ -9503,6 +9503,14 @@
         value_template: "{{ 'media_player.rx_a2a_733ceb' not in\n   (state_attr('media_player.kitchen_2',\n
           \  'group_members') | default([])) }}"
       sequence:
+      - alias: Remember the receiver's current volume as the ramp target (2026-09-26
+          - replaces the fixed 0.30); falls back to 0.30 if it was left at or below
+          the 0.05 start level
+        variables:
+          rx_target: "{{ [state_attr('media_player.rx_a2a_733ceb', 'volume_level')\n
+            \ | float(0.30), 0.30] | max if (state_attr('media_player.rx_a2a_733ceb',
+            'volume_level') | float(0) <= 0.05) else state_attr('media_player.rx_a2a_733ceb',
+            'volume_level') | float(0.30) }}"
       - action: media_player.volume_set
         target:
           entity_id: media_player.rx_a2a_733ceb
@@ -9523,19 +9531,19 @@
           entity_id: media_player.rx_a2a_733ceb
         data:
           volume_level: 0.05
-      - alias: Ramp receiver volume up to 0.30 over 20 seconds (raised from 0.25 on 2026-09-24
-          - user wanted one notch louder)
+      - alias: Ramp receiver volume up to its previous volume over 10 seconds (was
+          fixed 0.30 over 20s; sped up 2026-09-26)
         repeat:
           count: 5
           sequence:
           - delay:
-              seconds: 4
+              seconds: 2
           - action: media_player.volume_set
             target:
               entity_id: media_player.rx_a2a_733ceb
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((0.30 - 0.05) / 5)),\n    0.30]
-                | min | round(3) }}"
+              volume_level: "{{ [0.05 + (repeat.index * ((rx_target - 0.05) / 5)),\n
+                \   rx_target] | min | round(3) }}"
   mode: queued
   max: 6
 - id: '1777520160440'
