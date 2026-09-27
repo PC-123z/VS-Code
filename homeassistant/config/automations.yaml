@@ -84,7 +84,7 @@
     at: '19:00:00'
     weekday:
     - sat
-    enabled: true
+    enabled: false
   - trigger: time
     at: '16:58:00'
     enabled: false
@@ -9549,12 +9549,14 @@
           \  'group_members') | default([])) }}"
       sequence:
       - alias: 'RX-A4A (2026-09-27): the Music Assistant player is AirPlay-only and
-          does NOT control the master volume of the receiver, so all volume steps target
-          the native yamaha_musiccast entity. Power it on first so volume_set applies.'
+          does NOT control the master volume of the receiver, so all volume steps
+          target the native yamaha_musiccast entity. Power it on first so volume_set
+          applies.'
         action: media_player.turn_on
         target:
           entity_id: media_player.living_room_av
-      - wait_template: '{{ not is_state(''media_player.living_room_av'', ''off'') }}'
+      - wait_template: '{{ not is_state(''media_player.living_room_av'', ''off'')
+          }}'
         timeout:
           seconds: 15
         continue_on_timeout: true
@@ -9829,7 +9831,7 @@
     - fri
     enabled: false
   - trigger: time
-    at: 08:30:00
+    at: '10:30:00'
     weekday:
     - sat
     - sun
