@@ -5916,6 +5916,57 @@
         after: '21:15:00'
         before: 06:00:00
       sequence:
+      - alias: Courtesy night light while presence is unconfirmed - immediate wayfinding
+          light so a bathroom trip isn't stumbled through in the dark, but nothing
+          else (occupied, fan, full bedtime lighting) commits until real presence
+          is confirmed
+        action: light.turn_on
+        target:
+          entity_id:
+          - light.ribbon
+          - light.fluttershy
+        data:
+          rgb_color:
+          - 255
+          - 30
+          - 0
+          brightness_pct: 5
+          transition: 3
+      - alias: Wait up to 90s for the main bedroom2 sensor (Apollo radar zone occupancy
+          - not just the door sensor or a brief edge on the raw moving-target) to
+          confirm real presence in the room, not a passing walk-by
+        wait_for_trigger:
+        - trigger: state
+          entity_id:
+          - binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy
+          - binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy
+          - binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
+          to: 'on'
+        timeout:
+          seconds: 90
+        continue_on_timeout: true
+      - alias: Not confirmed within 90s - fade the courtesy light back off and abandon
+          this run without marking the room occupied
+        if:
+        - condition: template
+          value_template: '{{ wait.trigger is none }}'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id:
+            - light.ribbon
+            - light.fluttershy
+          data:
+            transition: 5
+        - stop: Presence not confirmed within 90 seconds - likely a walk-by, not
+            real occupancy
+      - alias: Confirmed - drop the courtesy light so the full bedtime lighting below
+          (or no lights, for a late confirmed start) takes over cleanly
+        action: light.turn_off
+        target:
+          entity_id:
+          - light.ribbon
+          - light.fluttershy
       - alias: Set bedroom 2 occupied (fan and music start via occupied_set branch)
         action: input_boolean.turn_on
         target:
