@@ -9083,10 +9083,10 @@
                 entity_id: media_player.kitchen_2
               data:
                 shuffle: true
-          - alias: Play afternoon music (12 PM - 5 PM)
+          - alias: Play afternoon music (12 PM - 3 PM)
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 12 and current_hour|int < 17
+              value_template: '{{ current_hour|int >= 12 and current_hour|int < 15
                 }}'
             then:
             - continue_on_error: true
@@ -9102,10 +9102,12 @@
                 entity_id: media_player.kitchen_2
               data:
                 shuffle: true
-          - alias: Play evening music (5 PM - 8 PM)
+          - alias: Play Dean Fraser playlist (3 PM - 8 PM) - user preference 2026-09-27,
+              replaces the old 5-8 PM album (ytmusic://album/MPREb_di7Fj3Fiafj) and
+              the 3-5 PM part of the afternoon album
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 17 and current_hour|int < 20
+              value_template: '{{ current_hour|int >= 15 and current_hour|int < 20
                 }}'
             then:
             - continue_on_error: true
@@ -9113,8 +9115,8 @@
               target:
                 entity_id: media_player.kitchen_2
               data:
-                media_id: ytmusic://album/MPREb_di7Fj3Fiafj
-                media_type: album
+                media_id: spotify--LXCMhnPg://playlist/048KIYNi4J3nTfC1w2w6md
+                media_type: playlist
             - continue_on_error: true
               action: media_player.shuffle_set
               target:
