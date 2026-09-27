@@ -9365,7 +9365,7 @@
     Also switched from ramping to kitchen''s current volume to fixed per-room targets,
     and shortened the ramp to 20 seconds total (5 steps of 4s) - office/bedroom_2
     targets 0.12, Big Bedroom targets 0.14. Living Room branch added 2026-09-23 -
-    joins the Yamaha RX-A2A receiver via its Music Assistant player entity (media_player.rx_a2a_733ceb,
+    joins the Yamaha RX-A4A receiver via its Music Assistant player entity (media_player.living_room_a4a,
     not the native yamaha_musiccast entity) on living room motion, targeting 0.25
     (the receiver''s own observed volume level, used as a sane ceiling rather than
     an arbitrary guess). Renamed from "...Bedroom Speakers..." since it now covers
@@ -9524,12 +9524,12 @@
           sequence re-ran on every retrigger, causing the exact audible cutouts this
           was meant to prevent
         condition: template
-        value_template: "{{ 'media_player.rx_a2a_733ceb' not in\n   (state_attr('media_player.kitchen_2',\n
+        value_template: "{{ 'media_player.living_room_a4a' not in\n   (state_attr('media_player.kitchen_2',\n
           \  'group_members') | default([])) }}"
       sequence:
       - action: media_player.volume_set
         target:
-          entity_id: media_player.rx_a2a_733ceb
+          entity_id: media_player.living_room_a4a
         data:
           volume_level: 0.05
       - action: media_player.join
@@ -9537,14 +9537,14 @@
           entity_id: media_player.kitchen_2
         data:
           group_members:
-          - media_player.rx_a2a_733ceb
+          - media_player.living_room_a4a
       - alias: Re-apply the low volume after joining - joining a group can silently
           restore a remembered volume for this player, overwriting the volume_set
           that ran right before the join (same issue "Bathroom Speaker Join on Motion
           v2" already worked around with its own "unmute again after join" step)
         action: media_player.volume_set
         target:
-          entity_id: media_player.rx_a2a_733ceb
+          entity_id: media_player.living_room_a4a
         data:
           volume_level: 0.05
       - alias: Ramp receiver volume up to a fixed 0.42 over 10 seconds (was 0.30 over
@@ -9556,7 +9556,7 @@
               seconds: 2
           - action: media_player.volume_set
             target:
-              entity_id: media_player.rx_a2a_733ceb
+              entity_id: media_player.living_room_a4a
             data:
               volume_level: "{{ [0.05 + (repeat.index * ((0.42 - 0.05) / 5)),\n    0.42]
                 | min | round(3) }}"
@@ -11761,7 +11761,7 @@
     directly (30-min auto-expire, music-paused kill switch, Big Bedroom sleep cancel)
     previously left whatever was still joined - joined, with nothing left watching
     to split it. Fires on every deactivation path uniformly and covers the _2 entities
-    the older per-room unjoins miss. Added the Living Room receiver (media_player.rx_a2a_733ceb)
+    the older per-room unjoins miss. Added the Living Room receiver (media_player.living_room_a4a)
     2026-09-23 - it has no per-room "unjoin after N min idle" automation of its own
     yet, so this catch-all is its only cleanup path. Also 2026-09-23 - unlike the
     Sonos satellites, unjoining the receiver does NOT stop it; observed it resume
@@ -11796,14 +11796,14 @@
       - media_player.office_2
       - media_player.bathroom
       - media_player.bathroom_2
-      - media_player.rx_a2a_733ceb
+      - media_player.living_room_a4a
       - media_player.kitchen_2
     data: {}
   - alias: Stop the receiver's stream - unjoin alone leaves it playing solo
     continue_on_error: true
     action: media_player.media_stop
     target:
-      entity_id: media_player.rx_a2a_733ceb
+      entity_id: media_player.living_room_a4a
   - alias: Power off the receiver itself (native entity - the MA entity can't turn_off)
     continue_on_error: true
     action: media_player.turn_off
@@ -13058,7 +13058,7 @@
 - id: '1785000000001'
   alias: 'Kitchen: Join Living Room Receiver Stream on Presence'
   description: Added 2026-09-24. Independent of Welcome Home, 8 AM - 10 PM daily.
-    While the Living Room receiver (media_player.rx_a2a_733ceb, via Music Assistant)
+    While the Living Room receiver (media_player.living_room_a4a, via Music Assistant)
     is playing, kitchen presence joins the kitchen Sonos (media_player.kitchen_2)
     into the receiver's group so both play together, with the receiver as leader.
     Kitchen ramps up from 0.05 to 0.15 over 20 seconds. Kitchen is unjoined after
@@ -13088,7 +13088,7 @@
         after: 08:00:00
         before: '22:00:00'
       - condition: state
-        entity_id: media_player.rx_a2a_733ceb
+        entity_id: media_player.living_room_a4a
         state: playing
       - alias: Never hijack a kitchen that is playing its own stream
         condition: not
@@ -13098,7 +13098,7 @@
           state: playing
       - alias: Skip if kitchen is already in the receiver group
         condition: template
-        value_template: '{{ ''media_player.kitchen_2'' not in (state_attr(''media_player.rx_a2a_733ceb'',
+        value_template: '{{ ''media_player.kitchen_2'' not in (state_attr(''media_player.living_room_a4a'',
           ''group_members'') | default([], true)) }}'
       sequence:
       - action: media_player.volume_set
@@ -13108,7 +13108,7 @@
           volume_level: 0.05
       - action: media_player.join
         target:
-          entity_id: media_player.rx_a2a_733ceb
+          entity_id: media_player.living_room_a4a
         data:
           group_members:
           - media_player.kitchen_2
@@ -13136,7 +13136,7 @@
       - condition: trigger
         id: kitchen_empty
       - condition: template
-        value_template: '{{ ''media_player.kitchen_2'' in (state_attr(''media_player.rx_a2a_733ceb'',
+        value_template: '{{ ''media_player.kitchen_2'' in (state_attr(''media_player.living_room_a4a'',
           ''group_members'') | default([], true)) }}'
       sequence:
       - continue_on_error: true
