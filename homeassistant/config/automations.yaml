@@ -8014,8 +8014,10 @@
           entity_id:
           - light.ribbon
           - light.fluttershy
+          - light.office
           - light.office_1
           - light.office_2
+          - light.hue_white_lamp_1
         data:
           transition: 30
   mode: restart
