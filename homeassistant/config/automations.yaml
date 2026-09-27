@@ -9555,8 +9555,9 @@
           entity_id: media_player.living_room_av
         data:
           volume_level: 0.05
-      - alias: Ramp receiver volume up to a fixed 0.42 over 10 seconds (was 0.30 over
-          20s; 0.42 = user's chosen volume, sped up 2026-09-26)
+      - alias: Ramp receiver volume up to a fixed 0.30 over 10 seconds (0.30 = 30%
+          in the MusicCast app, user's chosen max for the RX-A4A, set 2026-09-27;
+          the old RX-A2A used 0.42)
         repeat:
           count: 5
           sequence:
@@ -9566,7 +9567,7 @@
             target:
               entity_id: media_player.living_room_av
             data:
-              volume_level: "{{ [0.05 + (repeat.index * ((0.42 - 0.05) / 5)),\n    0.42]
+              volume_level: "{{ [0.05 + (repeat.index * ((0.30 - 0.05) / 5)),\n    0.30]
                 | min | round(3) }}"
   mode: queued
   max: 6
