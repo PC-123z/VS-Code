@@ -9527,9 +9527,19 @@
         value_template: "{{ 'media_player.living_room_a4a' not in\n   (state_attr('media_player.kitchen_2',\n
           \  'group_members') | default([])) }}"
       sequence:
+      - alias: 'RX-A4A (2026-09-27): the Music Assistant player is AirPlay-only and
+          does NOT control the master volume of the receiver, so all volume steps target
+          the native yamaha_musiccast entity. Power it on first so volume_set applies.'
+        action: media_player.turn_on
+        target:
+          entity_id: media_player.living_room_av
+      - wait_template: '{{ not is_state(''media_player.living_room_av'', ''off'') }}'
+        timeout:
+          seconds: 15
+        continue_on_timeout: true
       - action: media_player.volume_set
         target:
-          entity_id: media_player.living_room_a4a
+          entity_id: media_player.living_room_av
         data:
           volume_level: 0.05
       - action: media_player.join
@@ -9538,13 +9548,11 @@
         data:
           group_members:
           - media_player.living_room_a4a
-      - alias: Re-apply the low volume after joining - joining a group can silently
-          restore a remembered volume for this player, overwriting the volume_set
-          that ran right before the join (same issue "Bathroom Speaker Join on Motion
-          v2" already worked around with its own "unmute again after join" step)
+      - alias: Re-apply the low volume after joining - joining a group (or the receiver
+          switching to AirPlay) can restore a remembered volume
         action: media_player.volume_set
         target:
-          entity_id: media_player.living_room_a4a
+          entity_id: media_player.living_room_av
         data:
           volume_level: 0.05
       - alias: Ramp receiver volume up to a fixed 0.42 over 10 seconds (was 0.30 over
@@ -9556,7 +9564,7 @@
               seconds: 2
           - action: media_player.volume_set
             target:
-              entity_id: media_player.living_room_a4a
+              entity_id: media_player.living_room_av
             data:
               volume_level: "{{ [0.05 + (repeat.index * ((0.42 - 0.05) / 5)),\n    0.42]
                 | min | round(3) }}"
