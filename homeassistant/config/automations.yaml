@@ -8067,11 +8067,30 @@
   mode: single
 - id: '1777125101727'
   alias: Volvo XC60 - Turn Off Light When Charging
-  description: Turn off the bedroom Apollo light when the XC60 is plugged in.
+  description: 'Turn off the bedroom Apollo light when the XC60 is plugged in. Also
+    re-checks on HA start and every 15 min while connected - fixed 2026-09-27: the
+    sensor was already ''connected'' across a HA restart, so the on-transition trigger
+    never fired and the light stayed red for an hour after the car was actually charging.'
   triggers:
   - trigger: state
     entity_id: sensor.volvo_xc60_charging_connection_status
     to: connected
+    id: transition
+  - trigger: homeassistant
+    event: start
+    id: startup
+  - trigger: time_pattern
+    minutes: /15
+    id: poll
+  conditions:
+  - condition: or
+    conditions:
+    - condition: trigger
+      id: transition
+    - alias: On startup/poll, only act if the car is actually connected right now
+      condition: state
+      entity_id: sensor.volvo_xc60_charging_connection_status
+      state: connected
   actions:
   - alias: Turn off bedroom Apollo light
     action: light.turn_off
