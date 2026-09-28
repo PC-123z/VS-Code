@@ -10342,7 +10342,14 @@
                       in gm_heal_browse) else [] %}{% set p = states(''input_number.good_morning_playlist_position'')
                       | int(0) %}{% if t | length > 0 %}{{ t[p] if p < (t | length)
                       else t[0] }}{% endif %}'
-              - action: media_player.volume_set
+              - alias: Hold the volume - continue_on_error added 2026-09-28, a transient
+                  Sonos network read-timeout on this call threw an unhandled exception
+                  that killed the entire occupancy-driven music loop for the rest
+                  of the session (07:29:47 that morning), after which nothing was
+                  left babysitting the queue and Music Assistant's own autoplay took
+                  over silently with an unrelated track
+                continue_on_error: true
+                action: media_player.volume_set
                 target:
                   entity_id: media_player.bedroom
                 data:
@@ -10366,7 +10373,8 @@
                 - condition: template
                   value_template: '{{ wait.completed == true }}'
                 then:
-                - action: media_player.volume_set
+                - continue_on_error: true
+                  action: media_player.volume_set
                   target:
                     entity_id: media_player.bedroom
                   data:
@@ -10376,7 +10384,8 @@
                   repeat:
                     count: 8
                     sequence:
-                    - action: media_player.volume_set
+                    - continue_on_error: true
+                      action: media_player.volume_set
                       target:
                         entity_id: media_player.bedroom
                       data:
@@ -10384,7 +10393,11 @@
                           max | round(3) }}'
                     - delay:
                         seconds: 15
-                - action: media_player.media_stop
+                - alias: A Sonos network hiccup here must not skip turning off good_morning_active
+                    below - added 2026-09-28 after a read-timeout on this exact loop
+                    killed the whole occupancy branch for the rest of a session
+                  continue_on_error: true
+                  action: media_player.media_stop
                   target:
                     entity_id: media_player.bedroom
                 - continue_on_error: true
