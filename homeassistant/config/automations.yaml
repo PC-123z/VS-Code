@@ -9607,6 +9607,12 @@
         condition: template
         value_template: "{{ 'media_player.living_room_a4a' not in\n   (state_attr('media_player.kitchen_2',\n
           \  'group_members') | default([])) }}"
+      - alias: Skip entirely while the living room TV is on - added 2026-09-27, welcome
+          home has no business touching the receiver's volume/join state while someone
+          is watching TV/a movie on it
+        condition: state
+        entity_id: binary_sensor.living_room_tv_on
+        state: 'off'
       - alias: Skip if this already ran once this Welcome Home session - added 2026-09-27,
           motion after leaving/returning the room (e.g. to watch a movie via Jellyfin/Apple
           TV on the receiver's HDMI input, so it's not in the kitchen group) was re-running
@@ -11902,16 +11908,25 @@
       - media_player.living_room_a4a
       - media_player.kitchen_2
     data: {}
-  - alias: Stop the receiver's stream - unjoin alone leaves it playing solo
-    continue_on_error: true
-    action: media_player.media_stop
-    target:
-      entity_id: media_player.living_room_a4a
-  - alias: Power off the receiver itself (native entity - the MA entity can't turn_off)
-    continue_on_error: true
-    action: media_player.turn_off
-    target:
-      entity_id: media_player.living_room_av
+  - alias: Stop and power off the receiver - skipped entirely while the living room
+      TV is on (added 2026-09-27; welcome home ending - e.g. the 10-min no-presence
+      auto-stop missing someone sitting still watching a movie - was killing the
+      receiver's power mid-movie)
+    if:
+    - condition: state
+      entity_id: binary_sensor.living_room_tv_on
+      state: 'off'
+    then:
+    - alias: Stop the receiver's stream - unjoin alone leaves it playing solo
+      continue_on_error: true
+      action: media_player.media_stop
+      target:
+        entity_id: media_player.living_room_a4a
+    - alias: Power off the receiver itself (native entity - the MA entity can't turn_off)
+      continue_on_error: true
+      action: media_player.turn_off
+      target:
+        entity_id: media_player.living_room_av
   mode: single
 - id: '1779800000002'
   alias: 'Welcome Home: Unjoin Satellite or Disable on Kitchen Stop'
