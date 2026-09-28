@@ -203,6 +203,22 @@ template:
           minutes: 3
         state: "{{ is_state('binary_sensor.kitchen_person_occupancy', 'on') }}"
 
+      - name: "Living Room TV On"
+        unique_id: living_room_tv_on
+        device_class: running
+        state: >
+          {{ (integration_entities('jellyfin') | select('match', '^media_player\.')
+             | select('in', area_entities('living_room')) | map('states')
+             | reject('eq', 'off') | list | count > 0)
+             or (states('sensor.jellyfin_tiny_living_room_state') not in
+                 ['off', 'unavailable', 'unknown'])
+             or (states('media_player.living_room_tv') not in
+                 ['off', 'unavailable', 'unknown'])
+             or (states('media_player.living_room_tv_3') not in
+                 ['off', 'unavailable', 'unknown'])
+             or (states('media_player.living_room') not in
+                 ['off', 'unavailable', 'unknown']) }}
+
 # Jellyfin Tiny (jellyfin-tiny.pc) doesn't fit the native jellyfin integration
 # (HA's config flow dedupes by a broken "unique id" that collides across separate
 # servers/accounts), so its playback state is pulled directly via the Sessions API.
