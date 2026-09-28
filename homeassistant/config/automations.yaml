@@ -10091,7 +10091,10 @@
           entity_id: media_player.bedroom_2
       - delay:
           seconds: 3
-      - action: media_player.volume_set
+      - alias: Start at low volume - continue_on_error added 2026-09-28, same Sonos
+          network-timeout failure mode confirmed elsewhere in this routine
+        continue_on_error: true
+        action: media_player.volume_set
         target:
           entity_id: media_player.bedroom
         data:
@@ -10222,7 +10225,8 @@
             sequence:
             - delay:
                 seconds: 18
-            - action: media_player.volume_set
+            - continue_on_error: true
+              action: media_player.volume_set
               target:
                 entity_id: media_player.bedroom
               data:
