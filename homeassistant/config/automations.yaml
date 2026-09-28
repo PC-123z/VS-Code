@@ -9472,11 +9472,16 @@
     entity_id: input_boolean.welcome_home_active
     state: 'on'
   actions:
-  - alias: On session start, wait for the kitchen stream to actually be playing first
+  - alias: On session start, wait for the kitchen stream to actually be playing first,
+      and reset the living room once-per-session latch so this run is allowed to
+      join again
     if:
     - condition: template
       value_template: '{{ trigger.id == ''session_start'' }}'
     then:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.welcome_home_living_room_joined
     - wait_template: '{{ is_state(''media_player.kitchen_2'', ''playing'') }}'
       timeout:
         seconds: 90
@@ -9602,7 +9607,18 @@
         condition: template
         value_template: "{{ 'media_player.living_room_a4a' not in\n   (state_attr('media_player.kitchen_2',\n
           \  'group_members') | default([])) }}"
+      - alias: Skip if this already ran once this Welcome Home session - added 2026-09-27,
+          motion after leaving/returning the room (e.g. to watch a movie via Jellyfin/Apple
+          TV on the receiver's HDMI input, so it's not in the kitchen group) was re-running
+          the join/volume-drop/ramp sequence and cutting into movie audio; only re-arms
+          on a fresh session start
+        condition: state
+        entity_id: input_boolean.welcome_home_living_room_joined
+        state: 'off'
       sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.welcome_home_living_room_joined
       - alias: 'RX-A4A (2026-09-27): the Music Assistant player is AirPlay-only and
           does NOT control the master volume of the receiver, so all volume steps
           target the native yamaha_musiccast entity. Power it on first so volume_set
