@@ -5958,8 +5958,8 @@
             - light.fluttershy
           data:
             transition: 5
-        - stop: Presence not confirmed within 90 seconds - likely a walk-by, not
-            real occupancy
+        - stop: Presence not confirmed within 90 seconds - likely a walk-by, not real
+            occupancy
       - alias: Confirmed - drop the courtesy light so the full bedtime lighting below
           (or no lights, for a late confirmed start) takes over cleanly
         action: light.turn_off
@@ -9473,8 +9473,8 @@
     state: 'on'
   actions:
   - alias: On session start, wait for the kitchen stream to actually be playing first,
-      and reset the living room once-per-session latch so this run is allowed to
-      join again
+      and reset the living room once-per-session latch so this run is allowed to join
+      again
     if:
     - condition: template
       value_template: '{{ trigger.id == ''session_start'' }}'
@@ -9897,7 +9897,7 @@
     - wed
     - thu
     - fri
-    enabled: true
+    enabled: false
   - trigger: time
     at: 07:15:00
     weekday:
@@ -9906,7 +9906,7 @@
     - wed
     - thu
     - fri
-    enabled: false
+    enabled: true
   - trigger: time
     at: '10:30:00'
     weekday:
@@ -11910,8 +11910,8 @@
     data: {}
   - alias: Stop and power off the receiver - skipped entirely while the living room
       TV is on (added 2026-09-27; welcome home ending - e.g. the 10-min no-presence
-      auto-stop missing someone sitting still watching a movie - was killing the
-      receiver's power mid-movie)
+      auto-stop missing someone sitting still watching a movie - was killing the receiver's
+      power mid-movie)
     if:
     - condition: state
       entity_id: binary_sensor.living_room_tv_on
