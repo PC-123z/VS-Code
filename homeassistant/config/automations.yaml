@@ -6949,10 +6949,10 @@
   mode: single
 - id: '1776382720394'
   alias: Bedroom 2 Occupancy Latch
-  description: Sets bedroom2_occupied once per night when the main Apollo radar
-    (not the door sensor - it picks up bathroom activity through the wall) detects
-    presence between 22:00 and midnight. Single-fire - won't retrigger if already
-    occupied. Cleared by Good Morning Routine and Daily Reset.
+  description: Sets bedroom2_occupied once per night when the main Apollo radar (not
+    the door sensor - it picks up bathroom activity through the wall) detects presence
+    between 22:00 and midnight. Single-fire - won't retrigger if already occupied.
+    Cleared by Good Morning Routine and Daily Reset.
   triggers:
   - trigger: state
     entity_id:
@@ -7975,22 +7975,22 @@
             data:
               transition: 2
       - alias: Door sensor picks up bathroom activity through the wall - if it fired
-          this and the main bedroom2 radar never confirms real presence within 5
-          minutes, treat it as a false trigger and revert everything Smart Motion
-          & Presence controls back off, not just the Nanoleafs
+          this and the main bedroom2 radar never confirms real presence within 5 minutes,
+          treat it as a false trigger and revert everything Smart Motion & Presence
+          controls back off, not just the Nanoleafs
         if:
         - condition: template
-          value_template: "{{ trigger.entity_id == 'binary_sensor.bedroom2_office_bedroom2_door_presence'
-            }}"
+          value_template: '{{ trigger.entity_id == ''binary_sensor.bedroom2_office_bedroom2_door_presence''
+            }}'
         then:
         - delay:
             minutes: 5
         - if:
           - condition: template
-            value_template: "{{ not (is_state('binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy',
-              'on') or is_state('binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy',
-              'on') or is_state('binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy',
-              'on')) }}"
+            value_template: '{{ not (is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy'',
+              ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy'',
+              ''on'') or is_state(''binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy'',
+              ''on'')) }}'
           then:
           - action: light.turn_off
             target:
@@ -9934,7 +9934,7 @@
     - fri
     enabled: false
   - trigger: time
-    at: 07:15:00
+    at: 07:40:00
     weekday:
     - mon
     - tue
