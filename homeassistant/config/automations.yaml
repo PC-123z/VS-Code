@@ -7976,7 +7976,8 @@
               transition: 2
       - alias: Door sensor picks up bathroom activity through the wall - if it fired
           this and the main bedroom2 radar never confirms real presence within 5
-          minutes, treat it as a false trigger and revert the Nanoleafs back off
+          minutes, treat it as a false trigger and revert everything Smart Motion
+          & Presence controls back off, not just the Nanoleafs
         if:
         - condition: template
           value_template: "{{ trigger.entity_id == 'binary_sensor.bedroom2_office_bedroom2_door_presence'
@@ -7996,6 +7997,10 @@
               entity_id:
               - light.ribbon
               - light.fluttershy
+              - light.office
+              - light.office_1
+              - light.office_2
+              - light.hue_white_lamp_1
             data:
               transition: 2
     - conditions:
