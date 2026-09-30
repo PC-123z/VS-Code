@@ -5963,27 +5963,26 @@
           run) instead of waiting on a signal we know can't arrive
         if:
         - condition: template
-          value_template: "{{ ['binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy',\n\
-            \    'binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy',\n\
-            \    'binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy']\n\
-            \    | map('states') | select('in', ['unavailable', 'unknown']) | list\
-            \ | count == 3 }}"
+          value_template: "{{ ['binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy',\n
+            \   'binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy',\n    'binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy']\n
+            \   | map('states') | select('in', ['unavailable', 'unknown']) | list
+            | count == 3 }}"
         then:
         - action: notify.mobile_app_pc_iphone
           continue_on_error: true
           data:
             title: Bedroom 2 radar unavailable
             message: Bedtime Routine couldn't confirm presence - all three zone occupancy
-              sensors are unavailable. Rebooting the Apollo ESP and falling back
-              to trusting the motion trigger instead of waiting on it.
+              sensors are unavailable. Rebooting the Apollo ESP and falling back to
+              trusting the motion trigger instead of waiting on it.
         - action: button.press
           continue_on_error: true
           target:
             entity_id: button.bedroom2_sensor_apollo_esp_reboot
         else:
         - alias: Wait up to 90s for the main bedroom2 sensor (Apollo radar zone occupancy
-            - not just the door sensor or a brief edge on the raw moving-target)
-            to confirm real presence in the room, not a passing walk-by
+            - not just the door sensor or a brief edge on the raw moving-target) to
+            confirm real presence in the room, not a passing walk-by
           wait_for_trigger:
           - trigger: state
             entity_id:
@@ -9991,7 +9990,7 @@
     - fri
     enabled: false
   - trigger: time
-    at: 07:40:00
+    at: 08:40:00
     weekday:
     - mon
     - tue
