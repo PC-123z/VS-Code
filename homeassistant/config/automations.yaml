@@ -12565,7 +12565,7 @@
     AL resets skip the living room while input_boolean.living_room_manual_override
     is on. Ends on: living room empty 15 min (full shutoff: TV, fan, lights), a short
     press of On (handled in Smart Motion), or a short press of Off (lights only, bridge
-    turns them off natively). Holding Off also shuts off TV and fan.'
+    turns them off natively). Holding Off also shuts off TV, AV receiver and fan.'
   triggers:
   - device_id: 046bda673f9c3613042de9612024694e
     domain: hue
@@ -12590,7 +12590,7 @@
     unique_id: main_room_button_4
     trigger: device
     id: hold_off
-    alias: Off button held - also shuts off TV and fan
+    alias: Off button held - also shuts off TV, AV receiver and fan
   - trigger: template
     id: empty
     alias: Override on and living room empty for 15 min (counts from override start
@@ -12662,6 +12662,11 @@
         continue_on_error: true
         target:
           entity_id: media_player.living_room_tv_2
+      - alias: Turn off AV receiver (native entity)
+        action: media_player.turn_off
+        continue_on_error: true
+        target:
+          entity_id: media_player.living_room_av
       - alias: Turn off fan
         action: fan.turn_off
         continue_on_error: true
