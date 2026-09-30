@@ -5713,6 +5713,7 @@
         - stop: Occupied set - occupied_set branch handles fan and music
       - alias: Fan on - stays on until Good Morning routine turns it off
         action: fan.turn_on
+        continue_on_error: true
         data:
           percentage: 50
         target:
@@ -5813,6 +5814,7 @@
       sequence:
       - alias: Fan on - stays on until Good Morning routine turns it off
         action: fan.turn_on
+        continue_on_error: true
         data:
           percentage: 50
         target:
@@ -5937,8 +5939,11 @@
       - alias: Courtesy night light while presence is unconfirmed - immediate wayfinding
           light so a bathroom trip isn't stumbled through in the dark, but nothing
           else (occupied, fan, full bedtime lighting) commits until real presence
-          is confirmed
+          is confirmed. continue_on_error - the Nanoleafs drop offline periodically
+          (see the stuck-on watchdog) and a failed call here must not abort the
+          run before the confirm-wait even starts
         action: light.turn_on
+        continue_on_error: true
         target:
           entity_id:
           - light.ribbon
@@ -5963,37 +5968,41 @@
         timeout:
           seconds: 90
         continue_on_timeout: true
-      - alias: Not confirmed within 90s - fade the courtesy light back off and abandon
-          this run without marking the room occupied
+      - alias: Not confirmed within 90s - release the claim first (so a light failure
+          below can never leave it stuck), then fade the courtesy light back off
+          and abandon this run without marking the room occupied
         if:
         - condition: template
           value_template: '{{ wait.trigger is none }}'
         then:
+        - alias: Release the claim so the next real motion can start a fresh confirm-wait
+          action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.bedroom2_bedtime_confirming
         - action: light.turn_off
+          continue_on_error: true
           target:
             entity_id:
             - light.ribbon
             - light.fluttershy
           data:
             transition: 5
-        - alias: Release the claim so the next real motion can start a fresh confirm-wait
-          action: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.bedroom2_bedtime_confirming
         - stop: Presence not confirmed within 90 seconds - likely a walk-by, not real
             occupancy
+      - alias: Release the claim - occupied is about to be set, so the "already occupied"
+          guard takes over from here. Done before the light call below so a Nanoleaf
+          failure can't leave the claim stuck or block occupied from being set
+        action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.bedroom2_bedtime_confirming
       - alias: Confirmed - drop the courtesy light so the full bedtime lighting below
           (or no lights, for a late confirmed start) takes over cleanly
         action: light.turn_off
+        continue_on_error: true
         target:
           entity_id:
           - light.ribbon
           - light.fluttershy
-      - alias: Release the claim - occupied is about to be set, so the "already occupied"
-          guard takes over from here
-        action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.bedroom2_bedtime_confirming
       - alias: Set bedroom 2 occupied (fan and music start via occupied_set branch)
         action: input_boolean.turn_on
         target:
