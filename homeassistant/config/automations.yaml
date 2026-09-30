@@ -13500,16 +13500,15 @@
     on. It should never be on for more than ~90 seconds (the confirm-wait's own timeout),
     but an automation reload or HA restart mid-wait aborts the run before it can release
     the flag, which would otherwise permanently block the Bedtime Routine's motion
-    path. Clears it if it's been on for 5+ minutes.
+    path. Fires exactly 3 minutes (2x the normal max) after it turns on, if it's
+    still on then.
   triggers:
-  - trigger: time_pattern
-    minutes: /5
-  conditions:
-  - condition: state
+  - trigger: state
     entity_id: input_boolean.bedroom2_bedtime_confirming
-    state: 'on'
+    to: 'on'
     for:
-      minutes: 5
+      minutes: 3
+  conditions: []
   actions:
   - action: input_boolean.turn_off
     target:
