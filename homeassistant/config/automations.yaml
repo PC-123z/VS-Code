@@ -3373,7 +3373,7 @@
     - 'off'
     for:
       hours: 0
-      minutes: 10
+      minutes: 5
       seconds: 0
     id: cleared
   - trigger: time
@@ -3542,7 +3542,7 @@
         condition: state
         entity_id: binary_sensor.dining_room_sensor_group
         state: 'off'
-      - alias: Dining empty 10 min and nothing playing - hand the room back to presence
+      - alias: Dining empty 5 min and nothing playing - hand the room back to presence
           lighting
         if:
         - condition: template
@@ -3561,13 +3561,13 @@
           label_id: dining_room_bottom
           entity_id: light.dining_room_bottom
         data:
-          transition: 15
+          transition: 300
       - action: light.turn_off
         target:
           label_id: dining_room_top
           entity_id: light.dining_room_top
         data:
-          transition: 15
+          transition: 300
       - action: switch.turn_off
         target:
           entity_id:
