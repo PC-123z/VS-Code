@@ -134,6 +134,10 @@ input_boolean:
     name: "Bedroom 2 Announcement Pending"
     icon: mdi:bullhorn
     initial: off
+  bedroom2_bedtime_confirming:
+    name: "Bedroom 2 Bedtime Confirming"
+    icon: mdi:motion-sensor
+    initial: off
   arrival_recent:
     name: "Arrival Recent (latch)"
     initial: off
