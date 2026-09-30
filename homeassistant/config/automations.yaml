@@ -5916,11 +5916,24 @@
         condition: state
         entity_id: input_boolean.bedroom2_occupied
         state: 'off'
+      - alias: Skip if another run is already confirming this same motion event -
+          the raw moving-target sensor flickers on/off repeatedly on a single entry
+          (2026-09-29 - 8+ flickers spawned 10 parallel confirm-waits since this
+          automation runs in parallel mode, crowding out the run that would have
+          actually set occupied), so only the first flicker should start a confirm-wait
+        condition: state
+        entity_id: input_boolean.bedroom2_bedtime_confirming
+        state: 'off'
       - alias: Bedtime Routine active window - 9:15pm to 6am
         condition: time
         after: '21:15:00'
         before: 06:00:00
       sequence:
+      - alias: Claim the confirm-wait so subsequent flickers of the same entry are
+          skipped by the guard above instead of spawning their own redundant wait
+        action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.bedroom2_bedtime_confirming
       - alias: Courtesy night light while presence is unconfirmed - immediate wayfinding
           light so a bathroom trip isn't stumbled through in the dark, but nothing
           else (occupied, fan, full bedtime lighting) commits until real presence
@@ -5963,6 +5976,10 @@
             - light.fluttershy
           data:
             transition: 5
+        - alias: Release the claim so the next real motion can start a fresh confirm-wait
+          action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.bedroom2_bedtime_confirming
         - stop: Presence not confirmed within 90 seconds - likely a walk-by, not real
             occupancy
       - alias: Confirmed - drop the courtesy light so the full bedtime lighting below
@@ -5972,6 +5989,11 @@
           entity_id:
           - light.ribbon
           - light.fluttershy
+      - alias: Release the claim - occupied is about to be set, so the "already occupied"
+          guard takes over from here
+        action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.bedroom2_bedtime_confirming
       - alias: Set bedroom 2 occupied (fan and music start via occupied_set branch)
         action: input_boolean.turn_on
         target:
@@ -12563,7 +12585,7 @@
   description: 'Hold the Main Room dimmer On button: AL off + manual control, lights
     100% (4000K). Smart Motion, TV Mode, Unoccupied Shutoff and the global sleep/morning
     AL resets skip the living room while input_boolean.living_room_manual_override
-    is on. Ends on: living room empty 15 min (full shutoff: TV, fan, lights), a short
+    is on. Ends on: living room empty 15 min (full shutoff: TV, AV receiver, fan, lights), a short
     press of On (handled in Smart Motion), or a short press of Off (lights only, bridge
     turns them off natively). Holding Off also shuts off TV, AV receiver and fan.'
   triggers:
@@ -12691,6 +12713,11 @@
         continue_on_error: true
         target:
           entity_id: media_player.living_room_tv_2
+      - alias: Turn off AV receiver (native entity)
+        action: media_player.turn_off
+        continue_on_error: true
+        target:
+          entity_id: media_player.living_room_av
       - alias: Turn off fan
         action: fan.turn_off
         continue_on_error: true
