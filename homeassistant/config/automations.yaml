@@ -5918,9 +5918,9 @@
         state: 'off'
       - alias: Skip if another run is already confirming this same motion event -
           the raw moving-target sensor flickers on/off repeatedly on a single entry
-          (2026-09-29 - 8+ flickers spawned 10 parallel confirm-waits since this
-          automation runs in parallel mode, crowding out the run that would have
-          actually set occupied), so only the first flicker should start a confirm-wait
+          (2026-09-29 - 8+ flickers spawned 10 parallel confirm-waits since this automation
+          runs in parallel mode, crowding out the run that would have actually set
+          occupied), so only the first flicker should start a confirm-wait
         condition: state
         entity_id: input_boolean.bedroom2_bedtime_confirming
         state: 'off'
@@ -12585,9 +12585,10 @@
   description: 'Hold the Main Room dimmer On button: AL off + manual control, lights
     100% (4000K). Smart Motion, TV Mode, Unoccupied Shutoff and the global sleep/morning
     AL resets skip the living room while input_boolean.living_room_manual_override
-    is on. Ends on: living room empty 15 min (full shutoff: TV, AV receiver, fan, lights), a short
-    press of On (handled in Smart Motion), or a short press of Off (lights only, bridge
-    turns them off natively). Holding Off also shuts off TV, AV receiver and fan.'
+    is on. Ends on: living room empty 15 min (full shutoff: TV, AV receiver, fan,
+    lights), a short press of On (handled in Smart Motion), or a short press of Off
+    (lights only, bridge turns them off natively). Holding Off also shuts off TV,
+    AV receiver and fan.'
   triggers:
   - device_id: 046bda673f9c3613042de9612024694e
     domain: hue
@@ -13492,4 +13493,25 @@
         adapt_color: true
         adapt_brightness: true
         turn_on_lights: true
+  mode: single
+- id: '1790200000002'
+  alias: Bedroom 2 Bedtime Confirming - Watchdog
+  description: Backstop for input_boolean.bedroom2_bedtime_confirming getting stuck
+    on. It should never be on for more than ~90 seconds (the confirm-wait's own timeout),
+    but an automation reload or HA restart mid-wait aborts the run before it can release
+    the flag, which would otherwise permanently block the Bedtime Routine's motion
+    path. Clears it if it's been on for 5+ minutes.
+  triggers:
+  - trigger: time_pattern
+    minutes: /5
+  conditions:
+  - condition: state
+    entity_id: input_boolean.bedroom2_bedtime_confirming
+    state: 'on'
+    for:
+      minutes: 5
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.bedroom2_bedtime_confirming
   mode: single
