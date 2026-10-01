@@ -13551,3 +13551,35 @@
     target:
       entity_id: input_boolean.bedroom2_bedtime_confirming
   mode: single
+- id: '1790000000001'
+  alias: Big Bedroom Empty - Fan Off (any hour)
+  description: Turns the Big Bedroom fan off once the room has read empty for 30 min, at any
+    hour (Big Bedroom Empty - Off only runs 09:00-18:00). Skips while asleep so a fan left on
+    for sleeping is untouched. The time_pattern trigger re-checks the 30-minute condition in
+    case the sensor never makes a fresh off-transition. Added 2026-10-01 after the fan ran
+    6 hours following a 1-minute TV Mode session.
+  mode: single
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.big_bedroom_sensor_group
+    to: 'off'
+    for:
+      minutes: 30
+  - trigger: time_pattern
+    minutes: /10
+  conditions:
+  - condition: state
+    entity_id: fan.big_bedroom_fan
+    state: 'on'
+  - condition: state
+    entity_id: binary_sensor.big_bedroom_sensor_group
+    state: 'off'
+    for:
+      minutes: 30
+  - condition: state
+    entity_id: input_boolean.big_bedroom_asleep
+    state: 'off'
+  actions:
+  - action: fan.turn_off
+    target:
+      entity_id: fan.big_bedroom_fan
