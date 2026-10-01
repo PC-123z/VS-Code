@@ -1276,6 +1276,9 @@
     entity_id:
     - binary_sensor.kitchen_sensor_group
     to: 'on'
+    not_from:
+    - unavailable
+    - unknown
     id: motion_detected
   - trigger: state
     entity_id:
