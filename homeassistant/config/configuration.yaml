@@ -231,8 +231,8 @@ template:
                  ['off', 'unavailable', 'unknown'])
              or (states('media_player.living_room_tv') not in
                  ['off', 'unavailable', 'unknown'])
-             or (states('media_player.living_room_tv_3') not in
-                 ['off', 'unavailable', 'unknown'])
+             or (states('media_player.living_room_tv_3') in
+                 ['playing', 'paused', 'buffering'])
              or (states('media_player.living_room') not in
                  ['off', 'unavailable', 'unknown']) }}
 
