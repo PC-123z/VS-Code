@@ -86,10 +86,10 @@
     - sat
     enabled: false
   - trigger: time
-    at: '16:58:00'
-    enabled: false
+    at: '18:30:00'
+    enabled: true
     weekday:
-    - sun
+    - sat
   conditions: []
   actions:
   - alias: Mark routine as active
