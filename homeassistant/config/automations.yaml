@@ -9292,7 +9292,8 @@
               data:
                 shuffle: true
           - alias: Play evening album (8 PM - 9 PM) - was the whole 8 PM+ window until
-              2026-10-03, when 9 PM onward moved to the slower Piano Guys playlist below
+              2026-10-03, when 9 PM onward moved to the slower Piano Guys playlist
+              below
             if:
             - condition: template
               value_template: '{{ current_hour|int >= 20 and current_hour|int < 21
@@ -9311,18 +9312,19 @@
                 entity_id: media_player.kitchen_2
               data:
                 shuffle: true
-          - alias: Play late night Piano Guys playlist (9 PM+) - added 2026-10-03, the
-              8 PM album was too fast for late night. YT Music "Most Popular - The
-              Piano Guys" (120 tracks), in the playlist's order, started as ONE playlist
-              item at input_number.welcome_home_night_playlist_position so each night
-              resumes where the last ended (never expanded into per-track URIs, see
-              the Good Morning playlist notes). The tracker automation advances the
-              helper.
+          - alias: Play late night Piano Guys playlist (9 PM+) - added 2026-10-03,
+              the 8 PM album was too fast for late night. YT Music "Most Popular -
+              The Piano Guys" (120 tracks), in the playlist's order, started as ONE
+              playlist item at input_number.welcome_home_night_playlist_position so
+              each night resumes where the last ended (never expanded into per-track
+              URIs, see the Good Morning playlist notes). The tracker automation advances
+              the helper.
             if:
             - condition: template
               value_template: '{{ current_hour|int >= 21 }}'
             then:
-            - alias: Shuffle off and repeat all - curator's order, queue never runs dry
+            - alias: Shuffle off and repeat all - curator's order, queue never runs
+                dry
               continue_on_error: true
               action: media_player.shuffle_set
               target:
@@ -10054,7 +10056,7 @@
     - fri
     enabled: true
   - trigger: time
-    at: '10:30:00'
+    at: 09:15:00
     weekday:
     - sat
     - sun
@@ -13349,14 +13351,14 @@
   mode: restart
 - id: '1789400000102'
   alias: Welcome Home - Track night playlist position
-  description: 'Added 2026-10-03. Keeps input_number.welcome_home_night_playlist_position
+  description: Added 2026-10-03. Keeps input_number.welcome_home_night_playlist_position
     at the next unplayed track of the 9 PM+ Piano Guys playlist (YT Music Most Popular,
-    120 tracks), so the next night resumes where this one ended, in the playlist''s
+    120 tracks), so the next night resumes where this one ended, in the playlist's
     order. Runs on every kitchen track change while Welcome Home is active, looks
-    the playing track up in the playlist''s browse listing, and stores its position
+    the playing track up in the playlist's browse listing, and stores its position
     plus one. Wraps to the top once fewer than 20 tracks remain, because a queue started
     from a position holds only that track onward. Leaves the value alone when the
-    playing item is not a playlist track (an announcement, the 8 PM album).'
+    playing item is not a playlist track (an announcement, the 8 PM album).
   triggers:
   - trigger: state
     entity_id: media_player.kitchen_2
