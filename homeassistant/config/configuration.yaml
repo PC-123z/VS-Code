@@ -290,6 +290,19 @@ rest_command:
       "media": "ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H", "option": "replace",
       "radio_mode": false{% if start_item | default('') | length > 0 %}, "start_item": "{{ start_item }}"{% endif %}}}
 
+  # Welcome Home late-night (9 PM+) playlist: The Piano Guys - Most Popular (YT Music, 120 tracks),
+  # started as ONE playlist item at a saved position so each arrival resumes where the last ended.
+  ma_kitchen_night_play_from:
+    url: http://192.168.70.155:8095/api
+    method: POST
+    headers:
+      Authorization: !secret music_assistant_api_bearer
+    content_type: application/json
+    payload: >-
+      {"command": "player_queues/play_media", "args": {"queue_id": "RINCON_347E5CA0960A01400",
+      "media": "ytmusic://playlist/VLPL7j5iXGSdMweXm56WEjskhCT5oAeEZJQF", "option": "replace",
+      "radio_mode": false{% if start_item | default('') | length > 0 %}, "start_item": "{{ start_item }}"{% endif %}}}
+
 # The Emulated Hue Bridge
 emulated_hue:
   host_ip: 192.168.70.155

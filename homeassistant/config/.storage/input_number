@@ -30,6 +30,15 @@
         "step": 1.0,
         "mode": "box",
         "icon": "mdi:playlist-music"
+      },
+      {
+        "id": "welcome_home_night_playlist_position",
+        "name": "Welcome Home Night Playlist Position",
+        "min": 0.0,
+        "max": 5000.0,
+        "step": 1.0,
+        "mode": "box",
+        "icon": "mdi:playlist-music"
       }
     ]
   }
