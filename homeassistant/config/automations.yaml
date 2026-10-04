@@ -7580,10 +7580,14 @@
           entity_id: switch.al_big_bedroom
         data:
           min_brightness: 85
-  - alias: Always turn sleep mode off - manual only via Hue button 2/3
+  - alias: Always turn sleep mode off for every switch Hue button 2/3 turns on (Big
+      Bedroom + both Bathroom) - manual only via Hue button 2/3
     action: switch.turn_off
     target:
-      entity_id: switch.al_sleep_mode_big_bedroom
+      entity_id:
+      - switch.al_sleep_mode_big_bedroom
+      - switch.al_sleep_mode_bathroom
+      - switch.al_sleep_mode_bathroom_main
   - alias: Re-enable motion/presence automation
     action: automation.turn_on
     target:
