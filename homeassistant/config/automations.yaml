@@ -4574,7 +4574,9 @@
   mode: single
 - id: '1778900000001'
   alias: 'Hue Button 2 Hold - Big Bedroom: White Noise Sleep'
-  description: Hold sets sleep mode with white noise instead of sleep playlist
+  description: 'Hold sets sleep mode with white noise instead of sleep playlist. Idempotent:
+    never turns lights/Nanoleaf on, never lowers a fan, skips alarm if already armed.
+    Cancels the Press-2 run.'
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
@@ -4584,6 +4586,19 @@
     id: hold
   conditions: []
   actions:
+  - alias: Cancel any in-flight bedtime wind-down so its pending light/Nanoleaf/fan
+      steps can't turn anything back on or change it
+    action: automation.turn_off
+    target:
+      entity_id: &id001
+      - automation.big_bedroom_bedtime_button_hue_button_2
+    data:
+      stop_actions: true
+  - alias: Re-arm those button automations immediately
+    action: automation.turn_on
+    target:
+      entity_id: *id001
+    data: {}
   - alias: Start 35-minute auto-stop timer immediately - set first so a re-trigger
       or interruption later in this script can never prevent it from arming
     action: timer.start
@@ -4646,23 +4661,29 @@
           - 0
           transition: 2
     default: []
-  - alias: Nanoleaf to deep red 5%
-    action: light.turn_on
-    target:
-      entity_id: light.nano_sand_dune
-    data:
-      rgb_color:
-      - 255
-      - 30
-      - 0
-      brightness_pct: 5
-      transition: 1
-  - alias: Fade to 4% over 30 seconds - only if the light was already on, otherwise
-      leave it off
+  - alias: Nanoleaf to deep red 5% - only if it is already on, never turns an off
+      Nanoleaf on
     if:
     - condition: state
-      entity_id: light.bedroom
+      entity_id: light.nano_sand_dune
       state: 'on'
+    then:
+    - action: light.turn_on
+      target:
+        entity_id: light.nano_sand_dune
+      data:
+        rgb_color:
+        - 255
+        - 30
+        - 0
+        brightness_pct: 5
+        transition: 1
+  - alias: Fade to 4% over 30 seconds - only if the lights are on and above 4%, otherwise
+      leave them alone
+    if:
+    - condition: template
+      value_template: '{{ is_state(''light.bedroom'',''on'') and (state_attr(''light.bedroom'',''brightness'')
+        | int(0)) > 11 }}'
     then:
     - action: light.turn_on
       target:
@@ -4674,29 +4695,54 @@
     action: media_player.turn_off
     target:
       entity_id: media_player.bedroom_tv_2
-  - alias: Set alarm to Home/Stay
-    action: alarm_control_panel.alarm_arm_home
-    target:
-      entity_id: alarm_control_panel.3302_alarm
-  - alias: Set bedroom fan to 25%
-    action: fan.turn_on
-    target:
-      entity_id: fan.big_bedroom_fan
-    data:
-      percentage: 25
-    enabled: true
-  - alias: Turn on purifier at 25%
-    action: fan.turn_on
-    target:
-      entity_id: fan.bedroom_purifier
-    data:
-      percentage: 25
-  - alias: Turn on air circulator at 25%
-    action: fan.turn_on
-    target:
-      entity_id: fan.air_circulator
-    data:
-      percentage: 25
+  - alias: Set alarm to Home/Stay - skip if already armed home
+    if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: alarm_control_panel.3302_alarm
+        state: armed_home
+    then:
+    - action: alarm_control_panel.alarm_arm_home
+      target:
+        entity_id: alarm_control_panel.3302_alarm
+  - alias: Ensure fan.big_bedroom_fan is at least 25% - never lowers a fan that is
+      already higher
+    if:
+    - condition: template
+      value_template: '{{ not is_state(''fan.big_bedroom_fan'',''on'') or (state_attr(''fan.big_bedroom_fan'',''percentage'')
+        | int(0)) < 25 }}'
+    then:
+    - action: fan.turn_on
+      target:
+        entity_id: fan.big_bedroom_fan
+      data:
+        percentage: 25
+      enabled: true
+  - alias: Ensure fan.bedroom_purifier is at least 25% - never lowers a fan that is
+      already higher
+    if:
+    - condition: template
+      value_template: '{{ not is_state(''fan.bedroom_purifier'',''on'') or (state_attr(''fan.bedroom_purifier'',''percentage'')
+        | int(0)) < 25 }}'
+    then:
+    - action: fan.turn_on
+      target:
+        entity_id: fan.bedroom_purifier
+      data:
+        percentage: 25
+  - alias: Ensure fan.air_circulator is at least 25% - never lowers a fan that is
+      already higher
+    if:
+    - condition: template
+      value_template: '{{ not is_state(''fan.air_circulator'',''on'') or (state_attr(''fan.air_circulator'',''percentage'')
+        | int(0)) < 25 }}'
+    then:
+    - action: fan.turn_on
+      target:
+        entity_id: fan.air_circulator
+      data:
+        percentage: 25
   - alias: Set Sonos volume to 10%
     action: media_player.volume_set
     target:
@@ -4762,22 +4808,34 @@
         repeat:
           count: 4
           sequence:
-          - continue_on_error: true
-            action: light.turn_on
-            target:
-              entity_id: light.bedroom
-            data:
-              brightness_pct: '{{ [4 - repeat.index, 0] | max }}'
-              transition: 1
+          - alias: Step down - only dims lights that are on and brighter than the
+              target, never turns lights on
+            if:
+            - condition: template
+              value_template: '{{ is_state(''light.bedroom'',''on'') and (state_attr(''light.bedroom'',''brightness'')
+                | int(0)) > (([4 - repeat.index, 0] | max) * 2.55) }}'
+            then:
+            - continue_on_error: true
+              action: light.turn_on
+              target:
+                entity_id: light.bedroom
+              data:
+                brightness_pct: '{{ [4 - repeat.index, 0] | max }}'
+                transition: 1
           - delay:
               seconds: 15
-      - alias: Turn off bedroom lights
-        continue_on_error: true
-        action: light.turn_off
-        target:
+      - alias: Turn off bedroom lights - only if on
+        if:
+        - condition: state
           entity_id: light.bedroom
-        data:
-          transition: 1
+          state: 'on'
+        then:
+        - continue_on_error: true
+          action: light.turn_off
+          target:
+            entity_id: light.bedroom
+          data:
+            transition: 1
     - sequence:
       - alias: Step Nanoleaf down 1% every minute, off after 5 minutes
         repeat:
@@ -4785,36 +4843,57 @@
           sequence:
           - delay:
               minutes: 1
-          - continue_on_error: true
-            action: light.turn_on
-            target:
-              entity_id: light.nano_sand_dune
-            data:
-              brightness_pct: '{{ [5 - repeat.index, 0] | max }}'
-              transition: 1
-      - alias: Turn off Nanoleaf
-        continue_on_error: true
-        action: light.turn_off
-        target:
+          - alias: Step down - only if Nanoleaf is on and brighter than the target
+            if:
+            - condition: template
+              value_template: '{{ is_state(''light.nano_sand_dune'',''on'') and (state_attr(''light.nano_sand_dune'',''brightness'')
+                | int(0)) > (([5 - repeat.index, 0] | max) * 2.55) }}'
+            then:
+            - continue_on_error: true
+              action: light.turn_on
+              target:
+                entity_id: light.nano_sand_dune
+              data:
+                brightness_pct: '{{ [5 - repeat.index, 0] | max }}'
+                transition: 1
+      - alias: Turn off Nanoleaf - only if on
+        if:
+        - condition: state
           entity_id: light.nano_sand_dune
-        data:
-          transition: 1
+          state: 'on'
+        then:
+        - continue_on_error: true
+          action: light.turn_off
+          target:
+            entity_id: light.nano_sand_dune
+          data:
+            transition: 1
     - sequence:
       - alias: Wait 60 seconds then boost fans
         delay:
           seconds: 60
-      - alias: Increase purifier to 50%
-        action: fan.turn_on
-        target:
-          entity_id: fan.bedroom_purifier
-        data:
-          percentage: 50
-      - alias: Increase air circulator to 50%
-        action: fan.turn_on
-        target:
-          entity_id: fan.air_circulator
-        data:
-          percentage: 50
+      - alias: Ensure fan.bedroom_purifier is at least 50% - never lowers
+        if:
+        - condition: template
+          value_template: '{{ not is_state(''fan.bedroom_purifier'',''on'') or (state_attr(''fan.bedroom_purifier'',''percentage'')
+            | int(0)) < 50 }}'
+        then:
+        - action: fan.turn_on
+          target:
+            entity_id: fan.bedroom_purifier
+          data:
+            percentage: 50
+      - alias: Ensure fan.air_circulator is at least 50% - never lowers
+        if:
+        - condition: template
+          value_template: '{{ not is_state(''fan.air_circulator'',''on'') or (state_attr(''fan.air_circulator'',''percentage'')
+            | int(0)) < 50 }}'
+        then:
+        - action: fan.turn_on
+          target:
+            entity_id: fan.air_circulator
+          data:
+            percentage: 50
     - sequence:
       - alias: Fade all bathroom lights off over 10 seconds
         continue_on_error: true
@@ -4826,7 +4905,9 @@
   mode: restart
 - id: '1776302554735'
   alias: 'Hue Button 2 - Big Bedroom: Bedtime Button - Hue Button 2'
-  description: Single press sets bedtime mode - warm light fade, music, fans, alarm
+  description: 'Single press sets bedtime mode - warm light fade, music, fans, alarm.
+    Idempotent: never turns lights/Nanoleaf on, never lowers a fan, skips alarm if
+    already armed. Cancels the Hold-2 run.'
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
@@ -4840,6 +4921,19 @@
     entity_id: input_boolean.good_morning_active
     state: 'off'
   actions:
+  - alias: Cancel any in-flight bedtime wind-down so its pending light/Nanoleaf/fan
+      steps can't turn anything back on or change it
+    action: automation.turn_off
+    target:
+      entity_id: &id002
+      - automation.hue_button_2_hold_big_bedroom_white_noise_sleep
+    data:
+      stop_actions: true
+  - alias: Re-arm those button automations immediately
+    action: automation.turn_on
+    target:
+      entity_id: *id002
+    data: {}
   - alias: Start 35-minute auto-stop timer immediately - set first so a re-trigger
       or interruption later in this script can never prevent it from arming
     action: timer.start
@@ -4902,23 +4996,29 @@
           - 0
           transition: 2
     default: []
-  - alias: Nanoleaf to deep red 5%
-    action: light.turn_on
-    target:
-      entity_id: light.nano_sand_dune
-    data:
-      rgb_color:
-      - 255
-      - 30
-      - 0
-      brightness_pct: 5
-      transition: 1
-  - alias: Fade to 4% over 30 seconds - only if the light was already on, otherwise
-      leave it off
+  - alias: Nanoleaf to deep red 5% - only if it is already on, never turns an off
+      Nanoleaf on
     if:
     - condition: state
-      entity_id: light.bedroom
+      entity_id: light.nano_sand_dune
       state: 'on'
+    then:
+    - action: light.turn_on
+      target:
+        entity_id: light.nano_sand_dune
+      data:
+        rgb_color:
+        - 255
+        - 30
+        - 0
+        brightness_pct: 5
+        transition: 1
+  - alias: Fade to 4% over 30 seconds - only if the lights are on and above 4%, otherwise
+      leave them alone
+    if:
+    - condition: template
+      value_template: '{{ is_state(''light.bedroom'',''on'') and (state_attr(''light.bedroom'',''brightness'')
+        | int(0)) > 11 }}'
     then:
     - action: light.turn_on
       target:
@@ -4930,32 +5030,57 @@
     action: media_player.turn_off
     target:
       entity_id: media_player.bedroom_tv_2
-  - alias: Set alarm to Home/Stay
-    action: alarm_control_panel.alarm_arm_home
-    target:
-      entity_id: alarm_control_panel.3302_alarm
-  - alias: Set bedroom fan to 25%
-    continue_on_error: true
-    action: fan.turn_on
-    target:
-      entity_id: fan.big_bedroom_fan
-    data:
-      percentage: 25
-    enabled: true
-  - alias: Turn on purifier at 25%
-    continue_on_error: true
-    action: fan.turn_on
-    target:
-      entity_id: fan.bedroom_purifier
-    data:
-      percentage: 25
-  - alias: Turn on air circulator at 25%
-    continue_on_error: true
-    action: fan.turn_on
-    target:
-      entity_id: fan.air_circulator
-    data:
-      percentage: 25
+  - alias: Set alarm to Home/Stay - skip if already armed home
+    if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: alarm_control_panel.3302_alarm
+        state: armed_home
+    then:
+    - action: alarm_control_panel.alarm_arm_home
+      target:
+        entity_id: alarm_control_panel.3302_alarm
+  - alias: Ensure fan.big_bedroom_fan is at least 25% - never lowers a fan that is
+      already higher
+    if:
+    - condition: template
+      value_template: '{{ not is_state(''fan.big_bedroom_fan'',''on'') or (state_attr(''fan.big_bedroom_fan'',''percentage'')
+        | int(0)) < 25 }}'
+    then:
+    - continue_on_error: true
+      action: fan.turn_on
+      target:
+        entity_id: fan.big_bedroom_fan
+      data:
+        percentage: 25
+      enabled: true
+  - alias: Ensure fan.bedroom_purifier is at least 25% - never lowers a fan that is
+      already higher
+    if:
+    - condition: template
+      value_template: '{{ not is_state(''fan.bedroom_purifier'',''on'') or (state_attr(''fan.bedroom_purifier'',''percentage'')
+        | int(0)) < 25 }}'
+    then:
+    - continue_on_error: true
+      action: fan.turn_on
+      target:
+        entity_id: fan.bedroom_purifier
+      data:
+        percentage: 25
+  - alias: Ensure fan.air_circulator is at least 25% - never lowers a fan that is
+      already higher
+    if:
+    - condition: template
+      value_template: '{{ not is_state(''fan.air_circulator'',''on'') or (state_attr(''fan.air_circulator'',''percentage'')
+        | int(0)) < 25 }}'
+    then:
+    - continue_on_error: true
+      action: fan.turn_on
+      target:
+        entity_id: fan.air_circulator
+      data:
+        percentage: 25
   - alias: Set Sonos volume to 10%
     action: media_player.volume_set
     target:
@@ -5021,22 +5146,34 @@
         repeat:
           count: 4
           sequence:
-          - continue_on_error: true
-            action: light.turn_on
-            target:
-              entity_id: light.bedroom
-            data:
-              brightness_pct: '{{ [4 - repeat.index, 0] | max }}'
-              transition: 1
+          - alias: Step down - only dims lights that are on and brighter than the
+              target, never turns lights on
+            if:
+            - condition: template
+              value_template: '{{ is_state(''light.bedroom'',''on'') and (state_attr(''light.bedroom'',''brightness'')
+                | int(0)) > (([4 - repeat.index, 0] | max) * 2.55) }}'
+            then:
+            - continue_on_error: true
+              action: light.turn_on
+              target:
+                entity_id: light.bedroom
+              data:
+                brightness_pct: '{{ [4 - repeat.index, 0] | max }}'
+                transition: 1
           - delay:
               seconds: 10
-      - alias: Turn off bedroom lights
-        continue_on_error: true
-        action: light.turn_off
-        target:
+      - alias: Turn off bedroom lights - only if on
+        if:
+        - condition: state
           entity_id: light.bedroom
-        data:
-          transition: 1
+          state: 'on'
+        then:
+        - continue_on_error: true
+          action: light.turn_off
+          target:
+            entity_id: light.bedroom
+          data:
+            transition: 1
     - sequence:
       - alias: Step Nanoleaf down 1% every minute, off after 5 minutes
         repeat:
@@ -5044,36 +5181,57 @@
           sequence:
           - delay:
               minutes: 1
-          - continue_on_error: true
-            action: light.turn_on
-            target:
-              entity_id: light.nano_sand_dune
-            data:
-              brightness_pct: '{{ [5 - repeat.index, 0] | max }}'
-              transition: 1
-      - alias: Turn off Nanoleaf
-        continue_on_error: true
-        action: light.turn_off
-        target:
+          - alias: Step down - only if Nanoleaf is on and brighter than the target
+            if:
+            - condition: template
+              value_template: '{{ is_state(''light.nano_sand_dune'',''on'') and (state_attr(''light.nano_sand_dune'',''brightness'')
+                | int(0)) > (([5 - repeat.index, 0] | max) * 2.55) }}'
+            then:
+            - continue_on_error: true
+              action: light.turn_on
+              target:
+                entity_id: light.nano_sand_dune
+              data:
+                brightness_pct: '{{ [5 - repeat.index, 0] | max }}'
+                transition: 1
+      - alias: Turn off Nanoleaf - only if on
+        if:
+        - condition: state
           entity_id: light.nano_sand_dune
-        data:
-          transition: 1
+          state: 'on'
+        then:
+        - continue_on_error: true
+          action: light.turn_off
+          target:
+            entity_id: light.nano_sand_dune
+          data:
+            transition: 1
     - sequence:
       - alias: Wait 60 seconds then boost fans
         delay:
           seconds: 60
-      - alias: Increase purifier to 50%
-        action: fan.turn_on
-        target:
-          entity_id: fan.bedroom_purifier
-        data:
-          percentage: 50
-      - alias: Increase air circulator to 50%
-        action: fan.turn_on
-        target:
-          entity_id: fan.air_circulator
-        data:
-          percentage: 50
+      - alias: Ensure fan.bedroom_purifier is at least 50% - never lowers
+        if:
+        - condition: template
+          value_template: '{{ not is_state(''fan.bedroom_purifier'',''on'') or (state_attr(''fan.bedroom_purifier'',''percentage'')
+            | int(0)) < 50 }}'
+        then:
+        - action: fan.turn_on
+          target:
+            entity_id: fan.bedroom_purifier
+          data:
+            percentage: 50
+      - alias: Ensure fan.air_circulator is at least 50% - never lowers
+        if:
+        - condition: template
+          value_template: '{{ not is_state(''fan.air_circulator'',''on'') or (state_attr(''fan.air_circulator'',''percentage'')
+            | int(0)) < 50 }}'
+        then:
+        - action: fan.turn_on
+          target:
+            entity_id: fan.air_circulator
+          data:
+            percentage: 50
     - sequence:
       - alias: Fade all bathroom lights off over 10 seconds
         continue_on_error: true
@@ -5106,6 +5264,20 @@
       - condition: trigger
         id: press
       sequence:
+      - alias: Cancel any in-flight bedtime wind-down so its pending light/Nanoleaf/fan
+          steps can't turn anything back on or change it
+        action: automation.turn_off
+        target:
+          entity_id: &id003
+          - automation.big_bedroom_bedtime_button_hue_button_2
+          - automation.hue_button_2_hold_big_bedroom_white_noise_sleep
+        data:
+          stop_actions: true
+      - alias: Re-arm those button automations immediately
+        action: automation.turn_on
+        target:
+          entity_id: *id003
+        data: {}
       - alias: Disable motion automation
         action: automation.turn_off
         target:
@@ -5159,6 +5331,20 @@
       - condition: trigger
         id: hold
       sequence:
+      - alias: Cancel any in-flight bedtime wind-down so its pending light/Nanoleaf/fan
+          steps can't turn anything back on or change it
+        action: automation.turn_off
+        target:
+          entity_id: &id004
+          - automation.big_bedroom_bedtime_button_hue_button_2
+          - automation.hue_button_2_hold_big_bedroom_white_noise_sleep
+        data:
+          stop_actions: true
+      - alias: Re-arm those button automations immediately
+        action: automation.turn_on
+        target:
+          entity_id: *id004
+        data: {}
       - alias: Disable motion automation
         action: automation.turn_off
         target:
@@ -5240,7 +5426,9 @@
   mode: single
 - id: '1776310243675'
   alias: 'Hue Button 3 - Big Bedroom: Goodnight Button - Hue Button 3'
-  description: Single press - lights off, fans up, alarm set, no music
+  description: Single press - lights off, fans at least 25%, alarm set, stop music.
+    Never turns lights/Nanoleaf on, never lowers a fan. Cancels any in-flight Button
+    2 wind-down.
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
@@ -5250,11 +5438,20 @@
     id: press
   conditions: []
   actions:
-  - alias: Remember whether we were already asleep before this press (so Nanoleaf
-      only lights on the initial bedtime trigger, not a repeat press while already
-      asleep)
-    variables:
-      already_asleep: '{{ is_state(''input_boolean.big_bedroom_asleep'', ''on'') }}'
+  - alias: Cancel any in-flight bedtime wind-down so its pending light/Nanoleaf/fan
+      steps can't turn anything back on or change it
+    action: automation.turn_off
+    target:
+      entity_id: &id005
+      - automation.big_bedroom_bedtime_button_hue_button_2
+      - automation.hue_button_2_hold_big_bedroom_white_noise_sleep
+    data:
+      stop_actions: true
+  - alias: Re-arm those button automations immediately
+    action: automation.turn_on
+    target:
+      entity_id: *id005
+    data: {}
   - alias: Disable motion automation
     action: automation.turn_off
     target:
@@ -5296,64 +5493,82 @@
     action: media_player.turn_off
     target:
       entity_id: media_player.bedroom_tv_2
-  - alias: Set alarm to Home/Stay
-    action: alarm_control_panel.alarm_arm_home
-    target:
-      entity_id: alarm_control_panel.3302_alarm
-  - alias: Stop bedroom audio (with verify and retry)
-    repeat:
-      sequence:
-      - continue_on_error: true
-        action: media_player.media_stop
-        target:
-          entity_id: media_player.bedroom_2
-      - delay:
-          seconds: 5
-      until:
-      - condition: or
-        conditions:
-        - condition: template
-          value_template: '{{ repeat.index >= 3 }}'
-        - condition: not
-          conditions:
-          - condition: state
+  - alias: Set alarm to Home/Stay - skip if already armed home
+    if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: alarm_control_panel.3302_alarm
+        state: armed_home
+    then:
+    - action: alarm_control_panel.alarm_arm_home
+      target:
+        entity_id: alarm_control_panel.3302_alarm
+  - alias: Stop bedroom audio (with verify and retry) - only if something is playing
+    if:
+    - condition: state
+      entity_id: media_player.bedroom_2
+      state: playing
+    then:
+    - repeat:
+        sequence:
+        - continue_on_error: true
+          action: media_player.media_stop
+          target:
             entity_id: media_player.bedroom_2
-            state: playing
-  - alias: Set bedroom fan to 25%
-    action: fan.turn_on
-    data:
-      percentage: 25
-    target:
-      entity_id: fan.big_bedroom_fan
-    enabled: true
-  - alias: Set purifier to 25%
-    action: fan.turn_on
-    target:
-      device_id: c2504c8438baeadcf59cca47e71a14b4
-    data:
-      percentage: 25
-  - alias: Set air circulator to 25%
-    action: fan.turn_on
-    target:
-      device_id: ca438fb682d663761f41ccdd014ee6b0
-    data:
-      percentage: 25
-  - alias: Nanoleaf to deep red 2% (only on initial bedtime press, not if already
-      asleep)
+        - delay:
+            seconds: 5
+        until:
+        - condition: or
+          conditions:
+          - condition: template
+            value_template: '{{ repeat.index >= 3 }}'
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: media_player.bedroom_2
+              state: playing
+    - alias: Cancel the sleep-audio auto-stop timer, audio is already stopped
+      action: timer.cancel
+      target:
+        entity_id: timer.bedroom_sleep_audio
+  - alias: Ensure fan.big_bedroom_fan is at least 25% - never lowers a fan that is
+      already higher
     if:
     - condition: template
-      value_template: '{{ not already_asleep }}'
+      value_template: '{{ not is_state(''fan.big_bedroom_fan'',''on'') or (state_attr(''fan.big_bedroom_fan'',''percentage'')
+        | int(0)) < 25 }}'
     then:
-    - action: light.turn_on
-      target:
-        entity_id: light.nano_sand_dune
+    - action: fan.turn_on
       data:
-        rgb_color:
-        - 255
-        - 30
-        - 0
-        brightness_pct: 2
-        transition: 1
+        percentage: 25
+      target:
+        entity_id: fan.big_bedroom_fan
+      enabled: true
+  - alias: Ensure fan.bedroom_purifier is at least 25% - never lowers a fan that is
+      already higher
+    if:
+    - condition: template
+      value_template: '{{ not is_state(''fan.bedroom_purifier'',''on'') or (state_attr(''fan.bedroom_purifier'',''percentage'')
+        | int(0)) < 25 }}'
+    then:
+    - action: fan.turn_on
+      target:
+        entity_id: fan.bedroom_purifier
+      data:
+        percentage: 25
+  - alias: Ensure fan.air_circulator is at least 25% - never lowers a fan that is
+      already higher
+    if:
+    - condition: template
+      value_template: '{{ not is_state(''fan.air_circulator'',''on'') or (state_attr(''fan.air_circulator'',''percentage'')
+        | int(0)) < 25 }}'
+    then:
+    - action: fan.turn_on
+      target:
+        entity_id: fan.air_circulator
+      data:
+        percentage: 25
   - alias: Fade bedroom lights off over 5 seconds - only if already on, no point commanding
       an already-off light
     if:
@@ -5373,25 +5588,28 @@
     data:
       transition: 10
   - alias: Turn off Nanoleaf (retry - it frequently drops offline and misses commands)
-    repeat:
-      count: 3
-      sequence:
-      - continue_on_error: true
-        action: light.turn_off
-        target:
-          entity_id: light.nano_sand_dune
-        data:
-          transition: 5
-      - delay:
-          seconds: 5
-  - alias: Turn off Nanoleaf after 15 minutes
-    delay:
-      minutes: 15
-    enabled: true
+      - only if on
+    if:
+    - condition: state
+      entity_id: light.nano_sand_dune
+      state: 'on'
+    then:
+    - repeat:
+        count: 3
+        sequence:
+        - continue_on_error: true
+          action: light.turn_off
+          target:
+            entity_id: light.nano_sand_dune
+          data:
+            transition: 5
+        - delay:
+            seconds: 5
   mode: single
 - id: '1776310243676'
   alias: 'Hue Button 3 - Big Bedroom: Goodnight Button Hold - Hue Button 3'
-  description: Hold - lights off, fans up (purifier+circulator 50%), alarm set
+  description: Hold - lights off, fans at least 50%, alarm set, stop music. Never
+    turns lights/Nanoleaf on, never lowers a fan. Cancels any in-flight Button 2 wind-down.
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
@@ -5401,11 +5619,20 @@
     id: hold
   conditions: []
   actions:
-  - alias: Remember whether we were already asleep before this press (so Nanoleaf
-      only lights on the initial bedtime trigger, not a repeat press while already
-      asleep)
-    variables:
-      already_asleep: '{{ is_state(''input_boolean.big_bedroom_asleep'', ''on'') }}'
+  - alias: Cancel any in-flight bedtime wind-down so its pending light/Nanoleaf/fan
+      steps can't turn anything back on or change it
+    action: automation.turn_off
+    target:
+      entity_id: &id006
+      - automation.big_bedroom_bedtime_button_hue_button_2
+      - automation.hue_button_2_hold_big_bedroom_white_noise_sleep
+    data:
+      stop_actions: true
+  - alias: Re-arm those button automations immediately
+    action: automation.turn_on
+    target:
+      entity_id: *id006
+    data: {}
   - alias: Disable motion automation
     action: automation.turn_off
     target:
@@ -5447,64 +5674,82 @@
     action: media_player.turn_off
     target:
       entity_id: media_player.bedroom_tv_2
-  - alias: Set alarm to Home/Stay
-    action: alarm_control_panel.alarm_arm_home
-    target:
-      entity_id: alarm_control_panel.3302_alarm
-  - alias: Stop bedroom audio (with verify and retry)
-    repeat:
-      sequence:
-      - continue_on_error: true
-        action: media_player.media_stop
-        target:
-          entity_id: media_player.bedroom_2
-      - delay:
-          seconds: 5
-      until:
-      - condition: or
-        conditions:
-        - condition: template
-          value_template: '{{ repeat.index >= 3 }}'
-        - condition: not
-          conditions:
-          - condition: state
+  - alias: Set alarm to Home/Stay - skip if already armed home
+    if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: alarm_control_panel.3302_alarm
+        state: armed_home
+    then:
+    - action: alarm_control_panel.alarm_arm_home
+      target:
+        entity_id: alarm_control_panel.3302_alarm
+  - alias: Stop bedroom audio (with verify and retry) - only if something is playing
+    if:
+    - condition: state
+      entity_id: media_player.bedroom_2
+      state: playing
+    then:
+    - repeat:
+        sequence:
+        - continue_on_error: true
+          action: media_player.media_stop
+          target:
             entity_id: media_player.bedroom_2
-            state: playing
-  - alias: Set bedroom fan to 50%
-    action: fan.turn_on
-    data:
-      percentage: 50
-    target:
-      entity_id: fan.big_bedroom_fan
-    enabled: true
-  - alias: Set purifier to 50%
-    action: fan.turn_on
-    target:
-      device_id: c2504c8438baeadcf59cca47e71a14b4
-    data:
-      percentage: 50
-  - alias: Set air circulator to 50%
-    action: fan.turn_on
-    target:
-      device_id: ca438fb682d663761f41ccdd014ee6b0
-    data:
-      percentage: 50
-  - alias: Nanoleaf to deep red 2% (only on initial bedtime press, not if already
-      asleep)
+        - delay:
+            seconds: 5
+        until:
+        - condition: or
+          conditions:
+          - condition: template
+            value_template: '{{ repeat.index >= 3 }}'
+          - condition: not
+            conditions:
+            - condition: state
+              entity_id: media_player.bedroom_2
+              state: playing
+    - alias: Cancel the sleep-audio auto-stop timer, audio is already stopped
+      action: timer.cancel
+      target:
+        entity_id: timer.bedroom_sleep_audio
+  - alias: Ensure fan.big_bedroom_fan is at least 50% - never lowers a fan that is
+      already higher
     if:
     - condition: template
-      value_template: '{{ not already_asleep }}'
+      value_template: '{{ not is_state(''fan.big_bedroom_fan'',''on'') or (state_attr(''fan.big_bedroom_fan'',''percentage'')
+        | int(0)) < 50 }}'
     then:
-    - action: light.turn_on
-      target:
-        entity_id: light.nano_sand_dune
+    - action: fan.turn_on
       data:
-        rgb_color:
-        - 255
-        - 30
-        - 0
-        brightness_pct: 2
-        transition: 1
+        percentage: 50
+      target:
+        entity_id: fan.big_bedroom_fan
+      enabled: true
+  - alias: Ensure fan.bedroom_purifier is at least 50% - never lowers a fan that is
+      already higher
+    if:
+    - condition: template
+      value_template: '{{ not is_state(''fan.bedroom_purifier'',''on'') or (state_attr(''fan.bedroom_purifier'',''percentage'')
+        | int(0)) < 50 }}'
+    then:
+    - action: fan.turn_on
+      target:
+        entity_id: fan.bedroom_purifier
+      data:
+        percentage: 50
+  - alias: Ensure fan.air_circulator is at least 50% - never lowers a fan that is
+      already higher
+    if:
+    - condition: template
+      value_template: '{{ not is_state(''fan.air_circulator'',''on'') or (state_attr(''fan.air_circulator'',''percentage'')
+        | int(0)) < 50 }}'
+    then:
+    - action: fan.turn_on
+      target:
+        entity_id: fan.air_circulator
+      data:
+        percentage: 50
   - alias: Fade bedroom lights off over 5 seconds - only if already on, no point commanding
       an already-off light
     if:
@@ -5524,21 +5769,27 @@
     data:
       transition: 10
   - alias: Turn off Nanoleaf (retry - it frequently drops offline and misses commands)
-    repeat:
-      count: 3
-      sequence:
-      - continue_on_error: true
-        action: light.turn_off
-        target:
-          entity_id: light.nano_sand_dune
-        data:
-          transition: 5
-      - delay:
-          seconds: 5
-  - alias: Turn off Nanoleaf after 15 minutes
+      - only if on
+    if:
+    - condition: state
+      entity_id: light.nano_sand_dune
+      state: 'on'
+    then:
+    - repeat:
+        count: 3
+        sequence:
+        - continue_on_error: true
+          action: light.turn_off
+          target:
+            entity_id: light.nano_sand_dune
+          data:
+            transition: 5
+        - delay:
+            seconds: 5
+  - alias: Debounce - Hue hold fires repeat events continuously, ignore them while
+      this run finishes
     delay:
-      minutes: 15
-    enabled: true
+      seconds: 10
   mode: single
 - id: '1776378416550'
   alias: '*Bedroom 2 Bedtime Routine'
@@ -7711,10 +7962,16 @@
     down when bedroom2_occupied is on (Bedtime Routine has taken over). Hard cutoff
     at 22:15 - no motion response after that until 07:00.
   triggers:
+  - alias: Radar moving target must hold 3s - 1s false blips (2026-10-04) were turning
+      lights on in an empty room
+    trigger: state
+    entity_id: binary_sensor.bedroom2_sensor_apollo_radar_moving_target
+    to: 'on'
+    for:
+      seconds: 3
+    id: detected
   - trigger: state
-    entity_id:
-    - binary_sensor.bedroom2_sensor_apollo_radar_moving_target
-    - binary_sensor.bedroom2_office_bedroom2_door_presence
+    entity_id: binary_sensor.bedroom2_office_bedroom2_door_presence
     to:
     - 'on'
     id: detected
@@ -8079,8 +8336,8 @@
         action: input_boolean.turn_off
         target:
           entity_id: input_boolean.bedroom2_manual_override
-      - alias: Turn lights off FIRST - AL must not see them mid-fade (2026-10-04 - AL interval
-          update re-turned them on 27s after the off, ~10 bounces/week)
+      - alias: Turn lights off FIRST - AL must not see them mid-fade (2026-10-04 -
+          AL interval update re-turned them on 27s after the off, ~10 bounces/week)
         action: light.turn_off
         target:
           entity_id:
