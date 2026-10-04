@@ -7516,7 +7516,8 @@
   description: Pico 'on' press clears all overrides, re-enables AL switches and motion
     automation, clears manual_control, applies adaptive lighting, and always turns
     sleep mode off - sleep mode is manual only via Hue button 2/3. Press sets AL min
-    brightness floor to 45%, hold sets it to 85%.
+    brightness floor to 45%, hold sets it to 85%. Also sets the Nanoleaf scene/brightness
+    by time of day (same table as presence automation).
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
@@ -7614,12 +7615,119 @@
       adapt_color: true
       adapt_brightness: true
       prefer_rgb_color: true
-  - alias: Nanoleaf Sundown at night (22:00-07:00) to complement warm AL
-    if:
-    - condition: time
-      after: '22:00:00'
-      before: 07:00:00
-    then:
+  - alias: Nanoleaf scene by time of day - same table as Big Bedroom Smart Motion
+      & Presence, so the Nanoleaf follows AL whenever button 1 is pressed
+    choose:
+    - conditions:
+      - condition: time
+        after: 07:00:00
+        before: '10:00:00'
+      sequence:
+      - action: select.select_option
+        continue_on_error: true
+        target:
+          entity_id: select.nanoleaf_dynamic_scenes
+        data:
+          option: Cocoa Beach
+      - action: light.turn_on
+        continue_on_error: true
+        target:
+          entity_id: light.nano_sand_dune
+        data:
+          brightness_pct: 80
+          transition: 2
+    - conditions:
+      - condition: time
+        after: '10:00:00'
+        before: '12:00:00'
+      sequence:
+      - action: select.select_option
+        continue_on_error: true
+        target:
+          entity_id: select.nanoleaf_dynamic_scenes
+        data:
+          option: Northern Lights
+      - action: light.turn_on
+        continue_on_error: true
+        target:
+          entity_id: light.nano_sand_dune
+        data:
+          brightness_pct: 80
+          transition: 2
+    - conditions:
+      - condition: time
+        after: '12:00:00'
+        before: '15:00:00'
+      sequence:
+      - action: select.select_option
+        continue_on_error: true
+        target:
+          entity_id: select.nanoleaf_dynamic_scenes
+        data:
+          option: Lightscape
+      - action: light.turn_on
+        continue_on_error: true
+        target:
+          entity_id: light.nano_sand_dune
+        data:
+          brightness_pct: 70
+          transition: 2
+    - conditions:
+      - condition: time
+        after: '15:00:00'
+        before: '18:00:00'
+      sequence:
+      - action: select.select_option
+        continue_on_error: true
+        target:
+          entity_id: select.nanoleaf_dynamic_scenes
+        data:
+          option: Jungle
+      - action: light.turn_on
+        continue_on_error: true
+        target:
+          entity_id: light.nano_sand_dune
+        data:
+          brightness_pct: 70
+          transition: 2
+    - conditions:
+      - condition: time
+        after: '18:00:00'
+        before: '20:00:00'
+      sequence:
+      - action: select.select_option
+        continue_on_error: true
+        target:
+          entity_id: select.nanoleaf_dynamic_scenes
+        data:
+          option: Sundown
+      - action: light.turn_on
+        continue_on_error: true
+        target:
+          entity_id: light.nano_sand_dune
+        data:
+          brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
+            | float(30) | round(0) }}'
+          transition: 2
+    - conditions:
+      - condition: time
+        after: '20:00:00'
+        before: '22:00:00'
+      sequence:
+      - action: select.select_option
+        continue_on_error: true
+        target:
+          entity_id: select.nanoleaf_dynamic_scenes
+        data:
+          option: Starlight
+      - action: light.turn_on
+        continue_on_error: true
+        target:
+          entity_id: light.nano_sand_dune
+        data:
+          brightness_pct: 50
+          transition: 2
+    default:
     - action: select.select_option
       continue_on_error: true
       target:
