@@ -8079,6 +8079,22 @@
         action: input_boolean.turn_off
         target:
           entity_id: input_boolean.bedroom2_manual_override
+      - alias: Turn lights off FIRST - AL must not see them mid-fade (2026-10-04 - AL interval
+          update re-turned them on 27s after the off, ~10 bounces/week)
+        action: light.turn_off
+        target:
+          entity_id:
+          - light.ribbon
+          - light.fluttershy
+          - light.office
+          - light.office_1
+          - light.office_2
+          - light.hue_white_lamp_1
+        data:
+          transition: 30
+      - alias: Wait for the 30s fade to finish before touching Adaptive Lighting
+        delay:
+          seconds: 35
       - alias: Clear manual_control so AL can take over on next motion
         action: adaptive_lighting.set_manual_control
         data:
@@ -8103,17 +8119,43 @@
         - action: switch.turn_on
           target:
             entity_id: switch.adaptive_lighting_sleep_mode_office
-      - action: light.turn_off
-        target:
-          entity_id:
-          - light.ribbon
-          - light.fluttershy
-          - light.office
-          - light.office_1
-          - light.office_2
-          - light.hue_white_lamp_1
-        data:
-          transition: 30
+      - alias: Safety net - give AL time to bounce lights back on, then re-check
+        delay:
+          seconds: 120
+      - alias: If room is still empty and any light came back on, turn them off again
+        if:
+        - condition: state
+          entity_id: binary_sensor.bedroom_2_sensor_group
+          state: 'off'
+        - condition: state
+          entity_id: input_boolean.bedroom2_occupied
+          state: 'off'
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: light.office
+            state: 'on'
+          - condition: state
+            entity_id: light.office_1
+            state: 'on'
+          - condition: state
+            entity_id: light.office_2
+            state: 'on'
+          - condition: state
+            entity_id: light.hue_white_lamp_1
+            state: 'on'
+        then:
+        - action: light.turn_off
+          target:
+            entity_id:
+            - light.ribbon
+            - light.fluttershy
+            - light.office
+            - light.office_1
+            - light.office_2
+            - light.hue_white_lamp_1
+          data:
+            transition: 2
   mode: restart
 - id: '1776981794880'
   alias: Departure - Start Window on Climatization
