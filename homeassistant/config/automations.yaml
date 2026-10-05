@@ -12503,6 +12503,44 @@
       action: media_player.turn_off
       target:
         entity_id: media_player.living_room_av
+    else:
+    - alias: TV is on - still stop the receiver's Music Assistant stream (no power-off),
+        added 2026-10-04 so a solo leftover AirPlay stream can't make the receiver
+        switch its input away from the TV. Stopping the MA queue doesn't touch the
+        HDMI input the TV is using.
+      continue_on_error: true
+      action: media_player.media_stop
+      target:
+        entity_id: media_player.living_room_av_receiver
+  mode: single
+- id: '1791000000001'
+  alias: 'Welcome Home: End Session When Living Room TV Turns On'
+  description: 'Added 2026-10-04 at the user''s request - turning on the living room
+    TV ends Welcome Home and stops its music in every room. This only clears welcome_home_active;
+    "Unjoin All Satellites on Deactivation" (1779800000007) then stops the kitchen
+    leader, unjoins every satellite including the receiver, and stops the receiver''s
+    stream WITHOUT powering it off (TV guard). Ignores a TV-on within 60 s of the
+    Welcome Home living room join starting, in case powering the receiver on ever
+    wakes the TV over HDMI-CEC - that must not kill the session it just joined.'
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.living_room_tv_on
+    from: 'off'
+    to: 'on'
+  conditions:
+  - condition: state
+    entity_id: input_boolean.welcome_home_active
+    state: 'on'
+  - alias: Not within 60 s of the living room join powering the receiver on
+    condition: template
+    value_template: '{{ not (is_state(''input_boolean.welcome_home_living_room_joined'',
+      ''on'') and (now() - states.input_boolean.welcome_home_living_room_joined.last_changed).total_seconds()
+      < 60) }}'
+  actions:
+  - alias: End the Welcome Home session - the deactivation catch-all does the stop/unjoin
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.welcome_home_active
   mode: single
 - id: '1779800000002'
   alias: 'Welcome Home: Unjoin Satellite or Disable on Kitchen Stop'
