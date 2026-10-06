@@ -14177,7 +14177,7 @@
   - action: fan.turn_off
     target:
       entity_id: fan.big_bedroom_fan
-- id: '1790000000001'
+- id: '1791006020001'
   alias: 'Bedroom 2: Tap Buttons'
   description: 'Hue Tap Dial in Bedroom 2 (buttons 1, 2, 4). Press = short_release, hold = long_press. Any press engages the manual override (AL off) which Smart Motion clears after the room is empty 25 min + 5 min fade. Night = sleep mode or bedroom2_occupied on, or 22:00-07:00. B1 on/AL, B2 cycles 4 day / 4 night scenes, B4 off + restore AL; holds also raise the fan to 50% (B4 hold = everything off). Button 3 lives in Bedroom 2: Tap Go To Sleep.'
   triggers:
@@ -15232,7 +15232,7 @@
             entity_id: media_player.office_2
   mode: parallel
   max: 10
-- id: '1790000000002'
+- id: '1791006020002'
   alias: 'Bedroom 2: Tap Dial Brightness'
   description: 'Rotary on the Bedroom 2 Hue Tap Dial = brightness on whichever lights are already on (never turns a dark room on, never steps below 1%). Step size scales with how far the dial turned; night steps are smaller. Engages the manual override like any other tap input.'
   triggers:
@@ -15286,7 +15286,7 @@
           transition: 0.2
   mode: queued
   max: 20
-- id: '1790000000003'
+- id: '1791006020003'
   alias: 'Bedroom 2: Tap Go To Sleep'
   description: 'Hue Tap Dial Button 3 in Bedroom 2. Press = fan 50%, sleep album 45 min (ends with a 2 min fade). Hold = same with the white noise playlist. Lights fade off over 5 minutes, then the override clears. Marks the room occupied; timer.bedroom2_tap_sleep stops Bedroom 2 Bedtime Routine from starting its own music/stop on top of this. Restart mode - pressing again restarts the session; Button 4 hold cancels it.'
   triggers:
@@ -15600,7 +15600,7 @@
             data:
               volume_level: 0.15
   mode: restart
-- id: '1790000000004'
+- id: '1791006020004'
   alias: 'Bedroom 2: Tap Reset Scene Cycle'
   description: Resets the Button 2 scene cycle to the start whenever the manual override clears, so the next tap session starts at scene 1.
   triggers:
