@@ -15728,31 +15728,47 @@
       value: 0
   mode: single
 - id: '1791000000099'
-  alias: Outside Lights Sunset Backstop
-  description: Hue bridge normally turns the outside lights on at sunset. If front
-    porch or back are still off 1 hour after sunset, turn them on and post a notification.
+  alias: Outside Lights On at Sunset
+  description: Turns the front porch and back outside lights on at sunset (replaces
+    the Hue bridge schedule). Posts a notification if either fails to turn on.
   triggers:
   - trigger: sun
     event: sunset
-    offset: 01:00:00
-  conditions:
-  - condition: or
-    conditions:
-    - condition: state
-      entity_id: light.front_porch
-      state: 'off'
-    - condition: state
-      entity_id: light.back_outside
-      state: 'off'
   actions:
   - action: light.turn_on
     target:
       entity_id: light.outside
-  - action: persistent_notification.create
-    data:
-      notification_id: outside_lights_sunset_backstop
-      title: Outside lights were off at sunset
-      message: 'The Hue sunset automation did not turn the outside lights on. Front
-        Porch was {{ states(''light.front_porch'') }} and Back was {{ states(''light.back_outside'') }}
-        at {{ now().strftime(''%-I:%M %p'') }}; Home Assistant turned them on.'
+  - delay: 00:00:30
+  - if:
+    - condition: or
+      conditions:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: light.front_porch
+          state: 'on'
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: light.back_outside
+          state: 'on'
+    then:
+    - action: persistent_notification.create
+      data:
+        notification_id: outside_lights_sunset_failed
+        title: Outside lights failed to turn on at sunset
+        message: 'Front Porch is {{ states(''light.front_porch'') }} and Back is {{
+          states(''light.back_outside'') }} at {{ now().strftime(''%-I:%M %p'') }}.'
+  mode: single
+- id: '1791000000100'
+  alias: Outside Lights Off at Sunrise
+  description: Turns the front porch and back outside lights off at sunrise (replaces
+    the Hue bridge schedule).
+  triggers:
+  - trigger: sun
+    event: sunrise
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id: light.outside
   mode: single
