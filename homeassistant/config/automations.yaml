@@ -15803,23 +15803,26 @@
   mode: single
 - id: '1791000000102'
   alias: Outside Lights Turned Off At Night Alert
-  description: Alerts Paul's iPhone if an outside light turns off (for 1 minute)
-    while the sun is down.
+  description: If an outside light turns off (for 30 seconds) while the sun is down,
+    alert Paul's iPhone and turn the lights back on.
   triggers:
   - trigger: state
     entity_id:
     - light.front_porch
     - light.back_outside
     to: 'off'
-    for: 00:01:00
+    for: 00:00:30
   conditions:
   - condition: state
     entity_id: sun.sun
     state: below_horizon
   actions:
+  - action: light.turn_on
+    target:
+      entity_id: light.outside
   - action: notify.mobile_app_pc_iphone
     data:
       title: Outside light turned off
       message: '{{ trigger.to_state.name }} turned off at {{ now().strftime(''%-I:%M
-        %p'') }} while it is still dark. The hourly check will turn it back on.'
+        %p'') }} while it is still dark. I turned the outside lights back on.'
   mode: queued
