@@ -241,7 +241,7 @@ template:
         state: >
           {{ (integration_entities('jellyfin') | select('match', '^media_player\.')
              | select('in', area_entities('living_room')) | map('states')
-             | reject('eq', 'off') | list | count > 0)
+             | reject('in', ['off', 'unavailable', 'unknown']) | list | count > 0)
              or (states('sensor.jellyfin_tiny_living_room_state') not in
                  ['off', 'unavailable', 'unknown'])
              or (states('media_player.living_room_tv') not in
