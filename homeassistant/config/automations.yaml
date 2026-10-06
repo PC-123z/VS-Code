@@ -15730,11 +15730,11 @@
 - id: '1791000000099'
   alias: Outside Lights Sunset Backstop
   description: Hue bridge normally turns the outside lights on at sunset. If front
-    porch or back are still off 5 min after sunset, turn them on and post a notification.
+    porch or back are still off 1 hour after sunset, turn them on and post a notification.
   triggers:
   - trigger: sun
     event: sunset
-    offset: 00:05:00
+    offset: 01:00:00
   conditions:
   - condition: or
     conditions:
