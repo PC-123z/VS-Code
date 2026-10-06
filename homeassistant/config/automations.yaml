@@ -6061,7 +6061,8 @@
     - conditions:
       - condition: trigger
         id: occupied_set
-      - alias: Skip while a Bedroom 2 tap sleep session is running - it plays and stops its own audio
+      - alias: Skip while a Bedroom 2 tap sleep session is running - it plays and
+          stops its own audio
         condition: state
         entity_id: timer.bedroom2_tap_sleep
         state: idle
@@ -6488,7 +6489,8 @@
     - conditions:
       - condition: trigger
         id: music_fade
-      - alias: Skip while a Bedroom 2 tap sleep session is running - it plays and stops its own audio
+      - alias: Skip while a Bedroom 2 tap sleep session is running - it plays and
+          stops its own audio
         condition: state
         entity_id: timer.bedroom2_tap_sleep
         state: idle
@@ -6519,7 +6521,8 @@
     - conditions:
       - condition: trigger
         id: music_stop
-      - alias: Skip while a Bedroom 2 tap sleep session is running - it plays and stops its own audio
+      - alias: Skip while a Bedroom 2 tap sleep session is running - it plays and
+          stops its own audio
         condition: state
         entity_id: timer.bedroom2_tap_sleep
         state: idle
@@ -8271,7 +8274,8 @@
         entity_id: input_boolean.bedroom2_occupied
         state: 'off'
       sequence:
-      - alias: Motion returned during the 5 minute fade-out - cancel it by restoring the pre-fade lights, then the override check below keeps the tap's state
+      - alias: Motion returned during the 5 minute fade-out - cancel it by restoring
+          the pre-fade lights, then the override check below keeps the tap's state
         if:
         - condition: state
           entity_id: input_boolean.bedroom2_fading_out
@@ -8470,7 +8474,8 @@
         after: 07:00:00
         before: '23:45:00'
       sequence:
-      - alias: Snapshot the lights so motion returning mid-fade can restore them (override stays ON through the fade - it is cleared only once the lights are off)
+      - alias: Snapshot the lights so motion returning mid-fade can restore them (override
+          stays ON through the fade - it is cleared only once the lights are off)
         action: scene.create
         data:
           scene_id: bedroom2_prefade
@@ -8482,7 +8487,9 @@
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.bedroom2_fading_out
-      - alias: Room empty 25 minutes - fade lights off over 5 minutes. Lights go off FIRST so AL never sees them mid-fade (2026-10-04 - AL interval update re-turned them on 27s after the off)
+      - alias: Room empty 25 minutes - fade lights off over 5 minutes. Lights go off
+          FIRST so AL never sees them mid-fade (2026-10-04 - AL interval update re-turned
+          them on 27s after the off)
         action: light.turn_off
         target:
           entity_id:
@@ -8494,7 +8501,8 @@
           - light.hue_white_lamp_1
         data:
           transition: 300
-      - alias: Wait for the 5 minute fade to finish before touching override or Adaptive Lighting
+      - alias: Wait for the 5 minute fade to finish before touching override or Adaptive
+          Lighting
         delay:
           seconds: 305
       - action: input_boolean.turn_off
@@ -8715,7 +8723,8 @@
   - condition: state
     entity_id: input_boolean.bedroom2_occupied
     state: 'off'
-  - alias: Tap/dimmer override holds the lights until Smart Motion's 25 minute empty rule fades them off
+  - alias: Tap/dimmer override holds the lights until Smart Motion's 25 minute empty
+      rule fades them off
     condition: state
     entity_id: input_boolean.bedroom2_manual_override
     state: 'off'
@@ -10500,7 +10509,7 @@
     - wed
     - thu
     - fri
-    enabled: false
+    enabled: true
   - trigger: time
     at: 08:40:00
     weekday:
@@ -10509,7 +10518,7 @@
     - wed
     - thu
     - fri
-    enabled: true
+    enabled: false
   - trigger: time
     at: 09:00:00
     weekday:
@@ -12559,13 +12568,13 @@
   mode: single
 - id: '1791000000001'
   alias: 'Welcome Home: End Session When Living Room TV Turns On'
-  description: 'Added 2026-10-04 at the user''s request - turning on the living room
+  description: Added 2026-10-04 at the user's request - turning on the living room
     TV ends Welcome Home and stops its music in every room. This only clears welcome_home_active;
     "Unjoin All Satellites on Deactivation" (1779800000007) then stops the kitchen
-    leader, unjoins every satellite including the receiver, and stops the receiver''s
+    leader, unjoins every satellite including the receiver, and stops the receiver's
     stream WITHOUT powering it off (TV guard). Ignores a TV-on within 60 s of the
     Welcome Home living room join starting, in case powering the receiver on ever
-    wakes the TV over HDMI-CEC - that must not kill the session it just joined.'
+    wakes the TV over HDMI-CEC - that must not kill the session it just joined.
   triggers:
   - trigger: state
     entity_id: binary_sensor.living_room_tv_on
@@ -13892,8 +13901,8 @@
 - id: '1785000000001'
   alias: 'Kitchen: Join Living Room Receiver Stream on Presence'
   description: Added 2026-09-24. Independent of Welcome Home, 8 AM - 10 PM daily.
-    While the Living Room receiver (media_player.living_room_av_receiver, via Music Assistant)
-    is playing, kitchen presence joins the kitchen Sonos (media_player.kitchen_2)
+    While the Living Room receiver (media_player.living_room_av_receiver, via Music
+    Assistant) is playing, kitchen presence joins the kitchen Sonos (media_player.kitchen_2)
     into the receiver's group so both play together, with the receiver as leader.
     Kitchen ramps up from 0.05 to 0.15 over 20 seconds. Kitchen is unjoined after
     10 minutes with no kitchen presence. Skips if kitchen is already playing something
@@ -14179,838 +14188,344 @@
       entity_id: fan.big_bedroom_fan
 - id: '1791006020001'
   alias: 'Bedroom 2: Tap Buttons'
-  description: 'Hue Tap Dial in Bedroom 2 (buttons 1, 2, 4). Press = short_release, hold = long_press. Any press engages the manual override (AL off) which Smart Motion clears after the room is empty 25 min + 5 min fade. Night = sleep mode or bedroom2_occupied on, or 22:00-07:00. B1 on/AL, B2 cycles 4 day / 4 night scenes, B4 off + restore AL; holds also raise the fan to 50% (B4 hold = everything off). Button 3 lives in Bedroom 2: Tap Go To Sleep.'
+  description: 'Hue Tap Dial in Bedroom 2 (buttons 1, 2, 4). Press = short_release,
+    hold = long_press. Any press engages the manual override (AL off) which Smart
+    Motion clears after the room is empty 25 min + 5 min fade. Night = sleep mode
+    or bedroom2_occupied on, or 22:00-07:00. B1 on/AL, B2 cycles 4 day / 4 night scenes,
+    B4 off + restore AL; holds also raise the fan to 50% (B4 hold = everything off).
+    Button 3 lives in Bedroom 2: Tap Go To Sleep.'
   triggers:
   - trigger: state
     entity_id: event.hue_tap_dial_switch_3_button_1
-    not_from: [unavailable, unknown]
+    not_from:
+    - unavailable
+    - unknown
     id: b1
   - trigger: state
     entity_id: event.hue_tap_dial_switch_3_button_2
-    not_from: [unavailable, unknown]
+    not_from:
+    - unavailable
+    - unknown
     id: b2
   - trigger: state
     entity_id: event.hue_tap_dial_switch_3_button_4
-    not_from: [unavailable, unknown]
+    not_from:
+    - unavailable
+    - unknown
     id: b4
   conditions: []
   actions:
   - variables:
-      night: "{{ is_state('switch.adaptive_lighting_sleep_mode_office','on') or is_state('input_boolean.bedroom2_occupied','on') or now().hour >= 22 or now().hour < 7 }}"
+      night: '{{ is_state(''switch.adaptive_lighting_sleep_mode_office'',''on'') or
+        is_state(''input_boolean.bedroom2_occupied'',''on'') or now().hour >= 22 or
+        now().hour < 7 }}'
   - choose:
     - conditions:
       - condition: trigger
         id: b1
       - condition: template
-        value_template: "{{ trigger.to_state.attributes.event_type == 'short_release' }}"
+        value_template: '{{ trigger.to_state.attributes.event_type == ''short_release''
+          }}'
       sequence:
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ night }}'
+          sequence:
+          - alias: Override on - AL stays off and automations leave the lights alone
+              until the room has been empty 25 minutes
+            action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.bedroom2_manual_override
+          - alias: AL off so it can't fight the tap (sleep mode switch left alone
+              - it defines night)
+            action: switch.turn_off
+            target:
+              entity_id:
+              - switch.adaptive_lighting_office
+              - switch.adaptive_lighting_adapt_color_office
+              - switch.adaptive_lighting_adapt_brightness_office
+          - action: adaptive_lighting.set_manual_control
+            data:
+              entity_id: switch.adaptive_lighting_office
+              lights:
+              - light.office
+              - light.hue_white_lamp_1
+              manual_control: true
+          - alias: Night - only touch lights that are already on, never light a sleeping
+              room
+            repeat:
+              for_each: '{{ [''light.office'',''light.hue_white_lamp_1'',''light.ribbon'',''light.fluttershy'']
+                | select(''is_state'',''on'') | list }}'
+              sequence:
+              - action: light.turn_on
+                continue_on_error: true
+                target:
+                  entity_id: '{{ repeat.item }}'
+                data:
+                  rgb_color:
+                  - 255
+                  - 62
+                  - 1
+                  brightness_pct: 4
+                  transition: 2
+        default:
+        - alias: Override on - AL stays off and automations leave the lights alone
+            until the room has been empty 25 minutes
+          action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.bedroom2_manual_override
+        - alias: AL off so it can't fight the tap (sleep mode switch left alone -
+            it defines night)
+          action: switch.turn_off
+          target:
+            entity_id:
+            - switch.adaptive_lighting_office
+            - switch.adaptive_lighting_adapt_color_office
+            - switch.adaptive_lighting_adapt_brightness_office
+        - action: adaptive_lighting.set_manual_control
+          data:
+            entity_id: switch.adaptive_lighting_office
+            lights:
+            - light.office
+            - light.hue_white_lamp_1
+            manual_control: true
+        - action: light.turn_on
+          target:
+            entity_id:
+            - light.office
+            - light.hue_white_lamp_1
+          data:
+            transition: 2
+        - action: adaptive_lighting.apply
+          continue_on_error: true
+          data:
+            entity_id: switch.adaptive_lighting_office
+            lights:
+            - light.office
+            - light.hue_white_lamp_1
+            transition: 2
+            adapt_color: true
+            adapt_brightness: true
         - choose:
           - conditions:
-            - condition: template
-              value_template: "{{ night }}"
+            - condition: time
+              after: 06:30:00
+              before: '10:00:00'
             sequence:
-              - alias: Override on - AL stays off and automations leave the lights alone until the room has been empty 25 minutes
-                action: input_boolean.turn_on
-                target:
-                  entity_id: input_boolean.bedroom2_manual_override
-              - alias: AL off so it can't fight the tap (sleep mode switch left alone - it defines night)
-                action: switch.turn_off
-                target:
-                  entity_id:
-                  - switch.adaptive_lighting_office
-                  - switch.adaptive_lighting_adapt_color_office
-                  - switch.adaptive_lighting_adapt_brightness_office
-              - action: adaptive_lighting.set_manual_control
-                data:
-                  entity_id: switch.adaptive_lighting_office
-                  lights:
-                    - light.office
-                    - light.hue_white_lamp_1
-                  manual_control: true
-              - alias: Night - only touch lights that are already on, never light a sleeping room
-                repeat:
-                  for_each: "{{ ['light.office','light.hue_white_lamp_1','light.ribbon','light.fluttershy'] | select('is_state','on') | list }}"
-                  sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id: "{{ repeat.item }}"
-                    data:
-                      rgb_color: [255, 62, 1]
-                      brightness_pct: 4
-                      transition: 2
-          default:
-            - alias: Override on - AL stays off and automations leave the lights alone until the room has been empty 25 minutes
-              action: input_boolean.turn_on
-              target:
-                entity_id: input_boolean.bedroom2_manual_override
-            - alias: AL off so it can't fight the tap (sleep mode switch left alone - it defines night)
-              action: switch.turn_off
-              target:
-                entity_id:
-                - switch.adaptive_lighting_office
-                - switch.adaptive_lighting_adapt_color_office
-                - switch.adaptive_lighting_adapt_brightness_office
-            - action: adaptive_lighting.set_manual_control
-              data:
-                entity_id: switch.adaptive_lighting_office
-                lights:
-                  - light.office
-                  - light.hue_white_lamp_1
-                manual_control: true
             - action: light.turn_on
+              continue_on_error: true
               target:
                 entity_id:
-                - light.office
-                - light.hue_white_lamp_1
+                - light.ribbon
+                - light.fluttershy
               data:
-                transition: 2
-            - action: adaptive_lighting.apply
+                effect: Morning Sky
+            - action: light.turn_on
               continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
               data:
-                entity_id: switch.adaptive_lighting_office
-                lights:
-                  - light.office
-                  - light.hue_white_lamp_1
-                transition: 2
-                adapt_color: true
-                adapt_brightness: true
-            - choose:
-              - conditions:
-                - condition: time
-                  after: '06:30:00'
-                  before: '10:00:00'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Morning Sky
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 60
-              - conditions:
-                - condition: time
-                  after: '10:00:00'
-                  before: '12:00:00'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Cocoa Beach
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 60
-              - conditions:
-                - condition: time
-                  after: '12:00:00'
-                  before: '15:30:00'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Lightscape
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 60
-              - conditions:
-                - condition: time
-                  after: '15:30:00'
-                  before: '19:30:00'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                    data:
-                      effect: Jungle
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                    data:
-                      brightness_pct: 60
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.fluttershy
-                    data:
-                      effect: Flow
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 60
-              - conditions:
-                - condition: time
-                  after: '19:30:00'
-                  before: '22:00:00'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Sundown
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 60
-              default:
-                - action: light.turn_on
-                  continue_on_error: true
-                  target:
-                    entity_id:
-                    - light.ribbon
-                    - light.fluttershy
-                  data:
-                    effect: Starlight
-                - action: light.turn_on
-                  continue_on_error: true
-                  target:
-                    entity_id:
-                    - light.ribbon
-                    - light.fluttershy
-                  data:
-                    brightness_pct: 60
+                brightness_pct: 60
+          - conditions:
+            - condition: time
+              after: '10:00:00'
+              before: '12:00:00'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Cocoa Beach
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 60
+          - conditions:
+            - condition: time
+              after: '12:00:00'
+              before: '15:30:00'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Lightscape
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 60
+          - conditions:
+            - condition: time
+              after: '15:30:00'
+              before: '19:30:00'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+              data:
+                effect: Jungle
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+              data:
+                brightness_pct: 60
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.fluttershy
+              data:
+                effect: Flow
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.fluttershy
+              data:
+                brightness_pct: 60
+          - conditions:
+            - condition: time
+              after: '19:30:00'
+              before: '22:00:00'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Sundown
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 60
+          default:
+          - action: light.turn_on
+            continue_on_error: true
+            target:
+              entity_id:
+              - light.ribbon
+              - light.fluttershy
+            data:
+              effect: Starlight
+          - action: light.turn_on
+            continue_on_error: true
+            target:
+              entity_id:
+              - light.ribbon
+              - light.fluttershy
+            data:
+              brightness_pct: 60
     - conditions:
       - condition: trigger
         id: b1
       - condition: template
-        value_template: "{{ trigger.to_state.attributes.event_type == 'long_press' }}"
+        value_template: '{{ trigger.to_state.attributes.event_type == ''long_press''
+          }}'
       sequence:
-        - choose:
-          - conditions:
-            - condition: template
-              value_template: "{{ night }}"
-            sequence:
-              - alias: Override on - AL stays off and automations leave the lights alone until the room has been empty 25 minutes
-                action: input_boolean.turn_on
-                target:
-                  entity_id: input_boolean.bedroom2_manual_override
-              - alias: AL off so it can't fight the tap (sleep mode switch left alone - it defines night)
-                action: switch.turn_off
-                target:
-                  entity_id:
-                  - switch.adaptive_lighting_office
-                  - switch.adaptive_lighting_adapt_color_office
-                  - switch.adaptive_lighting_adapt_brightness_office
-              - action: adaptive_lighting.set_manual_control
-                data:
-                  entity_id: switch.adaptive_lighting_office
-                  lights:
-                    - light.office
-                    - light.hue_white_lamp_1
-                  manual_control: true
-              - alias: Fan to 50% - only ever raises it, never lowers a fan already higher
-                if:
-                - condition: template
-                  value_template: "{{ not is_state('fan.bedroom2_fan','on') or (state_attr('fan.bedroom2_fan','percentage') | int(0)) < 50 }}"
-                then:
-                - action: fan.turn_on
-                  continue_on_error: true
-                  target:
-                    entity_id: fan.bedroom2_fan
-                  data:
-                    percentage: 50
-              - alias: Night - gentle 15% amber, deliberate hold only. No bright flash.
-                action: light.turn_on
-                continue_on_error: true
-                target:
-                  entity_id: light.office
-                data:
-                  rgb_color: [191, 87, 0]
-                  brightness_pct: 15
-                  transition: 3
-              - action: light.turn_on
-                continue_on_error: true
-                target:
-                  entity_id: light.hue_white_lamp_1
-                data:
-                  brightness_pct: 8
-                  transition: 3
-              - action: light.turn_on
-                continue_on_error: true
-                target:
-                  entity_id:
-                  - light.ribbon
-                  - light.fluttershy
-                data:
-                  rgb_color: [255, 62, 1]
-                  brightness_pct: 15
-                  transition: 2
-          default:
-            - alias: Override on - AL stays off and automations leave the lights alone until the room has been empty 25 minutes
-              action: input_boolean.turn_on
-              target:
-                entity_id: input_boolean.bedroom2_manual_override
-            - alias: AL off so it can't fight the tap (sleep mode switch left alone - it defines night)
-              action: switch.turn_off
-              target:
-                entity_id:
-                - switch.adaptive_lighting_office
-                - switch.adaptive_lighting_adapt_color_office
-                - switch.adaptive_lighting_adapt_brightness_office
-            - action: adaptive_lighting.set_manual_control
-              data:
-                entity_id: switch.adaptive_lighting_office
-                lights:
-                  - light.office
-                  - light.hue_white_lamp_1
-                manual_control: true
-            - alias: Fan to 50% - only ever raises it, never lowers a fan already higher
-              if:
-              - condition: template
-                value_template: "{{ not is_state('fan.bedroom2_fan','on') or (state_attr('fan.bedroom2_fan','percentage') | int(0)) < 50 }}"
-              then:
-              - action: fan.turn_on
-                continue_on_error: true
-                target:
-                  entity_id: fan.bedroom2_fan
-                data:
-                  percentage: 50
-            - alias: Ceilings 100% with time-of-day color temperature
-              action: light.turn_on
-              target:
-                entity_id:
-                - light.office
-                - light.hue_white_lamp_1
-              data:
-                brightness_pct: 100
-                transition: 2
-            - action: adaptive_lighting.apply
-              continue_on_error: true
-              data:
-                entity_id: switch.adaptive_lighting_office
-                lights:
-                  - light.office
-                  - light.hue_white_lamp_1
-                transition: 2
-                adapt_color: true
-                adapt_brightness: false
-            - choose:
-              - conditions:
-                - condition: time
-                  after: '06:30:00'
-                  before: '10:00:00'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Morning Sky
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 100
-              - conditions:
-                - condition: time
-                  after: '10:00:00'
-                  before: '12:00:00'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Cocoa Beach
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 100
-              - conditions:
-                - condition: time
-                  after: '12:00:00'
-                  before: '15:30:00'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Lightscape
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 100
-              - conditions:
-                - condition: time
-                  after: '15:30:00'
-                  before: '19:30:00'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                    data:
-                      effect: Jungle
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                    data:
-                      brightness_pct: 100
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.fluttershy
-                    data:
-                      effect: Flow
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 100
-              - conditions:
-                - condition: time
-                  after: '19:30:00'
-                  before: '22:00:00'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Sundown
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 100
-              default:
-                - action: light.turn_on
-                  continue_on_error: true
-                  target:
-                    entity_id:
-                    - light.ribbon
-                    - light.fluttershy
-                  data:
-                    effect: Starlight
-                - action: light.turn_on
-                  continue_on_error: true
-                  target:
-                    entity_id:
-                    - light.ribbon
-                    - light.fluttershy
-                  data:
-                    brightness_pct: 100
-    - conditions:
-      - condition: trigger
-        id: b2
-      - condition: template
-        value_template: "{{ trigger.to_state.attributes.event_type == 'short_release' }}"
-      sequence:
-        - alias: Advance the scene index 1 -> 4 and wrap (0 = no scene picked yet)
-          variables:
-            next_idx: "{{ (states('input_number.bedroom2_scene_index') | int(0)) % 4 + 1 }}"
-        - action: input_number.set_value
-          target:
-            entity_id: input_number.bedroom2_scene_index
-          data:
-            value: "{{ next_idx }}"
-        - alias: Override on - AL stays off and automations leave the lights alone until the room has been empty 25 minutes
-          action: input_boolean.turn_on
-          target:
-            entity_id: input_boolean.bedroom2_manual_override
-        - alias: AL off so it can't fight the tap (sleep mode switch left alone - it defines night)
-          action: switch.turn_off
-          target:
-            entity_id:
-            - switch.adaptive_lighting_office
-            - switch.adaptive_lighting_adapt_color_office
-            - switch.adaptive_lighting_adapt_brightness_office
-        - action: adaptive_lighting.set_manual_control
-          data:
-            entity_id: switch.adaptive_lighting_office
-            lights:
-              - light.office
-              - light.hue_white_lamp_1
-            manual_control: true
-        - alias: Day or night scene set
-          if:
+      - choose:
+        - conditions:
           - condition: template
-            value_template: "{{ night }}"
-          then:
-            - choose:
-              - conditions:
-                - condition: template
-                  value_template: '{{ next_idx == 1 }}'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.office
-                    data:
-                      rgb_color: [191, 87, 0]
-                      brightness_pct: 3
-                      transition: 2
-                  - action: light.turn_off
-                    continue_on_error: true
-                    target:
-                      entity_id: light.hue_white_lamp_1
-                    data:
-                      transition: 2
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Sundown
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 5
-              - conditions:
-                - condition: template
-                  value_template: '{{ next_idx == 2 }}'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.office
-                    data:
-                      rgb_color: [191, 87, 0]
-                      brightness_pct: 3
-                      transition: 2
-                  - action: light.turn_off
-                    continue_on_error: true
-                    target:
-                      entity_id: light.hue_white_lamp_1
-                    data:
-                      transition: 2
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Starlight
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 5
-              - conditions:
-                - condition: template
-                  value_template: '{{ next_idx == 3 }}'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.office
-                    data:
-                      rgb_color: [191, 87, 0]
-                      brightness_pct: 3
-                      transition: 2
-                  - action: light.turn_off
-                    continue_on_error: true
-                    target:
-                      entity_id: light.hue_white_lamp_1
-                    data:
-                      transition: 2
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: moonlight
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 5
-              - conditions:
-                - condition: template
-                  value_template: '{{ next_idx == 4 }}'
-                sequence:
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.office
-                    data:
-                      rgb_color: [191, 87, 0]
-                      brightness_pct: 3
-                      transition: 2
-                  - action: light.turn_off
-                    continue_on_error: true
-                    target:
-                      entity_id: light.hue_white_lamp_1
-                    data:
-                      transition: 2
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Northern Lights
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 5
-          else:
-            - choose:
-              - conditions:
-                - condition: template
-                  value_template: '{{ next_idx == 1 }}'
-                sequence:
-                  - action: light.turn_on
-                    target:
-                      entity_id:
-                      - light.office
-                      - light.hue_white_lamp_1
-                    data:
-                      transition: 2
-                  - action: adaptive_lighting.apply
-                    continue_on_error: true
-                    data:
-                      entity_id: switch.adaptive_lighting_office
-                      lights:
-                        - light.office
-                        - light.hue_white_lamp_1
-                      transition: 2
-                      adapt_color: true
-                      adapt_brightness: true
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Morning Sky
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 70
-              - conditions:
-                - condition: template
-                  value_template: '{{ next_idx == 2 }}'
-                sequence:
-                  - action: light.turn_on
-                    target:
-                      entity_id:
-                      - light.office
-                      - light.hue_white_lamp_1
-                    data:
-                      transition: 2
-                  - action: adaptive_lighting.apply
-                    continue_on_error: true
-                    data:
-                      entity_id: switch.adaptive_lighting_office
-                      lights:
-                        - light.office
-                        - light.hue_white_lamp_1
-                      transition: 2
-                      adapt_color: true
-                      adapt_brightness: true
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Cocoa Beach
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 70
-              - conditions:
-                - condition: template
-                  value_template: '{{ next_idx == 3 }}'
-                sequence:
-                  - action: light.turn_on
-                    target:
-                      entity_id:
-                      - light.office
-                      - light.hue_white_lamp_1
-                    data:
-                      transition: 2
-                  - action: adaptive_lighting.apply
-                    continue_on_error: true
-                    data:
-                      entity_id: switch.adaptive_lighting_office
-                      lights:
-                        - light.office
-                        - light.hue_white_lamp_1
-                      transition: 2
-                      adapt_color: true
-                      adapt_brightness: true
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      effect: Lightscape
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 70
-              - conditions:
-                - condition: template
-                  value_template: '{{ next_idx == 4 }}'
-                sequence:
-                  - action: light.turn_on
-                    target:
-                      entity_id:
-                      - light.office
-                      - light.hue_white_lamp_1
-                    data:
-                      transition: 2
-                  - action: adaptive_lighting.apply
-                    continue_on_error: true
-                    data:
-                      entity_id: switch.adaptive_lighting_office
-                      lights:
-                        - light.office
-                        - light.hue_white_lamp_1
-                      transition: 2
-                      adapt_color: true
-                      adapt_brightness: true
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                    data:
-                      effect: Jungle
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.ribbon
-                    data:
-                      brightness_pct: 70
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.fluttershy
-                    data:
-                      effect: Flow
-                  - action: light.turn_on
-                    continue_on_error: true
-                    target:
-                      entity_id:
-                      - light.fluttershy
-                    data:
-                      brightness_pct: 70
-    - conditions:
-      - condition: trigger
-        id: b2
-      - condition: template
-        value_template: "{{ trigger.to_state.attributes.event_type == 'long_press' }}"
-      sequence:
-        - alias: Override on - AL stays off and automations leave the lights alone until the room has been empty 25 minutes
+            value_template: '{{ night }}'
+          sequence:
+          - alias: Override on - AL stays off and automations leave the lights alone
+              until the room has been empty 25 minutes
+            action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.bedroom2_manual_override
+          - alias: AL off so it can't fight the tap (sleep mode switch left alone
+              - it defines night)
+            action: switch.turn_off
+            target:
+              entity_id:
+              - switch.adaptive_lighting_office
+              - switch.adaptive_lighting_adapt_color_office
+              - switch.adaptive_lighting_adapt_brightness_office
+          - action: adaptive_lighting.set_manual_control
+            data:
+              entity_id: switch.adaptive_lighting_office
+              lights:
+              - light.office
+              - light.hue_white_lamp_1
+              manual_control: true
+          - alias: Fan to 50% - only ever raises it, never lowers a fan already higher
+            if:
+            - condition: template
+              value_template: '{{ not is_state(''fan.bedroom2_fan'',''on'') or (state_attr(''fan.bedroom2_fan'',''percentage'')
+                | int(0)) < 50 }}'
+            then:
+            - action: fan.turn_on
+              continue_on_error: true
+              target:
+                entity_id: fan.bedroom2_fan
+              data:
+                percentage: 50
+          - alias: Night - gentle 15% amber, deliberate hold only. No bright flash.
+            action: light.turn_on
+            continue_on_error: true
+            target:
+              entity_id: light.office
+            data:
+              rgb_color:
+              - 191
+              - 87
+              - 0
+              brightness_pct: 15
+              transition: 3
+          - action: light.turn_on
+            continue_on_error: true
+            target:
+              entity_id: light.hue_white_lamp_1
+            data:
+              brightness_pct: 8
+              transition: 3
+          - action: light.turn_on
+            continue_on_error: true
+            target:
+              entity_id:
+              - light.ribbon
+              - light.fluttershy
+            data:
+              rgb_color:
+              - 255
+              - 62
+              - 1
+              brightness_pct: 15
+              transition: 2
+        default:
+        - alias: Override on - AL stays off and automations leave the lights alone
+            until the room has been empty 25 minutes
           action: input_boolean.turn_on
           target:
             entity_id: input_boolean.bedroom2_manual_override
-        - alias: AL off so it can't fight the tap (sleep mode switch left alone - it defines night)
+        - alias: AL off so it can't fight the tap (sleep mode switch left alone -
+            it defines night)
           action: switch.turn_off
           target:
             entity_id:
@@ -15021,13 +14536,14 @@
           data:
             entity_id: switch.adaptive_lighting_office
             lights:
-              - light.office
-              - light.hue_white_lamp_1
+            - light.office
+            - light.hue_white_lamp_1
             manual_control: true
         - alias: Fan to 50% - only ever raises it, never lowers a fan already higher
           if:
           - condition: template
-            value_template: "{{ not is_state('fan.bedroom2_fan','on') or (state_attr('fan.bedroom2_fan','percentage') | int(0)) < 50 }}"
+            value_template: '{{ not is_state(''fan.bedroom2_fan'',''on'') or (state_attr(''fan.bedroom2_fan'',''percentage'')
+              | int(0)) < 50 }}'
           then:
           - action: fan.turn_on
             continue_on_error: true
@@ -15035,232 +14551,183 @@
               entity_id: fan.bedroom2_fan
             data:
               percentage: 50
-        - alias: Day or night hold scene
-          if:
-          - condition: template
-            value_template: "{{ night }}"
-          then:
-            - action: light.turn_on
-              continue_on_error: true
-              target:
-                entity_id:
-                - light.office
-              data:
-                rgb_color: [255, 30, 0]
-                brightness_pct: 4
-                transition: 2
-            - action: light.turn_on
-              continue_on_error: true
-              target:
-                entity_id:
-                - light.hue_white_lamp_1
-              data:
-                rgb_color: [255, 30, 0]
-                brightness_pct: 2
-                transition: 2
-            - action: light.turn_on
-              continue_on_error: true
-              target:
-                entity_id:
-                - light.ribbon
-                - light.fluttershy
-              data:
-                effect: Sleep Mode
-            - action: light.turn_on
-              continue_on_error: true
-              target:
-                entity_id:
-                - light.ribbon
-                - light.fluttershy
-              data:
-                brightness_pct: 3
-          else:
-            - action: light.turn_on
-              continue_on_error: true
-              target:
-                entity_id:
-                - light.office
-                - light.hue_white_lamp_1
-              data:
-                brightness_pct: 25
-                transition: 2
-            - action: adaptive_lighting.apply
-              continue_on_error: true
-              data:
-                entity_id: switch.adaptive_lighting_office
-                lights:
-                  - light.office
-                  - light.hue_white_lamp_1
-                transition: 2
-                adapt_color: true
-                adapt_brightness: false
-            - action: light.turn_on
-              continue_on_error: true
-              target:
-                entity_id:
-                - light.ribbon
-                - light.fluttershy
-              data:
-                effect: Date Night
-            - action: light.turn_on
-              continue_on_error: true
-              target:
-                entity_id:
-                - light.ribbon
-                - light.fluttershy
-              data:
-                brightness_pct: 80
-    - conditions:
-      - condition: trigger
-        id: b4
-      - condition: template
-        value_template: "{{ trigger.to_state.attributes.event_type == 'short_release' }}"
-      sequence:
-        - alias: Clear manual override
-          action: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.bedroom2_manual_override
-        - alias: Clear manual_control so AL can take over on next motion
-          action: adaptive_lighting.set_manual_control
-          data:
-            entity_id: switch.adaptive_lighting_office
-            lights:
-              - light.office
-              - light.hue_white_lamp_1
-            manual_control: false
-        - alias: Re-enable AL switches
-          action: switch.turn_on
-          target:
-            entity_id:
-            - switch.adaptive_lighting_office
-            - switch.adaptive_lighting_adapt_color_office
-            - switch.adaptive_lighting_adapt_brightness_office
-        - alias: Sleep mode by time of day
-          if:
-          - condition: time
-            after: '22:15:00'
-            before: 07:00:00
-          then:
-          - action: switch.turn_on
-            target:
-              entity_id: switch.adaptive_lighting_sleep_mode_office
-          else:
-          - action: switch.turn_off
-            target:
-              entity_id: switch.adaptive_lighting_sleep_mode_office
-        - action: light.turn_off
-          continue_on_error: true
+        - alias: Ceilings 100% with time-of-day color temperature
+          action: light.turn_on
           target:
             entity_id:
             - light.office
             - light.hue_white_lamp_1
-            - light.ribbon
-            - light.fluttershy
-            - light.showtime_light
           data:
+            brightness_pct: 100
             transition: 2
-    - conditions:
-      - condition: trigger
-        id: b4
-      - condition: template
-        value_template: "{{ trigger.to_state.attributes.event_type == 'long_press' }}"
-      sequence:
-        - alias: Cancel any running tap sleep session so it can't restart music or lights
-          action: automation.turn_off
-          target:
-            entity_id: automation.bedroom_2_tap_go_to_sleep
-          data:
-            stop_actions: true
-        - action: automation.turn_on
-          target:
-            entity_id: automation.bedroom_2_tap_go_to_sleep
-        - action: timer.cancel
-          target:
-            entity_id: timer.bedroom2_tap_sleep
-        - alias: Clear manual override
-          action: input_boolean.turn_off
-          target:
-            entity_id: input_boolean.bedroom2_manual_override
-        - alias: Clear manual_control so AL can take over on next motion
-          action: adaptive_lighting.set_manual_control
+        - action: adaptive_lighting.apply
+          continue_on_error: true
           data:
             entity_id: switch.adaptive_lighting_office
             lights:
-              - light.office
-              - light.hue_white_lamp_1
-            manual_control: false
-        - alias: Re-enable AL switches
-          action: switch.turn_on
-          target:
-            entity_id:
-            - switch.adaptive_lighting_office
-            - switch.adaptive_lighting_adapt_color_office
-            - switch.adaptive_lighting_adapt_brightness_office
-        - alias: Sleep mode by time of day
-          if:
-          - condition: time
-            after: '22:15:00'
-            before: 07:00:00
-          then:
-          - action: switch.turn_on
-            target:
-              entity_id: switch.adaptive_lighting_sleep_mode_office
-          else:
-          - action: switch.turn_off
-            target:
-              entity_id: switch.adaptive_lighting_sleep_mode_office
-        - action: light.turn_off
-          continue_on_error: true
-          target:
-            entity_id:
             - light.office
             - light.hue_white_lamp_1
-            - light.ribbon
-            - light.fluttershy
-            - light.showtime_light
-          data:
             transition: 2
-        - alias: Fan off
-          action: fan.turn_off
-          continue_on_error: true
-          target:
-            entity_id: fan.bedroom2_fan
-        - alias: Stop music - leaves any shared group first
-          action: script.stop_room_speaker_safely
-          continue_on_error: true
-          data:
-            entity_id: media_player.office_2
-  mode: parallel
-  max: 10
-- id: '1791006020002'
-  alias: 'Bedroom 2: Tap Dial Brightness'
-  description: 'Rotary on the Bedroom 2 Hue Tap Dial = brightness on whichever lights are already on (never turns a dark room on, never steps below 1%). Step size scales with how far the dial turned; night steps are smaller. Engages the manual override like any other tap input.'
-  triggers:
-  - trigger: state
-    entity_id: event.hue_tap_dial_switch_3_rotary
-    not_from: [unavailable, unknown]
-  conditions: []
-  actions:
-  - variables:
-      night: "{{ is_state('switch.adaptive_lighting_sleep_mode_office','on') or is_state('input_boolean.bedroom2_occupied','on') or now().hour >= 22 or now().hour < 7 }}"
-      direction: "{{ 1 if trigger.to_state.attributes.event_type == 'clock_wise' else -1 }}"
-      turn_steps: "{{ trigger.to_state.attributes.steps | int(10) }}"
-      step_pct: "{{ ([[(turn_steps / 12) | round(0), 1] | max, 5] | min) if night else ([[(turn_steps / 4) | round(0), 2] | max, 20] | min) }}"
-      on_lights: "{{ ['light.office','light.hue_white_lamp_1','light.ribbon','light.fluttershy'] | select('is_state','on') | list }}"
-  - alias: Nothing to dim - never turn a dark room on
-    condition: template
-    value_template: "{{ on_lights | count > 0 }}"
-  - alias: Engage the override once (first dial tick)
-    if:
-    - condition: state
-      entity_id: input_boolean.bedroom2_manual_override
-      state: 'off'
-    then:
-      - alias: Override on - AL stays off and automations leave the lights alone until the room has been empty 25 minutes
+            adapt_color: true
+            adapt_brightness: false
+        - choose:
+          - conditions:
+            - condition: time
+              after: 06:30:00
+              before: '10:00:00'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Morning Sky
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 100
+          - conditions:
+            - condition: time
+              after: '10:00:00'
+              before: '12:00:00'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Cocoa Beach
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 100
+          - conditions:
+            - condition: time
+              after: '12:00:00'
+              before: '15:30:00'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Lightscape
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 100
+          - conditions:
+            - condition: time
+              after: '15:30:00'
+              before: '19:30:00'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+              data:
+                effect: Jungle
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+              data:
+                brightness_pct: 100
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.fluttershy
+              data:
+                effect: Flow
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.fluttershy
+              data:
+                brightness_pct: 100
+          - conditions:
+            - condition: time
+              after: '19:30:00'
+              before: '22:00:00'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Sundown
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 100
+          default:
+          - action: light.turn_on
+            continue_on_error: true
+            target:
+              entity_id:
+              - light.ribbon
+              - light.fluttershy
+            data:
+              effect: Starlight
+          - action: light.turn_on
+            continue_on_error: true
+            target:
+              entity_id:
+              - light.ribbon
+              - light.fluttershy
+            data:
+              brightness_pct: 100
+    - conditions:
+      - condition: trigger
+        id: b2
+      - condition: template
+        value_template: '{{ trigger.to_state.attributes.event_type == ''short_release''
+          }}'
+      sequence:
+      - alias: Advance the scene index 1 -> 4 and wrap (0 = no scene picked yet)
+        variables:
+          next_idx: '{{ (states(''input_number.bedroom2_scene_index'') | int(0)) %
+            4 + 1 }}'
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.bedroom2_scene_index
+        data:
+          value: '{{ next_idx }}'
+      - alias: Override on - AL stays off and automations leave the lights alone until
+          the room has been empty 25 minutes
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.bedroom2_manual_override
-      - alias: AL off so it can't fight the tap (sleep mode switch left alone - it defines night)
+      - alias: AL off so it can't fight the tap (sleep mode switch left alone - it
+          defines night)
         action: switch.turn_off
         target:
           entity_id:
@@ -15271,45 +14738,673 @@
         data:
           entity_id: switch.adaptive_lighting_office
           lights:
+          - light.office
+          - light.hue_white_lamp_1
+          manual_control: true
+      - alias: Day or night scene set
+        if:
+        - condition: template
+          value_template: '{{ night }}'
+        then:
+        - choose:
+          - conditions:
+            - condition: template
+              value_template: '{{ next_idx == 1 }}'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.office
+              data:
+                rgb_color:
+                - 191
+                - 87
+                - 0
+                brightness_pct: 3
+                transition: 2
+            - action: light.turn_off
+              continue_on_error: true
+              target:
+                entity_id: light.hue_white_lamp_1
+              data:
+                transition: 2
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Sundown
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 5
+          - conditions:
+            - condition: template
+              value_template: '{{ next_idx == 2 }}'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.office
+              data:
+                rgb_color:
+                - 191
+                - 87
+                - 0
+                brightness_pct: 3
+                transition: 2
+            - action: light.turn_off
+              continue_on_error: true
+              target:
+                entity_id: light.hue_white_lamp_1
+              data:
+                transition: 2
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Starlight
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 5
+          - conditions:
+            - condition: template
+              value_template: '{{ next_idx == 3 }}'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.office
+              data:
+                rgb_color:
+                - 191
+                - 87
+                - 0
+                brightness_pct: 3
+                transition: 2
+            - action: light.turn_off
+              continue_on_error: true
+              target:
+                entity_id: light.hue_white_lamp_1
+              data:
+                transition: 2
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: moonlight
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 5
+          - conditions:
+            - condition: template
+              value_template: '{{ next_idx == 4 }}'
+            sequence:
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.office
+              data:
+                rgb_color:
+                - 191
+                - 87
+                - 0
+                brightness_pct: 3
+                transition: 2
+            - action: light.turn_off
+              continue_on_error: true
+              target:
+                entity_id: light.hue_white_lamp_1
+              data:
+                transition: 2
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Northern Lights
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 5
+        else:
+        - choose:
+          - conditions:
+            - condition: template
+              value_template: '{{ next_idx == 1 }}'
+            sequence:
+            - action: light.turn_on
+              target:
+                entity_id:
+                - light.office
+                - light.hue_white_lamp_1
+              data:
+                transition: 2
+            - action: adaptive_lighting.apply
+              continue_on_error: true
+              data:
+                entity_id: switch.adaptive_lighting_office
+                lights:
+                - light.office
+                - light.hue_white_lamp_1
+                transition: 2
+                adapt_color: true
+                adapt_brightness: true
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Morning Sky
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 70
+          - conditions:
+            - condition: template
+              value_template: '{{ next_idx == 2 }}'
+            sequence:
+            - action: light.turn_on
+              target:
+                entity_id:
+                - light.office
+                - light.hue_white_lamp_1
+              data:
+                transition: 2
+            - action: adaptive_lighting.apply
+              continue_on_error: true
+              data:
+                entity_id: switch.adaptive_lighting_office
+                lights:
+                - light.office
+                - light.hue_white_lamp_1
+                transition: 2
+                adapt_color: true
+                adapt_brightness: true
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Cocoa Beach
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 70
+          - conditions:
+            - condition: template
+              value_template: '{{ next_idx == 3 }}'
+            sequence:
+            - action: light.turn_on
+              target:
+                entity_id:
+                - light.office
+                - light.hue_white_lamp_1
+              data:
+                transition: 2
+            - action: adaptive_lighting.apply
+              continue_on_error: true
+              data:
+                entity_id: switch.adaptive_lighting_office
+                lights:
+                - light.office
+                - light.hue_white_lamp_1
+                transition: 2
+                adapt_color: true
+                adapt_brightness: true
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                effect: Lightscape
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+                - light.fluttershy
+              data:
+                brightness_pct: 70
+          - conditions:
+            - condition: template
+              value_template: '{{ next_idx == 4 }}'
+            sequence:
+            - action: light.turn_on
+              target:
+                entity_id:
+                - light.office
+                - light.hue_white_lamp_1
+              data:
+                transition: 2
+            - action: adaptive_lighting.apply
+              continue_on_error: true
+              data:
+                entity_id: switch.adaptive_lighting_office
+                lights:
+                - light.office
+                - light.hue_white_lamp_1
+                transition: 2
+                adapt_color: true
+                adapt_brightness: true
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+              data:
+                effect: Jungle
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.ribbon
+              data:
+                brightness_pct: 70
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.fluttershy
+              data:
+                effect: Flow
+            - action: light.turn_on
+              continue_on_error: true
+              target:
+                entity_id:
+                - light.fluttershy
+              data:
+                brightness_pct: 70
+    - conditions:
+      - condition: trigger
+        id: b2
+      - condition: template
+        value_template: '{{ trigger.to_state.attributes.event_type == ''long_press''
+          }}'
+      sequence:
+      - alias: Override on - AL stays off and automations leave the lights alone until
+          the room has been empty 25 minutes
+        action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.bedroom2_manual_override
+      - alias: AL off so it can't fight the tap (sleep mode switch left alone - it
+          defines night)
+        action: switch.turn_off
+        target:
+          entity_id:
+          - switch.adaptive_lighting_office
+          - switch.adaptive_lighting_adapt_color_office
+          - switch.adaptive_lighting_adapt_brightness_office
+      - action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.adaptive_lighting_office
+          lights:
+          - light.office
+          - light.hue_white_lamp_1
+          manual_control: true
+      - alias: Fan to 50% - only ever raises it, never lowers a fan already higher
+        if:
+        - condition: template
+          value_template: '{{ not is_state(''fan.bedroom2_fan'',''on'') or (state_attr(''fan.bedroom2_fan'',''percentage'')
+            | int(0)) < 50 }}'
+        then:
+        - action: fan.turn_on
+          continue_on_error: true
+          target:
+            entity_id: fan.bedroom2_fan
+          data:
+            percentage: 50
+      - alias: Day or night hold scene
+        if:
+        - condition: template
+          value_template: '{{ night }}'
+        then:
+        - action: light.turn_on
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.office
+          data:
+            rgb_color:
+            - 255
+            - 30
+            - 0
+            brightness_pct: 4
+            transition: 2
+        - action: light.turn_on
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.hue_white_lamp_1
+          data:
+            rgb_color:
+            - 255
+            - 30
+            - 0
+            brightness_pct: 2
+            transition: 2
+        - action: light.turn_on
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.ribbon
+            - light.fluttershy
+          data:
+            effect: Sleep Mode
+        - action: light.turn_on
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.ribbon
+            - light.fluttershy
+          data:
+            brightness_pct: 3
+        else:
+        - action: light.turn_on
+          continue_on_error: true
+          target:
+            entity_id:
             - light.office
             - light.hue_white_lamp_1
-          manual_control: true
+          data:
+            brightness_pct: 25
+            transition: 2
+        - action: adaptive_lighting.apply
+          continue_on_error: true
+          data:
+            entity_id: switch.adaptive_lighting_office
+            lights:
+            - light.office
+            - light.hue_white_lamp_1
+            transition: 2
+            adapt_color: true
+            adapt_brightness: false
+        - action: light.turn_on
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.ribbon
+            - light.fluttershy
+          data:
+            effect: Date Night
+        - action: light.turn_on
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.ribbon
+            - light.fluttershy
+          data:
+            brightness_pct: 80
+    - conditions:
+      - condition: trigger
+        id: b4
+      - condition: template
+        value_template: '{{ trigger.to_state.attributes.event_type == ''short_release''
+          }}'
+      sequence:
+      - alias: Clear manual override
+        action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.bedroom2_manual_override
+      - alias: Clear manual_control so AL can take over on next motion
+        action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.adaptive_lighting_office
+          lights:
+          - light.office
+          - light.hue_white_lamp_1
+          manual_control: false
+      - alias: Re-enable AL switches
+        action: switch.turn_on
+        target:
+          entity_id:
+          - switch.adaptive_lighting_office
+          - switch.adaptive_lighting_adapt_color_office
+          - switch.adaptive_lighting_adapt_brightness_office
+      - alias: Sleep mode by time of day
+        if:
+        - condition: time
+          after: '22:15:00'
+          before: 07:00:00
+        then:
+        - action: switch.turn_on
+          target:
+            entity_id: switch.adaptive_lighting_sleep_mode_office
+        else:
+        - action: switch.turn_off
+          target:
+            entity_id: switch.adaptive_lighting_sleep_mode_office
+      - action: light.turn_off
+        continue_on_error: true
+        target:
+          entity_id:
+          - light.office
+          - light.hue_white_lamp_1
+          - light.ribbon
+          - light.fluttershy
+          - light.showtime_light
+        data:
+          transition: 2
+    - conditions:
+      - condition: trigger
+        id: b4
+      - condition: template
+        value_template: '{{ trigger.to_state.attributes.event_type == ''long_press''
+          }}'
+      sequence:
+      - alias: Cancel any running tap sleep session so it can't restart music or lights
+        action: automation.turn_off
+        target:
+          entity_id: automation.bedroom_2_tap_go_to_sleep
+        data:
+          stop_actions: true
+      - action: automation.turn_on
+        target:
+          entity_id: automation.bedroom_2_tap_go_to_sleep
+      - action: timer.cancel
+        target:
+          entity_id: timer.bedroom2_tap_sleep
+      - alias: Clear manual override
+        action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.bedroom2_manual_override
+      - alias: Clear manual_control so AL can take over on next motion
+        action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.adaptive_lighting_office
+          lights:
+          - light.office
+          - light.hue_white_lamp_1
+          manual_control: false
+      - alias: Re-enable AL switches
+        action: switch.turn_on
+        target:
+          entity_id:
+          - switch.adaptive_lighting_office
+          - switch.adaptive_lighting_adapt_color_office
+          - switch.adaptive_lighting_adapt_brightness_office
+      - alias: Sleep mode by time of day
+        if:
+        - condition: time
+          after: '22:15:00'
+          before: 07:00:00
+        then:
+        - action: switch.turn_on
+          target:
+            entity_id: switch.adaptive_lighting_sleep_mode_office
+        else:
+        - action: switch.turn_off
+          target:
+            entity_id: switch.adaptive_lighting_sleep_mode_office
+      - action: light.turn_off
+        continue_on_error: true
+        target:
+          entity_id:
+          - light.office
+          - light.hue_white_lamp_1
+          - light.ribbon
+          - light.fluttershy
+          - light.showtime_light
+        data:
+          transition: 2
+      - alias: Fan off
+        action: fan.turn_off
+        continue_on_error: true
+        target:
+          entity_id: fan.bedroom2_fan
+      - alias: Stop music - leaves any shared group first
+        action: script.stop_room_speaker_safely
+        continue_on_error: true
+        data:
+          entity_id: media_player.office_2
+  mode: parallel
+  max: 10
+- id: '1791006020002'
+  alias: 'Bedroom 2: Tap Dial Brightness'
+  description: Rotary on the Bedroom 2 Hue Tap Dial = brightness on whichever lights
+    are already on (never turns a dark room on, never steps below 1%). Step size scales
+    with how far the dial turned; night steps are smaller. Engages the manual override
+    like any other tap input.
+  triggers:
+  - trigger: state
+    entity_id: event.hue_tap_dial_switch_3_rotary
+    not_from:
+    - unavailable
+    - unknown
+  conditions: []
+  actions:
+  - variables:
+      night: '{{ is_state(''switch.adaptive_lighting_sleep_mode_office'',''on'') or
+        is_state(''input_boolean.bedroom2_occupied'',''on'') or now().hour >= 22 or
+        now().hour < 7 }}'
+      direction: '{{ 1 if trigger.to_state.attributes.event_type == ''clock_wise''
+        else -1 }}'
+      turn_steps: '{{ trigger.to_state.attributes.steps | int(10) }}'
+      step_pct: '{{ ([[(turn_steps / 12) | round(0), 1] | max, 5] | min) if night
+        else ([[(turn_steps / 4) | round(0), 2] | max, 20] | min) }}'
+      on_lights: '{{ [''light.office'',''light.hue_white_lamp_1'',''light.ribbon'',''light.fluttershy'']
+        | select(''is_state'',''on'') | list }}'
+  - alias: Nothing to dim - never turn a dark room on
+    condition: template
+    value_template: '{{ on_lights | count > 0 }}'
+  - alias: Engage the override once (first dial tick)
+    if:
+    - condition: state
+      entity_id: input_boolean.bedroom2_manual_override
+      state: 'off'
+    then:
+    - alias: Override on - AL stays off and automations leave the lights alone until
+        the room has been empty 25 minutes
+      action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.bedroom2_manual_override
+    - alias: AL off so it can't fight the tap (sleep mode switch left alone - it defines
+        night)
+      action: switch.turn_off
+      target:
+        entity_id:
+        - switch.adaptive_lighting_office
+        - switch.adaptive_lighting_adapt_color_office
+        - switch.adaptive_lighting_adapt_brightness_office
+    - action: adaptive_lighting.set_manual_control
+      data:
+        entity_id: switch.adaptive_lighting_office
+        lights:
+        - light.office
+        - light.hue_white_lamp_1
+        manual_control: true
   - repeat:
-      for_each: "{{ on_lights }}"
+      for_each: '{{ on_lights }}'
       sequence:
       - action: light.turn_on
         continue_on_error: true
         target:
-          entity_id: "{{ repeat.item }}"
+          entity_id: '{{ repeat.item }}'
         data:
-          brightness_pct: "{{ [[((state_attr(repeat.item, 'brightness') | int(0)) / 2.55 + direction * step_pct) | round(0), 1] | max, 100] | min }}"
+          brightness_pct: '{{ [[((state_attr(repeat.item, ''brightness'') | int(0))
+            / 2.55 + direction * step_pct) | round(0), 1] | max, 100] | min }}'
           transition: 0.2
   mode: queued
   max: 20
 - id: '1791006020003'
   alias: 'Bedroom 2: Tap Go To Sleep'
-  description: 'Hue Tap Dial Button 3 in Bedroom 2. Press = fan 50%, sleep album 45 min (ends with a 2 min fade). Hold = same with the white noise playlist. Lights fade off over 5 minutes, then the override clears. Marks the room occupied; timer.bedroom2_tap_sleep stops Bedroom 2 Bedtime Routine from starting its own music/stop on top of this. Restart mode - pressing again restarts the session; Button 4 hold cancels it.'
+  description: Hue Tap Dial Button 3 in Bedroom 2. Press = fan 50%, sleep album 45
+    min (ends with a 2 min fade). Hold = same with the white noise playlist. Lights
+    fade off over 5 minutes, then the override clears. Marks the room occupied; timer.bedroom2_tap_sleep
+    stops Bedroom 2 Bedtime Routine from starting its own music/stop on top of this.
+    Restart mode - pressing again restarts the session; Button 4 hold cancels it.
   triggers:
   - trigger: state
     entity_id: event.hue_tap_dial_switch_3_button_3
-    not_from: [unavailable, unknown]
+    not_from:
+    - unavailable
+    - unknown
     id: b3
   conditions: []
   actions:
   - alias: Only short press or hold count
     condition: template
-    value_template: "{{ trigger.to_state.attributes.event_type in ['short_release','long_press'] }}"
+    value_template: '{{ trigger.to_state.attributes.event_type in [''short_release'',''long_press'']
+      }}'
   - alias: Set the session timer first so nothing can prevent it arming
     action: timer.start
     target:
       entity_id: timer.bedroom2_tap_sleep
     data:
       duration: 00:45:00
-  - alias: Override on - AL stays off and automations leave the lights alone until the room has been empty 25 minutes
+  - alias: Override on - AL stays off and automations leave the lights alone until
+      the room has been empty 25 minutes
     action: input_boolean.turn_on
     target:
       entity_id: input_boolean.bedroom2_manual_override
-  - alias: AL off so it can't fight the tap (sleep mode switch left alone - it defines night)
+  - alias: AL off so it can't fight the tap (sleep mode switch left alone - it defines
+      night)
     action: switch.turn_off
     target:
       entity_id:
@@ -15320,13 +15415,14 @@
     data:
       entity_id: switch.adaptive_lighting_office
       lights:
-        - light.office
-        - light.hue_white_lamp_1
+      - light.office
+      - light.hue_white_lamp_1
       manual_control: true
   - alias: Fan to 50% - only ever raises it, never lowers a fan already higher
     if:
     - condition: template
-      value_template: "{{ not is_state('fan.bedroom2_fan','on') or (state_attr('fan.bedroom2_fan','percentage') | int(0)) < 50 }}"
+      value_template: '{{ not is_state(''fan.bedroom2_fan'',''on'') or (state_attr(''fan.bedroom2_fan'',''percentage'')
+        | int(0)) < 50 }}'
     then:
     - action: fan.turn_on
       continue_on_error: true
@@ -15334,7 +15430,8 @@
         entity_id: fan.bedroom2_fan
       data:
         percentage: 50
-  - alias: Mark the room occupied so Smart Motion stands down (timer above already blocks the Bedtime Routine's own music)
+  - alias: Mark the room occupied so Smart Motion stands down (timer above already
+      blocks the Bedtime Routine's own music)
     if:
     - condition: state
       entity_id: input_boolean.bedroom2_occupied
@@ -15350,10 +15447,10 @@
         data:
           scene_id: bedroom2_prefade
           snapshot_entities:
-            - light.office
-            - light.hue_white_lamp_1
-            - light.ribbon
-            - light.fluttershy
+          - light.office
+          - light.hue_white_lamp_1
+          - light.ribbon
+          - light.fluttershy
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.bedroom2_fading_out
@@ -15381,8 +15478,8 @@
         data:
           entity_id: switch.adaptive_lighting_office
           lights:
-            - light.office
-            - light.hue_white_lamp_1
+          - light.office
+          - light.hue_white_lamp_1
           manual_control: false
       - action: switch.turn_on
         target:
@@ -15395,7 +15492,8 @@
         choose:
         - conditions:
           - condition: template
-            value_template: "{{ trigger.to_state.attributes.event_type == 'long_press' }}"
+            value_template: '{{ trigger.to_state.attributes.event_type == ''long_press''
+              }}'
           sequence:
           - alias: Unjoin office_2 from any Music Assistant group first
             action: media_player.unjoin
@@ -15403,7 +15501,8 @@
             target:
               entity_id: media_player.office_2
           - alias: Wait for the unjoin
-            wait_template: "{{ (state_attr('media_player.office_2', 'group_members') | default([]) | length) <= 1 }}"
+            wait_template: '{{ (state_attr(''media_player.office_2'', ''group_members'')
+              | default([]) | length) <= 1 }}'
             timeout:
               seconds: 5
             continue_on_timeout: true
@@ -15431,7 +15530,8 @@
                   media_id: ytmusic://playlist/VLPLOS9HJPmm92-46p6EL6vUxfuZ6AGVDkRG
                   media_type: playlist
                   radio_mode: false
-              - wait_template: "{{ is_state('media_player.office_2', 'playing') }}"
+              - wait_template: '{{ is_state(''media_player.office_2'', ''playing'')
+                  }}'
                 timeout:
                   seconds: 8
                 continue_on_timeout: true
@@ -15442,7 +15542,7 @@
                   entity_id: media_player.office_2
                   state: playing
                 - condition: template
-                  value_template: "{{ repeat.index >= 2 }}"
+                  value_template: '{{ repeat.index >= 2 }}'
           - alias: Notify if it still isn't playing
             if:
             - condition: not
@@ -15454,7 +15554,8 @@
             - action: notify.mobile_app_pc_iphone
               data:
                 title: Bedroom 2 tap sleep audio didn't start
-                message: Office/Bedroom 2 speaker didn't start playing after two tries - speaker may be offline.
+                message: Office/Bedroom 2 speaker didn't start playing after two tries
+                  - speaker may be offline.
           - alias: Fade in 0.01 to 0.15 over 60 s
             if:
             - condition: state
@@ -15469,10 +15570,12 @@
                   target:
                     entity_id: media_player.office_2
                   data:
-                    volume_level: "{{ [0.01 + 0.14 * repeat.index / 6, 0.15] | min | round(3) }}"
+                    volume_level: '{{ [0.01 + 0.14 * repeat.index / 6, 0.15] | min
+                      | round(3) }}'
                 - delay:
                     seconds: 10
-          - alias: Play until about 43 minutes in (timer is 45 min incl. start-up), then fade out over 2 minutes
+          - alias: Play until about 43 minutes in (timer is 45 min incl. start-up),
+              then fade out over 2 minutes
             delay:
               minutes: 43
           - repeat:
@@ -15483,7 +15586,8 @@
                 target:
                   entity_id: media_player.office_2
                 data:
-                  volume_level: "{{ [0.15 * (1 - repeat.index / 12), 0] | max | round(3) }}"
+                  volume_level: '{{ [0.15 * (1 - repeat.index / 12), 0] | max | round(3)
+                    }}'
               - delay:
                   seconds: 10
           - alias: Stop the music (leaves shared groups safely)
@@ -15499,110 +15603,117 @@
             data:
               volume_level: 0.15
         default:
-          - alias: Unjoin office_2 from any Music Assistant group first
-            action: media_player.unjoin
-            continue_on_error: true
-            target:
-              entity_id: media_player.office_2
-          - alias: Wait for the unjoin
-            wait_template: "{{ (state_attr('media_player.office_2', 'group_members') | default([]) | length) <= 1 }}"
-            timeout:
-              seconds: 5
-            continue_on_timeout: true
-          - alias: Start at low volume - fade-in below ramps it up
-            action: media_player.volume_set
-            continue_on_error: true
-            target:
-              entity_id: media_player.office_2
-            data:
-              volume_level: 0.01
-          - alias: Play via Music Assistant (with retry)
-            repeat:
-              sequence:
-              - action: media_player.shuffle_set
-                continue_on_error: true
-                target:
-                  entity_id: media_player.office_2
-                data:
-                  shuffle: true
-              - action: music_assistant.play_media
-                continue_on_error: true
-                target:
-                  entity_id: media_player.office_2
-                data:
-                  media_id: ytmusic://album/MPREb_A9AHzoUYd7b
-                  radio_mode: false
-              - wait_template: "{{ is_state('media_player.office_2', 'playing') }}"
-                timeout:
-                  seconds: 8
-                continue_on_timeout: true
-              until:
-              - condition: or
-                conditions:
-                - condition: state
-                  entity_id: media_player.office_2
-                  state: playing
-                - condition: template
-                  value_template: "{{ repeat.index >= 2 }}"
-          - alias: Notify if it still isn't playing
-            if:
-            - condition: not
+        - alias: Unjoin office_2 from any Music Assistant group first
+          action: media_player.unjoin
+          continue_on_error: true
+          target:
+            entity_id: media_player.office_2
+        - alias: Wait for the unjoin
+          wait_template: '{{ (state_attr(''media_player.office_2'', ''group_members'')
+            | default([]) | length) <= 1 }}'
+          timeout:
+            seconds: 5
+          continue_on_timeout: true
+        - alias: Start at low volume - fade-in below ramps it up
+          action: media_player.volume_set
+          continue_on_error: true
+          target:
+            entity_id: media_player.office_2
+          data:
+            volume_level: 0.01
+        - alias: Play via Music Assistant (with retry)
+          repeat:
+            sequence:
+            - action: media_player.shuffle_set
+              continue_on_error: true
+              target:
+                entity_id: media_player.office_2
+              data:
+                shuffle: true
+            - action: music_assistant.play_media
+              continue_on_error: true
+              target:
+                entity_id: media_player.office_2
+              data:
+                media_id: ytmusic://album/MPREb_A9AHzoUYd7b
+                radio_mode: false
+            - wait_template: '{{ is_state(''media_player.office_2'', ''playing'')
+                }}'
+              timeout:
+                seconds: 8
+              continue_on_timeout: true
+            until:
+            - condition: or
               conditions:
               - condition: state
                 entity_id: media_player.office_2
                 state: playing
-            then:
-            - action: notify.mobile_app_pc_iphone
-              data:
-                title: Bedroom 2 tap sleep audio didn't start
-                message: Office/Bedroom 2 speaker didn't start playing after two tries - speaker may be offline.
-          - alias: Fade in 0.01 to 0.15 over 60 s
-            if:
+              - condition: template
+                value_template: '{{ repeat.index >= 2 }}'
+        - alias: Notify if it still isn't playing
+          if:
+          - condition: not
+            conditions:
             - condition: state
               entity_id: media_player.office_2
               state: playing
-            then:
-            - repeat:
-                count: 6
-                sequence:
-                - action: media_player.volume_set
-                  continue_on_error: true
-                  target:
-                    entity_id: media_player.office_2
-                  data:
-                    volume_level: "{{ [0.01 + 0.14 * repeat.index / 6, 0.15] | min | round(3) }}"
-                - delay:
-                    seconds: 10
-          - alias: Play until about 43 minutes in (timer is 45 min incl. start-up), then fade out over 2 minutes
-            delay:
-              minutes: 43
+          then:
+          - action: notify.mobile_app_pc_iphone
+            data:
+              title: Bedroom 2 tap sleep audio didn't start
+              message: Office/Bedroom 2 speaker didn't start playing after two tries
+                - speaker may be offline.
+        - alias: Fade in 0.01 to 0.15 over 60 s
+          if:
+          - condition: state
+            entity_id: media_player.office_2
+            state: playing
+          then:
           - repeat:
-              count: 12
+              count: 6
               sequence:
               - action: media_player.volume_set
                 continue_on_error: true
                 target:
                   entity_id: media_player.office_2
                 data:
-                  volume_level: "{{ [0.15 * (1 - repeat.index / 12), 0] | max | round(3) }}"
+                  volume_level: '{{ [0.01 + 0.14 * repeat.index / 6, 0.15] | min |
+                    round(3) }}'
               - delay:
                   seconds: 10
-          - alias: Stop the music (leaves shared groups safely)
-            action: script.stop_room_speaker_safely
-            continue_on_error: true
-            data:
-              entity_id: media_player.office_2
-          - alias: Restore the normal sleep volume for next time
-            action: media_player.volume_set
-            continue_on_error: true
-            target:
-              entity_id: media_player.office_2
-            data:
-              volume_level: 0.15
+        - alias: Play until about 43 minutes in (timer is 45 min incl. start-up),
+            then fade out over 2 minutes
+          delay:
+            minutes: 43
+        - repeat:
+            count: 12
+            sequence:
+            - action: media_player.volume_set
+              continue_on_error: true
+              target:
+                entity_id: media_player.office_2
+              data:
+                volume_level: '{{ [0.15 * (1 - repeat.index / 12), 0] | max | round(3)
+                  }}'
+            - delay:
+                seconds: 10
+        - alias: Stop the music (leaves shared groups safely)
+          action: script.stop_room_speaker_safely
+          continue_on_error: true
+          data:
+            entity_id: media_player.office_2
+        - alias: Restore the normal sleep volume for next time
+          action: media_player.volume_set
+          continue_on_error: true
+          target:
+            entity_id: media_player.office_2
+          data:
+            volume_level: 0.15
   mode: restart
 - id: '1791006020004'
   alias: 'Bedroom 2: Tap Reset Scene Cycle'
-  description: Resets the Button 2 scene cycle to the start whenever the manual override clears, so the next tap session starts at scene 1.
+  description: Resets the Button 2 scene cycle to the start whenever the manual override
+    clears, so the next tap session starts at scene 1.
   triggers:
   - trigger: state
     entity_id: input_boolean.bedroom2_manual_override
