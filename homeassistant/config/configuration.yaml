@@ -65,6 +65,18 @@ timer:
   funtime_bedtime_countdown:
     name: "Funtime Bedtime Countdown"
     duration: "01:00:00"
+  bedroom2_tap_sleep:
+    name: "Bedroom 2 Tap Sleep Session"
+    duration: "00:45:00"
+
+input_number:
+  bedroom2_scene_index:
+    name: "Bedroom 2 Tap Scene Index"
+    min: 0
+    max: 4
+    step: 1
+    initial: 0
+    mode: box
 
 counter:
   funtime_playlist_index:
@@ -111,6 +123,9 @@ input_boolean:
     initial: off
   bedroom2_manual_override:
     name: "Bedroom 2 Manual Override"
+    initial: off
+  bedroom2_fading_out:
+    name: "Bedroom 2 Fading Out"
     initial: off
   dining_room_manual_override:
     name: "Dining Room Manual Override"
