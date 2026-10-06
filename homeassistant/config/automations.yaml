@@ -15729,8 +15729,8 @@
   mode: single
 - id: '1791000000099'
   alias: Outside Lights On at Sunset
-  description: Turns the front porch and back outside lights on at sunset (replaces
-    the Hue bridge schedule). Posts a notification if either fails to turn on.
+  description: Turns the front porch and back outside lights on at sunset. Alerts
+    Paul's iPhone if either fails to turn on.
   triggers:
   - trigger: sun
     event: sunset
@@ -15753,17 +15753,16 @@
           entity_id: light.back_outside
           state: 'on'
     then:
-    - action: persistent_notification.create
+    - action: notify.mobile_app_pc_iphone
       data:
-        notification_id: outside_lights_sunset_failed
-        title: Outside lights failed to turn on at sunset
+        title: Outside lights failed to turn on
         message: 'Front Porch is {{ states(''light.front_porch'') }} and Back is {{
           states(''light.back_outside'') }} at {{ now().strftime(''%-I:%M %p'') }}.'
   mode: single
 - id: '1791000000100'
-  alias: Outside Lights Off at Sunrise
-  description: Turns the front porch and back outside lights off at sunrise (replaces
-    the Hue bridge schedule).
+  alias: Outside Lights Fade Off at Sunrise
+  description: Fades the front porch and back outside lights off over 5 minutes at
+    sunrise.
   triggers:
   - trigger: sun
     event: sunrise
@@ -15771,4 +15770,56 @@
   - action: light.turn_off
     target:
       entity_id: light.outside
+    data:
+      transition: 300
   mode: single
+- id: '1791000000101'
+  alias: Outside Lights Hourly Check
+  description: Every hour between sunset and sunrise, turn the outside lights back
+    on if either is off.
+  triggers:
+  - trigger: time_pattern
+    minutes: '0'
+  conditions:
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+  - condition: or
+    conditions:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: light.front_porch
+        state: 'on'
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: light.back_outside
+        state: 'on'
+  actions:
+  - action: light.turn_on
+    target:
+      entity_id: light.outside
+  mode: single
+- id: '1791000000102'
+  alias: Outside Lights Turned Off At Night Alert
+  description: Alerts Paul's iPhone if an outside light turns off (for 1 minute)
+    while the sun is down.
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.front_porch
+    - light.back_outside
+    to: 'off'
+    for: 00:01:00
+  conditions:
+  - condition: state
+    entity_id: sun.sun
+    state: below_horizon
+  actions:
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Outside light turned off
+      message: '{{ trigger.to_state.name }} turned off at {{ now().strftime(''%-I:%M
+        %p'') }} while it is still dark. The hourly check will turn it back on.'
+  mode: queued
