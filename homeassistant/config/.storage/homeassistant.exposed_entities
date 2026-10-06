@@ -1826,6 +1826,13 @@
             "should_expose": false
           }
         }
+      },
+      "scene.bedroom2_prefade": {
+        "assistants": {
+          "conversation": {
+            "should_expose": false
+          }
+        }
       }
     }
   }
