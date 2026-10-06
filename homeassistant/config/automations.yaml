@@ -6586,7 +6586,7 @@
     presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: 08:30:00
+    at: 06:30:00
     weekday:
     - mon
     - tue
@@ -6598,6 +6598,7 @@
     weekday:
     - sun
     - sat
+    enabled: false
   conditions:
   - condition: state
     entity_id: input_boolean.bedroom2_occupied
