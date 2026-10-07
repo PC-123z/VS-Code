@@ -10510,16 +10510,16 @@
     - wed
     - thu
     - fri
-    enabled: true
+    enabled: false
   - trigger: time
-    at: 08:40:00
+    at: 08:00:00
     weekday:
     - mon
     - tue
     - wed
     - thu
     - fri
-    enabled: false
+    enabled: true
   - trigger: time
     at: 09:00:00
     weekday:
@@ -15756,8 +15756,8 @@
     - action: notify.mobile_app_pc_iphone
       data:
         title: Outside lights failed to turn on
-        message: 'Front Porch is {{ states(''light.front_porch'') }} and Back is {{
-          states(''light.back_outside'') }} at {{ now().strftime(''%-I:%M %p'') }}.'
+        message: Front Porch is {{ states('light.front_porch') }} and Back is {{ states('light.back_outside')
+          }} at {{ now().strftime('%-I:%M %p') }}.
   mode: single
 - id: '1791000000100'
   alias: Outside Lights Fade Off at Sunrise
