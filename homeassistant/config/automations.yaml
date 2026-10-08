@@ -10152,6 +10152,12 @@
     entity_id: input_boolean.welcome_home_active
     state: 'on'
   actions:
+  - alias: Resolve the RX-A4A's Music Assistant player - its entity id changes whenever
+      MA regenerates the universal player (2026-10-08); sensor.living_room_receiver_ma_player
+      finds it by device model
+    variables:
+      rx: "{{ states('sensor.living_room_receiver_ma_player') if states('sensor.living_room_receiver_ma_player').startswith('media_player.')
+        else 'media_player.living_room_av_receiver' }}"
   - alias: On session start, wait for the kitchen stream to actually be playing first,
       and reset the living room once-per-session latch so this run is allowed to join
       again
@@ -10285,7 +10291,7 @@
           sequence re-ran on every retrigger, causing the exact audible cutouts this
           was meant to prevent
         condition: template
-        value_template: "{{ 'media_player.living_room_av_receiver' not in\n   (state_attr('media_player.kitchen_2',\n
+        value_template: "{{ rx not in\n   (state_attr('media_player.kitchen_2',\n
           \  'group_members') | default([])) }}"
       - alias: Skip entirely while the living room TV is on - added 2026-09-27, welcome
           home has no business touching the receiver's volume/join state while someone
@@ -10331,11 +10337,11 @@
           entity_id: media_player.kitchen_2
         data:
           group_members:
-          - media_player.living_room_av_receiver
+          - '{{ rx }}'
       - alias: Verify the join (added 2026-10-08) - on 2026-10-08 the MA player had
           been re-created as living_room_av_receiver_2, the join errored, and the
           receiver sat on-but-silent with the latch blocking every retry
-        wait_template: "{{ 'media_player.living_room_av_receiver' in\n   (state_attr('media_player.kitchen_2',\n
+        wait_template: "{{ rx in\n   (state_attr('media_player.kitchen_2',\n
           \  'group_members') | default([])) }}"
         timeout:
           seconds: 15
@@ -10356,8 +10362,8 @@
         - action: persistent_notification.create
           data:
             title: Welcome Home - receiver join failed
-            message: media_player.living_room_av_receiver did not join the kitchen
-              group. Check the Music Assistant player entity ID.
+            message: '{{ rx }} did not join the kitchen group. Check that sensor.living_room_receiver_ma_player
+              resolves to the RX-A4A''s Music Assistant player.'
         - stop: Receiver join failed
           error: true
       - alias: Re-apply the low volume after joining - joining a group (or the receiver
@@ -12618,6 +12624,12 @@
     to: 'off'
   conditions: []
   actions:
+  - alias: Resolve the RX-A4A's Music Assistant player - its entity id changes whenever
+      MA regenerates the universal player (2026-10-08); sensor.living_room_receiver_ma_player
+      finds it by device model
+    variables:
+      rx: "{{ states('sensor.living_room_receiver_ma_player') if states('sensor.living_room_receiver_ma_player').startswith('media_player.')
+        else 'media_player.living_room_av_receiver' }}"
   - alias: Stop the shared stream at its leader FIRST (added 2026-09-24) - with AirPlay
       grouping, unjoining the kitchen leader while members remain hands leadership
       to the receiver and the music briefly resumes on the leftover group; stopping
@@ -12639,7 +12651,7 @@
       - media_player.office_2
       - media_player.bathroom
       - media_player.bathroom_2
-      - media_player.living_room_av_receiver
+      - '{{ rx }}'
       - media_player.kitchen_2
     data: {}
   - alias: Stop and power off the receiver - skipped entirely while the living room
@@ -12655,7 +12667,7 @@
       continue_on_error: true
       action: media_player.media_stop
       target:
-        entity_id: media_player.living_room_av_receiver
+        entity_id: '{{ rx }}'
     - alias: Power off the receiver itself (native entity - the MA entity can't turn_off)
       continue_on_error: true
       action: media_player.turn_off
@@ -12669,7 +12681,7 @@
       continue_on_error: true
       action: media_player.media_stop
       target:
-        entity_id: media_player.living_room_av_receiver
+        entity_id: '{{ rx }}'
   mode: single
 - id: '1791000000001'
   alias: 'Welcome Home: End Session When Living Room TV Turns On'
@@ -14027,6 +14039,12 @@
     id: kitchen_empty
   conditions: []
   actions:
+  - alias: Resolve the RX-A4A's Music Assistant player - its entity id changes whenever
+      MA regenerates the universal player (2026-10-08); sensor.living_room_receiver_ma_player
+      finds it by device model
+    variables:
+      rx: "{{ states('sensor.living_room_receiver_ma_player') if states('sensor.living_room_receiver_ma_player').startswith('media_player.')
+        else 'media_player.living_room_av_receiver' }}"
   - choose:
     - alias: Kitchen occupied while the receiver is playing - join it in
       conditions:
@@ -14035,9 +14053,8 @@
       - condition: time
         after: 08:00:00
         before: '22:00:00'
-      - condition: state
-        entity_id: media_player.living_room_av_receiver
-        state: playing
+      - condition: template
+        value_template: '{{ is_state(rx, ''playing'') }}'
       - alias: Never hijack a kitchen that is playing its own stream
         condition: not
         conditions:
@@ -14046,7 +14063,7 @@
           state: playing
       - alias: Skip if kitchen is already in the receiver group
         condition: template
-        value_template: '{{ ''media_player.kitchen_2'' not in (state_attr(''media_player.living_room_av_receiver'',
+        value_template: '{{ ''media_player.kitchen_2'' not in (state_attr(rx,
           ''group_members'') | default([], true)) }}'
       sequence:
       - action: media_player.volume_set
@@ -14056,7 +14073,7 @@
           volume_level: 0.05
       - action: media_player.join
         target:
-          entity_id: media_player.living_room_av_receiver
+          entity_id: '{{ rx }}'
         data:
           group_members:
           - media_player.kitchen_2
@@ -14084,7 +14101,7 @@
       - condition: trigger
         id: kitchen_empty
       - condition: template
-        value_template: '{{ ''media_player.kitchen_2'' in (state_attr(''media_player.living_room_av_receiver'',
+        value_template: '{{ ''media_player.kitchen_2'' in (state_attr(rx,
           ''group_members'') | default([], true)) }}'
       sequence:
       - continue_on_error: true
