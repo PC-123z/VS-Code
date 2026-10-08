@@ -16009,6 +16009,6 @@
     data:
       title: '{{ broken | count }} automation(s)/script(s) failed to load'
       message: >-
-        Unavailable after {{ trigger.id }}: {{ broken | join('', '') }}.
+        Unavailable after {{ trigger.id }}: {{ broken | join(', ') }}.
         Usually a config validation error (check Settings > System > Logs for
         "could not be validated") or a removed item's leftover entity.
