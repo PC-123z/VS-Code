@@ -10134,6 +10134,12 @@
     entity_id: binary_sensor.living_room_sensor_group
     to: 'on'
     id: living_room_motion
+  - alias: Dining room presence also joins the living room receiver (added 2026-10-08
+      - the open-plan dining room is served by the receiver's speakers)
+    trigger: state
+    entity_id: binary_sensor.dining_room_sensor_group
+    to: 'on'
+    id: living_room_motion
   - alias: Welcome Home just started - join rooms that were ALREADY occupied (their
       sensor never flips off->on after the session starts, so the motion triggers
       above miss them; seen with Bedroom 2 on 2026-09-24)
@@ -10272,8 +10278,8 @@
       - alias: Room motion, or session just started with the room already occupied
         condition: template
         value_template: '{{ trigger.id == ''living_room_motion'' or (trigger.id ==
-          ''session_start'' and is_state(''binary_sensor.living_room_sensor_group'',
-          ''on'')) }}'
+          ''session_start'' and (is_state(''binary_sensor.living_room_sensor_group'',
+          ''on'') or is_state(''binary_sensor.dining_room_sensor_group'', ''on''))) }}'
       - alias: Skip if the receiver is already in the kitchen group - motion re-triggers
           constantly while the room is occupied, and without this the whole volume-drop/join/ramp
           sequence re-ran on every retrigger, causing the exact audible cutouts this
@@ -10296,9 +10302,6 @@
         entity_id: input_boolean.welcome_home_living_room_joined
         state: 'off'
       sequence:
-      - action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.welcome_home_living_room_joined
       - alias: 'RX-A4A (2026-09-27): the Music Assistant player is AirPlay-only and
           does NOT control the master volume of the receiver, so all volume steps
           target the native yamaha_musiccast entity. Power it on first so volume_set
@@ -10322,6 +10325,13 @@
         data:
           group_members:
           - media_player.living_room_av_receiver
+      - alias: Latch once-per-session ONLY after the join succeeded (moved here 2026-10-08)
+          - it used to be set before power-on, so a failed join (MA player renamed
+          to living_room_av_receiver_2) left the receiver on but silent and blocked
+          every retry for the rest of the session
+        action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.welcome_home_living_room_joined
       - alias: Re-apply the low volume after joining - joining a group (or the receiver
           switching to AirPlay) can restore a remembered volume
         action: media_player.volume_set
