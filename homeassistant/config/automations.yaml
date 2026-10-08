@@ -9600,34 +9600,92 @@
     race is handled by waiting up to 60s for the pending flag inside the run instead.
     Mode single instead of queued.'
   triggers:
-  - alias: Ring garage to house door sensor reports open
+  - id: door
+    alias: Ring garage to house door sensor reports open
     trigger: state
     entity_id: binary_sensor.garage_door
     to: 'on'
+  - id: code
+    alias: Added 2026-10-07 - panel disarmed from entry delay (keypad code entered
+      after the door opened) is itself enough to run welcome home
+    trigger: state
+    entity_id: alarm_control_panel.3302_alarm
+    from: pending
+    to: disarmed
   conditions: []
   actions:
-  - alias: Garage to house door is the only trigger - give STAGE 1's arrival flag
-      up to 60s to land (the Ring sensor can report open a few seconds before the
-      beacon latch); if it never does, this was not a confirmed arrival and nothing
-      runs
-    wait_template: '{{ is_state(''input_boolean.welcome_home_pending'',''on'') }}'
+  - alias: Remember whether the alarm was armed when this run started, so a door opened
+      while already disarmed (normal in-and-out) is never treated as an arrival
+    variables:
+      alarm_at_start: '{{ states(''alarm_control_panel.3302_alarm'') }}'
+  - alias: 'Added 2026-10-07 after the garage cover (Aladdin) missed an open/close
+      cycle and STAGE 1 never armed pending. Give ANY of these up to 60s: STAGE 1
+      pending flag; the fallback of arrival_recent (BT beacon / phone / webhook) with
+      the door open; or the panel being disarmed (keypad code). If none lands,
+      notify and stop.'
+    wait_template: >-
+      {{ is_state('input_boolean.welcome_home_pending','on')
+         or (is_state('input_boolean.arrival_recent','on') and is_state('binary_sensor.garage_door','on'))
+         or ((trigger.id == 'code' or alarm_at_start != 'disarmed')
+             and is_state('alarm_control_panel.3302_alarm','disarmed')) }}
     timeout:
       seconds: 60
-    continue_on_timeout: false
-  - alias: Garage to house door must still be open - hard gate
-    condition: state
-    entity_id: binary_sensor.garage_door
-    state: 'on'
+    continue_on_timeout: true
+  - alias: Nothing confirmed an arrival - text Paul what failed, then stop
+    if:
+    - condition: template
+      value_template: '{{ not wait.completed }}'
+    then:
+    - alias: Only alert if the alarm is still armed/pending (someone disarming by
+        code in the meantime means the house is fine)
+      if:
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: alarm_control_panel.3302_alarm
+          state: disarmed
+      then:
+      - continue_on_error: true
+        action: notify.mobile_app_pc_iphone
+        data:
+          title: Welcome Home did NOT run
+          message: >-
+            Garage to house door opened but no arrival was confirmed within 60s.
+            Alarm: {{ states('alarm_control_panel.3302_alarm') }}.
+            Garage cover (Aladdin): {{ states('cover.garage') }}, last changed {{ as_timestamp(states.cover.garage.last_changed) | timestamp_custom('%-I:%M %p', true) }}.
+            Stage 1 pending flag: {{ states('input_boolean.welcome_home_pending') }}.
+            garage_open_recent latch: {{ states('input_boolean.garage_open_recent') }}.
+            arrival_recent latch (beacon/phone/webhook): {{ states('input_boolean.arrival_recent') }}.
+            Beacon: {{ states('device_tracker.bcpro_204982_08b8') }}. person.paul: {{ states('person.paul') }}.
+            Disarm by code to start the routine, or check the Aladdin integration.
+    - stop: Not a confirmed arrival
+  - alias: Garage to house door must still be open - hard gate (a keypad-code disarm
+      satisfies it too, since the door may already have closed)
+    condition: or
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.garage_door
+      state: 'on'
+    - condition: state
+      entity_id: alarm_control_panel.3302_alarm
+      state: disarmed
   - alias: Clear the pending flag so this only runs once per arrival
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.welcome_home_pending
-  - alias: Disarm the security panel
-    action: alarm_control_panel.alarm_disarm
-    target:
-      entity_id: alarm_control_panel.3302_alarm
-    data:
-      code: ''
+  - alias: Disarm the security panel (skipped if it was already disarmed by code)
+    if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: alarm_control_panel.3302_alarm
+        state: disarmed
+    then:
+    - action: alarm_control_panel.alarm_disarm
+      target:
+        entity_id: alarm_control_panel.3302_alarm
+      data:
+        code: ''
   - alias: Ungroup bedroom from kitchen - reverted 2026-09-09 now that SonosNet mesh
       is set up. Kitchen was briefly replaced as coordinator by Big Bedroom (Arc)
       on 2026-09-08 because Kitchen (Play:5) kept dropping its own stream connection
