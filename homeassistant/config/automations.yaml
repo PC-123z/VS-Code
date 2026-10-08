@@ -16116,3 +16116,67 @@
             value: '{{ repeat.item[1] }}'
         - delay:
             milliseconds: 1500
+- id: '1791300000001'
+  alias: 'Watchdog: Music Assistant player entities'
+  description: Added 2026-10-08. Music Assistant re-creates "universal" players (Receiver,
+    Living Room TV, Bedroom TV) with random ids on restarts/provider reloads, which
+    silently broke the Welcome Home receiver join. Those two are now resolved by device
+    model (sensor.living_room_receiver_ma_player / sensor.living_room_tv_ma_player).
+    This alerts when (a) any new MA media_player entity is created (a re-creation shows
+    up as a _2/_3 suffix), (b) a resolver finds 0 or 2+ matches, or (c) a core MA speaker
+    used by automations stays unavailable 15 min. Portable Roam excluded (often off).
+  triggers:
+  - trigger: event
+    event_type: entity_registry_updated
+    event_data:
+      action: create
+    id: created
+  - trigger: template
+    value_template: "{{ state_attr('sensor.living_room_receiver_ma_player', 'candidates')
+      | default([], true) | count != 1 }}"
+    for:
+      minutes: 10
+    id: resolver
+  - trigger: template
+    value_template: "{{ state_attr('sensor.living_room_tv_ma_player', 'candidates')
+      | default([], true) | count != 1 }}"
+    for:
+      minutes: 10
+    id: resolver
+  - trigger: state
+    entity_id:
+    - media_player.kitchen_2
+    - media_player.office_2
+    - media_player.bedroom_2
+    - media_player.bathroom_2
+    - media_player.living_room_av_receiver
+    - media_player.living_room_tv_3
+    to: unavailable
+    for:
+      minutes: 15
+    id: unavailable
+  conditions:
+  - condition: template
+    value_template: "{{ trigger.id != 'created' or (trigger.event.data.entity_id.startswith('media_player.')
+      and trigger.event.data.entity_id in integration_entities('music_assistant')) }}"
+  actions:
+  - variables:
+      msg: >-
+        {% if trigger.id == 'created' %}New Music Assistant player entity {{ trigger.event.data.entity_id }}
+        ({{ device_attr(trigger.event.data.entity_id, 'model') }}). If it has a _2/_3 suffix MA
+        re-created an existing player - check automations that reference it.
+        {% elif trigger.id == 'resolver' %}MA player resolver mismatch - receiver candidates:
+        {{ state_attr('sensor.living_room_receiver_ma_player', 'candidates') }}, TV candidates:
+        {{ state_attr('sensor.living_room_tv_ma_player', 'candidates') }}.
+        {% else %}{{ trigger.entity_id }} has been unavailable in Music Assistant for 15 min.{% endif %}
+  - action: persistent_notification.create
+    data:
+      title: Music Assistant player watchdog
+      message: '{{ msg }}'
+  - continue_on_error: true
+    action: notify.mobile_app_pc_iphone
+    data:
+      title: Music Assistant player watchdog
+      message: '{{ msg }}'
+  mode: queued
+  max: 10
