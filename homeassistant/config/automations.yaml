@@ -3414,7 +3414,7 @@
     tv_playing: '{{ integration_entities(''jellyfin'') | select(''match'', ''^media_player\.'')
       | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'',
       ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
-      ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''media_player.living_room_tv_3'',
+      ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''sensor.living_room_tv_ma_state'',
       ''playing'') or is_state(''media_player.living_room'', ''playing'') or is_state(''input_boolean.dining_room_tv_dim'',
       ''on'') }}'
   actions:
@@ -3475,7 +3475,7 @@
             ''^media_player\.'') | select(''in'', area_entities(''living_room''))
             | map(''states'') | select(''eq'', ''playing'') | list | count > 0 or
             is_state(''sensor.jellyfin_tiny_living_room_state'', ''playing'') or is_state(''media_player.living_room_tv'',
-            ''playing'') or is_state(''media_player.living_room_tv_3'', ''playing'')
+            ''playing'') or is_state(''sensor.living_room_tv_ma_state'', ''playing'')
             or is_state(''media_player.living_room'', ''playing'')) }}'
         then:
         - action: input_boolean.turn_off
@@ -3553,7 +3553,7 @@
             ''^media_player\.'') | select(''in'', area_entities(''living_room''))
             | map(''states'') | select(''eq'', ''playing'') | list | count > 0 or
             is_state(''sensor.jellyfin_tiny_living_room_state'', ''playing'') or is_state(''media_player.living_room_tv'',
-            ''playing'') or is_state(''media_player.living_room_tv_3'', ''playing'')
+            ''playing'') or is_state(''sensor.living_room_tv_ma_state'', ''playing'')
             or is_state(''media_player.living_room'', ''playing'')) }}'
         then:
         - action: input_boolean.turn_off
@@ -8832,20 +8832,20 @@
     id: tv_off
   - trigger: state
     entity_id:
-    - media_player.living_room_tv_3
+    - sensor.living_room_tv_ma_state
     to:
     - playing
     id: playing
   - trigger: state
     entity_id:
-    - media_player.living_room_tv_3
+    - sensor.living_room_tv_ma_state
     to:
     - paused
     - idle
     id: paused
   - trigger: state
     entity_id:
-    - media_player.living_room_tv_3
+    - sensor.living_room_tv_ma_state
     to:
     - 'off'
     id: tv_off
@@ -8916,7 +8916,7 @@
           ''^media_player\.'') | select(''in'', area_entities(''living_room'')) |
           map(''states'') | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
           ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or
-          is_state(''media_player.living_room_tv_3'', ''playing'') or is_state(''media_player.living_room'',
+          is_state(''sensor.living_room_tv_ma_state'', ''playing'') or is_state(''media_player.living_room'',
           ''playing'') }}'
       sequence:
       - alias: Living room fixture dim - only if it's actually on; don't force-light
@@ -9021,7 +9021,7 @@
           ''^media_player\.'') | select(''in'', area_entities(''living_room'')) |
           map(''states'') | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
           ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or
-          is_state(''media_player.living_room_tv_3'', ''playing'') or is_state(''media_player.living_room'',
+          is_state(''sensor.living_room_tv_ma_state'', ''playing'') or is_state(''media_player.living_room'',
           ''playing'') }}'
       - condition: template
         value_template: '{{ [''light.kitchen_1_color'', ''light.kitchen_2_color'',
@@ -9079,7 +9079,7 @@
           ''^media_player\.'') | select(''in'', area_entities(''living_room'')) |
           map(''states'') | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
           ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or
-          is_state(''media_player.living_room_tv_3'', ''playing'') or is_state(''media_player.living_room'',
+          is_state(''sensor.living_room_tv_ma_state'', ''playing'') or is_state(''media_player.living_room'',
           ''playing'')) and (trigger.id == ''motion_while_stopped'' or (is_state(''binary_sensor.living_room_motion'',
           ''on'') or is_state(''binary_sensor.dining_room_apollo_ld2450_moving_target'',
           ''on'') or is_state(''binary_sensor.kitchen_motion'', ''on'') or is_state(''binary_sensor.kitchen_motion_2'',
@@ -9307,7 +9307,7 @@
     is_playing_now: '{{ integration_entities(''jellyfin'') | select(''match'', ''^media_player\.'')
       | select(''in'', area_entities(''living_room'')) | map(''states'') | select(''eq'',
       ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
-      ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''media_player.living_room_tv_3'',
+      ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''sensor.living_room_tv_ma_state'',
       ''playing'') or is_state(''media_player.living_room'', ''playing'') }}'
     motion_active: '{{ is_state(''binary_sensor.living_room_motion'', ''on'') or is_state(''binary_sensor.dining_room_apollo_ld2450_moving_target'',
       ''on'') or is_state(''binary_sensor.kitchen_motion'', ''on'') or is_state(''binary_sensor.kitchen_motion_2'',
@@ -14157,7 +14157,7 @@
         - binary_sensor.apollo_r_pro_1_740624_ld2450_presence
         button: button.apollo_r_pro_1_740624_esp_reboot
         skip:
-        - media_player.living_room_tv_3
+        - sensor.living_room_tv_ma_state
         - media_player.living_room_appletv_2
   - repeat:
       for_each: '{{ watch }}'

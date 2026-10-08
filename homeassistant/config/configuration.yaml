@@ -201,6 +201,33 @@ template:
             {{ integration_entities('music_assistant')
                | select('match', 'media_player\\.')
                | select('is_device_attr', 'model', 'RX-A4A') | list }}
+      # Same for the Living Room Sony TV's MA universal player (also a random "up..." id).
+      - name: "Living Room TV MA Player"
+        unique_id: living_room_tv_ma_player
+        icon: mdi:television
+        state: >
+          {% set p = integration_entities('music_assistant')
+               | select('match', 'media_player\\.')
+               | select('is_device_attr', 'model', 'BRAVIA 4K UR2') | list %}
+          {% set live = p | reject('is_state', ['unavailable', 'unknown']) | list %}
+          {{ (live or p or ['media_player.living_room_tv_3']) | first }}
+        attributes:
+          candidates: >
+            {{ integration_entities('music_assistant')
+               | select('match', 'media_player\\.')
+               | select('is_device_attr', 'model', 'BRAVIA 4K UR2') | list }}
+
+  # Mirrors the state (playing/paused/idle/off) of whatever entity the resolver above
+  # points at, so automations can use plain state triggers on a STABLE entity id.
+  # Use this instead of media_player.living_room_tv_3 everywhere. 2026-10-08
+  - sensor:
+      - name: "Living Room TV MA State"
+        unique_id: living_room_tv_ma_state
+        icon: mdi:television-play
+        availability: >
+          {{ states(states('sensor.living_room_tv_ma_player')) not in ['unavailable', 'unknown'] }}
+        state: >
+          {{ states(states('sensor.living_room_tv_ma_player')) }}
 
   # Big Bedroom presence with a 45 s off-delay. Replaces the group helper of the same
   # entity id: the radar's zones flap 1-3 s at a time (pedestal fan under the sensor),
@@ -279,7 +306,7 @@ template:
                  ['off', 'unavailable', 'unknown'])
              or (states('media_player.living_room_tv') not in
                  ['off', 'unavailable', 'unknown'])
-             or (states('media_player.living_room_tv_3') in
+             or (states('sensor.living_room_tv_ma_state') in
                  ['playing', 'paused', 'buffering'])
              or (states('media_player.living_room') not in
                  ['off', 'unavailable', 'unknown']) }}
