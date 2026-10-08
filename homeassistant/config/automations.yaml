@@ -15884,3 +15884,81 @@
       message: '{{ trigger.to_state.name }} turned off at {{ now().strftime(''%-I:%M
         %p'') }} while it is still dark. I turned the outside lights back on.'
   mode: queued
+- id: '1791100000001'
+  alias: 'Watchdog: Jellyfin sensor unavailable 5 min'
+  description: 'Added 2026-10-07. jellyfin.pc / jellyfin-tiny.pc returned 502 Bad Gateway
+    repeatedly and TV-playing detection (TV Mode, Welcome Home, dining dim) silently
+    went wrong. Texts Paul once per outage when either Jellyfin sensor stays unavailable
+    5 min, then once more when it recovers.'
+  mode: parallel
+  max: 4
+  triggers:
+  - trigger: state
+    entity_id:
+    - sensor.jellyfin_tiny_living_room_state
+    - sensor.media_server_full_library_active_clients
+    to: unavailable
+    for:
+      minutes: 5
+  conditions: []
+  actions:
+  - variables:
+      ent: '{{ trigger.entity_id }}'
+      friendly: '{{ state_attr(trigger.entity_id, ''friendly_name'') or trigger.entity_id }}'
+  - action: notify.mobile_app_pc_iphone
+    continue_on_error: true
+    data:
+      title: Jellyfin unreachable
+      message: '{{ friendly }} has been unavailable for 5 min (Jellyfin server or
+        proxy returning errors, e.g. 502). TV-playing detection for Living Room TV
+        Mode / Welcome Home may be wrong until it recovers.'
+  - alias: Wait for it to come back (up to 12 h)
+    wait_template: '{{ states(ent) not in [''unavailable'', ''unknown''] }}'
+    timeout:
+      hours: 12
+    continue_on_timeout: false
+  - action: notify.mobile_app_pc_iphone
+    continue_on_error: true
+    data:
+      title: Jellyfin recovered
+      message: '{{ friendly }} is reporting again ({{ states(ent) }}).'
+- id: '1791100000002'
+  alias: 'Watchdog: Aladdin garage cover missed an arrival'
+  description: 'Added 2026-10-07. On 2026-10-07 the Aladdin cover missed a whole
+    open/close cycle (cloud app showed it, HA did not) so STAGE 1 never armed. cover.garage
+    kept reporting fresh data while stuck, so staleness cannot be seen from the cover
+    alone. Cross-check: arrival signal latched + garage to house door opened, but
+    cover.garage unchanged in the last 10 min after waiting 3 min. Texts Paul and
+    reloads the Aladdin config entry (the fix that worked).'
+  mode: single
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.garage_door
+    to: 'on'
+  conditions:
+  - alias: Only on a Paul arrival (beacon/phone/webhook latch)
+    condition: state
+    entity_id: input_boolean.arrival_recent
+    state: 'on'
+  actions:
+  - alias: Give the Aladdin cloud time to report (it can lag ~2 min)
+    delay:
+      minutes: 3
+  - alias: Cover has not changed at all around this arrival
+    condition: template
+    value_template: '{{ (now() - states.cover.garage.last_changed).total_seconds()
+      > 600 }}'
+  - action: notify.mobile_app_pc_iphone
+    continue_on_error: true
+    data:
+      title: Garage (Aladdin) missed your arrival
+      message: 'Garage to house door opened with an arrival signal, but cover.garage
+        has not changed since {{ as_timestamp(states.cover.garage.last_changed) |
+        timestamp_custom(''%-I:%M %p'', true) }} (now {{ states(''cover.garage'')
+        }}). Reloading the Aladdin integration. Welcome Home may rely on the beacon
+        + door fallback.'
+  - alias: Reload the Aladdin integration (fixed the stuck state on 2026-10-07)
+    continue_on_error: true
+    action: homeassistant.reload_config_entry
+    target:
+      entity_id: cover.garage
