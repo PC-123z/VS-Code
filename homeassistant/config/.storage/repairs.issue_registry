@@ -241,6 +241,20 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_1130928743_tags/v0.10.0"
+      },
+      {
+        "created": "2026-10-08T02:51:48.018304+00:00",
+        "dismissed_version": null,
+        "domain": "automation",
+        "is_persistent": false,
+        "issue_id": "automation.bedroom_2_good_morning_routine_validation_failed_schema"
+      },
+      {
+        "created": "2026-10-08T02:51:48.020396+00:00",
+        "dismissed_version": null,
+        "domain": "automation",
+        "is_persistent": false,
+        "issue_id": "automation.good_morning_routine_3_validation_failed_schema"
       }
     ]
   }
