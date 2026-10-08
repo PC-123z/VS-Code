@@ -175,6 +175,8 @@ template:
   # Big Bedroom presence with a 45 s off-delay. Replaces the group helper of the same
   # entity id: the radar's zones flap 1-3 s at a time (pedestal fan under the sensor),
   # which re-fired every presence automation. 2026-10-01
+  # Also occupied whenever the asleep flag is on: with the fans running a still sleeper
+  # is indistinguishable from an empty room on the radar. 2026-10-08
   - binary_sensor:
       - name: "Big Bedroom Sensor Group"
         unique_id: big_bedroom_sensor_group_debounced
@@ -182,7 +184,8 @@ template:
         delay_off:
           seconds: 45
         state: >
-          {{ is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy', 'on')
+          {{ is_state('input_boolean.big_bedroom_asleep', 'on')
+             or is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy', 'on')
              or is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy', 'on')
              or is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy', 'on') }}
   - switch:
