@@ -6989,13 +6989,18 @@
                   silent. Matches the Big Bedroom routine's self-heal for the same
                   failure mode.
                 if:
-                - condition: state
-                  entity_id: media_player.office_2
-                  state:
-                  - idle
-                  - 'off'
-                  for:
-                    seconds: 20
+                - condition: or
+                  conditions:
+                  - condition: state
+                    entity_id: media_player.office_2
+                    state: idle
+                    for:
+                      seconds: 20
+                  - condition: state
+                    entity_id: media_player.office_2
+                    state: 'off'
+                    for:
+                      seconds: 20
                 - condition: state
                   entity_id: input_boolean.bedroom2_occupied
                   state: 'on'
@@ -10978,13 +10983,18 @@
               then:
               - alias: Self-heal - re-queue playlist if Music Assistant went silent
                 if:
-                - condition: state
-                  entity_id: media_player.bedroom_2
-                  state:
-                  - idle
-                  - 'off'
-                  for:
-                    seconds: 20
+                - condition: or
+                  conditions:
+                  - condition: state
+                    entity_id: media_player.bedroom_2
+                    state: idle
+                    for:
+                      seconds: 20
+                  - condition: state
+                    entity_id: media_player.bedroom_2
+                    state: 'off'
+                    for:
+                      seconds: 20
                 - condition: state
                   entity_id: input_boolean.good_morning_active
                   state: 'on'
