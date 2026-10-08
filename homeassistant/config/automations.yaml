@@ -8774,9 +8774,9 @@
   alias: 'Living Room: TV Mode (Unified)'
   description: TV state drives living room lighting with time-of-day palette. Playing
     = deep dim scaled to daylight. Paused/Off = restore AL and presence. Dining room
-    dims during playback if occupied. Kitchen lights fade off (30s fade) when playback
-    starts if the kitchen is empty, or immediately when kitchen presence clears during
-    playback (5s debounce removed 2026-10-08 at user request).
+    dims during playback if occupied. Kitchen fade moved 2026-10-08 to its own automation
+    Kitchen - Fade Off When Empty During Apple TV (1791400000001) - this one runs in restart
+    mode, so kitchen triggers were aborting in-flight dimming runs.
     Galaxy projector off during playback, on when paused/off.
   triggers:
   - alias: Jellyfin (any current/future Living Room client) - playing
@@ -8883,12 +8883,6 @@
     trigger: event
     event_type: living_room_tv_mode_reapply
     id: playing
-  - alias: Kitchen went empty during playback - fade kitchen lights now (the playing
-      branch only checks the kitchen at the moment play starts)
-    trigger: state
-    entity_id: binary_sensor.kitchen_sensor_group
-    to: 'off'
-    id: kitchen_empty
   - alias: Real motion (not presence) in living room, dining room or kitchen while
       TV Mode still has the room dimmed and nothing is playing - brighten now instead
       of waiting for another pause event
@@ -8951,35 +8945,6 @@
       - action: light.turn_off
         target:
           entity_id: light.galaxy_projector
-      - alias: Kitchen empty - fade its lights off now instead of waiting for the
-          3:30 clear (same steps as Kitchen Smart Motion's kitchen_cleared_hue)
-        if:
-        - condition: state
-          entity_id: binary_sensor.kitchen_sensor_group
-          state: 'off'
-        - condition: template
-          value_template: '{{ [''light.kitchen_1_color'', ''light.kitchen_2_color'',
-            ''light.kitchen_lightstrip'', ''light.hue_datura_top_1'', ''light.hue_datura_bottom_1'']
-            | select(''is_state'', ''on'') | list | count > 0 }}'
-        then:
-        - action: switch.turn_off
-          target:
-            entity_id: switch.al_kitchen
-        - action: adaptive_lighting.set_manual_control
-          continue_on_error: true
-          data:
-            entity_id: switch.al_kitchen
-            manual_control: false
-        - action: light.turn_off
-          target:
-            entity_id:
-            - light.kitchen_1_color
-            - light.kitchen_2_color
-            - light.kitchen_lightstrip
-            - light.hue_datura_top_1
-            - light.hue_datura_bottom_1
-          data:
-            transition: 30
       - alias: Skip dining while dimmer override is active (On tap/hold)
         condition: state
         entity_id: input_boolean.dining_room_manual_override
@@ -9012,40 +8977,6 @@
           entity_id: light.dining_room_bottom
         data:
           brightness_pct: 2
-    - conditions:
-      - condition: trigger
-        id: kitchen_empty
-      - condition: template
-        value_template: '{{ integration_entities(''jellyfin'') | select(''match'',
-          ''^media_player\.'') | select(''in'', area_entities(''living_room'')) |
-          map(''states'') | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
-          ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or
-          is_state(''sensor.living_room_tv_ma_state'', ''playing'') or is_state(''media_player.living_room'',
-          ''playing'') }}'
-      - condition: template
-        value_template: '{{ [''light.kitchen_1_color'', ''light.kitchen_2_color'',
-          ''light.kitchen_lightstrip'', ''light.hue_datura_top_1'', ''light.hue_datura_bottom_1'']
-          | select(''is_state'', ''on'') | list | count > 0 }}'
-      alias: Kitchen presence cleared while media is playing - fade kitchen lights off (30s)
-      sequence:
-      - action: switch.turn_off
-        target:
-          entity_id: switch.al_kitchen
-      - action: adaptive_lighting.set_manual_control
-        continue_on_error: true
-        data:
-          entity_id: switch.al_kitchen
-          manual_control: false
-      - action: light.turn_off
-        target:
-          entity_id:
-          - light.kitchen_1_color
-          - light.kitchen_2_color
-          - light.kitchen_lightstrip
-          - light.hue_datura_top_1
-          - light.hue_datura_bottom_1
-        data:
-          transition: 30
     - conditions:
       - condition: or
         conditions:
@@ -16184,3 +16115,65 @@
       message: '{{ msg }}'
   mode: queued
   max: 10
+- id: '1791400000001'
+  alias: 'Kitchen: Fade Off When Empty During Apple TV'
+  description: Added 2026-10-08 (moved out of Living Room TV Mode, which is mode restart
+    so kitchen triggers aborted its dimming runs). While the living room Apple TV is
+    playing, kitchen lights fade off over 30 s once kitchen presence has been clear 5 s.
+    Apple TV only - Sony TV inputs / Jellyfin on other clients don't count. "Playing"
+    = native apple_tv entity OR its Music Assistant AirPlay player, since the native
+    one was stuck 'off' for a day until the integration was reloaded. Kitchen Smart
+    Motion turns the lights back on when someone walks in. Skips while the Pico/manual
+    hold is on.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    to: 'off'
+    for:
+      seconds: 5
+  - alias: Apple TV started playing with the kitchen already empty
+    trigger: state
+    entity_id:
+    - media_player.living_room
+    - media_player.living_room_2
+    to: playing
+  conditions:
+  - alias: Apple TV is playing
+    condition: template
+    value_template: "{{ is_state('media_player.living_room', 'playing') or is_state('media_player.living_room_2', 'playing') }}"
+  - alias: Kitchen clear for 5 s
+    condition: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    state: 'off'
+    for:
+      seconds: 5
+  - alias: Kitchen hold not active
+    condition: state
+    entity_id:
+    - input_boolean.kitchen_manual_override
+    - input_boolean.kitchen_pico_hold
+    state: 'off'
+  - alias: Something in the kitchen is actually on
+    condition: template
+    value_template: "{{ ['light.kitchen_1_color', 'light.kitchen_2_color', 'light.kitchen_lightstrip',
+      'light.hue_datura_top_1', 'light.hue_datura_bottom_1'] | select('is_state', 'on') | list | count > 0 }}"
+  actions:
+  - action: switch.turn_off
+    target:
+      entity_id: switch.al_kitchen
+  - action: adaptive_lighting.set_manual_control
+    continue_on_error: true
+    data:
+      entity_id: switch.al_kitchen
+      manual_control: false
+  - action: light.turn_off
+    target:
+      entity_id:
+      - light.kitchen_1_color
+      - light.kitchen_2_color
+      - light.kitchen_lightstrip
+      - light.hue_datura_top_1
+      - light.hue_datura_bottom_1
+    data:
+      transition: 30
+  mode: single
