@@ -8724,7 +8724,9 @@
 - id: '1777221197720'
   alias: Bedroom 2 - Off When Empty
   description: If bedroom 2 is unoccupied for 15 continuous minutes and no one is
-    sleeping there (bedroom2_occupied off), turn off all lights, fan, and music.
+    sleeping there (bedroom2_occupied off), turn off fan and music. Lights are owned
+    by Smart Motion & Presence (25 continuous empty minutes) - removed here 2026-10-08
+    so there is one light-off timer.
   triggers:
   - trigger: state
     entity_id:
@@ -8739,26 +8741,12 @@
   - condition: state
     entity_id: input_boolean.bedroom2_occupied
     state: 'off'
-  - alias: Tap/dimmer override holds the lights until Smart Motion's 25 minute empty
-      rule fades them off
-    condition: state
-    entity_id: input_boolean.bedroom2_manual_override
-    state: 'off'
   actions:
   - alias: Stop music - leaves the shared Welcome Home/receiver group first so it
       never kills the stream for people listening in other rooms
     action: script.stop_room_speaker_safely
     data:
       entity_id: media_player.office_2
-  - alias: Turn off all lights
-    action: light.turn_off
-    target:
-      entity_id:
-      - light.ribbon
-      - light.fluttershy
-      - light.office
-      - light.hue_white_lamp_1
-    data: {}
   - alias: Turn off fan
     action: fan.turn_off
     target:
