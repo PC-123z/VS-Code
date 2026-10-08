@@ -8108,6 +8108,14 @@
     to:
     - 'on'
     id: detected
+  - alias: Presence (incl. sitting still) re-detected - lights back on / cancel a fade
+      (2026-10-08 - person sitting still got faded off and nothing turned the lights
+      back on because only moving-target/door triggered detection)
+    trigger: state
+    entity_id: binary_sensor.bedroom_2_sensor_group
+    from: 'off'
+    to: 'on'
+    id: detected
   - trigger: state
     entity_id:
     - binary_sensor.bedroom_2_sensor_group
@@ -8119,11 +8127,10 @@
   - alias: Radar blip that never flipped the sensor group on (2026-09-26 - a 2s moving-target
       blip turned the lights on and the group-off trigger above never fired because
       the group was already off, so lights stayed on 3+ hours); the condition on the
-      stopped branch re-checks the group is off
+      stopped branch requires the group to have been off 25 continuous minutes
     trigger: state
     entity_id:
     - binary_sensor.bedroom2_sensor_apollo_radar_moving_target
-    - binary_sensor.bedroom2_office_bedroom2_door_presence
     to:
     - 'off'
     for:
@@ -8470,10 +8477,13 @@
     - conditions:
       - condition: trigger
         id: stopped
-      - alias: Only when the room is really empty (needed for the radar-blip trigger)
+      - alias: Only when the room has been empty 25 CONTINUOUS minutes - an instant 'off'
+          check let a brief radar dropout (person sitting still) kill the lights (2026-10-08)
         condition: state
         entity_id: binary_sensor.bedroom_2_sensor_group
         state: 'off'
+        for:
+          minutes: 25
       - alias: Skip if hard-off window (11:45 PM - 7 AM) - let Bedtime/Morning routines
           own this
         condition: time
