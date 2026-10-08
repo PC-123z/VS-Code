@@ -8775,7 +8775,8 @@
   description: TV state drives living room lighting with time-of-day palette. Playing
     = deep dim scaled to daylight. Paused/Off = restore AL and presence. Dining room
     dims during playback if occupied. Kitchen lights fade off (30s fade) when playback
-    starts if the kitchen is empty, or once the kitchen has been empty 5s during playback.
+    starts if the kitchen is empty, or immediately when kitchen presence clears during
+    playback (5s debounce removed 2026-10-08 at user request).
     Galaxy projector off during playback, on when paused/off.
   triggers:
   - alias: Jellyfin (any current/future Living Room client) - playing
@@ -8887,8 +8888,6 @@
     trigger: state
     entity_id: binary_sensor.kitchen_sensor_group
     to: 'off'
-    for:
-      seconds: 5
     id: kitchen_empty
   - alias: Real motion (not presence) in living room, dining room or kitchen while
       TV Mode still has the room dimmed and nothing is playing - brighten now instead
@@ -9027,7 +9026,7 @@
         value_template: '{{ [''light.kitchen_1_color'', ''light.kitchen_2_color'',
           ''light.kitchen_lightstrip'', ''light.hue_datura_top_1'', ''light.hue_datura_bottom_1'']
           | select(''is_state'', ''on'') | list | count > 0 }}'
-      alias: Kitchen empty for 5s while media is playing - fade kitchen lights off
+      alias: Kitchen presence cleared while media is playing - fade kitchen lights off (30s)
       sequence:
       - action: switch.turn_off
         target:
@@ -9183,6 +9182,11 @@
     - conditions:
       - condition: trigger
         id: tv_off
+      - alias: Only if nothing in the living room is still playing (added 2026-10-08) -
+          Jellyfin Tiny briefly reports 'off' when the Apple TV switches sessions, which
+          restored the lights mid-show while the Sony TV was still playing
+        condition: template
+        value_template: '{{ not is_playing_now }}'
       sequence:
       - alias: Skip living room light restore while hold-for-100% override is active
         if:
