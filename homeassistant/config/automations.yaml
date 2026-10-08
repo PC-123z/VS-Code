@@ -15972,3 +15972,43 @@
     action: homeassistant.reload_config_entry
     target:
       entity_id: cover.garage
+- id: '1791200000001'
+  alias: 'Watchdog: automations/scripts that failed to load'
+  description: 'Added 2026-10-08. HA 2026.10.0 silently disabled both Good Morning routines
+    after a reboot (state condition with for + list of states no longer validates)
+    and nothing said so. An automation or script that fails validation shows up as
+    state unavailable. Checks 4 min after every HA start, 30 s after any automation
+    reload, and daily at 06:00 (before the 06:30 routines) and texts Paul the list.
+    Intentionally disabled automations are off, not unavailable, so they never appear.'
+  mode: single
+  triggers:
+  - trigger: homeassistant
+    event: start
+    id: start
+  - trigger: event
+    event_type: automation_reloaded
+    id: reload
+  - trigger: time
+    at: 06:00:00
+    id: daily
+  conditions: []
+  actions:
+  - alias: Let integrations and automations finish loading after a start/reload
+    delay:
+      seconds: '{{ 240 if trigger.id == ''start'' else (30 if trigger.id == ''reload'' else 0) }}'
+  - variables:
+      broken: >-
+        {{ (states.automation | list + states.script | list)
+           | selectattr('state', 'eq', 'unavailable')
+           | map(attribute='name') | sort | list }}
+  - alias: Nothing failed to load - done
+    condition: template
+    value_template: '{{ broken | count > 0 }}'
+  - action: notify.mobile_app_pc_iphone
+    continue_on_error: true
+    data:
+      title: '{{ broken | count }} automation(s)/script(s) failed to load'
+      message: >-
+        Unavailable after {{ trigger.id }}: {{ broken | join('', '') }}.
+        Usually a config validation error (check Settings > System > Logs for
+        "could not be validated") or a removed item's leftover entity.
