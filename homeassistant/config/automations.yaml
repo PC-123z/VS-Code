@@ -16010,3 +16010,54 @@
         Unavailable after {{ trigger.id }}: {{ broken | join(', ') }}.
         Usually a config validation error (check Settings > System > Logs for
         "could not be validated") or a removed item's leftover entity.
+- id: '1790200000001'
+  alias: 'Big Bedroom Radar: Fan-Aware Still Thresholds'
+  description: 'The ceiling + pedestal fans give the same still energy (~27/36/24/20
+    at gates 3-6, ~3 m) as a sleeper, so the MSR-2 cannot tell a still person from
+    a running fan. Sensitive profile (fans off, or asleep flag on) detects someone
+    lying in bed; high profile (any fan on and not asleep) sits above the fan floor
+    so a fan left on in an empty room cannot hold the room occupied. Move thresholds
+    are static (walk-in detection near the sensor). Measured 2026-10-08: empty-room
+    still energy <=17, fan-only g3-g6 peaks 32/42/26/25.'
+  mode: queued
+  max: 3
+  triggers:
+  - trigger: state
+    entity_id:
+    - fan.big_bedroom_fan
+    - fan.air_circulator
+    - input_boolean.big_bedroom_asleep
+    to:
+    - 'on'
+    - 'off'
+  - trigger: state
+    entity_id: binary_sensor.apollo_msr_2_big_bedroom_online
+    to: 'on'
+    for:
+      seconds: 30
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - variables:
+      high: '{{ (is_state(''fan.big_bedroom_fan'', ''on'') or is_state(''fan.air_circulator'',
+        ''on'')) and not is_state(''input_boolean.big_bedroom_asleep'', ''on'') }}'
+      profile: '{{ {2: 25, 3: 40, 4: 50, 5: 35, 6: 32, 7: 28, 8: 30} if high else
+        {2: 25, 3: 28, 4: 25, 5: 23, 6: 22, 7: 25, 8: 30} }}'
+  - repeat:
+      for_each: '{{ profile.items() | list }}'
+      sequence:
+      - variables:
+          ent: number.apollo_msr_2_big_bedroom_g{{ repeat.item[0] }}_still_threshold
+      - if:
+        - condition: template
+          value_template: '{{ states(ent) | float(-1) != repeat.item[1] | float }}'
+        then:
+        - action: number.set_value
+          continue_on_error: true
+          target:
+            entity_id: '{{ ent }}'
+          data:
+            value: '{{ repeat.item[1] }}'
+        - delay:
+            milliseconds: 1500
