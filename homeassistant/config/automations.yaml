@@ -83,11 +83,11 @@
   - trigger: time
     at: '18:40:00'
     weekday:
-    - sat
-    enabled: false
+    - fri
+    enabled: true
   - trigger: time
     at: '18:30:00'
-    enabled: true
+    enabled: false
     weekday:
     - sat
   conditions: []
