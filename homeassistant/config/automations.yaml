@@ -10553,7 +10553,7 @@
     - fri
     enabled: false
   - trigger: time
-    at: 07:15:00
+    at: 08:15:00
     weekday:
     - mon
     - tue
