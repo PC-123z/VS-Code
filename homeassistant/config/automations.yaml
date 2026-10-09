@@ -8108,9 +8108,9 @@
     to:
     - 'on'
     id: detected
-  - alias: Presence (incl. sitting still) re-detected - lights back on / cancel a fade
-      (2026-10-08 - person sitting still got faded off and nothing turned the lights
-      back on because only moving-target/door triggered detection)
+  - alias: Presence (incl. sitting still) re-detected - lights back on / cancel a
+      fade (2026-10-08 - person sitting still got faded off and nothing turned the
+      lights back on because only moving-target/door triggered detection)
     trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
     from: 'off'
@@ -8477,8 +8477,9 @@
     - conditions:
       - condition: trigger
         id: stopped
-      - alias: Only when the room has been empty 25 CONTINUOUS minutes - an instant 'off'
-          check let a brief radar dropout (person sitting still) kill the lights (2026-10-08)
+      - alias: Only when the room has been empty 25 CONTINUOUS minutes - an instant
+          'off' check let a brief radar dropout (person sitting still) kill the lights
+          (2026-10-08)
         condition: state
         entity_id: binary_sensor.bedroom_2_sensor_group
         state: 'off'
@@ -8775,9 +8776,9 @@
   description: TV state drives living room lighting with time-of-day palette. Playing
     = deep dim scaled to daylight. Paused/Off = restore AL and presence. Dining room
     dims during playback if occupied. Kitchen fade moved 2026-10-08 to its own automation
-    Kitchen - Fade Off When Empty During Apple TV (1791400000001) - this one runs in restart
-    mode, so kitchen triggers were aborting in-flight dimming runs.
-    Galaxy projector off during playback, on when paused/off.
+    Kitchen - Fade Off When Empty During Apple TV (1791400000001) - this one runs
+    in restart mode, so kitchen triggers were aborting in-flight dimming runs. Galaxy
+    projector off during playback, on when paused/off.
   triggers:
   - alias: Jellyfin (any current/future Living Room client) - playing
     trigger: template
@@ -9113,9 +9114,9 @@
     - conditions:
       - condition: trigger
         id: tv_off
-      - alias: Only if nothing in the living room is still playing (added 2026-10-08) -
-          Jellyfin Tiny briefly reports 'off' when the Apple TV switches sessions, which
-          restored the lights mid-show while the Sony TV was still playing
+      - alias: Only if nothing in the living room is still playing (added 2026-10-08)
+          - Jellyfin Tiny briefly reports 'off' when the Apple TV switches sessions,
+          which restored the lights mid-show while the Sony TV was still playing
         condition: template
         value_template: '{{ not is_playing_now }}'
       sequence:
@@ -9559,13 +9560,12 @@
   - alias: 'Added 2026-10-07 after the garage cover (Aladdin) missed an open/close
       cycle and STAGE 1 never armed pending. Give ANY of these up to 60s: STAGE 1
       pending flag; the fallback of arrival_recent (BT beacon / phone / webhook) with
-      the door open; or the panel being disarmed (keypad code). If none lands,
-      notify and stop.'
-    wait_template: >-
-      {{ is_state('input_boolean.welcome_home_pending','on')
-         or (is_state('input_boolean.arrival_recent','on') and is_state('binary_sensor.garage_door','on'))
-         or ((trigger.id == 'code' or alarm_at_start != 'disarmed')
-             and is_state('alarm_control_panel.3302_alarm','disarmed')) }}
+      the door open; or the panel being disarmed (keypad code). If none lands, notify
+      and stop.'
+    wait_template: "{{ is_state('input_boolean.welcome_home_pending','on')\n   or
+      (is_state('input_boolean.arrival_recent','on') and is_state('binary_sensor.garage_door','on'))\n
+      \  or ((trigger.id == 'code' or alarm_at_start != 'disarmed')\n       and is_state('alarm_control_panel.3302_alarm','disarmed'))
+      }}"
     timeout:
       seconds: 60
     continue_on_timeout: true
@@ -9587,15 +9587,15 @@
         action: notify.mobile_app_pc_iphone
         data:
           title: Welcome Home did NOT run
-          message: >-
-            Garage to house door opened but no arrival was confirmed within 60s.
-            Alarm: {{ states('alarm_control_panel.3302_alarm') }}.
-            Garage cover (Aladdin): {{ states('cover.garage') }}, last changed {{ as_timestamp(states.cover.garage.last_changed) | timestamp_custom('%-I:%M %p', true) }}.
-            Stage 1 pending flag: {{ states('input_boolean.welcome_home_pending') }}.
-            garage_open_recent latch: {{ states('input_boolean.garage_open_recent') }}.
-            arrival_recent latch (beacon/phone/webhook): {{ states('input_boolean.arrival_recent') }}.
-            Beacon: {{ states('device_tracker.bcpro_204982_08b8') }}. person.paul: {{ states('person.paul') }}.
-            Disarm by code to start the routine, or check the Aladdin integration.
+          message: 'Garage to house door opened but no arrival was confirmed within
+            60s. Alarm: {{ states(''alarm_control_panel.3302_alarm'') }}. Garage cover
+            (Aladdin): {{ states(''cover.garage'') }}, last changed {{ as_timestamp(states.cover.garage.last_changed)
+            | timestamp_custom(''%-I:%M %p'', true) }}. Stage 1 pending flag: {{ states(''input_boolean.welcome_home_pending'')
+            }}. garage_open_recent latch: {{ states(''input_boolean.garage_open_recent'')
+            }}. arrival_recent latch (beacon/phone/webhook): {{ states(''input_boolean.arrival_recent'')
+            }}. Beacon: {{ states(''device_tracker.bcpro_204982_08b8'') }}. person.paul:
+            {{ states(''person.paul'') }}. Disarm by code to start the routine, or
+            check the Aladdin integration.'
     - stop: Not a confirmed arrival
   - alias: Garage to house door must still be open - hard gate (a keypad-code disarm
       satisfies it too, since the door may already have closed)
@@ -10091,8 +10091,8 @@
       MA regenerates the universal player (2026-10-08); sensor.living_room_receiver_ma_player
       finds it by device model
     variables:
-      rx: "{{ states('sensor.living_room_receiver_ma_player') if states('sensor.living_room_receiver_ma_player').startswith('media_player.')
-        else 'media_player.living_room_av_receiver' }}"
+      rx: '{{ states(''sensor.living_room_receiver_ma_player'') if states(''sensor.living_room_receiver_ma_player'').startswith(''media_player.'')
+        else ''media_player.living_room_av_receiver'' }}'
   - alias: On session start, wait for the kitchen stream to actually be playing first,
       and reset the living room once-per-session latch so this run is allowed to join
       again
@@ -10220,7 +10220,8 @@
         condition: template
         value_template: '{{ trigger.id == ''living_room_motion'' or (trigger.id ==
           ''session_start'' and (is_state(''binary_sensor.living_room_sensor_group'',
-          ''on'') or is_state(''binary_sensor.dining_room_sensor_group'', ''on''))) }}'
+          ''on'') or is_state(''binary_sensor.dining_room_sensor_group'', ''on'')))
+          }}'
       - alias: Skip if the receiver is already in the kitchen group - motion re-triggers
           constantly while the room is occupied, and without this the whole volume-drop/join/ramp
           sequence re-ran on every retrigger, causing the exact audible cutouts this
@@ -10276,8 +10277,8 @@
       - alias: Verify the join (added 2026-10-08) - on 2026-10-08 the MA player had
           been re-created as living_room_av_receiver_2, the join errored, and the
           receiver sat on-but-silent with the latch blocking every retry
-        wait_template: "{{ rx in\n   (state_attr('media_player.kitchen_2',\n
-          \  'group_members') | default([])) }}"
+        wait_template: "{{ rx in\n   (state_attr('media_player.kitchen_2',\n   'group_members')
+          | default([])) }}"
         timeout:
           seconds: 15
         continue_on_timeout: true
@@ -10552,7 +10553,7 @@
     - fri
     enabled: false
   - trigger: time
-    at: 08:00:00
+    at: 07:15:00
     weekday:
     - mon
     - tue
@@ -12563,8 +12564,8 @@
       MA regenerates the universal player (2026-10-08); sensor.living_room_receiver_ma_player
       finds it by device model
     variables:
-      rx: "{{ states('sensor.living_room_receiver_ma_player') if states('sensor.living_room_receiver_ma_player').startswith('media_player.')
-        else 'media_player.living_room_av_receiver' }}"
+      rx: '{{ states(''sensor.living_room_receiver_ma_player'') if states(''sensor.living_room_receiver_ma_player'').startswith(''media_player.'')
+        else ''media_player.living_room_av_receiver'' }}'
   - alias: Stop the shared stream at its leader FIRST (added 2026-09-24) - with AirPlay
       grouping, unjoining the kitchen leader while members remain hands leadership
       to the receiver and the music briefly resumes on the leftover group; stopping
@@ -13978,8 +13979,8 @@
       MA regenerates the universal player (2026-10-08); sensor.living_room_receiver_ma_player
       finds it by device model
     variables:
-      rx: "{{ states('sensor.living_room_receiver_ma_player') if states('sensor.living_room_receiver_ma_player').startswith('media_player.')
-        else 'media_player.living_room_av_receiver' }}"
+      rx: '{{ states(''sensor.living_room_receiver_ma_player'') if states(''sensor.living_room_receiver_ma_player'').startswith(''media_player.'')
+        else ''media_player.living_room_av_receiver'' }}'
   - choose:
     - alias: Kitchen occupied while the receiver is playing - join it in
       conditions:
@@ -13998,8 +13999,8 @@
           state: playing
       - alias: Skip if kitchen is already in the receiver group
         condition: template
-        value_template: '{{ ''media_player.kitchen_2'' not in (state_attr(rx,
-          ''group_members'') | default([], true)) }}'
+        value_template: '{{ ''media_player.kitchen_2'' not in (state_attr(rx, ''group_members'')
+          | default([], true)) }}'
       sequence:
       - action: media_player.volume_set
         target:
@@ -14036,8 +14037,8 @@
       - condition: trigger
         id: kitchen_empty
       - condition: template
-        value_template: '{{ ''media_player.kitchen_2'' in (state_attr(rx,
-          ''group_members'') | default([], true)) }}'
+        value_template: '{{ ''media_player.kitchen_2'' in (state_attr(rx, ''group_members'')
+          | default([], true)) }}'
       sequence:
       - continue_on_error: true
         action: media_player.unjoin
@@ -15884,10 +15885,10 @@
   mode: queued
 - id: '1791100000001'
   alias: 'Watchdog: Jellyfin sensor unavailable 5 min'
-  description: 'Added 2026-10-07. jellyfin.pc / jellyfin-tiny.pc returned 502 Bad Gateway
+  description: Added 2026-10-07. jellyfin.pc / jellyfin-tiny.pc returned 502 Bad Gateway
     repeatedly and TV-playing detection (TV Mode, Welcome Home, dining dim) silently
     went wrong. Texts Paul once per outage when either Jellyfin sensor stays unavailable
-    5 min, then once more when it recovers.'
+    5 min, then once more when it recovers.
   mode: parallel
   max: 4
   triggers:
@@ -15902,7 +15903,8 @@
   actions:
   - variables:
       ent: '{{ trigger.entity_id }}'
-      friendly: '{{ state_attr(trigger.entity_id, ''friendly_name'') or trigger.entity_id }}'
+      friendly: '{{ state_attr(trigger.entity_id, ''friendly_name'') or trigger.entity_id
+        }}'
   - action: notify.mobile_app_pc_iphone
     continue_on_error: true
     data:
@@ -15922,12 +15924,12 @@
       message: '{{ friendly }} is reporting again ({{ states(ent) }}).'
 - id: '1791100000002'
   alias: 'Watchdog: Aladdin garage cover missed an arrival'
-  description: 'Added 2026-10-07. On 2026-10-07 the Aladdin cover missed a whole
-    open/close cycle (cloud app showed it, HA did not) so STAGE 1 never armed. cover.garage
-    kept reporting fresh data while stuck, so staleness cannot be seen from the cover
-    alone. Cross-check: arrival signal latched + garage to house door opened, but
-    cover.garage unchanged in the last 10 min after waiting 3 min. Texts Paul and
-    reloads the Aladdin config entry (the fix that worked).'
+  description: 'Added 2026-10-07. On 2026-10-07 the Aladdin cover missed a whole open/close
+    cycle (cloud app showed it, HA did not) so STAGE 1 never armed. cover.garage kept
+    reporting fresh data while stuck, so staleness cannot be seen from the cover alone.
+    Cross-check: arrival signal latched + garage to house door opened, but cover.garage
+    unchanged in the last 10 min after waiting 3 min. Texts Paul and reloads the Aladdin
+    config entry (the fix that worked).'
   mode: single
   triggers:
   - trigger: state
@@ -15950,11 +15952,11 @@
     continue_on_error: true
     data:
       title: Garage (Aladdin) missed your arrival
-      message: 'Garage to house door opened with an arrival signal, but cover.garage
+      message: Garage to house door opened with an arrival signal, but cover.garage
         has not changed since {{ as_timestamp(states.cover.garage.last_changed) |
-        timestamp_custom(''%-I:%M %p'', true) }} (now {{ states(''cover.garage'')
-        }}). Reloading the Aladdin integration. Welcome Home may rely on the beacon
-        + door fallback.'
+        timestamp_custom('%-I:%M %p', true) }} (now {{ states('cover.garage') }}).
+        Reloading the Aladdin integration. Welcome Home may rely on the beacon + door
+        fallback.
   - alias: Reload the Aladdin integration (fixed the stuck state on 2026-10-07)
     continue_on_error: true
     action: homeassistant.reload_config_entry
@@ -15962,12 +15964,12 @@
       entity_id: cover.garage
 - id: '1791200000001'
   alias: 'Watchdog: automations/scripts that failed to load'
-  description: 'Added 2026-10-08. HA 2026.10.0 silently disabled both Good Morning routines
-    after a reboot (state condition with for + list of states no longer validates)
+  description: Added 2026-10-08. HA 2026.10.0 silently disabled both Good Morning
+    routines after a reboot (state condition with for + list of states no longer validates)
     and nothing said so. An automation or script that fails validation shows up as
     state unavailable. Checks 4 min after every HA start, 30 s after any automation
     reload, and daily at 06:00 (before the 06:30 routines) and texts Paul the list.
-    Intentionally disabled automations are off, not unavailable, so they never appear.'
+    Intentionally disabled automations are off, not unavailable, so they never appear.
   mode: single
   triggers:
   - trigger: homeassistant
@@ -15983,12 +15985,11 @@
   actions:
   - alias: Let integrations and automations finish loading after a start/reload
     delay:
-      seconds: '{{ 240 if trigger.id == ''start'' else (30 if trigger.id == ''reload'' else 0) }}'
+      seconds: '{{ 240 if trigger.id == ''start'' else (30 if trigger.id == ''reload''
+        else 0) }}'
   - variables:
-      broken: >-
-        {{ (states.automation | list + states.script | list)
-           | selectattr('state', 'eq', 'unavailable')
-           | map(attribute='name') | sort | list }}
+      broken: "{{ (states.automation | list + states.script | list)\n   | selectattr('state',
+        'eq', 'unavailable')\n   | map(attribute='name') | sort | list }}"
   - alias: Nothing failed to load - done
     condition: template
     value_template: '{{ broken | count > 0 }}'
@@ -15996,10 +15997,9 @@
     continue_on_error: true
     data:
       title: '{{ broken | count }} automation(s)/script(s) failed to load'
-      message: >-
-        Unavailable after {{ trigger.id }}: {{ broken | join(', ') }}.
-        Usually a config validation error (check Settings > System > Logs for
-        "could not be validated") or a removed item's leftover entity.
+      message: 'Unavailable after {{ trigger.id }}: {{ broken | join('', '') }}. Usually
+        a config validation error (check Settings > System > Logs for "could not be
+        validated") or a removed item''s leftover entity.'
 - id: '1790300000001'
   alias: 'Big Bedroom Radar: Fan-Aware Still Thresholds'
   description: 'The ceiling + pedestal fans give the same still energy (~27/36/24/20
@@ -16057,9 +16057,10 @@
     Living Room TV, Bedroom TV) with random ids on restarts/provider reloads, which
     silently broke the Welcome Home receiver join. Those two are now resolved by device
     model (sensor.living_room_receiver_ma_player / sensor.living_room_tv_ma_player).
-    This alerts when (a) any new MA media_player entity is created (a re-creation shows
-    up as a _2/_3 suffix), (b) a resolver finds 0 or 2+ matches, or (c) a core MA speaker
-    used by automations stays unavailable 15 min. Portable Roam excluded (often off).
+    This alerts when (a) any new MA media_player entity is created (a re-creation
+    shows up as a _2/_3 suffix), (b) a resolver finds 0 or 2+ matches, or (c) a core
+    MA speaker used by automations stays unavailable 15 min. Portable Roam excluded
+    (often off).
   triggers:
   - trigger: event
     event_type: entity_registry_updated
@@ -16067,14 +16068,14 @@
       action: create
     id: created
   - trigger: template
-    value_template: "{{ state_attr('sensor.living_room_receiver_ma_player', 'candidates')
-      | default([], true) | count != 1 }}"
+    value_template: '{{ state_attr(''sensor.living_room_receiver_ma_player'', ''candidates'')
+      | default([], true) | count != 1 }}'
     for:
       minutes: 10
     id: resolver
   - trigger: template
-    value_template: "{{ state_attr('sensor.living_room_tv_ma_player', 'candidates')
-      | default([], true) | count != 1 }}"
+    value_template: '{{ state_attr(''sensor.living_room_tv_ma_player'', ''candidates'')
+      | default([], true) | count != 1 }}'
     for:
       minutes: 10
     id: resolver
@@ -16092,18 +16093,19 @@
     id: unavailable
   conditions:
   - condition: template
-    value_template: "{{ trigger.id != 'created' or (trigger.event.data.entity_id.startswith('media_player.')
-      and trigger.event.data.entity_id in integration_entities('music_assistant')) }}"
+    value_template: '{{ trigger.id != ''created'' or (trigger.event.data.entity_id.startswith(''media_player.'')
+      and trigger.event.data.entity_id in integration_entities(''music_assistant''))
+      }}'
   actions:
   - variables:
-      msg: >-
-        {% if trigger.id == 'created' %}New Music Assistant player entity {{ trigger.event.data.entity_id }}
-        ({{ device_attr(trigger.event.data.entity_id, 'model') }}). If it has a _2/_3 suffix MA
-        re-created an existing player - check automations that reference it.
-        {% elif trigger.id == 'resolver' %}MA player resolver mismatch - receiver candidates:
-        {{ state_attr('sensor.living_room_receiver_ma_player', 'candidates') }}, TV candidates:
-        {{ state_attr('sensor.living_room_tv_ma_player', 'candidates') }}.
-        {% else %}{{ trigger.entity_id }} has been unavailable in Music Assistant for 15 min.{% endif %}
+      msg: '{% if trigger.id == ''created'' %}New Music Assistant player entity {{
+        trigger.event.data.entity_id }} ({{ device_attr(trigger.event.data.entity_id,
+        ''model'') }}). If it has a _2/_3 suffix MA re-created an existing player
+        - check automations that reference it. {% elif trigger.id == ''resolver''
+        %}MA player resolver mismatch - receiver candidates: {{ state_attr(''sensor.living_room_receiver_ma_player'',
+        ''candidates'') }}, TV candidates: {{ state_attr(''sensor.living_room_tv_ma_player'',
+        ''candidates'') }}. {% else %}{{ trigger.entity_id }} has been unavailable
+        in Music Assistant for 15 min.{% endif %}'
   - action: persistent_notification.create
     data:
       title: Music Assistant player watchdog
@@ -16118,9 +16120,9 @@
 - id: '1791400000001'
   alias: 'Kitchen: Fade Off When Empty During Apple TV'
   description: Added 2026-10-08 (moved out of Living Room TV Mode, which is mode restart
-    so kitchen triggers aborted its dimming runs). While the living room Apple TV is
-    playing, kitchen lights fade off over 30 s once kitchen presence has been clear 5 s.
-    Apple TV only - Sony TV inputs / Jellyfin on other clients don't count. "Playing"
+    so kitchen triggers aborted its dimming runs). While the living room Apple TV
+    is playing, kitchen lights fade off over 30 s once kitchen presence has been clear
+    5 s. Apple TV only - Sony TV inputs / Jellyfin on other clients don't count. "Playing"
     = native apple_tv entity OR its Music Assistant AirPlay player, since the native
     one was stuck 'off' for a day until the integration was reloaded. Kitchen Smart
     Motion turns the lights back on when someone walks in. Skips while the Pico/manual
@@ -16140,7 +16142,8 @@
   conditions:
   - alias: Apple TV is playing
     condition: template
-    value_template: "{{ is_state('media_player.living_room', 'playing') or is_state('media_player.living_room_2', 'playing') }}"
+    value_template: '{{ is_state(''media_player.living_room'', ''playing'') or is_state(''media_player.living_room_2'',
+      ''playing'') }}'
   - alias: Kitchen clear for 5 s
     condition: state
     entity_id: binary_sensor.kitchen_sensor_group
@@ -16155,8 +16158,9 @@
     state: 'off'
   - alias: Something in the kitchen is actually on
     condition: template
-    value_template: "{{ ['light.kitchen_1_color', 'light.kitchen_2_color', 'light.kitchen_lightstrip',
-      'light.hue_datura_top_1', 'light.hue_datura_bottom_1'] | select('is_state', 'on') | list | count > 0 }}"
+    value_template: '{{ [''light.kitchen_1_color'', ''light.kitchen_2_color'', ''light.kitchen_lightstrip'',
+      ''light.hue_datura_top_1'', ''light.hue_datura_bottom_1''] | select(''is_state'',
+      ''on'') | list | count > 0 }}'
   actions:
   - action: switch.turn_off
     target:
