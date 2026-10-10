@@ -10058,7 +10058,9 @@
   mode: single
 - id: '1748800000002'
   alias: 'Welcome Home: Unjoin Bedroom When Unoccupied 10 Min'
-  description: Re-enabled 2026-09-10 - back to join/broadcast mode. While welcome
+  description: DISABLED 2026-10-10 at the user's request - during Welcome Home a
+    room that got music keeps it until the session is stopped or expires; kept for
+    reference. Re-enabled 2026-09-10 - back to join/broadcast mode. While welcome
     home is active, unjoin the bedroom speaker when the room has been empty for 10
     minutes. The auto-join automation handles re-joining if someone returns.
   triggers:
@@ -10081,7 +10083,9 @@
   mode: single
 - id: '1748800000003'
   alias: 'Welcome Home: Unjoin Office When Unoccupied 10 Min'
-  description: Re-enabled 2026-09-10 - back to join/broadcast mode. While welcome
+  description: DISABLED 2026-10-10 at the user's request - during Welcome Home a
+    room that got music keeps it until the session is stopped or expires; kept for
+    reference. Re-enabled 2026-09-10 - back to join/broadcast mode. While welcome
     home is active, unjoin the office speaker when the room has been empty for 10
     minutes. The auto-join automation handles re-joining if someone returns.
   triggers:
@@ -10124,7 +10128,9 @@
     not the native yamaha_musiccast entity) on living room motion, targeting 0.25
     (the receiver''s own observed volume level, used as a sane ceiling rather than
     an arbitrary guess). Renamed from "...Bedroom Speakers..." since it now covers
-    more than bedrooms.'
+    more than bedrooms. 2026-10-10: joins target the group LEADER (wh_leader), not
+    kitchen_2, and joined rooms now keep the music until the session is stopped or
+    expires (the per-room unjoin-when-empty automations are disabled).'
   triggers:
   - trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
@@ -10163,6 +10169,12 @@
     variables:
       rx: '{{ states(''sensor.living_room_receiver_ma_player'') if states(''sensor.living_room_receiver_ma_player'').startswith(''media_player.'')
         else ''media_player.living_room_av_receiver'' }}'
+  - alias: Resolve the leader of the Welcome Home group (added 2026-10-10) - join rooms
+      to whoever actually leads the kitchen's group. On 2026-10-10 the receiver was
+      leading with kitchen as a member, and joining to kitchen_2 silently did nothing
+      (Big Bedroom stayed silent). MA lists the leader first in group_members.
+    variables:
+      wh_leader: "{{ (state_attr('media_player.kitchen_2','group_members') or ['media_player.kitchen_2'])[0] if (state_attr('media_player.kitchen_2','group_members') or []) | length > 1 else 'media_player.kitchen_2' }}"
   - alias: On session start, wait for the kitchen stream to actually be playing first,
       and reset the living room once-per-session latch so this run is allowed to join
       again
@@ -10204,7 +10216,7 @@
           volume_level: 0.05
       - action: media_player.join
         target:
-          entity_id: media_player.kitchen_2
+          entity_id: '{{ wh_leader }}'
         data:
           group_members:
           - media_player.office_2
@@ -10256,7 +10268,7 @@
           volume_level: 0.05
       - action: media_player.join
         target:
-          entity_id: media_player.kitchen_2
+          entity_id: '{{ wh_leader }}'
         data:
           group_members:
           - media_player.bedroom_2
@@ -10340,7 +10352,7 @@
       - continue_on_error: true
         action: media_player.join
         target:
-          entity_id: media_player.kitchen_2
+          entity_id: '{{ wh_leader }}'
         data:
           group_members:
           - '{{ rx }}'
@@ -11559,7 +11571,7 @@
         }}"
       kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']
         }}"
-      source_player: '{% if welcome_home_on and kitchen_active %} media_player.kitchen_2
+      source_player: '{% if welcome_home_on and kitchen_active %} {{ (state_attr(''media_player.kitchen_2'',''group_members'') or [''media_player.kitchen_2''])[0] if (state_attr(''media_player.kitchen_2'',''group_members'') or []) | length > 1 else ''media_player.kitchen_2'' }}
         {% elif bedroom_active %} media_player.bedroom_2 {% else %} none {% endif
         %}'
   - choose:
@@ -11655,6 +11667,13 @@
       conditions:
       - condition: trigger
         id: motion_off
+      - alias: Not while Welcome Home is running with the bathroom in its group - added
+          2026-10-10, a room that joined Welcome Home keeps the music until the session
+          is stopped or expires
+        condition: template
+        value_template: '{{ not (is_state(''input_boolean.welcome_home_active'', ''on'')
+          and ''media_player.bathroom_2'' in (state_attr(''media_player.kitchen_2'',
+          ''group_members'') or [])) }}'
       - alias: Bathroom is currently in any active source group - group_members lists
           MA entities (bathroom_2), not the raw Sonos entity
         condition: template
@@ -12643,7 +12662,7 @@
     continue_on_error: true
     action: media_player.media_stop
     target:
-      entity_id: media_player.kitchen_2
+      entity_id: "{{ [(state_attr('media_player.kitchen_2','group_members') or ['media_player.kitchen_2'])[0], 'media_player.kitchen_2'] if (state_attr('media_player.kitchen_2','group_members') or []) | length > 1 else ['media_player.kitchen_2'] }}"
   - delay:
       seconds: 2
   - alias: Unjoin every satellite from the kitchen group
@@ -12690,7 +12709,7 @@
         entity_id: '{{ rx }}'
   mode: single
 - id: '1791000000001'
-  alias: 'Welcome Home: End Session When Living Room TV Turns On'
+  alias: 'Welcome Home: End Session When Living Room or Big Bedroom TV Turns On'
   description: Added 2026-10-04 at the user's request - turning on the living room
     TV ends Welcome Home and stops its music in every room. This only clears welcome_home_active;
     "Unjoin All Satellites on Deactivation" (1779800000007) then stops the kitchen
@@ -12703,13 +12722,23 @@
     entity_id: binary_sensor.living_room_tv_on
     from: 'off'
     to: 'on'
+    id: living_room
+  - alias: Big Bedroom TV (added 2026-10-10 at the user's request). from 'off' only,
+      so an integration reconnect (unavailable -> on) can't end the session
+    trigger: state
+    entity_id: remote.bedroom_tv
+    from: 'off'
+    to: 'on'
+    for:
+      seconds: 3
+    id: big_bedroom
   conditions:
   - condition: state
     entity_id: input_boolean.welcome_home_active
     state: 'on'
   - alias: Not within 60 s of the living room join powering the receiver on
     condition: template
-    value_template: '{{ not (is_state(''input_boolean.welcome_home_living_room_joined'',
+    value_template: '{{ trigger.id == ''big_bedroom'' or not (is_state(''input_boolean.welcome_home_living_room_joined'',
       ''on'') and (now() - states.input_boolean.welcome_home_living_room_joined.last_changed).total_seconds()
       < 60) }}'
   actions:
@@ -14106,6 +14135,11 @@
       conditions:
       - condition: trigger
         id: kitchen_empty
+      - alias: Not during Welcome Home (2026-10-10) - the kitchen is part of the session
+          group and stays until the session is stopped or expires
+        condition: state
+        entity_id: input_boolean.welcome_home_active
+        state: 'off'
       - condition: template
         value_template: '{{ ''media_player.kitchen_2'' in (state_attr(rx, ''group_members'')
           | default([], true)) }}'
