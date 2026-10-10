@@ -375,7 +375,21 @@ rest_command:
       "media": "ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H", "option": "replace",
       "radio_mode": false{% if start_item | default('') | length > 0 %}, "start_item": "{{ start_item }}"{% endif %}}}
 
-  # Welcome Home late-night (9 PM+) playlist: The Piano Guys - Most Popular (YT Music, 120 tracks),
+  # Welcome Home 11 PM - 6 AM: "Late Night Slow Sax" MA library playlist, shuffled, with Silhouette
+  # (Kenny G) pinned first. Under shuffle, MA keeps the whole playlist and pins start_item in front
+  # of the shuffled rest (queue_loader pin_first). Added 2026-10-10.
+  ma_kitchen_late_night_play:
+    url: http://192.168.70.155:8095/api
+    method: POST
+    headers:
+      Authorization: !secret music_assistant_api_bearer
+    content_type: application/json
+    payload: >-
+      {"command": "player_queues/play_media", "args": {"queue_id": "RINCON_347E5CA0960A01400",
+      "media": "library://playlist/100", "option": "replace", "radio_mode": false, "shuffle": true,
+      "start_item": "ytmusic--GoVJpbUj://track/1JgQ29SWjWI"}}
+
+  # Welcome Home 8-9 PM playlist (was 9 PM+ until 2026-10-10): The Piano Guys - Most Popular (YT Music, 120 tracks),
   # started as ONE playlist item at a saved position so each arrival resumes where the last ended.
   ma_kitchen_night_play_from:
     url: http://192.168.70.155:8095/api

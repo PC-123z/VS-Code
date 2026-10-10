@@ -9698,8 +9698,8 @@
               user wanted very slow and calming after 11 PM (Kenny G ballads like Sentimental
               / The Wedding Song, Coltrane Ballads, gentle Dean Fraser). Music Assistant
               library playlist "Late Night Slow Sax" (library://playlist/100, 30 hand-picked
-              tracks), shuffled, repeat all. Edit the track list in Music Assistant, not
-              here.
+              tracks), Silhouette first then shuffled, repeat all. Edit the track list
+              in Music Assistant, not here.
             if:
             - condition: template
               value_template: '{{ current_hour|int >= 23 or current_hour|int < 6 }}'
@@ -9716,14 +9716,26 @@
                 entity_id: media_player.kitchen_2
               data:
                 repeat: all
-            - continue_on_error: true
-              action: music_assistant.play_media
-              target:
-                entity_id: media_player.kitchen_2
-              data:
-                media_id: library://playlist/100
-                media_type: playlist
-                enqueue: replace
+            - alias: Start the playlist with Silhouette (user's favorite) pinned first and
+                the rest shuffled - MA API via rest_command, since HA's play_media has no
+                start_item (2026-10-10)
+              continue_on_error: true
+              action: rest_command.ma_kitchen_late_night_play
+              response_variable: wh_late_night_play
+            - alias: Fallback - plain shuffled playlist if the MA API call failed
+              if:
+              - condition: template
+                value_template: '{{ wh_late_night_play is not defined or wh_late_night_play.status
+                  is not defined or wh_late_night_play.status != 200 }}'
+              then:
+              - continue_on_error: true
+                action: music_assistant.play_media
+                target:
+                  entity_id: media_player.kitchen_2
+                data:
+                  media_id: library://playlist/100
+                  media_type: playlist
+                  enqueue: replace
           - alias: Play morning music (6 AM - 12 PM)
             if:
             - condition: template
