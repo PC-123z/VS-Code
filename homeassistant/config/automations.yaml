@@ -9782,12 +9782,12 @@
                 entity_id: media_player.kitchen_2
               data:
                 shuffle: true
-          - alias: Play evening album (8 PM - 9 PM) - was the whole 8 PM+ window until
-              2026-10-03, when 9 PM onward moved to the slower Piano Guys playlist
-              below
+          - alias: Play Kenny G Breathless album (9 PM - 11 PM) - swapped with the
+              Piano Guys 2026-10-10 (user finds Breathless calmer for later in the
+              evening); was 8 PM+ until 2026-10-03, then 8-9 PM
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 20 and current_hour|int < 21
+              value_template: '{{ current_hour|int >= 21 and current_hour|int < 23
                 }}'
             then:
             - continue_on_error: true
@@ -9803,7 +9803,7 @@
                 entity_id: media_player.kitchen_2
               data:
                 shuffle: true
-          - alias: Play late night Piano Guys playlist (9 PM - 11 PM; 11 PM+ moved to the slow sax playlist 2026-10-10) - added 2026-10-03,
+          - alias: Play Piano Guys playlist (8 PM - 9 PM since 2026-10-10, swapped with Kenny G Breathless; was 9 PM+) - added 2026-10-03,
               the 8 PM album was too fast for late night. YT Music "Most Popular -
               The Piano Guys" (120 tracks), in the playlist's order, started as ONE
               playlist item at input_number.welcome_home_night_playlist_position so
@@ -9812,7 +9812,7 @@
               the helper.
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 21 and current_hour|int < 23 }}'
+              value_template: '{{ current_hour|int >= 20 and current_hour|int < 21 }}'
             then:
             - alias: Shuffle off and repeat all - curator's order, queue never runs
                 dry
