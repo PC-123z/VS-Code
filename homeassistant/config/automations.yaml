@@ -10162,6 +10162,11 @@
   - condition: state
     entity_id: input_boolean.welcome_home_active
     state: 'on'
+  - alias: Not while Welcome Home is fading out (added 2026-10-10) - a room that joined
+      mid-fade wasn't in the fade list and ramped UP while everything else faded
+    condition: template
+    value_template: '{{ state_attr(''automation.welcome_home_auto_expire_after_30_minutes'',
+      ''current'') | int(0) == 0 }}'
   actions:
   - alias: Resolve the RX-A4A's Music Assistant player - its entity id changes whenever
       MA regenerates the universal player (2026-10-08); sensor.living_room_receiver_ma_player
@@ -11579,6 +11584,11 @@
       conditions:
       - condition: trigger
         id: motion_on
+      - alias: Not while Welcome Home is fading out (added 2026-10-10) - a room that joined
+          mid-fade wasn't in the fade list and ramped UP while everything else faded
+        condition: template
+        value_template: '{{ state_attr(''automation.welcome_home_auto_expire_after_30_minutes'',
+          ''current'') | int(0) == 0 }}'
       - alias: A source is currently active
         condition: template
         value_template: '{{ source_player != ''none'' }}'
@@ -11602,8 +11612,9 @@
       - variables:
           bathroom_vol_before: '{{ state_attr(''media_player.bathroom'', ''volume_level'')
             | default(0.30) }}'
-          target_vol: '{{ state_attr(source_player, ''volume_level'') | default(0.20)
-            | float }}'
+          target_vol: '{{ [state_attr((''media_player.kitchen_2'' if welcome_home_on
+            else source_player), ''volume_level'') | default(0.20) | float(0.20), 0.30]
+            | min }}'
       - alias: Store pre-join volume for later restore
         action: input_number.set_value
         target:
