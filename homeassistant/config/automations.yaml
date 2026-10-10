@@ -9694,10 +9694,40 @@
                   volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n
                     \   0.15] | min | round(3) }}"
         - sequence:
+          - alias: Play late night slow sax playlist (11 PM - 6 AM) - added 2026-10-10,
+              user wanted very slow and calming after 11 PM (Kenny G ballads like Sentimental
+              / The Wedding Song, Coltrane Ballads, gentle Dean Fraser). Music Assistant
+              library playlist "Late Night Slow Sax" (library://playlist/100, 30 hand-picked
+              tracks), shuffled, repeat all. Edit the track list in Music Assistant, not
+              here.
+            if:
+            - condition: template
+              value_template: '{{ current_hour|int >= 23 or current_hour|int < 6 }}'
+            then:
+            - continue_on_error: true
+              action: media_player.shuffle_set
+              target:
+                entity_id: media_player.kitchen_2
+              data:
+                shuffle: true
+            - continue_on_error: true
+              action: media_player.repeat_set
+              target:
+                entity_id: media_player.kitchen_2
+              data:
+                repeat: all
+            - continue_on_error: true
+              action: music_assistant.play_media
+              target:
+                entity_id: media_player.kitchen_2
+              data:
+                media_id: library://playlist/100
+                media_type: playlist
+                enqueue: replace
           - alias: Play morning music (6 AM - 12 PM)
             if:
             - condition: template
-              value_template: '{{ current_hour|int < 12 }}'
+              value_template: '{{ current_hour|int >= 6 and current_hour|int < 12 }}'
             then:
             - continue_on_error: true
               action: music_assistant.play_media
@@ -9773,7 +9803,7 @@
                 entity_id: media_player.kitchen_2
               data:
                 shuffle: true
-          - alias: Play late night Piano Guys playlist (9 PM+) - added 2026-10-03,
+          - alias: Play late night Piano Guys playlist (9 PM - 11 PM; 11 PM+ moved to the slow sax playlist 2026-10-10) - added 2026-10-03,
               the 8 PM album was too fast for late night. YT Music "Most Popular -
               The Piano Guys" (120 tracks), in the playlist's order, started as ONE
               playlist item at input_number.welcome_home_night_playlist_position so
@@ -9782,7 +9812,7 @@
               the helper.
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 21 }}'
+              value_template: '{{ current_hour|int >= 21 and current_hour|int < 23 }}'
             then:
             - alias: Shuffle off and repeat all - curator's order, queue never runs
                 dry
