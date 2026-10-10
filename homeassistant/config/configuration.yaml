@@ -295,21 +295,31 @@ template:
           minutes: 3
         state: "{{ is_state('binary_sensor.kitchen_person_occupancy', 'on') }}"
 
+      # 2026-10-10: anchored on the Sony's real power state (Android TV Remote,
+      # remote.living_room_tv). Source entities can freeze - the Apple TV integration
+      # sat on "paused" for 30+ h with the TV off, holding this on and blocking the
+      # Welcome Home receiver join. Sources are only a fallback when the Sony's power
+      # entity is unavailable/unknown.
       - name: "Living Room TV On"
         unique_id: living_room_tv_on
         device_class: running
         state: >
-          {{ (integration_entities('jellyfin') | select('match', '^media_player\.')
-             | select('in', area_entities('living_room')) | map('states')
-             | reject('in', ['off', 'unavailable', 'unknown']) | list | count > 0)
-             or (states('sensor.jellyfin_tiny_living_room_state') not in
-                 ['off', 'unavailable', 'unknown'])
-             or (states('media_player.living_room_tv') not in
-                 ['off', 'unavailable', 'unknown'])
-             or (states('sensor.living_room_tv_ma_state') in
-                 ['playing', 'paused', 'buffering'])
-             or (states('media_player.living_room') not in
-                 ['off', 'unavailable', 'unknown']) }}
+          {% set power = states('remote.living_room_tv') %}
+          {% if power in ['on', 'off'] %}
+            {{ power == 'on' }}
+          {% else %}
+            {{ (integration_entities('jellyfin') | select('match', '^media_player\.')
+               | select('in', area_entities('living_room')) | map('states')
+               | reject('in', ['off', 'unavailable', 'unknown']) | list | count > 0)
+               or (states('sensor.jellyfin_tiny_living_room_state') not in
+                   ['off', 'unavailable', 'unknown'])
+               or (states('media_player.living_room_tv') not in
+                   ['off', 'unavailable', 'unknown'])
+               or (states('sensor.living_room_tv_ma_state') in
+                   ['playing', 'paused', 'buffering'])
+               or (states('media_player.living_room') not in
+                   ['off', 'unavailable', 'unknown']) }}
+          {% endif %}
 
 # Jellyfin Tiny (jellyfin-tiny.pc) doesn't fit the native jellyfin integration
 # (HA's config flow dedupes by a broken "unique id" that collides across separate
