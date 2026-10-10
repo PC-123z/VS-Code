@@ -9695,11 +9695,11 @@
                     \   0.15] | min | round(3) }}"
         - sequence:
           - alias: Play late night slow sax playlist (11 PM - 6 AM) - added 2026-10-10,
-              user wanted very slow and calming after 11 PM (Kenny G ballads like Sentimental
-              / The Wedding Song, Coltrane Ballads, gentle Dean Fraser). Music Assistant
-              library playlist "Late Night Slow Sax" (library://playlist/100, 30 hand-picked
-              tracks), Silhouette first then shuffled, repeat all. Edit the track list
-              in Music Assistant, not here.
+              user wanted very slow and calming after 11 PM (Kenny G ballads like
+              Sentimental / The Wedding Song, Coltrane Ballads, gentle Dean Fraser).
+              Music Assistant library playlist "Late Night Slow Sax" (library://playlist/100,
+              30 hand-picked tracks), Silhouette first then shuffled, repeat all.
+              Edit the track list in Music Assistant, not here.
             if:
             - condition: template
               value_template: '{{ current_hour|int >= 23 or current_hour|int < 6 }}'
@@ -9716,9 +9716,9 @@
                 entity_id: media_player.kitchen_2
               data:
                 repeat: all
-            - alias: Start the playlist with Silhouette (user's favorite) pinned first and
-                the rest shuffled - MA API via rest_command, since HA's play_media has no
-                start_item (2026-10-10)
+            - alias: Start the playlist with Silhouette (user's favorite) pinned first
+                and the rest shuffled - MA API via rest_command, since HA's play_media
+                has no start_item (2026-10-10)
               continue_on_error: true
               action: rest_command.ma_kitchen_late_night_play
               response_variable: wh_late_night_play
@@ -9739,7 +9739,8 @@
           - alias: Play morning music (6 AM - 12 PM)
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 6 and current_hour|int < 12 }}'
+              value_template: '{{ current_hour|int >= 6 and current_hour|int < 12
+                }}'
             then:
             - continue_on_error: true
               action: music_assistant.play_media
@@ -9783,9 +9784,9 @@
                 repeat: all
           - alias: Play Dean Fraser Sax Reggae playlist (3 PM - 8 PM) - user preference
               2026-09-27; since 2026-10-10 an MA library playlist (library://playlist/103,
-              35 YT Music tracks - Melodies of D.E.B, Dean Plays Bob Vol. 2, Tony Greene
-              Midnight Blue) instead of the 9-track Spotify list (ran dry in under an hour,
-              Spotify 1-stream limit). Shuffled, repeat all.
+              35 YT Music tracks - Melodies of D.E.B, Dean Plays Bob Vol. 2, Tony
+              Greene Midnight Blue) instead of the 9-track Spotify list (ran dry in
+              under an hour, Spotify 1-stream limit). Shuffled, repeat all.
             if:
             - condition: template
               value_template: '{{ current_hour|int >= 15 and current_hour|int < 20
@@ -9812,10 +9813,10 @@
                 media_type: playlist
                 enqueue: replace
           - alias: Play Evening Kenny G playlist (9 PM - 11 PM) - 2026-10-10, MA library
-              playlist library://playlist/102 (28 slow tracks - Breathless ballads, Classics
-              in the Key of G, New Standards, Brazilian Nights, etc.), shuffled, repeat
-              all. Replaced the full Breathless album (G-Bop, Sister Rose etc. too upbeat).
-              Edit tracks in Music Assistant.
+              playlist library://playlist/102 (28 slow tracks - Breathless ballads,
+              Classics in the Key of G, New Standards, Brazilian Nights, etc.), shuffled,
+              repeat all. Replaced the full Breathless album (G-Bop, Sister Rose etc.
+              too upbeat). Edit tracks in Music Assistant.
             if:
             - condition: template
               value_template: '{{ current_hour|int >= 21 and current_hour|int < 23
@@ -9841,18 +9842,19 @@
                 media_id: library://playlist/102
                 media_type: playlist
                 enqueue: replace
-          - alias: Play Piano Guys playlist (8 PM - 9 PM since 2026-10-10, swapped with Kenny G Breathless; was 9 PM+) - added 2026-10-03,
-              the 8 PM album was too fast for late night. Since 2026-10-10 the curated
-              MA library playlist "Welcome Home - Piano Guys Calm" (library://playlist/101,
-              33 calm pieces; replaced YT Music Most Popular, which had upbeat, Christmas
-              and vlog tracks), in the playlist's order, started as ONE
-              playlist item at input_number.welcome_home_night_playlist_position so
-              each night resumes where the last ended (never expanded into per-track
-              URIs, see the Good Morning playlist notes). The tracker automation advances
-              the helper.
+          - alias: Play Piano Guys playlist (8 PM - 9 PM since 2026-10-10, swapped
+              with Kenny G Breathless; was 9 PM+) - added 2026-10-03, the 8 PM album
+              was too fast for late night. Since 2026-10-10 the curated MA library
+              playlist "Welcome Home - Piano Guys Calm" (library://playlist/101, 33
+              calm pieces; replaced YT Music Most Popular, which had upbeat, Christmas
+              and vlog tracks), in the playlist's order, started as ONE playlist item
+              at input_number.welcome_home_night_playlist_position so each night resumes
+              where the last ended (never expanded into per-track URIs, see the Good
+              Morning playlist notes). The tracker automation advances the helper.
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 20 and current_hour|int < 21 }}'
+              value_template: '{{ current_hour|int >= 20 and current_hour|int < 21
+                }}'
             then:
             - alias: Shuffle off and repeat all - curator's order, queue never runs
                 dry
@@ -10058,11 +10060,11 @@
   mode: single
 - id: '1748800000002'
   alias: 'Welcome Home: Unjoin Bedroom When Unoccupied 10 Min'
-  description: DISABLED 2026-10-10 at the user's request - during Welcome Home a
-    room that got music keeps it until the session is stopped or expires; kept for
-    reference. Re-enabled 2026-09-10 - back to join/broadcast mode. While welcome
-    home is active, unjoin the bedroom speaker when the room has been empty for 10
-    minutes. The auto-join automation handles re-joining if someone returns.
+  description: DISABLED 2026-10-10 at the user's request - during Welcome Home a room
+    that got music keeps it until the session is stopped or expires; kept for reference.
+    Re-enabled 2026-09-10 - back to join/broadcast mode. While welcome home is active,
+    unjoin the bedroom speaker when the room has been empty for 10 minutes. The auto-join
+    automation handles re-joining if someone returns.
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
@@ -10083,11 +10085,11 @@
   mode: single
 - id: '1748800000003'
   alias: 'Welcome Home: Unjoin Office When Unoccupied 10 Min'
-  description: DISABLED 2026-10-10 at the user's request - during Welcome Home a
-    room that got music keeps it until the session is stopped or expires; kept for
-    reference. Re-enabled 2026-09-10 - back to join/broadcast mode. While welcome
-    home is active, unjoin the office speaker when the room has been empty for 10
-    minutes. The auto-join automation handles re-joining if someone returns.
+  description: DISABLED 2026-10-10 at the user's request - during Welcome Home a room
+    that got music keeps it until the session is stopped or expires; kept for reference.
+    Re-enabled 2026-09-10 - back to join/broadcast mode. While welcome home is active,
+    unjoin the office speaker when the room has been empty for 10 minutes. The auto-join
+    automation handles re-joining if someone returns.
   triggers:
   - trigger: state
     entity_id: binary_sensor.bedroom_2_sensor_group
@@ -10174,12 +10176,14 @@
     variables:
       rx: '{{ states(''sensor.living_room_receiver_ma_player'') if states(''sensor.living_room_receiver_ma_player'').startswith(''media_player.'')
         else ''media_player.living_room_av_receiver'' }}'
-  - alias: Resolve the leader of the Welcome Home group (added 2026-10-10) - join rooms
-      to whoever actually leads the kitchen's group. On 2026-10-10 the receiver was
-      leading with kitchen as a member, and joining to kitchen_2 silently did nothing
-      (Big Bedroom stayed silent). MA lists the leader first in group_members.
+  - alias: Resolve the leader of the Welcome Home group (added 2026-10-10) - join
+      rooms to whoever actually leads the kitchen's group. On 2026-10-10 the receiver
+      was leading with kitchen as a member, and joining to kitchen_2 silently did
+      nothing (Big Bedroom stayed silent). MA lists the leader first in group_members.
     variables:
-      wh_leader: "{{ (state_attr('media_player.kitchen_2','group_members') or ['media_player.kitchen_2'])[0] if (state_attr('media_player.kitchen_2','group_members') or []) | length > 1 else 'media_player.kitchen_2' }}"
+      wh_leader: '{{ (state_attr(''media_player.kitchen_2'',''group_members'') or
+        [''media_player.kitchen_2''])[0] if (state_attr(''media_player.kitchen_2'',''group_members'')
+        or []) | length > 1 else ''media_player.kitchen_2'' }}'
   - alias: On session start, wait for the kitchen stream to actually be playing first,
       and reset the living room once-per-session latch so this run is allowed to join
       again
@@ -10649,7 +10653,7 @@
     - fri
     enabled: true
   - trigger: time
-    at: 09:00:00
+    at: '10:00:00'
     weekday:
     - sat
     - sun
@@ -11576,16 +11580,18 @@
         }}"
       kitchen_active: "{{ states('media_player.kitchen') not in\n   ['off','idle','paused','standby','unavailable','unknown']
         }}"
-      source_player: '{% if welcome_home_on and kitchen_active %} {{ (state_attr(''media_player.kitchen_2'',''group_members'') or [''media_player.kitchen_2''])[0] if (state_attr(''media_player.kitchen_2'',''group_members'') or []) | length > 1 else ''media_player.kitchen_2'' }}
-        {% elif bedroom_active %} media_player.bedroom_2 {% else %} none {% endif
-        %}'
+      source_player: '{% if welcome_home_on and kitchen_active %} {{ (state_attr(''media_player.kitchen_2'',''group_members'')
+        or [''media_player.kitchen_2''])[0] if (state_attr(''media_player.kitchen_2'',''group_members'')
+        or []) | length > 1 else ''media_player.kitchen_2'' }} {% elif bedroom_active
+        %} media_player.bedroom_2 {% else %} none {% endif %}'
   - choose:
     - alias: Motion detected - join if eligible
       conditions:
       - condition: trigger
         id: motion_on
-      - alias: Not while Welcome Home is fading out (added 2026-10-10) - a room that joined
-          mid-fade wasn't in the fade list and ramped UP while everything else faded
+      - alias: Not while Welcome Home is fading out (added 2026-10-10) - a room that
+          joined mid-fade wasn't in the fade list and ramped UP while everything else
+          faded
         condition: template
         value_template: '{{ state_attr(''automation.welcome_home_auto_expire_after_30_minutes'',
           ''current'') | int(0) == 0 }}'
@@ -11613,8 +11619,8 @@
           bathroom_vol_before: '{{ state_attr(''media_player.bathroom'', ''volume_level'')
             | default(0.30) }}'
           target_vol: '{{ [state_attr((''media_player.kitchen_2'' if welcome_home_on
-            else source_player), ''volume_level'') | default(0.20) | float(0.20), 0.30]
-            | min }}'
+            else source_player), ''volume_level'') | default(0.20) | float(0.20),
+            0.30] | min }}'
       - alias: Store pre-join volume for later restore
         action: input_number.set_value
         target:
@@ -11678,9 +11684,9 @@
       conditions:
       - condition: trigger
         id: motion_off
-      - alias: Not while Welcome Home is running with the bathroom in its group - added
-          2026-10-10, a room that joined Welcome Home keeps the music until the session
-          is stopped or expires
+      - alias: Not while Welcome Home is running with the bathroom in its group -
+          added 2026-10-10, a room that joined Welcome Home keeps the music until
+          the session is stopped or expires
         condition: template
         value_template: '{{ not (is_state(''input_boolean.welcome_home_active'', ''on'')
           and ''media_player.bathroom_2'' in (state_attr(''media_player.kitchen_2'',
@@ -12673,7 +12679,9 @@
     continue_on_error: true
     action: media_player.media_stop
     target:
-      entity_id: "{{ [(state_attr('media_player.kitchen_2','group_members') or ['media_player.kitchen_2'])[0], 'media_player.kitchen_2'] if (state_attr('media_player.kitchen_2','group_members') or []) | length > 1 else ['media_player.kitchen_2'] }}"
+      entity_id: '{{ [(state_attr(''media_player.kitchen_2'',''group_members'') or
+        [''media_player.kitchen_2''])[0], ''media_player.kitchen_2''] if (state_attr(''media_player.kitchen_2'',''group_members'')
+        or []) | length > 1 else [''media_player.kitchen_2''] }}'
   - delay:
       seconds: 2
   - alias: Unjoin every satellite from the kitchen group
@@ -14018,12 +14026,13 @@
   alias: Welcome Home - Track night playlist position
   description: Added 2026-10-03. Keeps input_number.welcome_home_night_playlist_position
     at the next unplayed track of the 8-9 PM Piano Guys playlist (MA library://playlist/101
-    "Piano Guys Calm", 33 tracks, since 2026-10-10), so the next night resumes where this one ended, in the playlist's
-    order. Runs on every kitchen track change while Welcome Home is active, looks
-    the playing track up in the playlist's browse listing, and stores its position
-    plus one. Wraps to the top once fewer than 15 tracks remain (2026-10-10), because a queue
-    started from a position holds only that track onward. Leaves the value alone when the
-    playing item is not a playlist track (an announcement, the 8 PM album).
+    "Piano Guys Calm", 33 tracks, since 2026-10-10), so the next night resumes where
+    this one ended, in the playlist's order. Runs on every kitchen track change while
+    Welcome Home is active, looks the playing track up in the playlist's browse listing,
+    and stores its position plus one. Wraps to the top once fewer than 15 tracks remain
+    (2026-10-10), because a queue started from a position holds only that track onward.
+    Leaves the value alone when the playing item is not a playlist track (an announcement,
+    the 8 PM album).
   triggers:
   - trigger: state
     entity_id: media_player.kitchen_2
@@ -16305,8 +16314,8 @@
   alias: 'Watchdog: Living Room Apple TV integration frozen'
   description: Added 2026-10-10. The apple_tv integration (pyatv) silently stops updating
     media_player.living_room - it sat on "paused" for 30+ h with the TV off (2026-10-09),
-    and was stuck "off" while playing the day before. If the Sony has been off 10 min
-    but the Apple TV still claims playing/paused, reload the Apple TV config entry.
+    and was stuck "off" while playing the day before. If the Sony has been off 10
+    min but the Apple TV still claims playing/paused, reload the Apple TV config entry.
   triggers:
   - trigger: state
     entity_id: remote.living_room_tv
@@ -16328,7 +16337,7 @@
     - paused
   actions:
   - variables:
-      stale: "{{ states('media_player.living_room') }}"
+      stale: '{{ states(''media_player.living_room'') }}'
   - action: homeassistant.reload_config_entry
     continue_on_error: true
     target:
@@ -16336,6 +16345,7 @@
   - action: logbook.log
     data:
       name: Apple TV watchdog
-      message: Living Room Apple TV reported {{ stale }} with the TV off - reloaded the integration
+      message: Living Room Apple TV reported {{ stale }} with the TV off - reloaded
+        the integration
       entity_id: media_player.living_room
   mode: single
