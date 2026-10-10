@@ -16140,6 +16140,11 @@
     - media_player.living_room_2
     to: playing
   conditions:
+  - alias: Sony TV actually powered on (2026-10-10) - the Apple TV integration can
+      freeze on a stale playing/paused state with the TV off
+    condition: state
+    entity_id: remote.living_room_tv
+    state: 'on'
   - alias: Apple TV is playing
     condition: template
     value_template: '{{ is_state(''media_player.living_room'', ''playing'') or is_state(''media_player.living_room_2'',
@@ -16180,4 +16185,42 @@
       - light.hue_datura_bottom_1
     data:
       transition: 30
+  mode: single
+- id: '1791500000001'
+  alias: 'Watchdog: Living Room Apple TV integration frozen'
+  description: Added 2026-10-10. The apple_tv integration (pyatv) silently stops updating
+    media_player.living_room - it sat on "paused" for 30+ h with the TV off (2026-10-09),
+    and was stuck "off" while playing the day before. If the Sony has been off 10 min
+    but the Apple TV still claims playing/paused, reload the Apple TV config entry.
+  triggers:
+  - trigger: state
+    entity_id: remote.living_room_tv
+    to: 'off'
+    for:
+      minutes: 10
+  - trigger: time_pattern
+    minutes: /30
+  conditions:
+  - condition: state
+    entity_id: remote.living_room_tv
+    state: 'off'
+    for:
+      minutes: 10
+  - condition: state
+    entity_id: media_player.living_room
+    state:
+    - playing
+    - paused
+  actions:
+  - variables:
+      stale: "{{ states('media_player.living_room') }}"
+  - action: homeassistant.reload_config_entry
+    continue_on_error: true
+    target:
+      entity_id: media_player.living_room
+  - action: logbook.log
+    data:
+      name: Apple TV watchdog
+      message: Living Room Apple TV reported {{ stale }} with the TV off - reloaded the integration
+      entity_id: media_player.living_room
   mode: single
