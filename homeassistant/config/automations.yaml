@@ -9761,6 +9761,14 @@
                 entity_id: media_player.kitchen_2
               data:
                 shuffle: true
+            - alias: Repeat all - the album is shorter than its window; without repeat
+                Music Assistant auto-fills with its own "similar" picks (2026-10-10)
+              continue_on_error: true
+              action: media_player.repeat_set
+              target:
+                entity_id: media_player.kitchen_2
+              data:
+                repeat: all
           - alias: Play Dean Fraser playlist (3 PM - 8 PM) - user preference 2026-09-27,
               replaces the old 5-8 PM album (ytmusic://album/MPREb_di7Fj3Fiafj) and
               the 3-5 PM part of the afternoon album
@@ -9803,6 +9811,14 @@
                 entity_id: media_player.kitchen_2
               data:
                 shuffle: true
+            - alias: Repeat all - the album is shorter than its window; without repeat
+                Music Assistant auto-fills with its own "similar" picks (2026-10-10)
+              continue_on_error: true
+              action: media_player.repeat_set
+              target:
+                entity_id: media_player.kitchen_2
+              data:
+                repeat: all
           - alias: Play Piano Guys playlist (8 PM - 9 PM since 2026-10-10, swapped with Kenny G Breathless; was 9 PM+) - added 2026-10-03,
               the 8 PM album was too fast for late night. YT Music "Most Popular -
               The Piano Guys" (120 tracks), in the playlist's order, started as ONE
@@ -13941,8 +13957,9 @@
     120 tracks), so the next night resumes where this one ended, in the playlist's
     order. Runs on every kitchen track change while Welcome Home is active, looks
     the playing track up in the playlist's browse listing, and stores its position
-    plus one. Wraps to the top once fewer than 20 tracks remain, because a queue started
-    from a position holds only that track onward. Leaves the value alone when the
+    plus one. Wraps to the top after track index 85 (2026-10-10, was "fewer than 20 remain"),
+    so an hour of playback from the last start position never reaches the behind-the-scenes
+    videos and vlogs at index 103+. Leaves the value alone when the
     playing item is not a playlist track (an announcement, the 8 PM album).
   triggers:
   - trigger: state
@@ -13979,7 +13996,7 @@
       data:
         value: '{% set t = wh_night_track_browse[''media_player.kitchen_2''].children
           | map(attribute=''media_content_id'') | list %}{% set nxt = t.index(state_attr(''media_player.kitchen_2'',
-          ''media_content_id'')) + 1 %}{{ 0 if nxt >= (t | length - 20) else nxt }}'
+          ''media_content_id'')) + 1 %}{{ 0 if nxt > 85 else nxt }}'
   mode: restart
 - id: '1785000000001'
   alias: 'Kitchen: Join Living Room Receiver Stream on Presence'
