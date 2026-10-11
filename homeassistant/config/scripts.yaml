@@ -919,3 +919,46 @@ stop_room_speaker_safely:
           entity_id: '{{ entity_id }}'
   mode: parallel
   max: 10
+light_soft_color_on:
+  alias: Light - Soft Color On (no flash)
+  description: Added 2026-10-11. TP-Link (Kasa KL125 / Tapo L530) bulbs given color + brightness + transition
+    while OFF power on at their LAST colour/brightness (a visible flash) and then fade hue across the
+    wheel - one dining bulb ended up green. If the light is off and a colour is requested, this first
+    turns it on at 1% already in the target colour with no transition, then applies the full request so
+    only brightness fades. Otherwise it just passes the request through.
+  fields:
+    light:
+      description: Light entity (a group is fine)
+      example: light.dining_room_bottom
+      required: true
+      selector:
+        entity:
+          domain: light
+    light_data:
+      description: The light.turn_on data (brightness_pct, rgb_color / color_temp_kelvin, transition ...)
+      required: true
+      selector:
+        object: {}
+  sequence:
+  - if:
+    - condition: template
+      value_template: '{{ is_state(light, ''off'') and (light_data.rgb_color is defined or light_data.hs_color
+        is defined or light_data.xy_color is defined or light_data.color_temp_kelvin is defined) }}'
+    then:
+    - alias: Pre-stage - on at 1% in the target colour, no transition
+      continue_on_error: true
+      action: light.turn_on
+      target:
+        entity_id: '{{ light }}'
+      data: '{% set ns = namespace(d={}) %}{% for k, v in light_data.items() if k not in [''transition'',
+        ''brightness_pct'', ''brightness''] %}{% set ns.d = dict(ns.d, **{k: v}) %}{% endfor %}{{ dict(ns.d,
+        brightness_pct=1, transition=0) }}'
+    - delay:
+        milliseconds: 800
+  - alias: Apply the full request - now only brightness fades
+    action: light.turn_on
+    target:
+      entity_id: '{{ light }}'
+    data: '{{ light_data }}'
+  mode: parallel
+  max: 20

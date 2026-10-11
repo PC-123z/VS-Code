@@ -3362,8 +3362,11 @@
   mode: restart
 - id: '1775505707980'
   alias: 'Dining Room: Smart Motion & Presence'
-  description: Presence-based lighting with AL day, dinner, late evening, night mode,
-    and off after midnight. Sleep mode always overrides.
+  description: 'Presence-based lighting with AL day, dinner, late evening, night mode, and
+    off after midnight. Sleep mode always overrides. 2026-10-11: colour turn-ons with a transition
+    go through script.light_soft_color_on (pre-stage at 1% in the target colour) - the TP-Link
+    bulbs flashed their last state and one ended up green when given colour+transition from
+    off.'
   triggers:
   - trigger: state
     entity_id: binary_sensor.dining_room_sensor_group
@@ -3438,28 +3441,26 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: light.turn_on
-        target:
-          label_id: dining_room_bottom
-          entity_id: light.dining_room_bottom
+      - action: script.light_soft_color_on
         data:
-          brightness_pct: 8
-          rgb_color:
-          - 255
-          - 20
-          - 0
-          transition: 30
-      - action: light.turn_on
-        target:
-          label_id: dining_room_top
-          entity_id: light.dining_room_top
+          light: light.dining_room_bottom
+          light_data:
+            brightness_pct: 8
+            rgb_color:
+            - 255
+            - 20
+            - 0
+            transition: 30
+      - action: script.light_soft_color_on
         data:
-          brightness_pct: 12
-          rgb_color:
-          - 255
-          - 20
-          - 0
-          transition: 30
+          light: light.dining_room_top
+          light_data:
+            brightness_pct: 12
+            rgb_color:
+            - 255
+            - 20
+            - 0
+            transition: 30
     - conditions:
       - condition: trigger
         id: override_cleared
@@ -3472,11 +3473,10 @@
         if:
         - condition: template
           value_template: '{{ not (integration_entities(''jellyfin'') | select(''match'',
-            ''^media_player\.'') | select(''in'', area_entities(''living_room''))
-            | map(''states'') | select(''eq'', ''playing'') | list | count > 0 or
-            is_state(''sensor.jellyfin_tiny_living_room_state'', ''playing'') or is_state(''media_player.living_room_tv'',
-            ''playing'') or is_state(''sensor.living_room_tv_ma_state'', ''playing'')
-            or is_state(''media_player.living_room'', ''playing'')) }}'
+            ''^media_player\.'') | select(''in'', area_entities(''living_room'')) | map(''states'')
+            | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
+            ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''sensor.living_room_tv_ma_state'',
+            ''playing'') or is_state(''media_player.living_room'', ''playing'')) }}'
         then:
         - action: input_boolean.turn_off
           target:
@@ -3498,8 +3498,7 @@
           lights:
           - light.dining_room_top
           manual_control: false
-      - alias: Turn off lights before re-enabling AL (avoid AL flashing them back
-          on)
+      - alias: Turn off lights before re-enabling AL (avoid AL flashing them back on)
         action: light.turn_off
         target:
           label_id: dining_room_bottom
@@ -3545,16 +3544,14 @@
         condition: state
         entity_id: binary_sensor.dining_room_sensor_group
         state: 'off'
-      - alias: Dining empty 5 min and nothing playing - hand the room back to presence
-          lighting
+      - alias: Dining empty 5 min and nothing playing - hand the room back to presence lighting
         if:
         - condition: template
           value_template: '{{ not (integration_entities(''jellyfin'') | select(''match'',
-            ''^media_player\.'') | select(''in'', area_entities(''living_room''))
-            | map(''states'') | select(''eq'', ''playing'') | list | count > 0 or
-            is_state(''sensor.jellyfin_tiny_living_room_state'', ''playing'') or is_state(''media_player.living_room_tv'',
-            ''playing'') or is_state(''sensor.living_room_tv_ma_state'', ''playing'')
-            or is_state(''media_player.living_room'', ''playing'')) }}'
+            ''^media_player\.'') | select(''in'', area_entities(''living_room'')) | map(''states'')
+            | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
+            ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''sensor.living_room_tv_ma_state'',
+            ''playing'') or is_state(''media_player.living_room'', ''playing'')) }}'
         then:
         - action: input_boolean.turn_off
           target:
@@ -3622,8 +3619,8 @@
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
       - condition: template
-        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
-          'manual_control') }}\n"
+        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',\
+          \ 'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3634,8 +3631,8 @@
           adapt_color: true
           adapt_brightness: true
       - condition: template
-        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
-          'manual_control') }}\n"
+        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',\
+          \ 'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3664,22 +3661,20 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: light.turn_on
-        target:
-          label_id: dining_room_top
-          entity_id: light.dining_room_top
+      - action: script.light_soft_color_on
         data:
-          brightness_pct: 20
-          color_temp_kelvin: 3320
-          transition: 60
-      - action: light.turn_on
-        target:
-          label_id: dining_room_bottom
-          entity_id: light.dining_room_bottom
+          light: light.dining_room_top
+          light_data:
+            brightness_pct: 20
+            color_temp_kelvin: 3320
+            transition: 60
+      - action: script.light_soft_color_on
         data:
-          brightness_pct: 20
-          color_temp_kelvin: 2000
-          transition: 60
+          light: light.dining_room_bottom
+          light_data:
+            brightness_pct: 20
+            color_temp_kelvin: 2000
+            transition: 60
     - conditions:
       - condition: trigger
         id: late_evening_transition
@@ -3699,28 +3694,26 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: light.turn_on
-        target:
-          label_id: dining_room_top
-          entity_id: light.dining_room_top
+      - action: script.light_soft_color_on
         data:
-          rgb_color:
-          - 64
-          - 224
-          - 208
-          brightness_pct: 5
-          transition: 60
-      - action: light.turn_on
-        target:
-          label_id: dining_room_bottom
-          entity_id: light.dining_room_bottom
+          light: light.dining_room_top
+          light_data:
+            rgb_color:
+            - 64
+            - 224
+            - 208
+            brightness_pct: 5
+            transition: 60
+      - action: script.light_soft_color_on
         data:
-          rgb_color:
-          - 76
-          - 26
-          - 168
-          brightness_pct: 10
-          transition: 60
+          light: light.dining_room_bottom
+          light_data:
+            rgb_color:
+            - 76
+            - 26
+            - 168
+            brightness_pct: 10
+            transition: 60
     - conditions:
       - condition: trigger
         id: night_transition
@@ -3740,28 +3733,26 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: light.turn_on
-        target:
-          label_id: dining_room_bottom
-          entity_id: light.dining_room_bottom
+      - action: script.light_soft_color_on
         data:
-          brightness_pct: 8
-          rgb_color:
-          - 255
-          - 20
-          - 0
-          transition: 60
-      - action: light.turn_on
-        target:
-          label_id: dining_room_top
-          entity_id: light.dining_room_top
+          light: light.dining_room_bottom
+          light_data:
+            brightness_pct: 8
+            rgb_color:
+            - 255
+            - 20
+            - 0
+            transition: 60
+      - action: script.light_soft_color_on
         data:
-          brightness_pct: 12
-          rgb_color:
-          - 255
-          - 20
-          - 0
-          transition: 60
+          light: light.dining_room_top
+          light_data:
+            brightness_pct: 12
+            rgb_color:
+            - 255
+            - 20
+            - 0
+            transition: 60
     - conditions:
       - condition: trigger
         id: detected
@@ -3772,9 +3763,8 @@
       sequence:
       - choose:
         - conditions:
-          - alias: Living room TV playing, or TV Mode still owns dining after playback
-              - presence only gets the dim level; TV Mode restores AL on real dining
-              motion
+          - alias: Living room TV playing, or TV Mode still owns dining after playback - presence
+              only gets the dim level; TV Mode restores AL on real dining motion
             condition: template
             value_template: '{{ tv_playing }}'
           sequence:
@@ -3811,28 +3801,26 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              label_id: dining_room_bottom
-              entity_id: light.dining_room_bottom
+          - action: script.light_soft_color_on
             data:
-              brightness_pct: 8
-              rgb_color:
-              - 255
-              - 20
-              - 0
-              transition: 5
-          - action: light.turn_on
-            target:
-              label_id: dining_room_top
-              entity_id: light.dining_room_top
+              light: light.dining_room_bottom
+              light_data:
+                brightness_pct: 8
+                rgb_color:
+                - 255
+                - 20
+                - 0
+                transition: 5
+          - action: script.light_soft_color_on
             data:
-              brightness_pct: 12
-              rgb_color:
-              - 255
-              - 20
-              - 0
-              transition: 5
+              light: light.dining_room_top
+              light_data:
+                brightness_pct: 12
+                rgb_color:
+                - 255
+                - 20
+                - 0
+                transition: 5
         - conditions:
           - condition: time
             after: 07:00:00
@@ -3856,8 +3844,8 @@
             data:
               transition: 5
           - condition: template
-            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
-              'manual_control') }}\n"
+            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',\
+              \ 'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3868,8 +3856,8 @@
               adapt_color: true
               adapt_brightness: true
           - condition: template
-            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
-              'manual_control') }}\n"
+            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',\
+              \ 'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3889,22 +3877,20 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              label_id: dining_room_top
-              entity_id: light.dining_room_top
+          - action: script.light_soft_color_on
             data:
-              brightness_pct: 20
-              color_temp_kelvin: 3320
-              transition: 5
-          - action: light.turn_on
-            target:
-              label_id: dining_room_bottom
-              entity_id: light.dining_room_bottom
+              light: light.dining_room_top
+              light_data:
+                brightness_pct: 20
+                color_temp_kelvin: 3320
+                transition: 5
+          - action: script.light_soft_color_on
             data:
-              brightness_pct: 20
-              color_temp_kelvin: 2000
-              transition: 5
+              light: light.dining_room_bottom
+              light_data:
+                brightness_pct: 20
+                color_temp_kelvin: 2000
+                transition: 5
         - conditions:
           - condition: time
             after: '20:30:00'
@@ -3915,28 +3901,26 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              label_id: dining_room_top
-              entity_id: light.dining_room_top
+          - action: script.light_soft_color_on
             data:
-              rgb_color:
-              - 64
-              - 224
-              - 208
-              brightness_pct: 5
-              transition: 5
-          - action: light.turn_on
-            target:
-              label_id: dining_room_bottom
-              entity_id: light.dining_room_bottom
+              light: light.dining_room_top
+              light_data:
+                rgb_color:
+                - 64
+                - 224
+                - 208
+                brightness_pct: 5
+                transition: 5
+          - action: script.light_soft_color_on
             data:
-              rgb_color:
-              - 76
-              - 26
-              - 168
-              brightness_pct: 10
-              transition: 5
+              light: light.dining_room_bottom
+              light_data:
+                rgb_color:
+                - 76
+                - 26
+                - 168
+                brightness_pct: 10
+                transition: 5
         - conditions:
           - condition: time
             after: '22:30:00'
@@ -3947,28 +3931,26 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              label_id: dining_room_bottom
-              entity_id: light.dining_room_bottom
+          - action: script.light_soft_color_on
             data:
-              brightness_pct: 8
-              rgb_color:
-              - 255
-              - 20
-              - 0
-              transition: 5
-          - action: light.turn_on
-            target:
-              label_id: dining_room_top
-              entity_id: light.dining_room_top
+              light: light.dining_room_bottom
+              light_data:
+                brightness_pct: 8
+                rgb_color:
+                - 255
+                - 20
+                - 0
+                transition: 5
+          - action: script.light_soft_color_on
             data:
-              brightness_pct: 12
-              rgb_color:
-              - 255
-              - 20
-              - 0
-              transition: 5
+              light: light.dining_room_top
+              light_data:
+                brightness_pct: 12
+                rgb_color:
+                - 255
+                - 20
+                - 0
+                transition: 5
         - conditions: []
           sequence:
           - action: light.turn_off
