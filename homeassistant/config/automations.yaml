@@ -16356,3 +16356,250 @@
         the integration
       entity_id: media_player.living_room
   mode: single
+- id: '1792000000001'
+  alias: 'Welcome Home: Fade Out and Unjoin Empty Rooms'
+  description: Added 2026-10-10 at the user's request. While Welcome Home is active, a room
+    empty for 5 minutes fades its speaker to silence over 60 s and drops out of the group,
+    then its volume is restored for next time. Presence returning mid-fade aborts the fade
+    and restores the volume; presence after the drop rejoins via 'Auto Join Room Speakers
+    on Motion' / 'Bathroom Speaker Join on Motion v2'. Speakers - Big Bedroom media_player.bedroom_2,
+    Bedroom 2 media_player.office_2, Bathroom media_player.bathroom (group lists bathroom_2).
+    Living Room is the RX-A4A MA player and counts as empty only when living AND dining are
+    both clear 5 min; after the fade it is unjoined, stopped and powered off (unjoin alone
+    leaves it playing solo) and its once-per-session latch is cleared so it can rejoin; skipped
+    entirely while the TV is on. Kitchen - when it leads the group (or plays alone) it is
+    faded but KEPT as leader, since unjoining the leader stops every room, and ramps back
+    to 0.15 when kitchen presence returns; when it is only a member (receiver leading) it
+    fades and unjoins like a satellite. Never acts while the session's own auto-expire fade
+    runs. Kitchen volume is reset to 0.15 when the session ends so a faded kitchen isn't left
+    silent. Replaces the disabled 10-min unjoin automations 1748800000002/3.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.big_bedroom_sensor_group
+    to: 'off'
+    for:
+      minutes: 5
+    id: big_bedroom
+  - trigger: state
+    entity_id: binary_sensor.bedroom_2_sensor_group
+    to: 'off'
+    for:
+      minutes: 5
+    id: bedroom_2
+  - trigger: state
+    entity_id: binary_sensor.bathroom_motion
+    to: 'off'
+    for:
+      minutes: 5
+    id: bathroom
+  - trigger: state
+    entity_id: binary_sensor.living_room_sensor_group
+    to: 'off'
+    for:
+      minutes: 5
+    id: living_room
+  - trigger: state
+    entity_id: binary_sensor.dining_room_sensor_group
+    to: 'off'
+    for:
+      minutes: 5
+    id: living_room
+  - trigger: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    to: 'off'
+    for:
+      minutes: 5
+    id: kitchen
+  - trigger: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    to: 'on'
+    id: kitchen_back
+  - trigger: state
+    entity_id: input_boolean.welcome_home_active
+    to: 'off'
+    id: session_end
+  conditions: []
+  actions:
+  - choose:
+    - alias: Session ended - don't leave a faded kitchen at silence
+      conditions:
+      - condition: trigger
+        id: session_end
+      - condition: template
+        value_template: '{{ (state_attr(''media_player.kitchen_2'', ''volume_level'') | float(1))
+          < 0.05 }}'
+      sequence:
+      - continue_on_error: true
+        action: media_player.volume_set
+        target:
+          entity_id: media_player.kitchen_2
+        data:
+          volume_level: 0.15
+    - alias: Kitchen presence back while the kitchen sits faded - ramp back to 0.15 over 20
+        s
+      conditions:
+      - condition: trigger
+        id: kitchen_back
+      - condition: state
+        entity_id: input_boolean.welcome_home_active
+        state: 'on'
+      - condition: template
+        value_template: '{{ (state_attr(''media_player.kitchen_2'', ''volume_level'') | float(1))
+          < 0.05 }}'
+      sequence:
+      - repeat:
+          count: 5
+          sequence:
+          - continue_on_error: true
+            action: media_player.volume_set
+            target:
+              entity_id: media_player.kitchen_2
+            data:
+              volume_level: '{{ [0.02 + repeat.index * 0.026, 0.15] | min | round(3) }}'
+          - delay:
+              seconds: 4
+    - alias: A room has been empty 5 minutes - fade it out and drop it
+      conditions:
+      - condition: template
+        value_template: '{{ trigger.id in [''big_bedroom'', ''bedroom_2'', ''bathroom'', ''living_room'',
+          ''kitchen''] }}'
+      - condition: state
+        entity_id: input_boolean.welcome_home_active
+        state: 'on'
+      - alias: Not while the session's own auto-expire fade is running
+        condition: template
+        value_template: '{{ state_attr(''automation.welcome_home_auto_expire_after_30_minutes'',
+          ''current'') | int(0) == 0 }}'
+      sequence:
+      - variables:
+          rx: '{{ states(''sensor.living_room_receiver_ma_player'') if states(''sensor.living_room_receiver_ma_player'').startswith(''media_player.'')
+            else ''media_player.living_room_av_receiver'' }}'
+          grp: '{{ state_attr(''media_player.kitchen_2'', ''group_members'') or [] }}'
+          cfg: '{% set rx = states(''sensor.living_room_receiver_ma_player'') if states(''sensor.living_room_receiver_ma_player'').startswith(''media_player.'')
+            else ''media_player.living_room_av_receiver'' %}{{ {''big_bedroom'': {''member'':
+            ''media_player.bedroom_2'', ''vol'': ''media_player.bedroom_2'', ''unjoin'': ''media_player.bedroom_2'',
+            ''presence'': [''binary_sensor.big_bedroom_sensor_group'']}, ''bedroom_2'': {''member'':
+            ''media_player.office_2'', ''vol'': ''media_player.office_2'', ''unjoin'': ''media_player.office_2'',
+            ''presence'': [''binary_sensor.bedroom_2_sensor_group'']}, ''bathroom'': {''member'':
+            ''media_player.bathroom_2'', ''vol'': ''media_player.bathroom'', ''unjoin'': ''media_player.bathroom'',
+            ''presence'': [''binary_sensor.bathroom_motion'']}, ''living_room'': {''member'':
+            rx, ''vol'': ''media_player.living_room_av'', ''unjoin'': rx, ''presence'': [''binary_sensor.living_room_sensor_group'',
+            ''binary_sensor.dining_room_sensor_group'']}, ''kitchen'': {''member'': ''media_player.kitchen_2'',
+            ''vol'': ''media_player.kitchen_2'', ''unjoin'': ''media_player.kitchen_2'', ''presence'':
+            [''binary_sensor.kitchen_sensor_group'']}}[trigger.id] }}'
+      - variables:
+          kitchen_keeps_lead: '{{ trigger.id == ''kitchen'' and ((grp | length) <= 1 or grp[0]
+            == ''media_player.kitchen_2'') }}'
+      - alias: Every presence sensor for the room is clear and has been for ~5 min (living
+          room needs living AND dining clear)
+        condition: template
+        value_template: '{% set ns = namespace(ok=true) %}{% for e in cfg.presence %}{% set
+          s = states[e] %}{% if s is none or s.state != ''off'' or (now() - s.last_changed).total_seconds()
+          < 290 %}{% set ns.ok = false %}{% endif %}{% endfor %}{{ ns.ok }}'
+      - alias: The room's speaker is actually in the Welcome Home group (kitchen always qualifies)
+        condition: template
+        value_template: '{{ trigger.id == ''kitchen'' or cfg.member in grp }}'
+      - alias: Living room - leave the receiver completely alone while the TV is on
+        condition: template
+        value_template: '{{ trigger.id != ''living_room'' or is_state(''binary_sensor.living_room_tv_on'',
+          ''off'') }}'
+      - variables:
+          start_vol: '{{ state_attr(cfg.vol, ''volume_level'') | float(0) }}'
+      - alias: Fade to silence over 60 s, bailing out early if anyone comes back
+        repeat:
+          while:
+          - condition: template
+            value_template: '{{ repeat.index <= 10 }}'
+          - condition: template
+            value_template: '{{ cfg.presence | select(''is_state'', ''on'') | list | length
+              == 0 }}'
+          sequence:
+          - delay:
+              seconds: 6
+          - continue_on_error: true
+            action: media_player.volume_set
+            target:
+              entity_id: '{{ cfg.vol }}'
+            data:
+              volume_level: '{{ [start_vol * (1 - repeat.index / 10), 0] | max | round(3)
+                }}'
+      - if:
+        - condition: template
+          value_template: '{{ cfg.presence | select(''is_state'', ''on'') | list | length
+            > 0 }}'
+        then:
+        - alias: Someone came back mid-fade - restore the volume and keep the room in
+          continue_on_error: true
+          action: media_player.volume_set
+          target:
+            entity_id: '{{ cfg.vol }}'
+          data:
+            volume_level: '{{ start_vol }}'
+        else:
+        - choose:
+          - alias: Kitchen leads (or plays alone) - stay faded but keep leading; kitchen_back
+              ramps it up
+            conditions:
+            - condition: template
+              value_template: '{{ kitchen_keeps_lead }}'
+            sequence:
+            - delay:
+                seconds: 0
+          - alias: Living room - unjoin, stop and power off the receiver, and re-arm its join
+              latch
+            conditions:
+            - condition: template
+              value_template: '{{ trigger.id == ''living_room'' }}'
+            sequence:
+            - continue_on_error: true
+              action: media_player.unjoin
+              target:
+                entity_id: '{{ rx }}'
+              data: {}
+            - delay:
+                seconds: 2
+            - alias: Stop it - unjoin alone leaves the receiver playing solo
+              continue_on_error: true
+              action: media_player.media_stop
+              target:
+                entity_id: '{{ rx }}'
+            - delay:
+                seconds: 2
+            - alias: Restore the receiver's master volume now the stream is stopped - it is
+                shared with the TV, so powering off at 0 would leave the TV silent next time
+              continue_on_error: true
+              action: media_player.volume_set
+              target:
+                entity_id: media_player.living_room_av
+              data:
+                volume_level: '{{ start_vol }}'
+            - if:
+              - condition: state
+                entity_id: binary_sensor.living_room_tv_on
+                state: 'off'
+              then:
+              - continue_on_error: true
+                action: media_player.turn_off
+                target:
+                  entity_id: media_player.living_room_av
+            - alias: Re-arm the once-per-session latch so walking back in rejoins it
+              action: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.welcome_home_living_room_joined
+          default:
+          - continue_on_error: true
+            action: media_player.unjoin
+            target:
+              entity_id: '{{ cfg.unjoin }}'
+            data: {}
+          - delay:
+              seconds: 3
+          - alias: Restore the speaker's volume for next time
+            continue_on_error: true
+            action: media_player.volume_set
+            target:
+              entity_id: '{{ cfg.vol }}'
+            data:
+              volume_level: '{{ start_vol }}'
+  mode: parallel
+  max: 10
