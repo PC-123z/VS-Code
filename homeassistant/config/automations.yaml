@@ -16361,18 +16361,18 @@
   description: Added 2026-10-10 at the user's request. While Welcome Home is active, a room
     empty for 5 minutes fades its speaker to silence over 60 s and drops out of the group,
     then its volume is restored for next time. Presence returning mid-fade aborts the fade
-    and restores the volume; presence after the drop rejoins via 'Auto Join Room Speakers
-    on Motion' / 'Bathroom Speaker Join on Motion v2'. Speakers - Big Bedroom media_player.bedroom_2,
-    Bedroom 2 media_player.office_2, Bathroom media_player.bathroom (group lists bathroom_2).
-    Living Room is the RX-A4A MA player and counts as empty only when living AND dining are
-    both clear 5 min; after the fade it is unjoined, stopped and powered off (unjoin alone
-    leaves it playing solo) and its once-per-session latch is cleared so it can rejoin; skipped
-    entirely while the TV is on. Kitchen - when it leads the group (or plays alone) it is
-    faded but KEPT as leader, since unjoining the leader stops every room, and ramps back
-    to 0.15 when kitchen presence returns; when it is only a member (receiver leading) it
-    fades and unjoins like a satellite. Never acts while the session's own auto-expire fade
-    runs. Kitchen volume is reset to 0.15 when the session ends so a faded kitchen isn't left
-    silent. Replaces the disabled 10-min unjoin automations 1748800000002/3.
+    and ramps the volume gently back up over ~15 s; presence after the drop rejoins via 'Auto
+    Join Room Speakers on Motion' / 'Bathroom Speaker Join on Motion v2'. Speakers - Big Bedroom
+    media_player.bedroom_2, Bedroom 2 media_player.office_2, Bathroom media_player.bathroom
+    (group lists bathroom_2). Living Room is the RX-A4A MA player and counts as empty only
+    when living AND dining are both clear 5 min; after the fade it is unjoined, stopped and
+    powered off (unjoin alone leaves it playing solo) and its once-per-session latch is cleared
+    so it can rejoin; skipped entirely while the TV is on. Kitchen - when it leads the group
+    (or plays alone) it is faded but KEPT as leader, since unjoining the leader stops every
+    room, and ramps back to 0.15 when kitchen presence returns; when it is only a member (receiver
+    leading) it fades and unjoins like a satellite. Never acts while the session's own auto-expire
+    fade runs. Kitchen volume is reset to 0.15 when the session ends so a faded kitchen isn't
+    left silent. Replaces the disabled 10-min unjoin automations 1748800000002/3.
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
@@ -16528,13 +16528,22 @@
           value_template: '{{ cfg.presence | select(''is_state'', ''on'') | list | length
             > 0 }}'
         then:
-        - alias: Someone came back mid-fade - restore the volume and keep the room in
-          continue_on_error: true
-          action: media_player.volume_set
-          target:
-            entity_id: '{{ cfg.vol }}'
-          data:
-            volume_level: '{{ start_vol }}'
+        - variables:
+            resume_vol: '{{ state_attr(cfg.vol, ''volume_level'') | float(0) }}'
+        - alias: 'Someone came back mid-fade - ramp gently back up to the pre-fade volume
+            over ~15 s (user preference 2026-10-10: no jump back) and keep the room in'
+          repeat:
+            count: 5
+            sequence:
+            - delay:
+                seconds: 3
+            - continue_on_error: true
+              action: media_player.volume_set
+              target:
+                entity_id: '{{ cfg.vol }}'
+              data:
+                volume_level: '{{ [resume_vol + (start_vol - resume_vol) * repeat.index /
+                  5, start_vol] | min | round(3) }}'
         else:
         - choose:
           - alias: Kitchen leads (or plays alone) - stay faded but keep leading; kitchen_back
