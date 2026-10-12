@@ -39,6 +39,15 @@
         "step": 1.0,
         "mode": "box",
         "icon": "mdi:playlist-music"
+      },
+      {
+        "id": "dining_room_scene",
+        "name": "Dining Room Scene",
+        "min": 0.0,
+        "max": 10.0,
+        "step": 1.0,
+        "mode": "slider",
+        "icon": "mdi:palette"
       }
     ]
   }
