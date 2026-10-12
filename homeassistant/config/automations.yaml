@@ -3375,11 +3375,11 @@
   mode: restart
 - id: '1775505707980'
   alias: 'Dining Room: Smart Motion & Presence'
-  description: 'Presence-based lighting with AL day, dinner, late evening, night mode, and
-    off after midnight. Sleep mode always overrides. 2026-10-11: colour turn-ons with a transition
-    go through script.light_soft_color_on (pre-stage at 1% in the target colour) - the TP-Link
-    bulbs flashed their last state and one ended up green when given colour+transition from
-    off.'
+  description: 'Presence-based lighting with AL day, dinner, late evening, night mode,
+    and off after midnight. Sleep mode always overrides. 2026-10-11: colour turn-ons
+    with a transition go through script.light_soft_color_on (pre-stage at 1% in the
+    target colour) - the TP-Link bulbs flashed their last state and one ended up green
+    when given colour+transition from off.'
   triggers:
   - trigger: state
     entity_id: binary_sensor.dining_room_sensor_group
@@ -3486,10 +3486,11 @@
         if:
         - condition: template
           value_template: '{{ not (integration_entities(''jellyfin'') | select(''match'',
-            ''^media_player\.'') | select(''in'', area_entities(''living_room'')) | map(''states'')
-            | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
-            ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''sensor.living_room_tv_ma_state'',
-            ''playing'') or is_state(''media_player.living_room'', ''playing'')) }}'
+            ''^media_player\.'') | select(''in'', area_entities(''living_room''))
+            | map(''states'') | select(''eq'', ''playing'') | list | count > 0 or
+            is_state(''sensor.jellyfin_tiny_living_room_state'', ''playing'') or is_state(''media_player.living_room_tv'',
+            ''playing'') or is_state(''sensor.living_room_tv_ma_state'', ''playing'')
+            or is_state(''media_player.living_room'', ''playing'')) }}'
         then:
         - action: input_boolean.turn_off
           target:
@@ -3511,7 +3512,8 @@
           lights:
           - light.dining_room_top
           manual_control: false
-      - alias: Turn off lights before re-enabling AL (avoid AL flashing them back on)
+      - alias: Turn off lights before re-enabling AL (avoid AL flashing them back
+          on)
         action: light.turn_off
         target:
           label_id: dining_room_bottom
@@ -3557,14 +3559,16 @@
         condition: state
         entity_id: binary_sensor.dining_room_sensor_group
         state: 'off'
-      - alias: Dining empty 5 min and nothing playing - hand the room back to presence lighting
+      - alias: Dining empty 5 min and nothing playing - hand the room back to presence
+          lighting
         if:
         - condition: template
           value_template: '{{ not (integration_entities(''jellyfin'') | select(''match'',
-            ''^media_player\.'') | select(''in'', area_entities(''living_room'')) | map(''states'')
-            | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
-            ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''sensor.living_room_tv_ma_state'',
-            ''playing'') or is_state(''media_player.living_room'', ''playing'')) }}'
+            ''^media_player\.'') | select(''in'', area_entities(''living_room''))
+            | map(''states'') | select(''eq'', ''playing'') | list | count > 0 or
+            is_state(''sensor.jellyfin_tiny_living_room_state'', ''playing'') or is_state(''media_player.living_room_tv'',
+            ''playing'') or is_state(''sensor.living_room_tv_ma_state'', ''playing'')
+            or is_state(''media_player.living_room'', ''playing'')) }}'
         then:
         - action: input_boolean.turn_off
           target:
@@ -3632,8 +3636,8 @@
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
       - condition: template
-        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',\
-          \ 'manual_control') }}\n"
+        value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
+          'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3644,8 +3648,8 @@
           adapt_color: true
           adapt_brightness: true
       - condition: template
-        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',\
-          \ 'manual_control') }}\n"
+        value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
+          'manual_control') }}\n"
       - action: adaptive_lighting.apply
         continue_on_error: true
         data:
@@ -3776,8 +3780,9 @@
       sequence:
       - choose:
         - conditions:
-          - alias: Living room TV playing, or TV Mode still owns dining after playback - presence
-              only gets the dim level; TV Mode restores AL on real dining motion
+          - alias: Living room TV playing, or TV Mode still owns dining after playback
+              - presence only gets the dim level; TV Mode restores AL on real dining
+              motion
             condition: template
             value_template: '{{ tv_playing }}'
           sequence:
@@ -3859,8 +3864,8 @@
             data:
               transition: 5
           - condition: template
-            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.dining_room_bottom' not in\n   state_attr('switch.al_dining_room_bottom',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -3871,8 +3876,8 @@
               adapt_color: true
               adapt_brightness: true
           - condition: template
-            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',\
-              \ 'manual_control') }}\n"
+            value_template: "{{ 'light.dining_room_top' not in\n   state_attr('switch.al_dining_room_top',
+              'manual_control') }}\n"
           - action: adaptive_lighting.apply
             continue_on_error: true
             data:
@@ -9164,15 +9169,16 @@
               adapt_brightness: true
               prefer_rgb_color: true
           - alias: Galaxy projector on only from 30 min after sunset until 7 AM (user
-              preference 2026-10-11, was a fixed 10 PM - summer sunsets run late). Smart
-              Motion & Presence turns it off after 5 min with nobody present.
+              preference 2026-10-11, was a fixed 10 PM - summer sunsets run late).
+              Smart Motion & Presence turns it off after 5 min with nobody present.
             if:
             - condition: or
               conditions:
-              - alias: Evening - 30+ min after sunset (sun 'after sunset' holds until midnight)
+              - alias: Evening - 30+ min after sunset (sun 'after sunset' holds until
+                  midnight)
                 condition: sun
                 after: sunset
-                after_offset: '00:30:00'
+                after_offset: 00:30:00
               - alias: After midnight, until 7 AM
                 condition: time
                 before: 07:00:00
@@ -9568,11 +9574,11 @@
       while already disarmed (normal in-and-out) is never treated as an arrival
     variables:
       alarm_at_start: '{{ states(''alarm_control_panel.3302_alarm'') }}'
-  - alias: Added 2026-10-11 - hard gate. If the alarm was already disarmed when the door
-      opened, this is a normal in-and-out, never an arrival - on every path, including
-      the arrival_recent fallback (which ignored this and started Welcome Home at 9:40 PM
-      on 2026-10-11 from a stale latch). The keypad-code trigger (pending -> disarmed)
-      is still an arrival.
+  - alias: Added 2026-10-11 - hard gate. If the alarm was already disarmed when the
+      door opened, this is a normal in-and-out, never an arrival - on every path,
+      including the arrival_recent fallback (which ignored this and started Welcome
+      Home at 9:40 PM on 2026-10-11 from a stale latch). The keypad-code trigger (pending
+      -> disarmed) is still an arrival.
     condition: template
     value_template: '{{ trigger.id == ''code'' or alarm_at_start != ''disarmed'' }}'
   - alias: 'Added 2026-10-07 after the garage cover (Aladdin) missed an open/close
@@ -9943,13 +9949,14 @@
     - POST
     local_only: false
   conditions:
-  - alias: Added 2026-10-11 - a beacon coming back from 'unavailable' only counts if
-      it was unavailable for 10+ minutes. On 2026-10-11 an HA restart made the beacon
-      go unavailable -> home 90 s later with the car parked in the garage, which set
-      a stale latch that started Welcome Home 43 min later on a normal door open.
+  - alias: Added 2026-10-11 - a beacon coming back from 'unavailable' only counts
+      if it was unavailable for 10+ minutes. On 2026-10-11 an HA restart made the
+      beacon go unavailable -> home 90 s later with the car parked in the garage,
+      which set a stale latch that started Welcome Home 43 min later on a normal door
+      open.
     condition: template
-    value_template: '{{ not (trigger.platform == ''state'' and trigger.from_state is
-      not none and trigger.from_state.state == ''unavailable'') or (trigger.to_state.last_changed
+    value_template: '{{ not (trigger.platform == ''state'' and trigger.from_state
+      is not none and trigger.from_state.state == ''unavailable'') or (trigger.to_state.last_changed
       - trigger.from_state.last_changed).total_seconds() >= 600 }}'
   actions:
   - alias: Set the arrival latch
@@ -10661,14 +10668,14 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 06:45:00
+    at: 06:40:00
     weekday:
     - mon
     - tue
     - wed
     - thu
     - fri
-    enabled: false
+    enabled: true
   - trigger: time
     at: 08:15:00
     weekday:
@@ -10677,7 +10684,7 @@
     - wed
     - thu
     - fri
-    enabled: true
+    enabled: false
   - trigger: time
     at: '10:00:00'
     weekday:
@@ -16384,21 +16391,23 @@
   mode: single
 - id: '1792000000001'
   alias: 'Welcome Home: Fade Out and Unjoin Empty Rooms'
-  description: Added 2026-10-10 at the user's request. While Welcome Home is active, a room
-    empty for 5 minutes fades its speaker to silence over 60 s and drops out of the group,
-    then its volume is restored for next time. Presence returning mid-fade aborts the fade
-    and ramps the volume gently back up over ~15 s; presence after the drop rejoins via 'Auto
-    Join Room Speakers on Motion' / 'Bathroom Speaker Join on Motion v2'. Speakers - Big Bedroom
-    media_player.bedroom_2, Bedroom 2 media_player.office_2, Bathroom media_player.bathroom
-    (group lists bathroom_2). Living Room is the RX-A4A MA player and counts as empty only
-    when living AND dining are both clear 5 min; after the fade it is unjoined, stopped and
-    powered off (unjoin alone leaves it playing solo) and its once-per-session latch is cleared
-    so it can rejoin; skipped entirely while the TV is on. Kitchen - when it leads the group
-    (or plays alone) it is faded but KEPT as leader, since unjoining the leader stops every
-    room, and ramps back to 0.15 when kitchen presence returns; when it is only a member (receiver
-    leading) it fades and unjoins like a satellite. Never acts while the session's own auto-expire
-    fade runs. Kitchen volume is reset to 0.15 when the session ends so a faded kitchen isn't
-    left silent. Replaces the disabled 10-min unjoin automations 1748800000002/3.
+  description: Added 2026-10-10 at the user's request. While Welcome Home is active,
+    a room empty for 5 minutes fades its speaker to silence over 60 s and drops out
+    of the group, then its volume is restored for next time. Presence returning mid-fade
+    aborts the fade and ramps the volume gently back up over ~15 s; presence after
+    the drop rejoins via 'Auto Join Room Speakers on Motion' / 'Bathroom Speaker Join
+    on Motion v2'. Speakers - Big Bedroom media_player.bedroom_2, Bedroom 2 media_player.office_2,
+    Bathroom media_player.bathroom (group lists bathroom_2). Living Room is the RX-A4A
+    MA player and counts as empty only when living AND dining are both clear 5 min;
+    after the fade it is unjoined, stopped and powered off (unjoin alone leaves it
+    playing solo) and its once-per-session latch is cleared so it can rejoin; skipped
+    entirely while the TV is on. Kitchen - when it leads the group (or plays alone)
+    it is faded but KEPT as leader, since unjoining the leader stops every room, and
+    ramps back to 0.15 when kitchen presence returns; when it is only a member (receiver
+    leading) it fades and unjoins like a satellite. Never acts while the session's
+    own auto-expire fade runs. Kitchen volume is reset to 0.15 when the session ends
+    so a faded kitchen isn't left silent. Replaces the disabled 10-min unjoin automations
+    1748800000002/3.
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
@@ -16452,8 +16461,8 @@
       - condition: trigger
         id: session_end
       - condition: template
-        value_template: '{{ (state_attr(''media_player.kitchen_2'', ''volume_level'') | float(1))
-          < 0.05 }}'
+        value_template: '{{ (state_attr(''media_player.kitchen_2'', ''volume_level'')
+          | float(1)) < 0.05 }}'
       sequence:
       - continue_on_error: true
         action: media_player.volume_set
@@ -16461,8 +16470,8 @@
           entity_id: media_player.kitchen_2
         data:
           volume_level: 0.15
-    - alias: Kitchen presence back while the kitchen sits faded - ramp back to 0.15 over 20
-        s
+    - alias: Kitchen presence back while the kitchen sits faded - ramp back to 0.15
+        over 20 s
       conditions:
       - condition: trigger
         id: kitchen_back
@@ -16470,8 +16479,8 @@
         entity_id: input_boolean.welcome_home_active
         state: 'on'
       - condition: template
-        value_template: '{{ (state_attr(''media_player.kitchen_2'', ''volume_level'') | float(1))
-          < 0.05 }}'
+        value_template: '{{ (state_attr(''media_player.kitchen_2'', ''volume_level'')
+          | float(1)) < 0.05 }}'
       sequence:
       - repeat:
           count: 5
@@ -16481,14 +16490,15 @@
             target:
               entity_id: media_player.kitchen_2
             data:
-              volume_level: '{{ [0.02 + repeat.index * 0.026, 0.15] | min | round(3) }}'
+              volume_level: '{{ [0.02 + repeat.index * 0.026, 0.15] | min | round(3)
+                }}'
           - delay:
               seconds: 4
     - alias: A room has been empty 5 minutes - fade it out and drop it
       conditions:
       - condition: template
-        value_template: '{{ trigger.id in [''big_bedroom'', ''bedroom_2'', ''bathroom'', ''living_room'',
-          ''kitchen''] }}'
+        value_template: '{{ trigger.id in [''big_bedroom'', ''bedroom_2'', ''bathroom'',
+          ''living_room'', ''kitchen''] }}'
       - condition: state
         entity_id: input_boolean.welcome_home_active
         state: 'on'
@@ -16500,29 +16510,34 @@
       - variables:
           rx: '{{ states(''sensor.living_room_receiver_ma_player'') if states(''sensor.living_room_receiver_ma_player'').startswith(''media_player.'')
             else ''media_player.living_room_av_receiver'' }}'
-          grp: '{{ state_attr(''media_player.kitchen_2'', ''group_members'') or [] }}'
+          grp: '{{ state_attr(''media_player.kitchen_2'', ''group_members'') or []
+            }}'
           cfg: '{% set rx = states(''sensor.living_room_receiver_ma_player'') if states(''sensor.living_room_receiver_ma_player'').startswith(''media_player.'')
             else ''media_player.living_room_av_receiver'' %}{{ {''big_bedroom'': {''member'':
-            ''media_player.bedroom_2'', ''vol'': ''media_player.bedroom_2'', ''unjoin'': ''media_player.bedroom_2'',
-            ''presence'': [''binary_sensor.big_bedroom_sensor_group'']}, ''bedroom_2'': {''member'':
-            ''media_player.office_2'', ''vol'': ''media_player.office_2'', ''unjoin'': ''media_player.office_2'',
-            ''presence'': [''binary_sensor.bedroom_2_sensor_group'']}, ''bathroom'': {''member'':
-            ''media_player.bathroom_2'', ''vol'': ''media_player.bathroom'', ''unjoin'': ''media_player.bathroom'',
-            ''presence'': [''binary_sensor.bathroom_motion'']}, ''living_room'': {''member'':
-            rx, ''vol'': ''media_player.living_room_av'', ''unjoin'': rx, ''presence'': [''binary_sensor.living_room_sensor_group'',
-            ''binary_sensor.dining_room_sensor_group'']}, ''kitchen'': {''member'': ''media_player.kitchen_2'',
-            ''vol'': ''media_player.kitchen_2'', ''unjoin'': ''media_player.kitchen_2'', ''presence'':
-            [''binary_sensor.kitchen_sensor_group'']}}[trigger.id] }}'
+            ''media_player.bedroom_2'', ''vol'': ''media_player.bedroom_2'', ''unjoin'':
+            ''media_player.bedroom_2'', ''presence'': [''binary_sensor.big_bedroom_sensor_group'']},
+            ''bedroom_2'': {''member'': ''media_player.office_2'', ''vol'': ''media_player.office_2'',
+            ''unjoin'': ''media_player.office_2'', ''presence'': [''binary_sensor.bedroom_2_sensor_group'']},
+            ''bathroom'': {''member'': ''media_player.bathroom_2'', ''vol'': ''media_player.bathroom'',
+            ''unjoin'': ''media_player.bathroom'', ''presence'': [''binary_sensor.bathroom_motion'']},
+            ''living_room'': {''member'': rx, ''vol'': ''media_player.living_room_av'',
+            ''unjoin'': rx, ''presence'': [''binary_sensor.living_room_sensor_group'',
+            ''binary_sensor.dining_room_sensor_group'']}, ''kitchen'': {''member'':
+            ''media_player.kitchen_2'', ''vol'': ''media_player.kitchen_2'', ''unjoin'':
+            ''media_player.kitchen_2'', ''presence'': [''binary_sensor.kitchen_sensor_group'']}}[trigger.id]
+            }}'
       - variables:
-          kitchen_keeps_lead: '{{ trigger.id == ''kitchen'' and ((grp | length) <= 1 or grp[0]
-            == ''media_player.kitchen_2'') }}'
-      - alias: Every presence sensor for the room is clear and has been for ~5 min (living
-          room needs living AND dining clear)
+          kitchen_keeps_lead: '{{ trigger.id == ''kitchen'' and ((grp | length) <=
+            1 or grp[0] == ''media_player.kitchen_2'') }}'
+      - alias: Every presence sensor for the room is clear and has been for ~5 min
+          (living room needs living AND dining clear)
         condition: template
-        value_template: '{% set ns = namespace(ok=true) %}{% for e in cfg.presence %}{% set
-          s = states[e] %}{% if s is none or s.state != ''off'' or (now() - s.last_changed).total_seconds()
-          < 290 %}{% set ns.ok = false %}{% endif %}{% endfor %}{{ ns.ok }}'
-      - alias: The room's speaker is actually in the Welcome Home group (kitchen always qualifies)
+        value_template: '{% set ns = namespace(ok=true) %}{% for e in cfg.presence
+          %}{% set s = states[e] %}{% if s is none or s.state != ''off'' or (now()
+          - s.last_changed).total_seconds() < 290 %}{% set ns.ok = false %}{% endif
+          %}{% endfor %}{{ ns.ok }}'
+      - alias: The room's speaker is actually in the Welcome Home group (kitchen always
+          qualifies)
         condition: template
         value_template: '{{ trigger.id == ''kitchen'' or cfg.member in grp }}'
       - alias: Living room - leave the receiver completely alone while the TV is on
@@ -16537,8 +16552,8 @@
           - condition: template
             value_template: '{{ repeat.index <= 10 }}'
           - condition: template
-            value_template: '{{ cfg.presence | select(''is_state'', ''on'') | list | length
-              == 0 }}'
+            value_template: '{{ cfg.presence | select(''is_state'', ''on'') | list
+              | length == 0 }}'
           sequence:
           - delay:
               seconds: 6
@@ -16551,13 +16566,14 @@
                 }}'
       - if:
         - condition: template
-          value_template: '{{ cfg.presence | select(''is_state'', ''on'') | list | length
-            > 0 }}'
+          value_template: '{{ cfg.presence | select(''is_state'', ''on'') | list |
+            length > 0 }}'
         then:
         - variables:
             resume_vol: '{{ state_attr(cfg.vol, ''volume_level'') | float(0) }}'
-        - alias: 'Someone came back mid-fade - ramp gently back up to the pre-fade volume
-            over ~15 s (user preference 2026-10-10: no jump back) and keep the room in'
+        - alias: 'Someone came back mid-fade - ramp gently back up to the pre-fade
+            volume over ~15 s (user preference 2026-10-10: no jump back) and keep
+            the room in'
           repeat:
             count: 5
             sequence:
@@ -16568,8 +16584,8 @@
               target:
                 entity_id: '{{ cfg.vol }}'
               data:
-                volume_level: '{{ [resume_vol + (start_vol - resume_vol) * repeat.index /
-                  5, start_vol] | min | round(3) }}'
+                volume_level: '{{ [resume_vol + (start_vol - resume_vol) * repeat.index
+                  / 5, start_vol] | min | round(3) }}'
         else:
         - choose:
           - alias: Kitchen leads (or plays alone) - stay faded but keep leading; kitchen_back
@@ -16580,8 +16596,8 @@
             sequence:
             - delay:
                 seconds: 0
-          - alias: Living room - unjoin, stop and power off the receiver, and re-arm its join
-              latch
+          - alias: Living room - unjoin, stop and power off the receiver, and re-arm
+              its join latch
             conditions:
             - condition: template
               value_template: '{{ trigger.id == ''living_room'' }}'
@@ -16600,8 +16616,9 @@
                 entity_id: '{{ rx }}'
             - delay:
                 seconds: 2
-            - alias: Restore the receiver's master volume now the stream is stopped - it is
-                shared with the TV, so powering off at 0 would leave the TV silent next time
+            - alias: Restore the receiver's master volume now the stream is stopped
+                - it is shared with the TV, so powering off at 0 would leave the TV
+                silent next time
               continue_on_error: true
               action: media_player.volume_set
               target:
@@ -16617,7 +16634,8 @@
                 action: media_player.turn_off
                 target:
                   entity_id: media_player.living_room_av
-            - alias: Re-arm the once-per-session latch so walking back in rejoins it
+            - alias: Re-arm the once-per-session latch so walking back in rejoins
+                it
               action: input_boolean.turn_off
               target:
                 entity_id: input_boolean.welcome_home_living_room_joined
@@ -16642,10 +16660,10 @@
   alias: 'Dining Room: Empty-Room Lights-Off Watchdog'
   description: 'Added 2026-10-11. Safety net for Smart Motion & Presence - its 5-min
     "cleared" trigger is a state-for timer, and an automation reload (or HA restart)
-    while the room is already empty wipes the timer and nothing re-arms it. On
-    2026-10-11 a reload at 00:46 left the lights on ~12 h. This checks every minute:
-    lights on + sensor group not on for 15+ min -> off. While the dimmer hold override
-    is on it waits 30 min (the hold design) and clears the override too.'
+    while the room is already empty wipes the timer and nothing re-arms it. On 2026-10-11
+    a reload at 00:46 left the lights on ~12 h. This checks every minute: lights on
+    + sensor group not on for 15+ min -> off. While the dimmer hold override is on
+    it waits 30 min (the hold design) and clears the override too.'
   triggers:
   - trigger: time_pattern
     minutes: /1
@@ -16657,8 +16675,8 @@
       ''on'') | list | count > 0 }}'
   - condition: template
     value_template: '{% set s = states.binary_sensor.dining_room_sensor_group %}{%
-      set limit = 1800 if is_state(''input_boolean.dining_room_manual_override'', ''on'')
-      else 900 %}{{ s is none or (s.state != ''on'' and (now() - s.last_changed).total_seconds()
+      set limit = 1800 if is_state(''input_boolean.dining_room_manual_override'',
+      ''on'') else 900 %}{{ s is none or (s.state != ''on'' and (now() - s.last_changed).total_seconds()
       >= limit) }}'
   actions:
   - alias: Nothing playing - hand dining back from TV Mode
@@ -16667,8 +16685,9 @@
       value_template: '{{ not (integration_entities(''jellyfin'') | select(''match'',
         ''^media_player\.'') | select(''in'', area_entities(''living_room'')) | map(''states'')
         | select(''eq'', ''playing'') | list | count > 0 or is_state(''sensor.jellyfin_tiny_living_room_state'',
-        ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or is_state(''sensor.living_room_tv_ma_state'',
-        ''playing'') or is_state(''media_player.living_room'', ''playing'')) }}'
+        ''playing'') or is_state(''media_player.living_room_tv'', ''playing'') or
+        is_state(''sensor.living_room_tv_ma_state'', ''playing'') or is_state(''media_player.living_room'',
+        ''playing'')) }}'
     then:
     - action: input_boolean.turn_off
       target:
