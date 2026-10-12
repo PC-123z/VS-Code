@@ -3774,18 +3774,20 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              label_id: dining_room_bottom
-              entity_id: light.dining_room_bottom
+          - action: script.light_soft_color_on
             data:
-              brightness_pct: 2
-          - action: light.turn_on
-            target:
-              label_id: dining_room_top
-              entity_id: light.dining_room_top
+              light: light.dining_room_bottom
+              light_data:
+                brightness_pct: 2
+                color_temp_kelvin: 2500
+                transition: 5
+          - action: script.light_soft_color_on
             data:
-              brightness_pct: 2
+              light: light.dining_room_top
+              light_data:
+                brightness_pct: 2
+                color_temp_kelvin: 2500
+                transition: 5
         - conditions:
           - condition: or
             conditions:
@@ -8946,20 +8948,20 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: light.turn_on
-        metadata: {}
-        target:
-          label_id: dining_room_top
-          entity_id: light.dining_room_top
+      - action: script.light_soft_color_on
         data:
-          brightness_pct: 2
-      - action: light.turn_on
-        metadata: {}
-        target:
-          label_id: dining_room_bottom
-          entity_id: light.dining_room_bottom
+          light: light.dining_room_top
+          light_data:
+            brightness_pct: 2
+            color_temp_kelvin: 2500
+            transition: 5
+      - action: script.light_soft_color_on
         data:
-          brightness_pct: 2
+          light: light.dining_room_bottom
+          light_data:
+            brightness_pct: 2
+            color_temp_kelvin: 2500
+            transition: 5
     - conditions:
       - condition: or
         conditions:
