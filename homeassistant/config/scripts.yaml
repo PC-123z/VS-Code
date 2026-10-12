@@ -349,15 +349,15 @@ goodbye_routine_main:
   icon: mdi:logout
 goodbye_routine_motion_tracking:
   alias: Goodbye Routine - Motion Tracking
-  description: 'Decides home vs empty. First allows up to 5 min for Paul''s own exit
-    motion to clear (must stay clear for 30 s), then runs up to 5 consecutive 2-minute checks (fewer when post-departure quiet time already elapsed - added 2026-10-12, always at least 1).
-    Motion only counts if it stays on for 30 s, so a radar blip or a sensor flapping
-    for a second cannot decide the outcome (2026-09-25: a Bedroom 2 radar zone flap
-    ended the settle wait and tripped check 1 in 2 seconds). Returns {someone_home,
-    detected}.'
+  description: 'Decides home vs empty. First allows up to 5 min for Paul''s own exit motion to clear (must
+    stay clear for 30 s), then runs up to 5 consecutive 2-minute checks (fewer when post-departure quiet
+    time already elapsed - added 2026-10-12, always at least 1). Motion only counts if it stays on for
+    30 s, so a radar blip or a sensor flapping for a second cannot decide the outcome (2026-09-25: a Bedroom
+    2 radar zone flap ended the settle wait and tripped check 1 in 2 seconds). Returns {someone_home,
+    detected}. 2026-10-12: indoor Frigate person detection (kitchen, living room) and the front/back/garage-to-house
+    doors also count as someone home, and cap the quiet-time credit.'
   sequence:
-  - alias: Settle - let departure motion clear (must be off 30 s; still-on after 5
-      min fails check 1)
+  - alias: Settle - let departure motion clear (must be off 30 s; still-on after 5 min fails check 1)
     if:
     - condition: not
       conditions:
@@ -376,29 +376,30 @@ goodbye_routine_motion_tracking:
       timeout:
         minutes: 5
       continue_on_timeout: true
-  - alias: Added 2026-10-12 - credit quiet time that already passed. The 10-minute
-      no-motion requirement used to start only when the beacon flipped away (~4.5 min
-      after the garage closed), throwing away the quiet minutes before it. Credit = how
-      long the motion group has been off right now, capped at the time since the garage
-      last changed (so only post-departure quiet counts) and at 8 min, so at least one
-      live 2-minute check always runs. Same 10 continuous quiet minutes overall.
+  - alias: Added 2026-10-12 - credit post-departure quiet time toward the 10 quiet minutes. Capped at
+      the time since the garage, any outside door (front/back/garage-to-house) or an indoor Frigate person
+      sensor last changed, and at 8 min, so at least one live 2-minute check runs. No credit while a camera
+      sees a person.
     variables:
-      quiet_credit_s: '{% set g = states.binary_sensor.goodbye_motion_sensors %}{% set
-        c = states.cover.garage %}{% if g is none or g.state != ''off'' %}0{% else %}{%
-        set q = (now() - g.last_changed).total_seconds() %}{% if c is not none %}{% set
-        q = [q, (now() - c.last_changed).total_seconds()] | min %}{% endif %}{{ [q, 480]
-        | min | int }}{% endif %}'
-      checks_needed: '{{ [[((600 - (quiet_credit_s | int)) / 120) | round(0, ''ceil'')
-        | int, 1] | max, 5] | min }}'
+      quiet_credit_s: '{% set g = states.binary_sensor.goodbye_motion_sensors %}{% set people = [''binary_sensor.kitchen_person_occupancy'',
+        ''binary_sensor.living_room_person_occupancy''] | select(''is_state'', ''on'') | list %}{% if
+        g is none or g.state != ''off'' or people | length > 0 %}0{% else %}{% set ns = namespace(q=(now()
+        - g.last_changed).total_seconds()) %}{% for e in [''cover.garage''] + [''binary_sensor.front_door'',
+        ''binary_sensor.back_door'', ''binary_sensor.garage_door''] + [''binary_sensor.kitchen_person_occupancy'',
+        ''binary_sensor.living_room_person_occupancy''] %}{% set st = states[e] %}{% if st is not none
+        %}{% set ns.q = [ns.q, (now() - st.last_changed).total_seconds()] | min %}{% endif %}{% endfor
+        %}{{ [ns.q, 480] | min | int }}{% endif %}'
+      checks_needed: '{{ [[((600 - (quiet_credit_s | int)) / 120) | round(0, ''ceil'') | int, 1] | max,
+        5] | min }}'
   - repeat:
       count: '{{ checks_needed }}'
       sequence:
-      - alias: Sustained motion (on 30 s) at any point in this 2-minute window = someone
-          is home
+      - alias: Sustained motion (on 30 s), a camera seeing a person, or an outside door opening at any
+          point in this 2-minute window = someone is home (cameras/doors added 2026-10-12)
         variables:
-          already_on: '{{ is_state(''binary_sensor.goodbye_motion_sensors'', ''on'')
-            and (now() - states.binary_sensor.goodbye_motion_sensors.last_changed).total_seconds()
-            >= 30 }}'
+          already_on: '{{ (is_state(''binary_sensor.goodbye_motion_sensors'', ''on'') and (now() - states.binary_sensor.goodbye_motion_sensors.last_changed).total_seconds()
+            >= 30) or ([''binary_sensor.kitchen_person_occupancy'', ''binary_sensor.living_room_person_occupancy'']
+            | select(''is_state'', ''on'') | list | length > 0) }}'
       - if:
         - condition: template
           value_template: '{{ not already_on }}'
@@ -409,6 +410,19 @@ goodbye_routine_motion_tracking:
             to: 'on'
             for:
               seconds: 30
+          - trigger: state
+            entity_id:
+            - binary_sensor.kitchen_person_occupancy
+            - binary_sensor.living_room_person_occupancy
+            to: 'on'
+            for:
+              seconds: 5
+          - trigger: state
+            entity_id:
+            - binary_sensor.front_door
+            - binary_sensor.back_door
+            - binary_sensor.garage_door
+            to: 'on'
           timeout:
             minutes: 2
           continue_on_timeout: true
@@ -419,9 +433,12 @@ goodbye_routine_motion_tracking:
         - variables:
             result:
               someone_home: true
-              detected: '{{ expand(state_attr(''binary_sensor.goodbye_motion_sensors'',
-                ''entity_id'')) | selectattr(''state'', ''eq'', ''on'') | map(attribute=''name'')
-                | join('', '') }}'
+              detected: '{% if wait is defined and wait.trigger is not none and wait.trigger.entity_id
+                != ''binary_sensor.goodbye_motion_sensors'' %}{{ wait.trigger.to_state.name }}{% else
+                %}{% set cams = [''binary_sensor.kitchen_person_occupancy'', ''binary_sensor.living_room_person_occupancy'']
+                | select(''is_state'',''on'') | map(''state_attr'',''friendly_name'') | list %}{{ (cams
+                + (expand(state_attr(''binary_sensor.goodbye_motion_sensors'', ''entity_id'')) | selectattr(''state'',
+                ''eq'', ''on'') | map(attribute=''name'') | list)) | join('', '') }}{% endif %}'
         - stop: Motion detected - someone is home
           response_variable: result
   - variables:
@@ -538,7 +555,10 @@ goodbye_routine_stay_recheck:
   icon: mdi:shield-refresh
 goodbye_routine_all_clear_arm_and_power_off:
   alias: Goodbye Routine - All Clear, Arm and Power Off
-  description: House confirmed empty by motion tracking - arm Away, then power down.
+  description: 'House confirmed empty by motion tracking - arm Away, then power down. 2026-10-12: never
+    Away when kids are home (Bedroom 2 Occupied), Partner or Guests Home is on, or an indoor camera (kitchen/living
+    room Frigate) sees a person - arms Stay instead. Otherwise sends a 1-minute ''Arming Away'' notification
+    with Arm Stay instead / Cancel buttons before arming.'
   sequence:
   - alias: Abort if car beacon shows Paul is actually home (stale/premature away trigger)
     if:
@@ -549,6 +569,137 @@ goodbye_routine_all_clear_arm_and_power_off:
     - action: script.goodbye_routine_abort_and_restore
       data: {}
     - stop: Beacon confirms Paul is home - not arming
+  - alias: Added 2026-10-12 - who should be home? Kids (Bedroom 2 Occupied), the Partner or Guests Home
+      toggle, or an indoor camera seeing a person right now means never auto-Away
+    variables:
+      stay_reasons: '{% set r = [] %}{% if is_state(''input_boolean.bedroom2_occupied'', ''on'') %}{%
+        set r = r + [''kids home (Bedroom 2 Occupied)''] %}{% endif %}{% if is_state(''input_boolean.partner_or_guests_home'',
+        ''on'') %}{% set r = r + [''Partner or Guests Home is on''] %}{% endif %}{% set cams = [''binary_sensor.kitchen_person_occupancy'',
+        ''binary_sensor.living_room_person_occupancy''] | select(''is_state'', ''on'') | map(''state_attr'',
+        ''friendly_name'') | list %}{% if cams | length > 0 %}{% set r = r + [''camera sees a person (''
+        ~ (cams | join('', '')) ~ '')''] %}{% endif %}{{ r }}'
+  - if:
+    - condition: template
+      value_template: '{{ stay_reasons | length > 0 }}'
+    then:
+    - if:
+      - condition: state
+        entity_id: alarm_control_panel.3302_alarm
+        state: disarmed
+      then:
+      - action: alarm_control_panel.alarm_arm_home
+        target:
+          entity_id: alarm_control_panel.3302_alarm
+        data:
+          code: ''
+    - action: notify.mobile_app_pc_iphone
+      data:
+        title: Staying on Stay
+        message: 'Not arming Away: {{ stay_reasons | join(''; '') }}. Alarm is on Stay; lights, TVs and
+          music left alone.'
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.goodbye_routine_active
+    - stop: Someone should be home - Stay, not Away
+  - alias: Added 2026-10-12 - one-minute warning with Arm Stay instead / Cancel buttons before any Away
+    action: notify.mobile_app_pc_iphone
+    data:
+      title: Arming Away in 1 minute
+      message: House looks empty. Tap a button if someone is home.
+      data:
+        tag: goodbye_arm_warning
+        actions:
+        - action: GOODBYE_ARM_STAY
+          title: Arm Stay instead
+        - action: GOODBYE_CANCEL
+          title: Cancel
+  - wait_for_trigger:
+    - trigger: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: GOODBYE_ARM_STAY
+    - trigger: event
+      event_type: mobile_app_notification_action
+      event_data:
+        action: GOODBYE_CANCEL
+    - trigger: state
+      entity_id: device_tracker.bcpro_204982_08b8
+      to: home
+    timeout:
+      seconds: 60
+    continue_on_timeout: true
+  - choose:
+    - alias: Arm Stay instead
+      conditions:
+      - condition: template
+        value_template: '{{ wait.trigger is not none and wait.trigger.platform == ''event'' and wait.trigger.event.data.action
+          == ''GOODBYE_ARM_STAY'' }}'
+      sequence:
+      - if:
+        - condition: state
+          entity_id: alarm_control_panel.3302_alarm
+          state: disarmed
+        then:
+        - action: alarm_control_panel.alarm_arm_home
+          target:
+            entity_id: alarm_control_panel.3302_alarm
+          data:
+            code: ''
+      - action: notify.mobile_app_pc_iphone
+        data:
+          title: Armed Stay
+          message: Alarm on Stay as requested; lights, TVs and music left alone.
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.goodbye_routine_active
+      - stop: User chose Stay
+    - alias: Cancel
+      conditions:
+      - condition: template
+        value_template: '{{ wait.trigger is not none and wait.trigger.platform == ''event'' and wait.trigger.event.data.action
+          == ''GOODBYE_CANCEL'' }}'
+      sequence:
+      - action: notify.mobile_app_pc_iphone
+        data:
+          title: Goodbye cancelled
+          message: Alarm left as it was ({{ states('alarm_control_panel.3302_alarm') }}); nothing changed.
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.goodbye_routine_active
+      - stop: User cancelled
+    - alias: Car came back during the warning
+      conditions:
+      - condition: state
+        entity_id: device_tracker.bcpro_204982_08b8
+        state: home
+      sequence:
+      - action: script.goodbye_routine_abort_and_restore
+        data: {}
+      - stop: Beacon home during warning
+  - alias: Re-check the cameras after the warning minute - a person seen meanwhile means Stay
+    if:
+    - condition: template
+      value_template: '{{ [''binary_sensor.kitchen_person_occupancy'', ''binary_sensor.living_room_person_occupancy'']
+        | select(''is_state'', ''on'') | list | length > 0 }}'
+    then:
+    - if:
+      - condition: state
+        entity_id: alarm_control_panel.3302_alarm
+        state: disarmed
+      then:
+      - action: alarm_control_panel.alarm_arm_home
+        target:
+          entity_id: alarm_control_panel.3302_alarm
+        data:
+          code: ''
+    - action: notify.mobile_app_pc_iphone
+      data:
+        title: Staying on Stay
+        message: A camera saw someone during the arming warning - alarm on Stay.
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.goodbye_routine_active
+    - stop: Camera saw a person during the warning
   - alias: Failsafe - leaving the house confirms awake, clear stuck asleep flag
     action: input_boolean.turn_off
     target:
@@ -618,8 +769,7 @@ goodbye_routine_all_clear_arm_and_power_off:
       - fan.bedroom2_fan
     action: fan.turn_off
     data: {}
-  - alias: House is empty - end any Welcome Home session (unjoin/cleanup automations
-      key off this flag)
+  - alias: House is empty - end any Welcome Home session (unjoin/cleanup automations key off this flag)
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.welcome_home_active
