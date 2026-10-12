@@ -9163,13 +9163,19 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
-          - alias: Galaxy projector on only 10 PM - 7 AM (user preference 2026-10-11 -
-              TV switched off with someone present after 10 PM). Smart Motion & Presence
-              turns it off after 5 min with nobody present.
+          - alias: Galaxy projector on only from 30 min after sunset until 7 AM (user
+              preference 2026-10-11, was a fixed 10 PM - summer sunsets run late). Smart
+              Motion & Presence turns it off after 5 min with nobody present.
             if:
-            - condition: time
-              after: '22:00:00'
-              before: 07:00:00
+            - condition: or
+              conditions:
+              - alias: Evening - 30+ min after sunset (sun 'after sunset' holds until midnight)
+                condition: sun
+                after: sunset
+                after_offset: '00:30:00'
+              - alias: After midnight, until 7 AM
+                condition: time
+                before: 07:00:00
             then:
             - action: light.turn_on
               target:
