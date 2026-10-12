@@ -350,7 +350,7 @@ goodbye_routine_main:
 goodbye_routine_motion_tracking:
   alias: Goodbye Routine - Motion Tracking
   description: 'Decides home vs empty. First allows up to 5 min for Paul''s own exit
-    motion to clear (must stay clear for 30 s), then runs 5 consecutive 2-minute checks.
+    motion to clear (must stay clear for 30 s), then runs up to 5 consecutive 2-minute checks (fewer when post-departure quiet time already elapsed - added 2026-10-12, always at least 1).
     Motion only counts if it stays on for 30 s, so a radar blip or a sensor flapping
     for a second cannot decide the outcome (2026-09-25: a Bedroom 2 radar zone flap
     ended the settle wait and tripped check 1 in 2 seconds). Returns {someone_home,
@@ -376,8 +376,22 @@ goodbye_routine_motion_tracking:
       timeout:
         minutes: 5
       continue_on_timeout: true
+  - alias: Added 2026-10-12 - credit quiet time that already passed. The 10-minute
+      no-motion requirement used to start only when the beacon flipped away (~4.5 min
+      after the garage closed), throwing away the quiet minutes before it. Credit = how
+      long the motion group has been off right now, capped at the time since the garage
+      last changed (so only post-departure quiet counts) and at 8 min, so at least one
+      live 2-minute check always runs. Same 10 continuous quiet minutes overall.
+    variables:
+      quiet_credit_s: '{% set g = states.binary_sensor.goodbye_motion_sensors %}{% set
+        c = states.cover.garage %}{% if g is none or g.state != ''off'' %}0{% else %}{%
+        set q = (now() - g.last_changed).total_seconds() %}{% if c is not none %}{% set
+        q = [q, (now() - c.last_changed).total_seconds()] | min %}{% endif %}{{ [q, 480]
+        | min | int }}{% endif %}'
+      checks_needed: '{{ [[((600 - (quiet_credit_s | int)) / 120) | round(0, ''ceil'')
+        | int, 1] | max, 5] | min }}'
   - repeat:
-      count: 5
+      count: '{{ checks_needed }}'
       sequence:
       - alias: Sustained motion (on 30 s) at any point in this 2-minute window = someone
           is home
