@@ -3210,6 +3210,19 @@
       - action: switch.turn_off
         target:
           entity_id: switch.al_living_room
+    - alias: Added 2026-10-11 - nobody present for 5 minutes outside the night window
+        - turn off ONLY the galaxy projector (user preference); the room lights keep
+        their 14.5-minute 'cleared' timing
+      conditions:
+      - condition: trigger
+        id: cleared_night
+      - condition: state
+        entity_id: light.galaxy_projector
+        state: 'on'
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.galaxy_projector
     - conditions:
       - condition: trigger
         id: morning_transition
@@ -9150,9 +9163,17 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
-          - action: light.turn_on
-            target:
-              entity_id: light.galaxy_projector
+          - alias: Galaxy projector on only 10 PM - 7 AM (user preference 2026-10-11 -
+              TV switched off with someone present after 10 PM). Smart Motion & Presence
+              turns it off after 5 min with nobody present.
+            if:
+            - condition: time
+              after: '22:00:00'
+              before: 07:00:00
+            then:
+            - action: light.turn_on
+              target:
+                entity_id: light.galaxy_projector
           else:
           - action: fan.turn_off
             target:
