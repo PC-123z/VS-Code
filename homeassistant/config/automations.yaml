@@ -520,8 +520,12 @@
   mode: single
 - id: '1774818998231'
   alias: 'Dining Room Button On '
-  description: Bright override - disables AL/sleep mode, holds bright until sensor
-    clears for 30 min.
+  description: Short press of On hands the dining room back to Adaptive Lighting with
+    the lights on - clears any dimmer scene (input_number.dining_room_scene) and the
+    manual / TV-dim overrides, turns AL back on (plus AL sleep mode between 22:30 and
+    07:00, off otherwise) and applies AL now. Holding On is the 100% bright override
+    (Dining Room - Dimmer Hold Override). Changed 2026-10-12; was a time-of-day bright
+    override.
   triggers:
   - device_id: b553d4e94880b54012c3c4fbdec5c988
     domain: hue
@@ -537,176 +541,66 @@
       entity_id: input_number.dining_room_scene
     data:
       value: 0
-  - alias: Set manual override - bright override
-    action: input_boolean.turn_on
-    target:
-      entity_id: input_boolean.dining_room_manual_override
-  - alias: Disable AL and sleep mode so they cannot fight the override
-    action: switch.turn_off
+  - alias: Clear the dimmer override and TV Mode's dining dim flag
+    action: input_boolean.turn_off
     target:
       entity_id:
-      - switch.al_dining_room_bottom
-      - switch.al_dining_room_top
-      - switch.al_sleep_mode_dining_room_bottom
-      - switch.al_sleep_mode_dining_room_top
-  - alias: Mark lights as manually controlled so AL won't touch them
+      - input_boolean.dining_room_manual_override
+      - input_boolean.dining_room_tv_dim
+  - alias: Clear manual_control so AL adapts the lights again
     action: adaptive_lighting.set_manual_control
+    continue_on_error: true
     data:
       entity_id: switch.al_dining_room_bottom
       lights:
       - light.dining_room_bottom
-      manual_control: true
+      manual_control: false
   - action: adaptive_lighting.set_manual_control
+    continue_on_error: true
     data:
       entity_id: switch.al_dining_room_top
       lights:
       - light.dining_room_top
-      manual_control: true
-  - alias: Apply time-of-day bright scene with top/bottom color variation
-    choose:
-    - conditions:
-      - condition: time
-        after: 06:30:00
-        before: '10:00:00'
-      sequence:
-      - action: light.turn_on
-        target:
-          label_id: dining_room_top
-          entity_id: light.dining_room_top
-        data:
-          color_temp_kelvin: 5500
-          brightness_pct: 100
-          transition: 2
-      - action: light.turn_on
-        target:
-          label_id: dining_room_bottom
-          entity_id: light.dining_room_bottom
-        data:
-          color_temp_kelvin: 3200
-          brightness_pct: 100
-          transition: 2
-    - conditions:
-      - condition: time
-        after: '10:00:00'
-        before: '13:00:00'
-      sequence:
-      - action: light.turn_on
-        target:
-          label_id: dining_room_top
-          entity_id: light.dining_room_top
-        data:
-          color_temp_kelvin: 4500
-          brightness_pct: 100
-          transition: 2
-      - action: light.turn_on
-        target:
-          label_id: dining_room_bottom
-          entity_id: light.dining_room_bottom
-        data:
-          color_temp_kelvin: 3800
-          brightness_pct: 100
-          transition: 2
-    - conditions:
-      - condition: time
-        after: '13:00:00'
-        before: '17:00:00'
-      sequence:
-      - action: light.turn_on
-        target:
-          label_id: dining_room_top
-          entity_id: light.dining_room_top
-        data:
-          color_temp_kelvin: 3800
-          brightness_pct: 100
-          transition: 2
-      - action: light.turn_on
-        target:
-          label_id: dining_room_bottom
-          entity_id: light.dining_room_bottom
-        data:
-          rgb_color:
-          - 255
-          - 180
-          - 130
-          brightness_pct: 100
-          transition: 2
-    - conditions:
-      - condition: time
-        after: '17:00:00'
-        before: '20:00:00'
-      sequence:
-      - action: light.turn_on
-        target:
-          label_id: dining_room_top
-          entity_id: light.dining_room_top
-        data:
-          rgb_color:
-          - 238
-          - 73
-          - 98
-          brightness_pct: 90
-          transition: 2
-      - action: light.turn_on
-        target:
-          label_id: dining_room_bottom
-          entity_id: light.dining_room_bottom
-        data:
-          rgb_color:
-          - 255
-          - 200
-          - 140
-          brightness_pct: 90
-          transition: 2
-    - conditions:
-      - condition: time
-        after: '20:00:00'
-        before: '22:30:00'
-      sequence:
-      - action: light.turn_on
-        target:
-          label_id: dining_room_top
-          entity_id: light.dining_room_top
-        data:
-          rgb_color:
-          - 0
-          - 180
-          - 200
-          brightness_pct: 80
-          transition: 2
-      - action: light.turn_on
-        target:
-          label_id: dining_room_bottom
-          entity_id: light.dining_room_bottom
-        data:
-          rgb_color:
-          - 180
-          - 50
-          - 150
-          brightness_pct: 80
-          transition: 2
-    default:
-    - action: light.turn_on
+      manual_control: false
+  - alias: AL sleep mode on overnight (22:30-07:00), off otherwise
+    if:
+    - condition: time
+      after: '22:30:00'
+      before: 07:00:00
+    then:
+    - action: switch.turn_on
       target:
-        label_id: dining_room_top
-        entity_id: light.dining_room_top
-      data:
-        rgb_color:
-        - 255
-        - 140
-        - 50
-        brightness_pct: 60
-        transition: 2
-    - action: light.turn_on
+        entity_id:
+        - switch.al_sleep_mode_dining_room_bottom
+        - switch.al_sleep_mode_dining_room_top
+    else:
+    - action: switch.turn_off
       target:
-        label_id: dining_room_bottom
-        entity_id: light.dining_room_bottom
-      data:
-        rgb_color:
-        - 255
-        - 80
-        - 30
-        brightness_pct: 60
-        transition: 2
+        entity_id:
+        - switch.al_sleep_mode_dining_room_bottom
+        - switch.al_sleep_mode_dining_room_top
+  - action: switch.turn_on
+    target:
+      entity_id:
+      - switch.al_dining_room_bottom
+      - switch.al_dining_room_top
+  - alias: Apply AL now and turn the lights on
+    action: adaptive_lighting.apply
+    continue_on_error: true
+    data:
+      entity_id: switch.al_dining_room_bottom
+      lights:
+      - light.dining_room_bottom
+      turn_on_lights: true
+      transition: 2
+  - action: adaptive_lighting.apply
+    continue_on_error: true
+    data:
+      entity_id: switch.al_dining_room_top
+      lights:
+      - light.dining_room_top
+      turn_on_lights: true
+      transition: 2
   mode: single
 - id: '1774819066797'
   alias: 'Dining Room Off Button '
