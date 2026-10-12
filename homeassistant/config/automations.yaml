@@ -3376,10 +3376,9 @@
 - id: '1775505707980'
   alias: 'Dining Room: Smart Motion & Presence'
   description: 'Presence-based lighting with AL day, dinner, late evening, night mode,
-    and off after midnight. Sleep mode always overrides. 2026-10-11: colour turn-ons
-    with a transition go through script.light_soft_color_on (pre-stage at 1% in the
-    target colour) - the TP-Link bulbs flashed their last state and one ended up green
-    when given colour+transition from off.'
+    and off after midnight. Sleep mode always overrides. 2026-10-12: fixture moved
+    to Hue Essential bulbs, so colour turn-ons call light.turn_on directly again (the
+    old TP-Link bulbs needed script.light_soft_color_on to avoid flashing).'
   triggers:
   - trigger: state
     entity_id: binary_sensor.dining_room_sensor_group
@@ -3454,26 +3453,26 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: script.light_soft_color_on
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_bottom
         data:
-          light: light.dining_room_bottom
-          light_data:
-            brightness_pct: 8
-            rgb_color:
-            - 255
-            - 20
-            - 0
-            transition: 30
-      - action: script.light_soft_color_on
+          brightness_pct: 8
+          rgb_color:
+          - 255
+          - 20
+          - 0
+          transition: 30
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_top
         data:
-          light: light.dining_room_top
-          light_data:
-            brightness_pct: 12
-            rgb_color:
-            - 255
-            - 20
-            - 0
-            transition: 30
+          brightness_pct: 12
+          rgb_color:
+          - 255
+          - 20
+          - 0
+          transition: 30
     - conditions:
       - condition: trigger
         id: override_cleared
@@ -3678,20 +3677,20 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: script.light_soft_color_on
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_top
         data:
-          light: light.dining_room_top
-          light_data:
-            brightness_pct: 20
-            color_temp_kelvin: 3320
-            transition: 60
-      - action: script.light_soft_color_on
+          brightness_pct: 20
+          color_temp_kelvin: 3320
+          transition: 60
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_bottom
         data:
-          light: light.dining_room_bottom
-          light_data:
-            brightness_pct: 20
-            color_temp_kelvin: 2000
-            transition: 60
+          brightness_pct: 20
+          color_temp_kelvin: 2000
+          transition: 60
     - conditions:
       - condition: trigger
         id: late_evening_transition
@@ -3711,26 +3710,26 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: script.light_soft_color_on
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_top
         data:
-          light: light.dining_room_top
-          light_data:
-            rgb_color:
-            - 64
-            - 224
-            - 208
-            brightness_pct: 5
-            transition: 60
-      - action: script.light_soft_color_on
+          rgb_color:
+          - 64
+          - 224
+          - 208
+          brightness_pct: 5
+          transition: 60
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_bottom
         data:
-          light: light.dining_room_bottom
-          light_data:
-            rgb_color:
-            - 76
-            - 26
-            - 168
-            brightness_pct: 10
-            transition: 60
+          rgb_color:
+          - 76
+          - 26
+          - 168
+          brightness_pct: 10
+          transition: 60
     - conditions:
       - condition: trigger
         id: night_transition
@@ -3750,26 +3749,26 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: script.light_soft_color_on
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_bottom
         data:
-          light: light.dining_room_bottom
-          light_data:
-            brightness_pct: 8
-            rgb_color:
-            - 255
-            - 20
-            - 0
-            transition: 60
-      - action: script.light_soft_color_on
+          brightness_pct: 8
+          rgb_color:
+          - 255
+          - 20
+          - 0
+          transition: 60
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_top
         data:
-          light: light.dining_room_top
-          light_data:
-            brightness_pct: 12
-            rgb_color:
-            - 255
-            - 20
-            - 0
-            transition: 60
+          brightness_pct: 12
+          rgb_color:
+          - 255
+          - 20
+          - 0
+          transition: 60
     - conditions:
       - condition: trigger
         id: detected
@@ -3792,20 +3791,20 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: script.light_soft_color_on
+          - action: light.turn_on
+            target:
+              entity_id: light.dining_room_bottom
             data:
-              light: light.dining_room_bottom
-              light_data:
-                brightness_pct: 2
-                color_temp_kelvin: 2500
-                transition: 5
-          - action: script.light_soft_color_on
+              brightness_pct: 2
+              color_temp_kelvin: 2500
+              transition: 5
+          - action: light.turn_on
+            target:
+              entity_id: light.dining_room_top
             data:
-              light: light.dining_room_top
-              light_data:
-                brightness_pct: 2
-                color_temp_kelvin: 2500
-                transition: 5
+              brightness_pct: 2
+              color_temp_kelvin: 2500
+              transition: 5
         - conditions:
           - condition: or
             conditions:
@@ -3821,26 +3820,26 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: script.light_soft_color_on
+          - action: light.turn_on
+            target:
+              entity_id: light.dining_room_bottom
             data:
-              light: light.dining_room_bottom
-              light_data:
-                brightness_pct: 8
-                rgb_color:
-                - 255
-                - 20
-                - 0
-                transition: 5
-          - action: script.light_soft_color_on
+              brightness_pct: 8
+              rgb_color:
+              - 255
+              - 20
+              - 0
+              transition: 5
+          - action: light.turn_on
+            target:
+              entity_id: light.dining_room_top
             data:
-              light: light.dining_room_top
-              light_data:
-                brightness_pct: 12
-                rgb_color:
-                - 255
-                - 20
-                - 0
-                transition: 5
+              brightness_pct: 12
+              rgb_color:
+              - 255
+              - 20
+              - 0
+              transition: 5
         - conditions:
           - condition: time
             after: 07:00:00
@@ -3897,20 +3896,20 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: script.light_soft_color_on
+          - action: light.turn_on
+            target:
+              entity_id: light.dining_room_top
             data:
-              light: light.dining_room_top
-              light_data:
-                brightness_pct: 20
-                color_temp_kelvin: 3320
-                transition: 5
-          - action: script.light_soft_color_on
+              brightness_pct: 20
+              color_temp_kelvin: 3320
+              transition: 5
+          - action: light.turn_on
+            target:
+              entity_id: light.dining_room_bottom
             data:
-              light: light.dining_room_bottom
-              light_data:
-                brightness_pct: 20
-                color_temp_kelvin: 2000
-                transition: 5
+              brightness_pct: 20
+              color_temp_kelvin: 2000
+              transition: 5
         - conditions:
           - condition: time
             after: '20:30:00'
@@ -3921,26 +3920,26 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: script.light_soft_color_on
+          - action: light.turn_on
+            target:
+              entity_id: light.dining_room_top
             data:
-              light: light.dining_room_top
-              light_data:
-                rgb_color:
-                - 64
-                - 224
-                - 208
-                brightness_pct: 5
-                transition: 5
-          - action: script.light_soft_color_on
+              rgb_color:
+              - 64
+              - 224
+              - 208
+              brightness_pct: 5
+              transition: 5
+          - action: light.turn_on
+            target:
+              entity_id: light.dining_room_bottom
             data:
-              light: light.dining_room_bottom
-              light_data:
-                rgb_color:
-                - 76
-                - 26
-                - 168
-                brightness_pct: 10
-                transition: 5
+              rgb_color:
+              - 76
+              - 26
+              - 168
+              brightness_pct: 10
+              transition: 5
         - conditions:
           - condition: time
             after: '22:30:00'
@@ -3951,26 +3950,26 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: script.light_soft_color_on
+          - action: light.turn_on
+            target:
+              entity_id: light.dining_room_bottom
             data:
-              light: light.dining_room_bottom
-              light_data:
-                brightness_pct: 8
-                rgb_color:
-                - 255
-                - 20
-                - 0
-                transition: 5
-          - action: script.light_soft_color_on
+              brightness_pct: 8
+              rgb_color:
+              - 255
+              - 20
+              - 0
+              transition: 5
+          - action: light.turn_on
+            target:
+              entity_id: light.dining_room_top
             data:
-              light: light.dining_room_top
-              light_data:
-                brightness_pct: 12
-                rgb_color:
-                - 255
-                - 20
-                - 0
-                transition: 5
+              brightness_pct: 12
+              rgb_color:
+              - 255
+              - 20
+              - 0
+              transition: 5
         - conditions: []
           sequence:
           - action: light.turn_off
@@ -8966,20 +8965,20 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: script.light_soft_color_on
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_top
         data:
-          light: light.dining_room_top
-          light_data:
-            brightness_pct: 2
-            color_temp_kelvin: 2500
-            transition: 5
-      - action: script.light_soft_color_on
+          brightness_pct: 2
+          color_temp_kelvin: 2500
+          transition: 5
+      - action: light.turn_on
+        target:
+          entity_id: light.dining_room_bottom
         data:
-          light: light.dining_room_bottom
-          light_data:
-            brightness_pct: 2
-            color_temp_kelvin: 2500
-            transition: 5
+          brightness_pct: 2
+          color_temp_kelvin: 2500
+          transition: 5
     - conditions:
       - condition: or
         conditions:
