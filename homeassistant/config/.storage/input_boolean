@@ -47,11 +47,6 @@
         "id": "dining_room_tv_dim",
         "name": "Dining Room TV Dim",
         "icon": "mdi:television-ambient-light"
-      },
-      {
-        "id": "partner_or_guests_home",
-        "name": "Partner or Guests Home",
-        "icon": "mdi:account-group"
       }
     ]
   }
