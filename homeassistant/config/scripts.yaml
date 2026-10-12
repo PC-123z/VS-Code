@@ -556,9 +556,9 @@ goodbye_routine_stay_recheck:
 goodbye_routine_all_clear_arm_and_power_off:
   alias: Goodbye Routine - All Clear, Arm and Power Off
   description: 'House confirmed empty by motion tracking - arm Away, then power down. 2026-10-12: never
-    Away when kids are home (Bedroom 2 Occupied), Partner or Guests Home is on, or an indoor camera (kitchen/living
-    room Frigate) sees a person - arms Stay instead. Otherwise sends a 1-minute ''Arming Away'' notification
-    with Arm Stay instead / Cancel buttons before arming.'
+    Away while any goodbye motion sensor group is on or an indoor camera (kitchen/living room Frigate)
+    sees a person - arms Stay instead. Otherwise sends a 1-minute ''Arming Away'' notification with Arm
+    Stay instead / Cancel buttons before arming.'
   sequence:
   - alias: Abort if car beacon shows Paul is actually home (stale/premature away trigger)
     if:
@@ -569,15 +569,13 @@ goodbye_routine_all_clear_arm_and_power_off:
     - action: script.goodbye_routine_abort_and_restore
       data: {}
     - stop: Beacon confirms Paul is home - not arming
-  - alias: Added 2026-10-12 - who should be home? Kids (Bedroom 2 Occupied), the Partner or Guests Home
-      toggle, or an indoor camera seeing a person right now means never auto-Away
+  - alias: Added 2026-10-12, sensor-only per user - any goodbye motion sensor group on, or an indoor Frigate
+      camera (kitchen/living room) seeing a person right now, means Stay, never Away
     variables:
-      stay_reasons: '{% set r = [] %}{% if is_state(''input_boolean.bedroom2_occupied'', ''on'') %}{%
-        set r = r + [''kids home (Bedroom 2 Occupied)''] %}{% endif %}{% if is_state(''input_boolean.partner_or_guests_home'',
-        ''on'') %}{% set r = r + [''Partner or Guests Home is on''] %}{% endif %}{% set cams = [''binary_sensor.kitchen_person_occupancy'',
+      stay_reasons: '{% set r = expand(state_attr(''binary_sensor.goodbye_motion_sensors'', ''entity_id''))
+        | selectattr(''state'', ''eq'', ''on'') | map(attribute=''name'') | list %}{% set cams = [''binary_sensor.kitchen_person_occupancy'',
         ''binary_sensor.living_room_person_occupancy''] | select(''is_state'', ''on'') | map(''state_attr'',
-        ''friendly_name'') | list %}{% if cams | length > 0 %}{% set r = r + [''camera sees a person (''
-        ~ (cams | join('', '')) ~ '')''] %}{% endif %}{{ r }}'
+        ''friendly_name'') | list %}{{ r + cams }}'
   - if:
     - condition: template
       value_template: '{{ stay_reasons | length > 0 }}'
