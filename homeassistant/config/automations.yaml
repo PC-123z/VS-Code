@@ -531,6 +531,12 @@
     trigger: device
   conditions: []
   actions:
+  - alias: Reset the dimmer scene number (Brighter/Dimmer scenes)
+    action: input_number.set_value
+    target:
+      entity_id: input_number.dining_room_scene
+    data:
+      value: 0
   - alias: Set manual override - bright override
     action: input_boolean.turn_on
     target:
@@ -714,6 +720,12 @@
     trigger: device
   conditions: []
   actions:
+  - alias: Reset the dimmer scene number (Brighter/Dimmer scenes)
+    action: input_number.set_value
+    target:
+      entity_id: input_number.dining_room_scene
+    data:
+      value: 0
   - alias: Clear manual override
     action: input_boolean.turn_off
     target:
@@ -13649,6 +13661,12 @@
     trigger: device
   conditions: []
   actions:
+  - alias: Reset the dimmer scene number (Brighter/Dimmer scenes)
+    action: input_number.set_value
+    target:
+      entity_id: input_number.dining_room_scene
+    data:
+      value: 0
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.dining_room_manual_override
@@ -16730,4 +16748,738 @@
       - light.dining_room_top
     data:
       transition: 30
+  mode: single
+- id: '1792200000001'
+  alias: 'Dining Room: Dimmer Scenes'
+  description: 'Added 2026-10-12. Dining dimmer Brighter/Dimmer step input_number.dining_room_scene 1-10
+    (from 0 either button starts at 1; clamps at 1 and 10) and apply that scene - day list while sun.sun
+    is above_horizon, night list otherwise. Scenes are stacked dimmest/calmest (1) to brightest/most vibrant
+    (10). Sets input_boolean.dining_room_manual_override so Smart Motion, TV Mode and AL leave the room
+    alone; "Dining Room: Dimmer Scenes Clear" resets after 15 min empty. On / On-hold / Off reset the
+    number to 0. Bottom bulbs alternate in pairs 1&4, 2&5, 3&6 for multi-colour scenes.'
+  triggers:
+  - device_id: b553d4e94880b54012c3c4fbdec5c988
+    domain: hue
+    type: initial_press
+    subtype: 2
+    trigger: device
+    id: up
+  - device_id: b553d4e94880b54012c3c4fbdec5c988
+    domain: hue
+    type: initial_press
+    subtype: 3
+    trigger: device
+    id: down
+  conditions: []
+  variables:
+    day_scenes:
+    - name: Dimmed
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          color_temp_kelvin: 2700
+          brightness_pct: 30
+      - e:
+        - light.dining_1
+        - light.dining_2
+        - light.dining_3
+        - light.dining_4
+        - light.dining_5
+        - light.dining_6
+        d:
+          color_temp_kelvin: 2700
+          brightness_pct: 30
+    - name: Relax
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          color_temp_kelvin: 2237
+          brightness_pct: 45
+      - e:
+        - light.dining_1
+        - light.dining_2
+        - light.dining_3
+        - light.dining_4
+        - light.dining_5
+        - light.dining_6
+        d:
+          color_temp_kelvin: 2400
+          brightness_pct: 45
+    - name: Read
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          color_temp_kelvin: 2900
+          brightness_pct: 60
+      - e:
+        - light.dining_1
+        - light.dining_2
+        - light.dining_3
+        - light.dining_4
+        - light.dining_5
+        - light.dining_6
+        d:
+          color_temp_kelvin: 2900
+          brightness_pct: 60
+    - name: Natural Light
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          color_temp_kelvin: 4000
+          brightness_pct: 75
+      - e:
+        - light.dining_1
+        - light.dining_2
+        - light.dining_3
+        - light.dining_4
+        - light.dining_5
+        - light.dining_6
+        d:
+          color_temp_kelvin: 3500
+          brightness_pct: 75
+    - name: Concentrate
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          color_temp_kelvin: 4300
+          brightness_pct: 90
+      - e:
+        - light.dining_1
+        - light.dining_2
+        - light.dining_3
+        - light.dining_4
+        - light.dining_5
+        - light.dining_6
+        d:
+          color_temp_kelvin: 4300
+          brightness_pct: 90
+    - name: Energize
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          color_temp_kelvin: 6500
+          brightness_pct: 100
+      - e:
+        - light.dining_1
+        - light.dining_2
+        - light.dining_3
+        - light.dining_4
+        - light.dining_5
+        - light.dining_6
+        d:
+          color_temp_kelvin: 6000
+          brightness_pct: 100
+    - name: Spring Blossom
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 255
+          - 190
+          - 150
+          brightness_pct: 75
+      - e:
+        - light.dining_1
+        - light.dining_4
+        d:
+          rgb_color:
+          - 255
+          - 150
+          - 190
+          brightness_pct: 75
+      - e:
+        - light.dining_2
+        - light.dining_5
+        d:
+          rgb_color:
+          - 255
+          - 200
+          - 160
+          brightness_pct: 75
+      - e:
+        - light.dining_3
+        - light.dining_6
+        d:
+          rgb_color:
+          - 255
+          - 170
+          - 210
+          brightness_pct: 75
+    - name: Tropical Twilight
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 160
+          - 100
+          - 255
+          brightness_pct: 85
+      - e:
+        - light.dining_1
+        - light.dining_4
+        d:
+          rgb_color:
+          - 255
+          - 140
+          - 90
+          brightness_pct: 85
+      - e:
+        - light.dining_2
+        - light.dining_5
+        d:
+          rgb_color:
+          - 200
+          - 120
+          - 255
+          brightness_pct: 85
+      - e:
+        - light.dining_3
+        - light.dining_6
+        d:
+          rgb_color:
+          - 255
+          - 110
+          - 130
+          brightness_pct: 85
+    - name: Arctic Aurora
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 0
+          - 210
+          - 190
+          brightness_pct: 90
+      - e:
+        - light.dining_1
+        - light.dining_4
+        d:
+          rgb_color:
+          - 0
+          - 160
+          - 255
+          brightness_pct: 90
+      - e:
+        - light.dining_2
+        - light.dining_5
+        d:
+          rgb_color:
+          - 40
+          - 255
+          - 160
+          brightness_pct: 90
+      - e:
+        - light.dining_3
+        - light.dining_6
+        d:
+          rgb_color:
+          - 90
+          - 100
+          - 255
+          brightness_pct: 90
+    - name: Rio
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 255
+          - 0
+          - 170
+          brightness_pct: 100
+      - e:
+        - light.dining_1
+        - light.dining_4
+        d:
+          rgb_color:
+          - 255
+          - 40
+          - 0
+          brightness_pct: 100
+      - e:
+        - light.dining_2
+        - light.dining_5
+        d:
+          rgb_color:
+          - 255
+          - 190
+          - 0
+          brightness_pct: 100
+      - e:
+        - light.dining_3
+        - light.dining_6
+        d:
+          rgb_color:
+          - 0
+          - 90
+          - 255
+          brightness_pct: 100
+    night_scenes:
+    - name: Nightlight
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 255
+          - 56
+          - 0
+          brightness_pct: 4
+      - e:
+        - light.dining_1
+        - light.dining_2
+        - light.dining_3
+        - light.dining_4
+        - light.dining_5
+        - light.dining_6
+        d:
+          rgb_color:
+          - 255
+          - 56
+          - 0
+          brightness_pct: 2
+    - name: Candlelight
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 255
+          - 120
+          - 20
+          brightness_pct: 8
+      - e:
+        - light.dining_1
+        - light.dining_2
+        - light.dining_3
+        - light.dining_4
+        - light.dining_5
+        - light.dining_6
+        d:
+          color_temp_kelvin: 2237
+          brightness_pct: 12
+    - name: Dimmed
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          color_temp_kelvin: 2237
+          brightness_pct: 20
+      - e:
+        - light.dining_1
+        - light.dining_2
+        - light.dining_3
+        - light.dining_4
+        - light.dining_5
+        - light.dining_6
+        d:
+          color_temp_kelvin: 2400
+          brightness_pct: 25
+    - name: Relax
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          color_temp_kelvin: 2237
+          brightness_pct: 40
+      - e:
+        - light.dining_1
+        - light.dining_2
+        - light.dining_3
+        - light.dining_4
+        - light.dining_5
+        - light.dining_6
+        d:
+          color_temp_kelvin: 2500
+          brightness_pct: 45
+    - name: Savanna Sunset
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 255
+          - 90
+          - 0
+          brightness_pct: 50
+      - e:
+        - light.dining_1
+        - light.dining_4
+        d:
+          rgb_color:
+          - 255
+          - 40
+          - 0
+          brightness_pct: 50
+      - e:
+        - light.dining_2
+        - light.dining_5
+        d:
+          rgb_color:
+          - 255
+          - 140
+          - 20
+          brightness_pct: 50
+      - e:
+        - light.dining_3
+        - light.dining_6
+        d:
+          rgb_color:
+          - 255
+          - 180
+          - 60
+          brightness_pct: 50
+    - name: Honolulu
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 255
+          - 90
+          - 90
+          brightness_pct: 55
+      - e:
+        - light.dining_1
+        - light.dining_4
+        d:
+          rgb_color:
+          - 255
+          - 80
+          - 140
+          brightness_pct: 55
+      - e:
+        - light.dining_2
+        - light.dining_5
+        d:
+          rgb_color:
+          - 255
+          - 120
+          - 40
+          brightness_pct: 55
+      - e:
+        - light.dining_3
+        - light.dining_6
+        d:
+          rgb_color:
+          - 170
+          - 70
+          - 255
+          brightness_pct: 55
+    - name: Tokyo
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 255
+          - 40
+          - 160
+          brightness_pct: 60
+      - e:
+        - light.dining_1
+        - light.dining_4
+        d:
+          rgb_color:
+          - 40
+          - 80
+          - 255
+          brightness_pct: 60
+      - e:
+        - light.dining_2
+        - light.dining_5
+        d:
+          rgb_color:
+          - 140
+          - 50
+          - 255
+          brightness_pct: 60
+      - e:
+        - light.dining_3
+        - light.dining_6
+        d:
+          rgb_color:
+          - 0
+          - 180
+          - 255
+          brightness_pct: 60
+    - name: Galaxy
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 120
+          - 40
+          - 255
+          brightness_pct: 70
+      - e:
+        - light.dining_1
+        - light.dining_4
+        d:
+          rgb_color:
+          - 40
+          - 40
+          - 255
+          brightness_pct: 70
+      - e:
+        - light.dining_2
+        - light.dining_5
+        d:
+          rgb_color:
+          - 200
+          - 0
+          - 255
+          brightness_pct: 70
+      - e:
+        - light.dining_3
+        - light.dining_6
+        d:
+          rgb_color:
+          - 255
+          - 0
+          - 140
+          brightness_pct: 70
+    - name: Arctic Aurora
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 0
+          - 210
+          - 190
+          brightness_pct: 85
+      - e:
+        - light.dining_1
+        - light.dining_4
+        d:
+          rgb_color:
+          - 0
+          - 160
+          - 255
+          brightness_pct: 85
+      - e:
+        - light.dining_2
+        - light.dining_5
+        d:
+          rgb_color:
+          - 40
+          - 255
+          - 160
+          brightness_pct: 85
+      - e:
+        - light.dining_3
+        - light.dining_6
+        d:
+          rgb_color:
+          - 90
+          - 100
+          - 255
+          brightness_pct: 85
+    - name: Rio
+      steps:
+      - e:
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        d:
+          rgb_color:
+          - 255
+          - 0
+          - 170
+          brightness_pct: 100
+      - e:
+        - light.dining_1
+        - light.dining_4
+        d:
+          rgb_color:
+          - 255
+          - 40
+          - 0
+          brightness_pct: 100
+      - e:
+        - light.dining_2
+        - light.dining_5
+        d:
+          rgb_color:
+          - 255
+          - 190
+          - 0
+          brightness_pct: 100
+      - e:
+        - light.dining_3
+        - light.dining_6
+        d:
+          rgb_color:
+          - 0
+          - 90
+          - 255
+          brightness_pct: 100
+  actions:
+  - variables:
+      current: '{{ states(''input_number.dining_room_scene'') | int(0) }}'
+      idx: '{{ ([current + 1, 10] | min) if trigger.id == ''up'' else ([current - 1, 1] | max) }}'
+      daytime: '{{ is_state(''sun.sun'', ''above_horizon'') }}'
+      scene: '{{ (day_scenes if daytime else night_scenes)[idx - 1] }}'
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.dining_room_scene
+    data:
+      value: '{{ idx }}'
+  - alias: Take the room over - same as the On button override
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.dining_room_manual_override
+  - action: switch.turn_off
+    target:
+      entity_id:
+      - switch.al_dining_room_bottom
+      - switch.al_dining_room_top
+      - switch.al_sleep_mode_dining_room_bottom
+      - switch.al_sleep_mode_dining_room_top
+  - action: adaptive_lighting.set_manual_control
+    continue_on_error: true
+    data:
+      entity_id: switch.al_dining_room_bottom
+      lights:
+      - light.dining_room_bottom
+      manual_control: true
+  - action: adaptive_lighting.set_manual_control
+    continue_on_error: true
+    data:
+      entity_id: switch.al_dining_room_top
+      lights:
+      - light.dining_room_top
+      manual_control: true
+  - alias: Apply the scene
+    repeat:
+      for_each: '{{ scene.steps }}'
+      sequence:
+      - action: light.turn_on
+        continue_on_error: true
+        target:
+          entity_id: '{{ repeat.item.e }}'
+        data: '{{ dict(repeat.item.d, transition=1) }}'
+  - action: logbook.log
+    data:
+      name: Dining Room scene
+      message: '{{ idx }} - {{ scene.name }} ({{ ''day'' if daytime else ''night'' }})'
+      entity_id: input_number.dining_room_scene
+  mode: queued
+  max: 10
+- id: '1792200000002'
+  alias: 'Dining Room: Dimmer Scenes Clear'
+  description: Added 2026-10-12. A dimmer scene (input_number.dining_room_scene > 0) holds until the dining
+    sensor group is empty 15 min, then this resets the number to 0, clears the override, fades the lights
+    off and hands the room back to Smart Motion / AL - the same clean-up Smart Motion does for the 30-min
+    hold override.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.dining_room_sensor_group
+    to: 'off'
+    for:
+      minutes: 15
+  conditions:
+  - condition: numeric_state
+    entity_id: input_number.dining_room_scene
+    above: 0
+  actions:
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.dining_room_scene
+    data:
+      value: 0
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.dining_room_manual_override
+  - action: adaptive_lighting.set_manual_control
+    continue_on_error: true
+    data:
+      entity_id: switch.al_dining_room_bottom
+      lights:
+      - light.dining_room_bottom
+      manual_control: false
+  - action: adaptive_lighting.set_manual_control
+    continue_on_error: true
+    data:
+      entity_id: switch.al_dining_room_top
+      lights:
+      - light.dining_room_top
+      manual_control: false
+  - alias: Turn off lights before re-enabling AL (avoid AL flashing them back on)
+    action: light.turn_off
+    target:
+      entity_id:
+      - light.dining_room_bottom
+      - light.dining_room_top
+    data:
+      transition: 30
+  - alias: Only re-enable AL if the room is still empty
+    condition: state
+    entity_id: binary_sensor.dining_room_sensor_group
+    state: 'off'
+  - action: switch.turn_on
+    target:
+      entity_id:
+      - switch.al_dining_room_bottom
+      - switch.al_dining_room_top
+  - alias: Re-enable sleep mode if it should be active (after 22:30)
+    if:
+    - condition: time
+      after: '22:30:00'
+      before: 07:00:00
+    then:
+    - action: switch.turn_on
+      target:
+        entity_id:
+        - switch.al_sleep_mode_dining_room_bottom
+        - switch.al_sleep_mode_dining_room_top
   mode: single
