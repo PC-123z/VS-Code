@@ -9539,6 +9539,13 @@
       while already disarmed (normal in-and-out) is never treated as an arrival
     variables:
       alarm_at_start: '{{ states(''alarm_control_panel.3302_alarm'') }}'
+  - alias: Added 2026-10-11 - hard gate. If the alarm was already disarmed when the door
+      opened, this is a normal in-and-out, never an arrival - on every path, including
+      the arrival_recent fallback (which ignored this and started Welcome Home at 9:40 PM
+      on 2026-10-11 from a stale latch). The keypad-code trigger (pending -> disarmed)
+      is still an arrival.
+    condition: template
+    value_template: '{{ trigger.id == ''code'' or alarm_at_start != ''disarmed'' }}'
   - alias: 'Added 2026-10-07 after the garage cover (Aladdin) missed an open/close
       cycle and STAGE 1 never armed pending. Give ANY of these up to 60s: STAGE 1
       pending flag; the fallback of arrival_recent (BT beacon / phone / webhook) with
@@ -9906,7 +9913,15 @@
     allowed_methods:
     - POST
     local_only: false
-  conditions: []
+  conditions:
+  - alias: Added 2026-10-11 - a beacon coming back from 'unavailable' only counts if
+      it was unavailable for 10+ minutes. On 2026-10-11 an HA restart made the beacon
+      go unavailable -> home 90 s later with the car parked in the garage, which set
+      a stale latch that started Welcome Home 43 min later on a normal door open.
+    condition: template
+    value_template: '{{ not (trigger.platform == ''state'' and trigger.from_state is
+      not none and trigger.from_state.state == ''unavailable'') or (trigger.to_state.last_changed
+      - trigger.from_state.last_changed).total_seconds() >= 600 }}'
   actions:
   - alias: Set the arrival latch
     action: input_boolean.turn_on
