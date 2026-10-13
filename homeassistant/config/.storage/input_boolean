@@ -47,6 +47,11 @@
         "id": "dining_room_tv_dim",
         "name": "Dining Room TV Dim",
         "icon": "mdi:television-ambient-light"
+      },
+      {
+        "id": "living_room_tv_lights_off",
+        "name": "Living Room TV Lights Off",
+        "icon": "mdi:television-ambient-light"
       }
     ]
   }
