@@ -3300,6 +3300,15 @@
       minutes: 5
       seconds: 0
     id: cleared
+  - alias: Empty 90 s - only acted on while the living room TV is on
+    trigger: state
+    entity_id:
+    - binary_sensor.dining_room_sensor_group
+    to:
+    - 'off'
+    for:
+      seconds: 90
+    id: cleared_tv
   - trigger: time
     at: 07:00:00
     id: morning_transition
@@ -3453,8 +3462,18 @@
             - switch.al_sleep_mode_dining_room_bottom
             - switch.al_sleep_mode_dining_room_top
     - conditions:
-      - condition: trigger
-        id: cleared
+      - alias: Empty 5 min, or empty 90 s while the living room TV is on (2026-10-12)
+        condition: or
+        conditions:
+        - condition: trigger
+          id: cleared
+        - condition: and
+          conditions:
+          - condition: trigger
+            id: cleared_tv
+          - condition: state
+            entity_id: binary_sensor.living_room_tv_on
+            state: 'on'
       - alias: Skip if dimmer override is active (wait for 30-min override clear)
         condition: state
         entity_id: input_boolean.dining_room_manual_override
