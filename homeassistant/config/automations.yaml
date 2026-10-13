@@ -8862,13 +8862,28 @@
             lights:
             - light.living_room
             manual_control: true
-        - action: light.turn_on
-          target:
-            entity_id: light.living_room
-          data:
-            brightness_pct: '{{ playing_brightness | int }}'
-            color_temp_kelvin: '{{ tv_kelvin | int }}'
-            transition: 3
+        - alias: After dark (sun below -6 deg) playback turns the living room off (2026-10-12)
+            - the flag lets pause/TV-off turn them back on
+          if:
+          - condition: template
+            value_template: '{{ sun_elev <= -6 }}'
+          then:
+          - action: light.turn_off
+            target:
+              entity_id: light.living_room
+            data:
+              transition: 3
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.living_room_tv_lights_off
+          else:
+          - action: light.turn_on
+            target:
+              entity_id: light.living_room
+            data:
+              brightness_pct: '{{ playing_brightness | int }}'
+              color_temp_kelvin: '{{ tv_kelvin | int }}'
+              transition: 3
       - action: light.turn_off
         target:
           entity_id: light.galaxy_projector
@@ -8983,6 +8998,26 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
+          - alias: TV Mode switched the lights off for night playback - bring them back on
+            if:
+            - condition: state
+              entity_id: input_boolean.living_room_tv_lights_off
+              state: 'on'
+            then:
+            - action: adaptive_lighting.apply
+              continue_on_error: true
+              data:
+                entity_id: switch.al_living_room
+                lights:
+                - light.living_room
+                transition: 3
+                adapt_color: true
+                adapt_brightness: true
+                prefer_rgb_color: true
+                turn_on_lights: true
+            - action: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.living_room_tv_lights_off
       - alias: Dining room - restore AL only if TV Mode dimmed it, dimmer override
           is off, and there's real motion in the dining room itself (presence alone
           keeps it dim; a later dining motion_while_stopped run restores it)
@@ -9092,6 +9127,26 @@
               adapt_color: true
               adapt_brightness: true
               prefer_rgb_color: true
+          - alias: TV Mode switched the lights off for night playback - bring them back on
+            if:
+            - condition: state
+              entity_id: input_boolean.living_room_tv_lights_off
+              state: 'on'
+            then:
+            - action: adaptive_lighting.apply
+              continue_on_error: true
+              data:
+                entity_id: switch.al_living_room
+                lights:
+                - light.living_room
+                transition: 3
+                adapt_color: true
+                adapt_brightness: true
+                prefer_rgb_color: true
+                turn_on_lights: true
+            - action: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.living_room_tv_lights_off
           - alias: Galaxy projector on only from 30 min after sunset until 7 AM (user
               preference 2026-10-11, was a fixed 10 PM - summer sunsets run late).
               Smart Motion & Presence turns it off after 5 min with nobody present.
