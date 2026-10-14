@@ -241,6 +241,20 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_1130928743_tags/v0.10.0"
+      },
+      {
+        "created": "2026-10-14T11:51:52.697770+00:00",
+        "dismissed_version": null,
+        "domain": "homeassistant",
+        "is_persistent": false,
+        "issue_id": "config_entry_reauth_esphome_01KNJHCCZ90DMRF131BE49RT4Z"
+      },
+      {
+        "created": "2026-10-14T11:51:53.326926+00:00",
+        "dismissed_version": null,
+        "domain": "homeassistant",
+        "is_persistent": false,
+        "issue_id": "config_entry_reauth_esphome_01KNYWR8F317SWWKR0AX56RJ4M"
       }
     ]
   }
