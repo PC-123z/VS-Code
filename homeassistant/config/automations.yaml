@@ -522,8 +522,8 @@
   alias: 'Dining Room Button On '
   description: Short press of On hands the dining room back to Adaptive Lighting with
     the lights on - clears any dimmer scene (input_number.dining_room_scene) and the
-    manual / TV-dim overrides, turns AL back on (plus AL sleep mode between 22:30 and
-    07:00, off otherwise) and applies AL now. Holding On is the 100% bright override
+    manual / TV-dim overrides, turns AL back on (plus AL sleep mode between 22:30
+    and 07:00, off otherwise) and applies AL now. Holding On is the 100% bright override
     (Dining Room - Dimmer Hold Override). Changed 2026-10-12; was a time-of-day bright
     override.
   triggers:
@@ -8862,8 +8862,8 @@
             lights:
             - light.living_room
             manual_control: true
-        - alias: After dark (sun below -6 deg) playback - ceiling (Living Room 1/2) deep
-            red, lamps (Small Lamp / Floor Lamp) 1% warm white (2026-10-12)
+        - alias: After dark (sun below -6 deg) playback - ceiling (Living Room 1/2)
+            deep red, lamps (Small Lamp / Floor Lamp) 1% warm white (2026-10-12)
           if:
           - condition: template
             value_template: '{{ sun_elev <= -6 }}'
@@ -10627,16 +10627,16 @@
     - wed
     - thu
     - fri
-    enabled: true
+    enabled: false
   - trigger: time
-    at: 08:15:00
+    at: 07:55:00
     weekday:
     - mon
     - tue
     - wed
     - thu
     - fri
-    enabled: false
+    enabled: true
   - trigger: time
     at: '10:00:00'
     weekday:
@@ -16692,12 +16692,13 @@
   mode: single
 - id: '1792200000001'
   alias: 'Dining Room: Dimmer Scenes'
-  description: 'Added 2026-10-12. Dining dimmer Brighter/Dimmer step input_number.dining_room_scene 1-10
-    (from 0 either button starts at 1; clamps at 1 and 10) and apply that scene - day list while sun.sun
-    is above_horizon, night list otherwise. Scenes are stacked dimmest/calmest (1) to brightest/most vibrant
-    (10). Sets input_boolean.dining_room_manual_override so Smart Motion, TV Mode and AL leave the room
-    alone; "Dining Room: Dimmer Scenes Clear" resets after 15 min empty. On / On-hold / Off reset the
-    number to 0. Bottom bulbs alternate in pairs 1&4, 2&5, 3&6 for multi-colour scenes.'
+  description: 'Added 2026-10-12. Dining dimmer Brighter/Dimmer step input_number.dining_room_scene
+    1-10 (from 0 either button starts at 1; clamps at 1 and 10) and apply that scene
+    - day list while sun.sun is above_horizon, night list otherwise. Scenes are stacked
+    dimmest/calmest (1) to brightest/most vibrant (10). Sets input_boolean.dining_room_manual_override
+    so Smart Motion, TV Mode and AL leave the room alone; "Dining Room: Dimmer Scenes
+    Clear" resets after 15 min empty. On / On-hold / Off reset the number to 0. Bottom
+    bulbs alternate in pairs 1&4, 2&5, 3&6 for multi-colour scenes.'
   triggers:
   - device_id: b553d4e94880b54012c3c4fbdec5c988
     domain: hue
@@ -17307,7 +17308,8 @@
   actions:
   - variables:
       current: '{{ states(''input_number.dining_room_scene'') | int(0) }}'
-      idx: '{{ ([current + 1, 10] | min) if trigger.id == ''up'' else ([current - 1, 1] | max) }}'
+      idx: '{{ ([current + 1, 10] | min) if trigger.id == ''up'' else ([current -
+        1, 1] | max) }}'
       daytime: '{{ is_state(''sun.sun'', ''above_horizon'') }}'
       scene: '{{ (day_scenes if daytime else night_scenes)[idx - 1] }}'
   - action: input_number.set_value
@@ -17352,16 +17354,17 @@
   - action: logbook.log
     data:
       name: Dining Room scene
-      message: '{{ idx }} - {{ scene.name }} ({{ ''day'' if daytime else ''night'' }})'
+      message: '{{ idx }} - {{ scene.name }} ({{ ''day'' if daytime else ''night''
+        }})'
       entity_id: input_number.dining_room_scene
   mode: queued
   max: 10
 - id: '1792200000002'
   alias: 'Dining Room: Dimmer Scenes Clear'
-  description: Added 2026-10-12. A dimmer scene (input_number.dining_room_scene > 0) holds until the dining
-    sensor group is empty 15 min, then this resets the number to 0, clears the override, fades the lights
-    off and hands the room back to Smart Motion / AL - the same clean-up Smart Motion does for the 30-min
-    hold override.
+  description: Added 2026-10-12. A dimmer scene (input_number.dining_room_scene >
+    0) holds until the dining sensor group is empty 15 min, then this resets the number
+    to 0, clears the override, fades the lights off and hands the room back to Smart
+    Motion / AL - the same clean-up Smart Motion does for the 30-min hold override.
   triggers:
   - trigger: state
     entity_id: binary_sensor.dining_room_sensor_group
