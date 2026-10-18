@@ -13,7 +13,7 @@
     once playback resumes, so this automation only reacts to a stop it didn't cause.
     Announcements no longer pause anything - they are spoken over the music through
     Music Assistant's own announcement path, so they create no idle window at all.
-    Does not touch this automation's or the Good Morning Routine automation's enabled
+    No presence gate (removed 2026-10-18) - it used to defer to the routine self-heal whenever anyone was in the bedroom/bathroom/kitchen, so a manual stop while in the room was always re-queued. A stop now always ends the session. Does not touch this automation's or the Good Morning Routine automation's enabled
     state, so scheduled/manual runs still work normally in the future.
   triggers:
   - trigger: state
@@ -47,19 +47,6 @@
   - condition: state
     entity_id: input_boolean.good_morning_expected_pause
     state: 'off'
-  - alias: Only end the routine if you've actually left the morning area - if presence
-      is still detected in the bedroom, bathroom, or kitchen, this is more likely
-      Music Assistant failing to advance the queue than a deliberate manual stop,
-      so let the routine's own occupancy-driven self-heal loop try to resume playback
-      instead of ending Good Morning while you're still moving through your morning
-      routine. Tolerates each sensor's flicker with the same 2-minute window used
-      elsewhere.
-    condition: template
-    value_template: "{% set ns = namespace(occupied=false) %} {% for eid in ['binary_sensor.big_bedroom_sensor_group',\n
-      \ 'binary_sensor.bathroom_motion', 'binary_sensor.kitchen_sensor_group'] %}\n
-      \ {% set s = states[eid] %}\n  {% if s is not none and (s.state == 'on' or (now()
-      - s.last_changed).total_seconds() < 120) %}\n    {% set ns.occupied = true %}\n
-      \ {% endif %}\n{% endfor %} {{ not ns.occupied }}"
   actions:
   - alias: Stop the music player explicitly
     action: media_player.media_stop
