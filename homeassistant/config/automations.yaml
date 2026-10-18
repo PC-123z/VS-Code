@@ -5156,7 +5156,7 @@
   mode: restart
 - id: '1776307653783'
   alias: 'Hue Button 4 - Big Bedroom: Hue Switch Override - Button 4'
-  description: Press turns off all lights, hold turns off everything in bedroom
+  description: Press turns off all lights, hold turns off everything in bedroom and cancels the whole Good Morning routine
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
@@ -5244,6 +5244,28 @@
       - condition: trigger
         id: hold
       sequence:
+      - alias: End Good Morning FIRST (added 2026-10-18) - clearing good_morning_active
+          disarms the routine's self-heal so stopping the music below can't be re-queued
+        action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.good_morning_active
+      - alias: Kill any in-flight Good Morning run (light ramp, announcement, music loop)
+          and re-arm it for tomorrow
+        action: automation.turn_off
+        target:
+          entity_id: automation.good_morning_routine_3
+        data:
+          stop_actions: true
+      - action: automation.turn_on
+        target:
+          entity_id: automation.good_morning_routine_3
+      - alias: Clear the routine's internal flags it would normally reset itself
+        action: input_boolean.turn_off
+        target:
+          entity_id:
+          - input_boolean.good_morning_announcement_pending
+          - input_boolean.good_morning_expected_pause
+          - input_boolean.good_morning_music_started
       - alias: Cancel any in-flight bedtime wind-down so its pending light/Nanoleaf/fan
           steps can't turn anything back on or change it
         action: automation.turn_off
@@ -5307,9 +5329,9 @@
         action: media_player.turn_off
         target:
           entity_id: media_player.bedroom_tv_2
-      - alias: Stop bedroom audio (with verify and retry)
+      - alias: Stop bedroom audio (with verify and retry, up to 3 tries) - repeat-until,
+          not stop, because stop ended the whole automation and skipped the steps below
         repeat:
-          count: 3
           sequence:
           - continue_on_error: true
             action: media_player.media_stop
@@ -5317,14 +5339,16 @@
               entity_id: media_player.bedroom_2
           - delay:
               seconds: 5
-          - if:
+          until:
+          - condition: or
+            conditions:
             - condition: not
               conditions:
               - condition: state
                 entity_id: media_player.bedroom_2
                 state: playing
-            then:
-            - stop: Stop confirmed
+            - condition: template
+              value_template: '{{ repeat.index >= 3 }}'
       - alias: Reset scene mode
         action: input_select.select_option
         target:
