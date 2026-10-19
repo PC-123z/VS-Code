@@ -13,8 +13,11 @@
     once playback resumes, so this automation only reacts to a stop it didn't cause.
     Announcements no longer pause anything - they are spoken over the music through
     Music Assistant's own announcement path, so they create no idle window at all.
-    No presence gate (removed 2026-10-18) - it used to defer to the routine self-heal whenever anyone was in the bedroom/bathroom/kitchen, so a manual stop while in the room was always re-queued. A stop now always ends the session. Does not touch this automation's or the Good Morning Routine automation's enabled
-    state, so scheduled/manual runs still work normally in the future.
+    No presence gate (removed 2026-10-18) - it used to defer to the routine self-heal
+    whenever anyone was in the bedroom/bathroom/kitchen, so a manual stop while in
+    the room was always re-queued. A stop now always ends the session. Does not touch
+    this automation's or the Good Morning Routine automation's enabled state, so scheduled/manual
+    runs still work normally in the future.
   triggers:
   - trigger: state
     entity_id: media_player.bedroom_2
@@ -5156,7 +5159,8 @@
   mode: restart
 - id: '1776307653783'
   alias: 'Hue Button 4 - Big Bedroom: Hue Switch Override - Button 4'
-  description: Press turns off all lights, hold turns off everything in bedroom and cancels the whole Good Morning routine
+  description: Press turns off all lights, hold turns off everything in bedroom and
+    cancels the whole Good Morning routine
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
@@ -5249,8 +5253,8 @@
         action: input_boolean.turn_off
         target:
           entity_id: input_boolean.good_morning_active
-      - alias: Kill any in-flight Good Morning run (light ramp, announcement, music loop)
-          and re-arm it for tomorrow
+      - alias: Kill any in-flight Good Morning run (light ramp, announcement, music
+          loop) and re-arm it for tomorrow
         action: automation.turn_off
         target:
           entity_id: automation.good_morning_routine_3
@@ -5330,7 +5334,8 @@
         target:
           entity_id: media_player.bedroom_tv_2
       - alias: Stop bedroom audio (with verify and retry, up to 3 tries) - repeat-until,
-          not stop, because stop ended the whole automation and skipped the steps below
+          not stop, because stop ended the whole automation and skipped the steps
+          below
         repeat:
           sequence:
           - continue_on_error: true
@@ -10640,7 +10645,7 @@
     - fri
     enabled: false
   - trigger: time
-    at: 07:55:00
+    at: 06:35:00
     weekday:
     - mon
     - tue
