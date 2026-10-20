@@ -11528,6 +11528,8 @@
   mode: single
 - id: '1778194432803'
   alias: Bathroom Speaker Join on Motion v2
+  trace:
+    stored_traces: 30
   description: 'Joins bathroom Sonos to the active source on motion. During welcome_home_active
     the source is the kitchen; otherwise it''s the bedroom Arc. Matches source volume,
     ramping in gracefully. Uses timer.bathroom_join_idle to track 15-minute motion-clear
