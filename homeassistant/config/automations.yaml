@@ -17445,3 +17445,102 @@
         - switch.al_sleep_mode_dining_room_bottom
         - switch.al_sleep_mode_dining_room_top
   mode: single
+- id: '1792300000001'
+  alias: 'Bedroom 2: Lamp Daylight Gate'
+  description: 'Bedroom 2 Lamp (light.hue_white_lamp_1) is daylight-blocked from sunrise+2h
+    until sunset (2026-10-20). Sunrise+2h: release from AL (AL Office is min=max=100 and
+    would undo the fade) and fade off over 15 min. During the window any turn-on or brightness
+    increase (motion, buttons, routines, Hue app) is turned straight back off - a single
+    guard here instead of patching the 9 automations that drive the lamp. Sunset: if the
+    room is occupied (and no bedtime/override/sleep mode), hand back to AL and fade on.'
+  mode: queued
+  max: 5
+  triggers:
+  - trigger: sun
+    event: sunrise
+    offset: '02:00:00'
+    id: fade
+  - trigger: sun
+    event: sunset
+    id: sunset
+  - alias: Any state or attribute change - condition below keeps only on/brighter
+    trigger: state
+    entity_id: light.hue_white_lamp_1
+    id: changed
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: fade
+      sequence:
+      - action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.adaptive_lighting_office
+          lights:
+          - light.hue_white_lamp_1
+          manual_control: true
+      - condition: state
+        entity_id: light.hue_white_lamp_1
+        state: 'on'
+      - action: light.turn_off
+        target:
+          entity_id: light.hue_white_lamp_1
+        data:
+          transition: 900
+    - conditions:
+      - condition: trigger
+        id: changed
+      - alias: Only inside the blocked window (sunrise+2h to sunset)
+        condition: sun
+        after: sunrise
+        after_offset: '02:00:00'
+        before: sunset
+      - alias: Lamp turned on or got brighter (fade-down updates are ignored)
+        condition: template
+        value_template: >-
+          {% set f = trigger.from_state.attributes.brightness | int(0)
+             if trigger.from_state is not none and trigger.from_state.state == 'on' else 0 %}
+          {{ trigger.to_state is not none and trigger.to_state.state == 'on'
+             and (trigger.to_state.attributes.brightness | int(0)) > f }}
+      sequence:
+      - action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.adaptive_lighting_office
+          lights:
+          - light.hue_white_lamp_1
+          manual_control: true
+      - action: light.turn_off
+        target:
+          entity_id: light.hue_white_lamp_1
+        data:
+          transition: 1
+    - conditions:
+      - condition: trigger
+        id: sunset
+      - condition: state
+        entity_id: binary_sensor.bedroom_2_sensor_group
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.bedroom2_occupied
+        state: 'off'
+      - condition: state
+        entity_id: input_boolean.bedroom2_manual_override
+        state: 'off'
+      - condition: state
+        entity_id: switch.adaptive_lighting_sleep_mode_office
+        state: 'off'
+      - condition: state
+        entity_id: light.hue_white_lamp_1
+        state: 'off'
+      sequence:
+      - action: adaptive_lighting.set_manual_control
+        data:
+          entity_id: switch.adaptive_lighting_office
+          lights:
+          - light.hue_white_lamp_1
+          manual_control: false
+      - action: light.turn_on
+        target:
+          entity_id: light.hue_white_lamp_1
+        data:
+          transition: 60
