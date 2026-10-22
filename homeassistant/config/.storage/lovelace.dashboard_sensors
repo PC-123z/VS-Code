@@ -7,175 +7,63 @@
       "views": [
         {
           "type": "sections",
+          "title": "Sensors",
+          "path": "sensors",
+          "max_columns": 4,
           "sections": [
             {
               "type": "grid",
               "cards": [
                 {
                   "type": "heading",
-                  "heading_style": "title"
+                  "heading": "Room Presence",
+                  "heading_style": "title",
+                  "icon": "mdi:home-account"
                 },
                 {
-                  "type": "entities",
-                  "title": "Motion & Presence Sensors",
-                  "entities": [
-                    {
-                      "type": "section",
-                      "label": "Bathroom"
-                    },
-                    {
-                      "entity": "binary_sensor.bathroom_motion",
-                      "name": "Bathroom Motion"
-                    },
-                    {
-                      "type": "section",
-                      "label": "Bedroom - Big"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom_motion",
-                      "name": "Motion"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom_occupancy",
-                      "name": "Occupancy"
-                    },
-                    {
-                      "entity": "binary_sensor.apollo_msr_2_big_bedroom_radar_still_target",
-                      "name": "Radar Still Target"
-                    },
-                    {
-                      "entity": "binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target",
-                      "name": "Radar Moving Target"
-                    },
-                    {
-                      "entity": "binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy",
-                      "name": "Zone 1 Occupancy"
-                    },
-                    {
-                      "entity": "binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy",
-                      "name": "Zone 2 Occupancy"
-                    },
-                    {
-                      "entity": "binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy",
-                      "name": "Zone 3 Occupancy"
-                    },
-                    {
-                      "type": "section",
-                      "label": "Bedroom 2 / Office"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy",
-                      "name": "Zone 1 Occupancy"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy",
-                      "name": "Zone 2 Occupancy"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy",
-                      "name": "Zone 3 Occupancy"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom2_sensor_apollo_radar_still_target",
-                      "name": "Still Target"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom2_sensor_apollo_radar_moving_target",
-                      "name": "Moving Target"
-                    },
-                    {
-                      "type": "section",
-                      "label": "Bedroom 2 Entry"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom2_office_bedroom2_door_presence",
-                      "name": "Presence"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom2_office_bedroom2_door_moving_target",
-                      "name": "Moving Target"
-                    },
-                    {
-                      "entity": "binary_sensor.bedroom2_office_bedroom2_door_still_target",
-                      "name": "Still Target"
-                    },
-                    {
-                      "type": "section",
-                      "label": "Dining Room"
-                    },
-                    {
-                      "entity": "binary_sensor.dining_room_apollo_ld2450_presence",
-                      "name": "LD2450 Presence"
-                    },
-                    {
-                      "entity": "binary_sensor.dining_room_apollo_ld2450_moving_target",
-                      "name": "LD2450 Moving Target"
-                    },
-                    {
-                      "entity": "binary_sensor.dining_room_apollo_ld2450_still_target",
-                      "name": "LD2450 Still Target"
-                    },
-                    {
-                      "type": "section",
-                      "label": "Hallway"
-                    },
-                    {
-                      "entity": "binary_sensor.hallway_motion",
-                      "name": "Hallway Motion"
-                    },
-                    {
-                      "type": "section",
-                      "label": "Kitchen"
-                    },
-                    {
-                      "entity": "binary_sensor.kitchen_motion_2",
-                      "name": "Kitchen Motion Hue"
-                    },
-                    {
-                      "entity": "binary_sensor.kitchen_sensor_group",
-                      "name": "Kitchen Presence Cam"
-                    },
-                    {
-                      "entity": "binary_sensor.kitchen_occupancy_sensor_radar_still_target",
-                      "name": "Radar Still Target"
-                    },
-                    {
-                      "entity": "binary_sensor.kitchen_occupancy_sensor_radar_moving_target",
-                      "name": "Radar Moving Target"
-                    },
-                    {
-                      "entity": "binary_sensor.kitchen_occupancy_sensor_radar_zone_1_occupancy",
-                      "name": "Zone 1 Occupancy"
-                    },
-                    {
-                      "entity": "binary_sensor.kitchen_occupancy_sensor_radar_zone_2_occupancy",
-                      "name": "Zone 2 Occupancy"
-                    },
-                    {
-                      "entity": "binary_sensor.kitchen_occupancy_sensor_radar_zone_3_occupancy",
-                      "name": "Zone 3 Occupancy"
-                    },
-                    {
-                      "type": "section",
-                      "label": "Living Room"
-                    },
-                    {
-                      "entity": "binary_sensor.living_room_all_occupancy",
-                      "name": "All Occupancy"
-                    },
-                    {
-                      "entity": "binary_sensor.living_room_person_occupancy",
-                      "name": "Person Occupancy"
-                    },
-                    {
-                      "entity": "binary_sensor.apollo_r_pro_1_740624_ld2412_presence",
-                      "name": "LD2412 Presence"
-                    },
-                    {
-                      "entity": "binary_sensor.apollo_r_pro_1_740624_ld2450_presence",
-                      "name": "LD2450 Presence"
-                    }
-                  ]
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "entities",
+                    "title": "Room groups (what automations read)",
+                    "state_color": true
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "label": "presence_group"
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "friendly_name"
+                  },
+                  "show_empty": true
+                },
+                {
+                  "type": "tile",
+                  "entity": "device_tracker.bcpro_204982_08b8",
+                  "vertical": false,
+                  "features_position": "bottom"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "column_span": 4,
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Fleet Health",
+                  "heading_style": "title",
+                  "icon": "mdi:heart-pulse"
+                },
+                {
+                  "type": "markdown",
+                  "content": "{%- set rssi_warn = -75 %}\n{%- set batt_warn = 25 %}\n{%- set fw_max_days = 180 %}\n{%- set quiet_hours = 48 %}\n{%- set signals = label_entities('presence_signal') %}\n{%- set ns = namespace(rows=[], bad=0) %}\n{%- for d in label_devices('presence_sensor') %}\n  {%- set name = device_attr(d, 'name_by_user') or device_attr(d, 'name') %}\n  {%- set ents = device_entities(d) %}\n  {%- set e = namespace(online=none, rssi=none, batt=none, upd=false, last=none, total=0, dead=0) %}\n  {%- for x in ents %}\n    {%- set s = states(x) %}\n    {%- set dc = state_attr(x, 'device_class') %}\n    {%- if x.startswith('sensor.') or x.startswith('binary_sensor.') %}\n      {%- set e.total = e.total + 1 %}\n      {%- if s == 'unavailable' %}{% set e.dead = e.dead + 1 %}{% endif %}\n    {%- endif %}\n    {%- if x.endswith('_online') and x.startswith('binary_sensor.') %}{% set e.online = s == 'on' %}{% endif %}\n    {%- if x.startswith('sensor.') and dc == 'signal_strength' and s | is_number %}{% set e.rssi = s | float %}{% endif %}\n    {%- if x.startswith('sensor.') and dc == 'battery' and s | is_number %}{% set e.batt = s | float %}{% endif %}\n    {%- if x.startswith('update.') and s == 'on' %}{% set e.upd = true %}{% endif %}\n    {%- if x in signals and states[x] is not none %}\n      {%- set t = as_timestamp(states[x].last_changed) %}\n      {%- if e.last is none or t > e.last %}{% set e.last = t %}{% endif %}\n    {%- endif %}\n  {%- endfor %}\n  {%- if e.online is none %}{% set e.online = e.total > 0 and e.dead < e.total %}{% endif %}\n  {%- set sw = (device_attr(d, 'sw_version') or '—') | regex_replace(' \\\\(ESPHome.*\\\\)', '') %}\n  {%- set issues = [] %}\n  {%- if not e.online %}{% set issues = issues + ['offline'] %}{% endif %}\n  {%- if e.rssi is not none and e.rssi < rssi_warn %}{% set issues = issues + ['weak Wi-Fi'] %}{% endif %}\n  {%- if e.batt is not none and e.batt < batt_warn %}{% set issues = issues + ['low battery'] %}{% endif %}\n  {%- if e.upd %}{% set issues = issues + ['update available'] %}{% endif %}\n  {%- if device_attr(d, 'manufacturer') == 'ApolloAutomation' and sw is match('\\\\d+\\\\.\\\\d+\\\\.\\\\d+') %}\n    {%- set p = sw.split('.') %}\n    {%- set built = as_timestamp(strptime('20' ~ p[0] ~ '-' ~ p[1] ~ '-' ~ p[2], '%Y-%m-%d')) %}\n    {%- if (as_timestamp(now()) - built) / 86400 > fw_max_days %}{% set issues = issues + ['firmware > 6 mo'] %}{% endif %}\n  {%- endif %}\n  {%- if e.last is not none and (as_timestamp(now()) - e.last) / 3600 > quiet_hours %}{% set issues = issues + ['no activity ' ~ quiet_hours ~ ' h'] %}{% endif %}\n  {%- if issues %}{% set ns.bad = ns.bad + 1 %}{% endif %}\n  {%- set ago = '—' if e.last is none else relative_time(as_datetime(e.last)) ~ ' ago' %}\n  {%- set row = [\n      ('⚠️' if issues else '✅') ~ ' ' ~ name,\n      device_attr(d, 'model') or '—',\n      area_name(d) or '—',\n      '🟢' if e.online else '🔴',\n      ('%d dBm' | format(e.rssi)) if e.rssi is not none else '—',\n      ('%d%%' | format(e.batt)) if e.batt is not none else '—',\n      sw ~ (' ⬆' if e.upd else ''),\n      ago,\n      issues | join(', ') or 'OK'] %}\n  {%- set ns.rows = ns.rows + [(0 if issues else 1, name, row)] %}\n{%- endfor %}\n**{{ ns.rows | count }} devices · {{ ns.rows | count - ns.bad }} healthy · {{ ns.bad }} need attention**\n\n| Device | Model | Area | Online | Wi-Fi | Battery | Firmware | Last activity | Status |\n|---|---|---|:-:|---|---|---|---|---|\n{%- for r in ns.rows | sort(attribute='1') | sort(attribute='0') %}\n| {{ r[2] | join(' | ') }} |\n{%- endfor %}\n\n<sub>Flags: offline · Wi-Fi below {{ rssi_warn }} dBm · battery below {{ batt_warn }}% · update available · Apollo firmware older than {{ fw_max_days }} days · no presence change in {{ quiet_hours }} h. Devices come from the <b>Presence Sensor</b> label.</sub>\n",
+                  "grid_options": {
+                    "columns": "full"
+                  }
                 }
               ]
             },
@@ -184,13 +72,264 @@
               "cards": [
                 {
                   "type": "heading",
-                  "heading_style": "title"
+                  "heading": "Sensors by Room",
+                  "heading_style": "title",
+                  "icon": "mdi:motion-sensor"
                 },
                 {
-                  "type": "tile",
-                  "entity": "device_tracker.bcpro_204982_08b8",
-                  "vertical": false,
-                  "features_position": "bottom"
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "entities",
+                    "title": "Big Bedroom",
+                    "state_color": true
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "label": "presence_signal",
+                        "area": "Bedroom - Big"
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "friendly_name"
+                  },
+                  "show_empty": false
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "entities",
+                    "title": "Bedroom 2",
+                    "state_color": true
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "label": "presence_signal",
+                        "area": "Bedroom2 / Office"
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "friendly_name"
+                  },
+                  "show_empty": false
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "entities",
+                    "title": "Kitchen",
+                    "state_color": true
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "label": "presence_signal",
+                        "area": "Kitchen"
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "friendly_name"
+                  },
+                  "show_empty": false
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "entities",
+                    "title": "Dining Room",
+                    "state_color": true
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "label": "presence_signal",
+                        "area": "Dining Room"
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "friendly_name"
+                  },
+                  "show_empty": false
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "entities",
+                    "title": "Living Room",
+                    "state_color": true
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "label": "presence_signal",
+                        "area": "Living Room"
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "friendly_name"
+                  },
+                  "show_empty": false
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "entities",
+                    "title": "Hallway",
+                    "state_color": true
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "label": "presence_signal",
+                        "area": "Hallway"
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "friendly_name"
+                  },
+                  "show_empty": false
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "entities",
+                    "title": "Bathroom",
+                    "state_color": true
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "label": "presence_signal",
+                        "area": "Bathroom"
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "friendly_name"
+                  },
+                  "show_empty": false
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "entities",
+                    "title": "Garage",
+                    "state_color": true
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "label": "presence_signal",
+                        "area": "Garage"
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "friendly_name"
+                  },
+                  "show_empty": false
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "entities",
+                    "title": "Other / unassigned area",
+                    "state_color": true
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "label": "presence_signal"
+                      }
+                    ],
+                    "exclude": [
+                      {
+                        "area": "Bedroom - Big"
+                      },
+                      {
+                        "area": "Bedroom2 / Office"
+                      },
+                      {
+                        "area": "Kitchen"
+                      },
+                      {
+                        "area": "Dining Room"
+                      },
+                      {
+                        "area": "Living Room"
+                      },
+                      {
+                        "area": "Hallway"
+                      },
+                      {
+                        "area": "Bathroom"
+                      },
+                      {
+                        "area": "Garage"
+                      }
+                    ]
+                  },
+                  "sort": {
+                    "method": "friendly_name"
+                  },
+                  "show_empty": false
+                }
+              ],
+              "column_span": 2
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Radar Detail",
+                  "heading_style": "title",
+                  "icon": "mdi:ruler"
+                },
+                {
+                  "type": "custom:auto-entities",
+                  "card": {
+                    "type": "entities",
+                    "title": "Distances, target counts & light",
+                    "state_color": true
+                  },
+                  "filter": {
+                    "include": [
+                      {
+                        "label": "presence_detail"
+                      }
+                    ],
+                    "exclude": []
+                  },
+                  "sort": {
+                    "method": "friendly_name"
+                  },
+                  "show_empty": false
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Lights",
+                  "heading_style": "title"
                 },
                 {
                   "type": "entities",
@@ -255,109 +394,6 @@
                     {
                       "entity": "light.living_room",
                       "name": "Living Room Lights"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "grid",
-              "cards": [
-                {
-                  "type": "heading",
-                  "heading_style": "title"
-                },
-                {
-                  "type": "entities",
-                  "title": "Apollo Sensor Details",
-                  "entities": [
-                    {
-                      "type": "section",
-                      "label": "Big Bedroom MSR-2"
-                    },
-                    {
-                      "entity": "sensor.apollo_msr_2_big_bedroom_radar_still_distance",
-                      "name": "Still Distance"
-                    },
-                    {
-                      "entity": "sensor.apollo_msr_2_big_bedroom_radar_moving_distance",
-                      "name": "Moving Distance"
-                    },
-                    {
-                      "entity": "sensor.apollo_msr_2_big_bedroom_radar_detection_distance",
-                      "name": "Detection Distance"
-                    },
-                    {
-                      "type": "section",
-                      "label": "Bedroom 2 MSR-2"
-                    },
-                    {
-                      "entity": "sensor.bedroom2_sensor_apollo_radar_still_distance",
-                      "name": "Still Distance"
-                    },
-                    {
-                      "entity": "sensor.bedroom2_sensor_apollo_radar_moving_distance",
-                      "name": "Moving Distance"
-                    },
-                    {
-                      "entity": "sensor.bedroom2_sensor_apollo_radar_detection_distance",
-                      "name": "Detection Distance"
-                    },
-                    {
-                      "type": "section",
-                      "label": "Kitchen MSR-2"
-                    },
-                    {
-                      "entity": "sensor.kitchen_occupancy_sensor_radar_still_distance",
-                      "name": "Still Distance"
-                    },
-                    {
-                      "entity": "sensor.kitchen_occupancy_sensor_radar_moving_distance",
-                      "name": "Moving Distance"
-                    },
-                    {
-                      "entity": "sensor.kitchen_occupancy_sensor_radar_detection_distance",
-                      "name": "Detection Distance"
-                    },
-                    {
-                      "type": "section",
-                      "label": "Dining Room MTR-1"
-                    },
-                    {
-                      "entity": "sensor.dining_room_apollo_moving_target_count",
-                      "name": "Moving Target Count"
-                    },
-                    {
-                      "entity": "sensor.dining_room_apollo_presence_target_count",
-                      "name": "Presence Target Count"
-                    },
-                    {
-                      "entity": "sensor.dining_room_apollo_still_target_count",
-                      "name": "Still Target Count"
-                    },
-                    {
-                      "entity": "sensor.dining_room_apollo_ltr390_light",
-                      "name": "Light"
-                    },
-                    {
-                      "type": "section",
-                      "label": "Living Room R-PRO-1"
-                    },
-                    {
-                      "entity": "sensor.apollo_r_pro_1_740624_ld2450_moving_target_count",
-                      "name": "LD2450 Moving Count"
-                    },
-                    {
-                      "entity": "sensor.apollo_r_pro_1_740624_ld2450_presence_target_count",
-                      "name": "LD2450 Presence Count"
-                    },
-                    {
-                      "entity": "sensor.apollo_r_pro_1_740624_ld2450_still_target_count",
-                      "name": "LD2450 Still Count"
-                    },
-                    {
-                      "entity": "sensor.apollo_r_pro_1_740624_ltr390_light",
-                      "name": "Light"
                     }
                   ]
                 }
