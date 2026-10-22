@@ -290,6 +290,7 @@
             entity_id:
             - binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
             - binary_sensor.bathroom_motion
+            - binary_sensor.bathroom_bathroom_presence
             - binary_sensor.hallway_motion
             - binary_sensor.kitchen_sensor_group
             to: 'on'
@@ -334,6 +335,7 @@
               entity_id:
               - binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
               - binary_sensor.bathroom_motion
+              - binary_sensor.bathroom_bathroom_presence
               - binary_sensor.hallway_motion
               - binary_sensor.kitchen_sensor_group
               to: 'on'
@@ -2036,7 +2038,7 @@
     trigger: device
   conditions:
   - condition: state
-    entity_id: binary_sensor.bathroom_motion
+    entity_id: binary_sensor.bathroom_sensor_group
     state: 'off'
   actions:
   - action: light.turn_off
@@ -2047,16 +2049,18 @@
   mode: single
 - id: '1775373515241'
   alias: 'Bathroom: Smart Motion & Presence (Split Color/White)'
-  description: 'Staggered no-motion off: main lights off at 7 min, shower/tub/back
+  description: 'Hue motion (fast entry) or Akamatis radar presence turns lights on; off-timers run on binary_sensor.bathroom_sensor_group so someone sitting still keeps the lights on. Staggered no-motion off: main lights off at 7 min, shower/tub/back
     lights fade off over the following 8 min (done by 15 min) so the room never goes
     dark all at once.'
   triggers:
   - trigger: state
-    entity_id: binary_sensor.bathroom_motion
+    entity_id:
+    - binary_sensor.bathroom_motion
+    - binary_sensor.bathroom_bathroom_presence
     to: 'on'
     id: detected
   - trigger: state
-    entity_id: binary_sensor.bathroom_motion
+    entity_id: binary_sensor.bathroom_sensor_group
     to: 'off'
     for:
       minutes: 7
@@ -2166,7 +2170,7 @@
       - condition: trigger
         id: mains_off
       - condition: state
-        entity_id: binary_sensor.bathroom_motion
+        entity_id: binary_sensor.bathroom_sensor_group
         state: 'off'
       sequence:
       - action: light.turn_off
@@ -2187,7 +2191,7 @@
       - condition: trigger
         id: failsafe
       - condition: state
-        entity_id: binary_sensor.bathroom_motion
+        entity_id: binary_sensor.bathroom_sensor_group
         state: 'off'
       sequence:
       - action: light.turn_off
@@ -10207,7 +10211,7 @@
     - binary_sensor.kitchen_sensor_group
     - binary_sensor.big_bedroom_sensor_group
     - binary_sensor.bedroom_2_sensor_group
-    - binary_sensor.bathroom_motion
+    - binary_sensor.bathroom_sensor_group
     - binary_sensor.living_room_sensor_group
     to: 'off'
     for:
@@ -10238,7 +10242,7 @@
     state: 'off'
   - alias: Bathroom must actually be empty right now
     condition: state
-    entity_id: binary_sensor.bathroom_motion
+    entity_id: binary_sensor.bathroom_sensor_group
     state: 'off'
   - alias: Living Room must actually be empty right now - added back 2026-09-24, the
       receiver is now joined to the session's stream, so someone listening there must
@@ -11750,11 +11754,13 @@
     and bathroom the instant bathroom motion fired).'
   triggers:
   - trigger: state
-    entity_id: binary_sensor.bathroom_motion
+    entity_id:
+    - binary_sensor.bathroom_motion
+    - binary_sensor.bathroom_bathroom_presence
     to: 'on'
     id: motion_on
   - trigger: state
-    entity_id: binary_sensor.bathroom_motion
+    entity_id: binary_sensor.bathroom_sensor_group
     to: 'off'
     id: motion_off
   - trigger: event
@@ -11941,7 +11947,7 @@
             - condition: template
               value_template: '{{ repeat.index <= 9 }}'
             - condition: state
-              entity_id: binary_sensor.bathroom_motion
+              entity_id: binary_sensor.bathroom_sensor_group
               state: 'off'
             sequence:
             - delay:
@@ -11955,7 +11961,7 @@
       - alias: Ungroup bathroom Sonos, unless motion resumed during the fade
         if:
         - condition: state
-          entity_id: binary_sensor.bathroom_motion
+          entity_id: binary_sensor.bathroom_sensor_group
           state: 'off'
         then:
         - continue_on_error: true
@@ -11972,7 +11978,7 @@
           entity_id: input_boolean.bathroom_volume_manual_override
           state: 'off'
         - condition: state
-          entity_id: binary_sensor.bathroom_motion
+          entity_id: binary_sensor.bathroom_sensor_group
           state: 'off'
         then:
         - action: media_player.volume_set
@@ -12785,7 +12791,7 @@
     condition: template
     value_template: "{{ trigger.id == 'hard' or not (\n  is_state('binary_sensor.kitchen_sensor_group','on')\n
       \ or is_state('binary_sensor.big_bedroom_sensor_group','on')\n  or is_state('binary_sensor.bedroom_2_sensor_group','on')\n
-      \ or is_state('binary_sensor.bathroom_motion','on')\n  or is_state('binary_sensor.living_room_sensor_group','on'))
+      \ or is_state('binary_sensor.bathroom_sensor_group','on')\n  or is_state('binary_sensor.living_room_sensor_group','on'))
       }}"
   actions:
   - alias: Capture every speaker in the kitchen group and its current volume
@@ -13073,7 +13079,7 @@
           entity_id: binary_sensor.bedroom_2_sensor_group
           state: 'off'
         - condition: state
-          entity_id: binary_sensor.bathroom_motion
+          entity_id: binary_sensor.bathroom_sensor_group
           state: 'off'
         - condition: state
           entity_id: binary_sensor.living_room_sensor_group
@@ -16815,7 +16821,7 @@
       minutes: 5
     id: bedroom_2
   - trigger: state
-    entity_id: binary_sensor.bathroom_motion
+    entity_id: binary_sensor.bathroom_sensor_group
     to: 'off'
     for:
       minutes: 5
@@ -16912,7 +16918,7 @@
             ''bedroom_2'': {''member'': ''media_player.office_2'', ''vol'': ''media_player.office_2'',
             ''unjoin'': ''media_player.office_2'', ''presence'': [''binary_sensor.bedroom_2_sensor_group'']},
             ''bathroom'': {''member'': ''media_player.bathroom_2'', ''vol'': ''media_player.bathroom'',
-            ''unjoin'': ''media_player.bathroom'', ''presence'': [''binary_sensor.bathroom_motion'']},
+            ''unjoin'': ''media_player.bathroom'', ''presence'': [''binary_sensor.bathroom_sensor_group'']},
             ''living_room'': {''member'': rx, ''vol'': ''media_player.living_room_av'',
             ''unjoin'': rx, ''presence'': [''binary_sensor.living_room_sensor_group'',
             ''binary_sensor.dining_room_sensor_group'']}, ''kitchen'': {''member'':
