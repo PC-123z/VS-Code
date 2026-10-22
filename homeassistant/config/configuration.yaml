@@ -321,6 +321,21 @@ template:
                    ['off', 'unavailable', 'unknown']) }}
           {% endif %}
 
+  # Presence sensor fleet issues for the phone alert (automation 1792500000001). Logic
+  # lives in custom_templates/presence_fleet.jinja: offline 10+ min, battery < 25%,
+  # update available, for every device labelled "Presence Sensor". 2026-10-21
+  - sensor:
+      - name: "Presence Fleet Issues"
+        unique_id: presence_fleet_issues
+        icon: mdi:heart-pulse
+        state: >
+          {% from 'presence_fleet.jinja' import presence_fleet_issues %}
+          {{ presence_fleet_issues() | from_json | count }}
+        attributes:
+          issues: >
+            {% from 'presence_fleet.jinja' import presence_fleet_issues %}
+            {{ presence_fleet_issues() | from_json }}
+
 # Jellyfin Tiny (jellyfin-tiny.pc) doesn't fit the native jellyfin integration
 # (HA's config flow dedupes by a broken "unique id" that collides across separate
 # servers/accounts), so its playback state is pulled directly via the Sessions API.
