@@ -15996,12 +15996,15 @@
     - unavailable
     - unknown
     id: b3
-  conditions: []
-  actions:
-  - alias: Only short press or hold count
+  conditions:
+  - alias: Only short press or hold count - must be a top-level condition, not an
+      action step. In restart mode every trigger cancels the running session first,
+      so a trailing repeat/long_release/initial_press event used to kill the real run
+      (2026-10-21 - music never stopped, fade-out flag stuck on)
     condition: template
     value_template: '{{ trigger.to_state.attributes.event_type in [''short_release'',''long_press'']
       }}'
+  actions:
   - alias: Set the session timer first so nothing can prevent it arming
     action: timer.start
     target:
@@ -17970,3 +17973,99 @@
           entity_id: light.hue_white_lamp_1
         data:
           transition: 60
+- id: '1792400000001'
+  alias: 'Bedroom 2: Tap Sleep Music Backstop'
+  description: Added 2026-10-21. When timer.bedroom2_tap_sleep finishes, the Tap Go
+    To Sleep run should already have faded and stopped the music. If that run was
+    killed (restart, reload) nothing else stops it - the Bedtime Routine skips its own
+    music stop while the timer runs. This waits 60 s for the normal run, then fades
+    office_2 out over 60 s and stops it if still playing. Also clears a stuck
+    bedroom2_fading_out flag when the session ends or is cancelled.
+  triggers:
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.bedroom2_tap_sleep
+    id: finished
+  - trigger: event
+    event_type: timer.cancelled
+    event_data:
+      entity_id: timer.bedroom2_tap_sleep
+    id: cancelled
+  conditions: []
+  actions:
+  - alias: Clear a stuck fade-out flag (the session's 5-minute light fade is long over)
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.bedroom2_fading_out
+  - alias: Cancelled (Button 4 hold) leaves the music alone on purpose
+    condition: trigger
+    id: finished
+  - delay:
+      seconds: 60
+  - alias: Only if the music is still going, no new tap session started, and the normal
+      run (or Good Morning) isn't handling the speaker
+    condition: and
+    conditions:
+    - condition: state
+      entity_id: media_player.office_2
+      state: playing
+    - condition: state
+      entity_id: timer.bedroom2_tap_sleep
+      state: idle
+    - condition: template
+      value_template: '{{ (state_attr(''automation.bedroom_2_tap_go_to_sleep'', ''current'')
+        | int(0)) == 0 and (state_attr(''automation.bedroom_2_good_morning_routine'',
+        ''current'') | int(0)) == 0 }}'
+  - variables:
+      start_vol: '{{ state_attr(''media_player.office_2'', ''volume_level'') | float(0.15)
+        }}'
+  - alias: Fade out over 60 s
+    repeat:
+      count: 6
+      sequence:
+      - action: media_player.volume_set
+        continue_on_error: true
+        target:
+          entity_id: media_player.office_2
+        data:
+          volume_level: '{{ [start_vol * (1 - repeat.index / 6), 0] | max | round(3)
+            }}'
+      - delay:
+          seconds: 10
+  - action: script.stop_room_speaker_safely
+    continue_on_error: true
+    data:
+      entity_id: media_player.office_2
+  - alias: Restore the normal sleep volume for next time
+    action: media_player.volume_set
+    continue_on_error: true
+    target:
+      entity_id: media_player.office_2
+    data:
+      volume_level: 0.15
+  mode: restart
+- id: '1792400000002'
+  alias: 'Bedroom 2: Fan Unavailable Alert'
+  description: Added 2026-10-21. fan.bedroom2_fan (HomeKit Controller) dropped offline
+    2026-10-17 to 2026-10-21 and every bedtime fan.turn_on failed silently. Alerts
+    after 30 min unavailable, plus a 9 PM pre-bedtime check.
+  triggers:
+  - trigger: state
+    entity_id: fan.bedroom2_fan
+    to: unavailable
+    for:
+      minutes: 30
+  - trigger: time
+    at: '21:00:00'
+  conditions:
+  - condition: state
+    entity_id: fan.bedroom2_fan
+    state: unavailable
+  actions:
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Bedroom 2 fan offline
+      message: 'Bedroom 2 / Office fan has been unavailable since {{ as_local(states.fan.bedroom2_fan.last_changed).strftime(''%a %-I:%M %p'')
+        }} - bedtime automations can''t turn it on. Check its power / HomeKit pairing.'
+  mode: single
