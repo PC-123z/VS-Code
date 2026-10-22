@@ -18075,3 +18075,30 @@
       message: 'Bedroom 2 / Office fan has been unavailable since {{ as_local(states.fan.bedroom2_fan.last_changed).strftime(''%a %-I:%M %p'')
         }} - bedtime automations can''t turn it on. Check its power / HomeKit pairing.'
   mode: single
+- id: '1792500000001'
+  alias: 'Sensor Fleet: Presence Sensor Issue Alert'
+  description: Added 2026-10-21. Notifies when a device labelled Presence Sensor newly
+    goes offline (10+ min), drops below 25% battery, or has a firmware update available.
+    Source is sensor.presence_fleet_issues (logic in custom_templates/presence_fleet.jinja).
+    Only issues not present before are sent; firmware age stays dashboard-only.
+  triggers:
+  - trigger: state
+    entity_id: sensor.presence_fleet_issues
+    attribute: issues
+  conditions:
+  - condition: template
+    value_template: "{{ trigger.from_state is not none and trigger.to_state is not none\n\
+      \  and trigger.from_state.state not in ['unavailable', 'unknown']\n  and trigger.to_state.state\
+      \ not in ['unavailable', 'unknown'] }}"
+  - condition: template
+    value_template: '{{ new_issues | count > 0 }}'
+  variables:
+    new_issues: "{{ (trigger.to_state.attributes.issues or []) | reject('in', trigger.from_state.attributes.issues\
+      \ or []) | list }}"
+  actions:
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Presence sensor needs attention
+      message: "{{ new_issues | join('\n') }}"
+  mode: queued
+  max: 10
