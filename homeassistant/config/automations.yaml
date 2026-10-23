@@ -9756,6 +9756,20 @@
       while already disarmed (normal in-and-out) is never treated as an arrival
     variables:
       alarm_at_start: '{{ states(''alarm_control_panel.3302_alarm'') }}'
+  - alias: Added 2026-10-23 - capture arrival evidence NOW, before any disarm (the
+      latch-clear automation wipes arrival_recent/garage_open_recent the instant the
+      panel disarms). Only Paul's devices count - Stage 1 pending, the beacon/phone
+      and garage latches, or the beacon, person.paul or the garage cover changing in
+      the last 15 min. On 2026-10-23 7:36 AM someone LEFT through the garage during
+      Armed Stay, disarmed by keypad, and the keypad path alone started Welcome Home
+      and hijacked Good Morning.
+    variables:
+      arrival_evidence: "{% set recent = now() - timedelta(minutes=15) %}{{ is_state('input_boolean.welcome_home_pending','on')\n
+        \ or is_state('input_boolean.arrival_recent','on')\n  or is_state('input_boolean.garage_open_recent','on')\n
+        \ or (is_state('device_tracker.bcpro_204982_08b8','home') and states.device_tracker.bcpro_204982_08b8.last_changed
+        > recent)\n  or (is_state('person.paul','home') and states.person.paul.last_changed
+        > recent)\n  or (states.cover.garage is not none and states.cover.garage.last_changed
+        > recent) }}"
   - alias: Added 2026-10-11 - hard gate. If the alarm was already disarmed when the
       door opened, this is a normal in-and-out, never an arrival - on every path,
       including the arrival_recent fallback (which ignored this and started Welcome
@@ -9770,7 +9784,7 @@
       and stop.'
     wait_template: "{{ is_state('input_boolean.welcome_home_pending','on')\n   or
       (is_state('input_boolean.arrival_recent','on') and is_state('binary_sensor.garage_door','on'))\n
-      \  or ((trigger.id == 'code' or alarm_at_start != 'disarmed')\n       and is_state('alarm_control_panel.3302_alarm','disarmed'))
+      \  or ((trigger.id == 'code' or alarm_at_start != 'disarmed')\n       and arrival_evidence\n       and is_state('alarm_control_panel.3302_alarm','disarmed'))
       }}"
     timeout:
       seconds: 60
