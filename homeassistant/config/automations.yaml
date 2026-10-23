@@ -74,12 +74,12 @@
     at: '18:40:00'
     weekday:
     - mon
-    enabled: true
+    enabled: false
   - trigger: time
-    at: '16:00:00'
+    at: '18:20:00'
     enabled: true
     weekday:
-    - sat
+    - fri
   conditions: []
   actions:
   - alias: Mark routine as active
@@ -9759,8 +9759,8 @@
   - alias: Added 2026-10-23 - capture arrival evidence NOW, before any disarm (the
       latch-clear automation wipes arrival_recent/garage_open_recent the instant the
       panel disarms). Only Paul's devices count - Stage 1 pending, the beacon/phone
-      and garage latches, or the beacon, person.paul or the garage cover changing in
-      the last 15 min. On 2026-10-23 7:36 AM someone LEFT through the garage during
+      and garage latches, or the beacon, person.paul or the garage cover changing
+      in the last 15 min. On 2026-10-23 7:36 AM someone LEFT through the garage during
       Armed Stay, disarmed by keypad, and the keypad path alone started Welcome Home
       and hijacked Good Morning.
     variables:
@@ -9784,8 +9784,8 @@
       and stop.'
     wait_template: "{{ is_state('input_boolean.welcome_home_pending','on')\n   or
       (is_state('input_boolean.arrival_recent','on') and is_state('binary_sensor.garage_door','on'))\n
-      \  or ((trigger.id == 'code' or alarm_at_start != 'disarmed')\n       and arrival_evidence\n       and is_state('alarm_control_panel.3302_alarm','disarmed'))
-      }}"
+      \  or ((trigger.id == 'code' or alarm_at_start != 'disarmed')\n       and arrival_evidence\n
+      \      and is_state('alarm_control_panel.3302_alarm','disarmed')) }}"
     timeout:
       seconds: 60
     continue_on_timeout: true
