@@ -2049,7 +2049,9 @@
   mode: single
 - id: '1775373515241'
   alias: 'Bathroom: Smart Motion & Presence (Split Color/White)'
-  description: 'Hue motion (fast entry) or Akamatis radar presence turns lights on; off-timers run on binary_sensor.bathroom_sensor_group so someone sitting still keeps the lights on. Staggered no-motion off: main lights off at 7 min, shower/tub/back
+  description: 'Hue motion (fast entry) or Akamatis radar presence turns lights on;
+    off-timers run on binary_sensor.bathroom_sensor_group so someone sitting still
+    keeps the lights on. Staggered no-motion off: main lights off at 7 min, shower/tub/back
     lights fade off over the following 8 min (done by 15 min) so the room never goes
     dark all at once.'
   triggers:
@@ -10848,14 +10850,14 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 07:40:00
+    at: 07:25:00
     weekday:
     - mon
     - tue
     - wed
     - thu
     - fri
-    enabled: false
+    enabled: true
   - trigger: time
     at: 06:35:00
     weekday:
@@ -10864,7 +10866,7 @@
     - wed
     - thu
     - fri
-    enabled: true
+    enabled: false
   - trigger: time
     at: 07:30:00
     weekday:
@@ -16005,8 +16007,8 @@
   conditions:
   - alias: Only short press or hold count - must be a top-level condition, not an
       action step. In restart mode every trigger cancels the running session first,
-      so a trailing repeat/long_release/initial_press event used to kill the real run
-      (2026-10-21 - music never stopped, fade-out flag stuck on)
+      so a trailing repeat/long_release/initial_press event used to kill the real
+      run (2026-10-21 - music never stopped, fade-out flag stuck on)
     condition: template
     value_template: '{{ trigger.to_state.attributes.event_type in [''short_release'',''long_press'']
       }}'
@@ -17983,9 +17985,9 @@
   alias: 'Bedroom 2: Tap Sleep Music Backstop'
   description: Added 2026-10-21. When timer.bedroom2_tap_sleep finishes, the Tap Go
     To Sleep run should already have faded and stopped the music. If that run was
-    killed (restart, reload) nothing else stops it - the Bedtime Routine skips its own
-    music stop while the timer runs. This waits 60 s for the normal run, then fades
-    office_2 out over 60 s and stops it if still playing. Also clears a stuck
+    killed (restart, reload) nothing else stops it - the Bedtime Routine skips its
+    own music stop while the timer runs. This waits 60 s for the normal run, then
+    fades office_2 out over 60 s and stops it if still playing. Also clears a stuck
     bedroom2_fading_out flag when the session ends or is cancelled.
   triggers:
   - trigger: event
@@ -18000,7 +18002,8 @@
     id: cancelled
   conditions: []
   actions:
-  - alias: Clear a stuck fade-out flag (the session's 5-minute light fade is long over)
+  - alias: Clear a stuck fade-out flag (the session's 5-minute light fade is long
+      over)
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.bedroom2_fading_out
@@ -18072,8 +18075,9 @@
   - action: notify.mobile_app_pc_iphone
     data:
       title: Bedroom 2 fan offline
-      message: 'Bedroom 2 / Office fan has been unavailable since {{ as_local(states.fan.bedroom2_fan.last_changed).strftime(''%a %-I:%M %p'')
-        }} - bedtime automations can''t turn it on. Check its power / HomeKit pairing.'
+      message: Bedroom 2 / Office fan has been unavailable since {{ as_local(states.fan.bedroom2_fan.last_changed).strftime('%a
+        %-I:%M %p') }} - bedtime automations can't turn it on. Check its power / HomeKit
+        pairing.
   mode: single
 - id: '1792500000001'
   alias: 'Sensor Fleet: Presence Sensor Issue Alert'
@@ -18087,18 +18091,20 @@
     attribute: issues
   conditions:
   - condition: template
-    value_template: "{{ trigger.from_state is not none and trigger.to_state is not none\n\
-      \  and trigger.from_state.state not in ['unavailable', 'unknown']\n  and trigger.to_state.state\
-      \ not in ['unavailable', 'unknown'] }}"
+    value_template: "{{ trigger.from_state is not none and trigger.to_state is not
+      none\n  and trigger.from_state.state not in ['unavailable', 'unknown']\n  and
+      trigger.to_state.state not in ['unavailable', 'unknown'] }}"
   - condition: template
     value_template: '{{ new_issues | count > 0 }}'
   variables:
-    new_issues: "{{ (trigger.to_state.attributes.issues or []) | reject('in', trigger.from_state.attributes.issues\
-      \ or []) | list }}"
+    new_issues: '{{ (trigger.to_state.attributes.issues or []) | reject(''in'', trigger.from_state.attributes.issues
+      or []) | list }}'
   actions:
   - action: notify.mobile_app_pc_iphone
     data:
       title: Presence sensor needs attention
-      message: "{{ new_issues | join('\n') }}"
+      message: '{{ new_issues | join(''
+
+        '') }}'
   mode: queued
   max: 10
