@@ -76,10 +76,10 @@
     - mon
     enabled: false
   - trigger: time
-    at: '18:20:00'
+    at: '18:25:00'
     enabled: true
     weekday:
-    - fri
+    - sat
   conditions: []
   actions:
   - alias: Mark routine as active
