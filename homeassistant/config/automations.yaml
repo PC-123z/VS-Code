@@ -10882,7 +10882,7 @@
     - fri
     enabled: false
   - trigger: time
-    at: 07:30:00
+    at: 09:00:00
     weekday:
     - sat
     - sun
