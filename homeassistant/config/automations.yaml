@@ -12968,7 +12968,7 @@
         entity_id: '{{ rx }}'
   mode: single
 - id: '1791000000001'
-  alias: 'Welcome Home: End Session When Living Room or Big Bedroom TV Turns On'
+  alias: 'Welcome Home: End Session When Living Room, Big Bedroom or Kitchen TV Turns On'
   description: Added 2026-10-04 at the user's request - turning on the living room
     TV ends Welcome Home and stops its music in every room. This only clears welcome_home_active;
     "Unjoin All Satellites on Deactivation" (1779800000007) then stops the kitchen
@@ -12991,13 +12991,22 @@
     for:
       seconds: 3
     id: big_bedroom
+  - alias: Kitchen TV (added 2026-10-25 at the user's request). from 'off' only,
+      so an integration reconnect (unavailable -> on) can't end the session
+    trigger: state
+    entity_id: remote.kitchen
+    from: 'off'
+    to: 'on'
+    for:
+      seconds: 3
+    id: kitchen
   conditions:
   - condition: state
     entity_id: input_boolean.welcome_home_active
     state: 'on'
   - alias: Not within 60 s of the living room join powering the receiver on
     condition: template
-    value_template: '{{ trigger.id == ''big_bedroom'' or not (is_state(''input_boolean.welcome_home_living_room_joined'',
+    value_template: '{{ trigger.id in [''big_bedroom'', ''kitchen''] or not (is_state(''input_boolean.welcome_home_living_room_joined'',
       ''on'') and (now() - states.input_boolean.welcome_home_living_room_joined.last_changed).total_seconds()
       < 60) }}'
   actions:
