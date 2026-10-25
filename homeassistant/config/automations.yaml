@@ -16597,7 +16597,7 @@
     lying in bed; high profile (any fan on and not asleep) sits above the fan floor
     so a fan left on in an empty room cannot hold the room occupied. Move thresholds
     are static (walk-in detection near the sensor). Measured 2026-10-08: empty-room
-    still energy <=17, fan-only g3-g6 peaks 32/42/26/25.'
+    still energy <=17, fan-only g3-g6 peaks 32/42/26/25. 2026-10-25 re-measured fan-only (25% reverse) g3-g8 ~52/71/33/27/30/24, 62/83 while blades coast down; high profile raised to 70/90/45/35/40/30 after the room held Goodbye on Stay.'
   mode: queued
   max: 3
   triggers:
@@ -16621,7 +16621,7 @@
   - variables:
       high: '{{ (is_state(''fan.big_bedroom_fan'', ''on'') or is_state(''fan.air_circulator'',
         ''on'')) and not is_state(''input_boolean.big_bedroom_asleep'', ''on'') }}'
-      profile: '{{ {2: 25, 3: 40, 4: 50, 5: 35, 6: 32, 7: 28, 8: 30} if high else
+      profile: '{{ {2: 25, 3: 70, 4: 90, 5: 45, 6: 35, 7: 40, 8: 30} if high else
         {2: 25, 3: 28, 4: 25, 5: 23, 6: 22, 7: 25, 8: 30} }}'
   - repeat:
       for_each: '{{ profile.items() | list }}'
