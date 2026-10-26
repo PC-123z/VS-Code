@@ -245,6 +245,19 @@ template:
              or is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy', 'on')
              or is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy', 'on')
              or is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy', 'on') }}
+
+  # Goodbye-only view of Big Bedroom occupancy. With either fan running the MSR-2 reads an
+  # empty room as occupied (still energy 50-80, spikes past threshold 100), which held
+  # Goodbye on Stay with nobody home 2026-10-25. Fan on and nobody asleep = radar ignored;
+  # the hallway and other rooms still catch anyone home. Asleep still counts as occupied.
+  - binary_sensor:
+      - name: "Big Bedroom Goodbye Occupancy"
+        unique_id: big_bedroom_goodbye_occupancy
+        icon: mdi:bed-king-outline
+        state: >
+          {% set fan = is_state('fan.big_bedroom_fan', 'on') or is_state('fan.air_circulator', 'on') %}
+          {{ is_state('input_boolean.big_bedroom_asleep', 'on')
+             or (not fan and is_state('binary_sensor.big_bedroom_sensor_group', 'on')) }}
   - switch:
       - name: "Volvo Climatization"
         unique_id: volvo_climatization_voice
