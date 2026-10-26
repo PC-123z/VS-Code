@@ -18152,13 +18152,14 @@
   - action: remote.turn_on
     target:
       entity_id: remote.kitchen
-  - alias: Give the TV time to boot before switching input
-    wait_template: '{{ is_state(''media_player.kitchen_tv'', ''on'') }}'
+  - alias: Wait for the TV to wake - remote.kitchen reports on within ~4 s, while
+      media_player.kitchen_tv (BRAVIA, polled) lags 20 s+ so don't wait on it
+    wait_template: '{{ is_state(''remote.kitchen'', ''on'') }}'
     timeout:
-      seconds: 20
+      seconds: 15
     continue_on_timeout: true
   - delay:
-      seconds: 3
+      seconds: 2
   - alias: Switch input via the Sony BRAVIA IP control integration (the Android TV
       Remote TV_INPUT_HDMI_1 key is ignored by this K-43XR30M2)
     action: media_player.select_source
