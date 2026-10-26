@@ -18133,10 +18133,10 @@
   mode: queued
   max: 10
 - id: '1792600000001'
-  alias: 'Kitchen TV: On + HDMI 1 When Receiver Zone 2 Turns On'
-  description: Added 2026-10-26 at the user's request. Kitchen TV HDMI 1 is fed by
+  alias: 'Kitchen TV: On + HDMI 4 When Receiver Zone 2 Turns On'
+  description: Added 2026-10-26 at the user's request (input moved HDMI 1 -> 4 same day). Kitchen TV HDMI 4 is fed by
     the living room receiver's Zone 2 output, so when Zone 2 powers on, wake the
-    kitchen Sony (remote.kitchen, Android TV Remote) and switch it to HDMI 1. from
+    kitchen Sony (remote.kitchen, Android TV Remote) and switch it to HDMI 4. from
     'off' only, so an integration reconnect (unavailable -> on) doesn't fire it.
   triggers:
   - alias: Zone 2 goes straight off -> playing/idle when powered on (never 'on'),
@@ -18161,17 +18161,17 @@
   - delay:
       seconds: 2
   - alias: Switch input via the Sony BRAVIA IP control integration (the Android TV
-      Remote TV_INPUT_HDMI_1 key is ignored by this K-43XR30M2)
+      Remote TV_INPUT_HDMI_x keys are ignored by this K-43XR30M2)
     action: media_player.select_source
     target:
       entity_id: media_player.kitchen_tv
     data:
-      source: HDMI 1
+      source: HDMI 4
   mode: single
 - id: '1792600000002'
-  alias: 'Kitchen TV: Off When Receiver Zone 2 Turns Off (if on HDMI 1)'
+  alias: 'Kitchen TV: Off When Receiver Zone 2 Turns Off (if on HDMI 4)'
   description: Added 2026-10-26 at the user's request. Companion to 1792600000001.
-    When Zone 2 powers off and the kitchen TV is showing HDMI 1 (the Zone 2 feed),
+    When Zone 2 powers off and the kitchen TV is showing HDMI 4 (the Zone 2 feed),
     turn the TV off. If someone switched the TV to an app or another input, leave it
     alone. not_from unavailable/unknown so an integration reconnect doesn't fire it.
   triggers:
@@ -18185,11 +18185,11 @@
   - condition: state
     entity_id: remote.kitchen
     state: 'on'
-  - alias: Kitchen TV is on HDMI 1 (BRAVIA IP control source)
+  - alias: Kitchen TV is on HDMI 4 (BRAVIA IP control source)
     condition: state
     entity_id: media_player.kitchen_tv
     attribute: source
-    state: HDMI 1
+    state: HDMI 4
   actions:
   - action: remote.turn_off
     target:
