@@ -241,13 +241,6 @@
         "domain": "hacs",
         "is_persistent": false,
         "issue_id": "restart_required_1130928743_tags/v0.10.0"
-      },
-      {
-        "created": "2026-10-26T03:47:01.116714+00:00",
-        "dismissed_version": null,
-        "domain": "sonos",
-        "is_persistent": false,
-        "issue_id": "subscriptions_failed"
       }
     ]
   }
