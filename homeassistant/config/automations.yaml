@@ -18168,3 +18168,30 @@
     data:
       source: HDMI 1
   mode: single
+- id: '1792600000002'
+  alias: 'Kitchen TV: Off When Receiver Zone 2 Turns Off (if on HDMI 1)'
+  description: Added 2026-10-26 at the user's request. Companion to 1792600000001.
+    When Zone 2 powers off and the kitchen TV is showing HDMI 1 (the Zone 2 feed),
+    turn the TV off. If someone switched the TV to an app or another input, leave it
+    alone. not_from unavailable/unknown so an integration reconnect doesn't fire it.
+  triggers:
+  - trigger: state
+    entity_id: media_player.living_room_av_zone2
+    to: 'off'
+    not_from:
+    - unavailable
+    - unknown
+  conditions:
+  - condition: state
+    entity_id: remote.kitchen
+    state: 'on'
+  - alias: Kitchen TV is on HDMI 1 (BRAVIA IP control source)
+    condition: state
+    entity_id: media_player.kitchen_tv
+    attribute: source
+    state: HDMI 1
+  actions:
+  - action: remote.turn_off
+    target:
+      entity_id: remote.kitchen
+  mode: single
