@@ -18132,3 +18132,31 @@
         '') }}'
   mode: queued
   max: 10
+- id: '1792600000001'
+  alias: 'Kitchen TV: On + HDMI 1 When Receiver Zone 2 Turns On'
+  description: Added 2026-10-26 at the user's request. Kitchen TV HDMI 1 is fed by
+    the living room receiver's Zone 2 output, so when Zone 2 powers on, wake the
+    kitchen Sony (remote.kitchen, Android TV Remote) and switch it to HDMI 1. from
+    'off' only, so an integration reconnect (unavailable -> on) doesn't fire it.
+  triggers:
+  - trigger: state
+    entity_id: media_player.living_room_av_zone2
+    from: 'off'
+    to: 'on'
+  actions:
+  - action: remote.turn_on
+    target:
+      entity_id: remote.kitchen
+  - alias: Give the TV time to boot before switching input
+    wait_template: '{{ is_state(''remote.kitchen'', ''on'') }}'
+    timeout:
+      seconds: 20
+    continue_on_timeout: true
+  - delay:
+      seconds: 3
+  - action: remote.send_command
+    target:
+      entity_id: remote.kitchen
+    data:
+      command: TV_INPUT_HDMI_1
+  mode: single
