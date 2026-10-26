@@ -18139,10 +18139,15 @@
     kitchen Sony (remote.kitchen, Android TV Remote) and switch it to HDMI 1. from
     'off' only, so an integration reconnect (unavailable -> on) doesn't fire it.
   triggers:
-  - trigger: state
+  - alias: Zone 2 goes straight off -> playing/idle when powered on (never 'on'),
+      so match any non-off, available state
+    trigger: state
     entity_id: media_player.living_room_av_zone2
     from: 'off'
-    to: 'on'
+    not_to:
+    - 'off'
+    - unavailable
+    - unknown
   actions:
   - action: remote.turn_on
     target:
