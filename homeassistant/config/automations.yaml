@@ -16967,7 +16967,7 @@
             ''bedroom_2'': {''member'': ''media_player.office_2'', ''vol'': ''media_player.office_2'',
             ''unjoin'': ''media_player.office_2'', ''presence'': [''binary_sensor.bedroom_2_sensor_group'']},
             ''bathroom'': {''member'': ''media_player.bathroom_2'', ''vol'': ''media_player.bathroom'',
-            ''unjoin'': ''media_player.bathroom'', ''presence'': [''binary_sensor.bathroom_sensor_group'']},
+            ''unjoin'': ''media_player.bathroom_2'', ''presence'': [''binary_sensor.bathroom_sensor_group'']},
             ''living_room'': {''member'': rx, ''vol'': ''media_player.living_room_av'',
             ''unjoin'': rx, ''presence'': [''binary_sensor.living_room_sensor_group'',
             ''binary_sensor.dining_room_sensor_group'']}, ''kitchen'': {''member'':
