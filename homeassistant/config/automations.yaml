@@ -7433,8 +7433,8 @@
       already_joined: "{{ state_attr('media_player.bedroom_2', 'group_members') is
         not none and\n   'media_player.kitchen' in\n   state_attr('media_player.bedroom_2',
         'group_members') | default([]) }}"
-      kitchen_vol_before: '{{ state_attr(''media_player.kitchen'', ''volume_level'')
-        | default(0.10) }}'
+      kitchen_vol_before: '{{ [state_attr(''media_player.kitchen'', ''volume_level'')
+        | float(0.15), 0.10] | max }}'
   - alias: Join and ramp only if not already in group
     if:
     - condition: template
@@ -7454,6 +7454,14 @@
         entity_id: media_player.kitchen
       data:
         volume_level: 0.05
+    - alias: Unmute kitchen before join - a fade to 0 (e.g. Welcome Home expiry)
+        leaves the Sonos muted, and volume_set alone does not clear it
+      continue_on_error: true
+      action: media_player.volume_mute
+      target:
+        entity_id: media_player.kitchen
+      data:
+        is_volume_muted: false
     - alias: Join kitchen to bedroom group
       action: media_player.join
       target:
@@ -7461,6 +7469,13 @@
       data:
         group_members:
         - media_player.kitchen
+    - alias: Unmute kitchen again after join
+      continue_on_error: true
+      action: media_player.volume_mute
+      target:
+        entity_id: media_player.kitchen
+      data:
+        is_volume_muted: false
     - alias: Wait for Bedroom to be playing again after the join
       wait_template: '{{ is_state(''media_player.bedroom_2'',''playing'') and is_state(''media_player.bedroom'',''playing'')
         }}'
@@ -12880,6 +12895,14 @@
             entity_id: '{{ repeat.item.entity }}'
           data:
             volume_level: '{{ repeat.item.vol }}'
+        - alias: Unmute - fading to 0 mutes the speaker and restoring volume does
+            not clear it
+          continue_on_error: true
+          action: media_player.volume_mute
+          target:
+            entity_id: '{{ repeat.item.entity }}'
+          data:
+            is_volume_muted: false
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.welcome_home_active
