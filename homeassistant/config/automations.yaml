@@ -7454,8 +7454,8 @@
         entity_id: media_player.kitchen
       data:
         volume_level: 0.05
-    - alias: Unmute kitchen before join - a fade to 0 (e.g. Welcome Home expiry)
-        leaves the Sonos muted, and volume_set alone does not clear it
+    - alias: Unmute kitchen before join - a fade to 0 (e.g. Welcome Home expiry) leaves
+        the Sonos muted, and volume_set alone does not clear it
       continue_on_error: true
       action: media_player.volume_mute
       target:
@@ -10879,7 +10879,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 06:50:00
+    at: 07:50:00
     weekday:
     - mon
     - tue
@@ -18157,10 +18157,11 @@
   max: 10
 - id: '1792600000001'
   alias: 'Kitchen TV: On + HDMI 4 When Receiver Zone 2 Turns On'
-  description: Added 2026-10-26 at the user's request (input moved HDMI 1 -> 4 same day). Kitchen TV HDMI 4 is fed by
-    the living room receiver's Zone 2 output, so when Zone 2 powers on, wake the
-    kitchen Sony (remote.kitchen, Android TV Remote) and switch it to HDMI 4. from
-    'off' only, so an integration reconnect (unavailable -> on) doesn't fire it.
+  description: Added 2026-10-26 at the user's request (input moved HDMI 1 -> 4 same
+    day). Kitchen TV HDMI 4 is fed by the living room receiver's Zone 2 output, so
+    when Zone 2 powers on, wake the kitchen Sony (remote.kitchen, Android TV Remote)
+    and switch it to HDMI 4. from 'off' only, so an integration reconnect (unavailable
+    -> on) doesn't fire it.
   triggers:
   - alias: Zone 2 goes straight off -> playing/idle when powered on (never 'on'),
       so match any non-off, available state
@@ -18195,8 +18196,9 @@
   alias: 'Kitchen TV: Off When Receiver Zone 2 Turns Off (if on HDMI 4)'
   description: Added 2026-10-26 at the user's request. Companion to 1792600000001.
     When Zone 2 powers off and the kitchen TV is showing HDMI 4 (the Zone 2 feed),
-    turn the TV off. If someone switched the TV to an app or another input, leave it
-    alone. not_from unavailable/unknown so an integration reconnect doesn't fire it.
+    turn the TV off. If someone switched the TV to an app or another input, leave
+    it alone. not_from unavailable/unknown so an integration reconnect doesn't fire
+    it.
   triggers:
   - trigger: state
     entity_id: media_player.living_room_av_zone2
