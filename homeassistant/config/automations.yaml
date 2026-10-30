@@ -10879,7 +10879,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 07:50:00
+    at: 07:15:00
     weekday:
     - mon
     - tue
@@ -18272,7 +18272,7 @@
   - variables:
       fridge: '{{ states(''sensor.fridge_freezer_monitor_fridge_temperature'') }}'
       freezer: '{{ states(''sensor.fridge_freezer_monitor_freezer_temperature'') }}'
-      temps: 'Fridge {{ fridge }}°F, freezer {{ freezer }}°F.'
+      temps: Fridge {{ fridge }}°F, freezer {{ freezer }}°F.
   - choose:
     - conditions:
       - condition: trigger
