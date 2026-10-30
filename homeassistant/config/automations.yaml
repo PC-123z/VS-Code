@@ -18225,7 +18225,7 @@
   description: Added 2026-10-29 for the CYD fridge/freezer monitor (ESPHome). Door
     open = fast rise from the Statistics "change" helpers (fridge +5F in 10 min and
     above 44F; freezer +8F in 15 min and above 15F). Failure = sustained warm (fridge
-    >41F 30 min, freezer >15F 45 min), monitor offline 10 min, or a probe reading
+    >41F 15 min, freezer >15F 20 min), monitor offline 10 min, or a probe reading
     unknown 10 min while the monitor is online. Thresholds are provisional - retune
     once there is a week of history (defrost cycles, compressor swing).
   triggers:
@@ -18259,13 +18259,13 @@
     entity_id: sensor.fridge_freezer_monitor_fridge_temperature
     above: 41
     for:
-      minutes: 30
+      minutes: 15
     id: fridge_warm
   - trigger: numeric_state
     entity_id: sensor.fridge_freezer_monitor_freezer_temperature
     above: 15
     for:
-      minutes: 45
+      minutes: 20
     id: freezer_warm
   conditions: []
   actions:
@@ -18338,7 +18338,7 @@
       - action: notify.mobile_app_pc_iphone
         data:
           title: Fridge too warm
-          message: Fridge has been above 41°F for 30 min - door ajar or not cooling.
+          message: Fridge has been above 41°F for 15 min - door ajar or not cooling.
             {{ temps }}
           data:
             tag: fridge-warm
@@ -18351,7 +18351,7 @@
       - action: notify.mobile_app_pc_iphone
         data:
           title: Freezer too warm
-          message: Freezer has been above 15°F for 45 min - door ajar or not cooling.
+          message: Freezer has been above 15°F for 20 min - door ajar or not cooling.
             {{ temps }}
           data:
             tag: freezer-warm
