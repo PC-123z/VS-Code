@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.fridge_freezer",
+  "data": {
+    "config": {
+      "title": "Fridge & Freezer",
+      "views": [
+        {
+          "title": "Temperatures",
+          "path": "temps",
+          "type": "sections",
+          "max_columns": 2,
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Now"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.fridge_freezer_monitor_fridge_temperature",
+                  "name": "Fridge",
+                  "icon": "mdi:fridge-bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.fridge_freezer_monitor_freezer_temperature",
+                  "name": "Freezer",
+                  "icon": "mdi:fridge-top"
+                },
+                {
+                  "type": "tile",
+                  "entity": "binary_sensor.fridge_freezer_monitor_status",
+                  "name": "Monitor"
+                },
+                {
+                  "type": "tile",
+                  "entity": "automation.kitchen_fridge_freezer_alerts",
+                  "name": "Alerts"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "column_span": 2,
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Last 3 days"
+                },
+                {
+                  "type": "history-graph",
+                  "title": "Fridge",
+                  "hours_to_show": 72,
+                  "grid_options": {
+                    "columns": "full",
+                    "rows": 5
+                  },
+                  "entities": [
+                    {
+                      "entity": "sensor.fridge_freezer_monitor_fridge_temperature",
+                      "name": "Fridge"
+                    }
+                  ]
+                },
+                {
+                  "type": "history-graph",
+                  "title": "Freezer",
+                  "hours_to_show": 72,
+                  "grid_options": {
+                    "columns": "full",
+                    "rows": 5
+                  },
+                  "entities": [
+                    {
+                      "entity": "sensor.fridge_freezer_monitor_freezer_temperature",
+                      "name": "Freezer"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

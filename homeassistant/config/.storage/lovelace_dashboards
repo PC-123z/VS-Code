@@ -179,6 +179,15 @@
         "require_admin": true,
         "mode": "storage",
         "url_path": "visual-studio-code"
+      },
+      {
+        "id": "fridge_freezer",
+        "url_path": "fridge-freezer",
+        "title": "Fridge & Freezer",
+        "icon": "mdi:fridge-outline",
+        "show_in_sidebar": true,
+        "require_admin": false,
+        "mode": "storage"
       }
     ]
   }
