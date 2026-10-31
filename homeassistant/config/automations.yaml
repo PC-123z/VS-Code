@@ -10897,7 +10897,7 @@
     - fri
     enabled: false
   - trigger: time
-    at: 09:30:00
+    at: 07:43:00
     weekday:
     - sat
     - sun
