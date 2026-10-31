@@ -13001,10 +13001,13 @@
     Welcome Home living room join starting, in case powering the receiver on ever
     wakes the TV over HDMI-CEC - that must not kill the session it just joined.
   triggers:
-  - trigger: state
+  - alias: 3 s hold so the Apple TV state has settled for the CEC-guard check below
+    trigger: state
     entity_id: binary_sensor.living_room_tv_on
     from: 'off'
     to: 'on'
+    for:
+      seconds: 3
     id: living_room
   - alias: Big Bedroom TV (added 2026-10-10 at the user's request). from 'off' only,
       so an integration reconnect (unavailable -> on) can't end the session
@@ -13028,11 +13031,14 @@
   - condition: state
     entity_id: input_boolean.welcome_home_active
     state: 'on'
-  - alias: Not within 60 s of the living room join powering the receiver on
+  - alias: Not within 60 s of the living room join powering the receiver on - UNLESS
+      the Apple TV woke too (2026-10-31 the user turned the TV on with the Apple TV
+      remote 9 s after the join and the session kept playing; the receiver can't
+      wake the Apple TV, so that's a real user TV-on)
     condition: template
     value_template: '{{ trigger.id in [''big_bedroom'', ''kitchen''] or not (is_state(''input_boolean.welcome_home_living_room_joined'',
       ''on'') and (now() - states.input_boolean.welcome_home_living_room_joined.last_changed).total_seconds()
-      < 60) }}'
+      < 60) or states(''media_player.living_room'') not in [''off'', ''standby'', ''unavailable'', ''unknown''] }}'
   actions:
   - alias: End the Welcome Home session - the deactivation catch-all does the stop/unjoin
     action: input_boolean.turn_off
