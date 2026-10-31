@@ -76,7 +76,7 @@
     - mon
     enabled: false
   - trigger: time
-    at: '18:25:00'
+    at: '18:05:00'
     enabled: true
     weekday:
     - sat
@@ -13033,12 +13033,13 @@
     state: 'on'
   - alias: Not within 60 s of the living room join powering the receiver on - UNLESS
       the Apple TV woke too (2026-10-31 the user turned the TV on with the Apple TV
-      remote 9 s after the join and the session kept playing; the receiver can't
-      wake the Apple TV, so that's a real user TV-on)
+      remote 9 s after the join and the session kept playing; the receiver can't wake
+      the Apple TV, so that's a real user TV-on)
     condition: template
     value_template: '{{ trigger.id in [''big_bedroom'', ''kitchen''] or not (is_state(''input_boolean.welcome_home_living_room_joined'',
       ''on'') and (now() - states.input_boolean.welcome_home_living_room_joined.last_changed).total_seconds()
-      < 60) or states(''media_player.living_room'') not in [''off'', ''standby'', ''unavailable'', ''unknown''] }}'
+      < 60) or states(''media_player.living_room'') not in [''off'', ''standby'',
+      ''unavailable'', ''unknown''] }}'
   actions:
   - alias: End the Welcome Home session - the deactivation catch-all does the stop/unjoin
     action: input_boolean.turn_off
@@ -18381,7 +18382,9 @@
     state: armed_home
   - alias: Volvo start flag on, or the start script ran within the last 20 minutes
     condition: template
-    value_template: "{% set lt = state_attr('script.script_start_volvo_xc60','last_triggered') %}{{ is_state('input_boolean.volvo_start_active','on') or (lt is not none and (now() - lt).total_seconds() < 1200) }}"
+    value_template: '{% set lt = state_attr(''script.script_start_volvo_xc60'',''last_triggered'')
+      %}{{ is_state(''input_boolean.volvo_start_active'',''on'') or (lt is not none
+      and (now() - lt).total_seconds() < 1200) }}'
   actions:
   - action: alarm_control_panel.alarm_disarm
     target:
