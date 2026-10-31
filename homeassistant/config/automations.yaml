@@ -18358,3 +18358,32 @@
             push:
               interruption-level: time-sensitive
   mode: queued
+- id: '1792710000001'
+  alias: 'Volvo Start: Disarm Stay When Garage to House Door Opens'
+  description: Leaving after a remote start - if the Volvo start ran in the last 20
+    minutes and the panel is armed Stay, opening the garage to house door disarms
+    it (no more manual disarm on the way out). Away is never touched. The Goodbye
+    routine re-arms once the house is empty.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.garage_door
+    from: 'off'
+    to: 'on'
+  conditions:
+  - condition: state
+    entity_id: alarm_control_panel.3302_alarm
+    state: armed_home
+  - alias: Volvo start flag on, or the start script ran within the last 20 minutes
+    condition: template
+    value_template: "{% set lt = state_attr('script.script_start_volvo_xc60','last_triggered') %}{{ is_state('input_boolean.volvo_start_active','on') or (lt is not none and (now() - lt).total_seconds() < 1200) }}"
+  actions:
+  - action: alarm_control_panel.alarm_disarm
+    target:
+      entity_id: alarm_control_panel.3302_alarm
+    data:
+      code: ''
+  - action: logbook.log
+    data:
+      name: Volvo Start
+      message: Disarmed Stay - garage to house door opened during a remote start
+  mode: single
