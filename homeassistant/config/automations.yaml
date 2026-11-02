@@ -6664,7 +6664,7 @@
     presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: 06:30:00
+    at: 08:30:00
     weekday:
     - mon
     - tue
@@ -18401,9 +18401,8 @@
   description: Glances on Docker (192.168.2.18, Portainer server) and Docker2 (192.168.70.155,
     HA/Frigate/MA). Alerts on OS / Docker data / boot disk at 85% and 95%, Frigate
     storage at 97% (Frigate prunes its own recordings, so it normally runs high),
-    memory or swap pressure, high CPU, or Glances going offline. Docker2 offline
-    can only catch the glances container stopping - if Docker2 itself is down, HA
-    is too.
+    memory or swap pressure, high CPU, or Glances going offline. Docker2 offline can
+    only catch the glances container stopping - if Docker2 itself is down, HA is too.
   triggers:
   - trigger: numeric_state
     entity_id:
@@ -18468,22 +18467,19 @@
   conditions: []
   actions:
   - variables:
-      host: >-
-        {{ 'Docker2' if '192_168_70_155' in trigger.entity_id else 'Docker' }}
-      ip: >-
-        {{ '192.168.70.155' if host == 'Docker2' else '192.168.2.18' }}
-      title: >-
-        {{ host }} {{ {'disk_critical': 'disk CRITICAL', 'offline': 'unreachable'}.get(trigger.id,
-        'warning') }}
-      message: >-
-        {% if trigger.id == 'offline' %}Glances on {{ ip }} has not reported
-        for 10 min. The VM may be down, or the glances container stopped.
-        {% elif trigger.id in ['disk_warn', 'disk_critical'] %}{{ trigger.to_state.name
-        }} is at {{ trigger.to_state.state }}% ({{ states(trigger.entity_id | replace('_usage',
-        '_free')) }} GiB free). {{ 'Check Frigate retention.' if 'frigate' in trigger.entity_id
-        else 'Check docker system df / image usage.' }}
-        {% else %}{{ trigger.to_state.name }} is at {{ trigger.to_state.state }}%
-        for {{ {'memory': 15, 'swap': 15, 'cpu': 20}[trigger.id] }} min.{% endif %}
+      host: '{{ ''Docker2'' if ''192_168_70_155'' in trigger.entity_id else ''Docker''
+        }}'
+      ip: '{{ ''192.168.70.155'' if host == ''Docker2'' else ''192.168.2.18'' }}'
+      title: '{{ host }} {{ {''disk_critical'': ''disk CRITICAL'', ''offline'': ''unreachable''}.get(trigger.id,
+        ''warning'') }}'
+      message: '{% if trigger.id == ''offline'' %}Glances on {{ ip }} has not reported
+        for 10 min. The VM may be down, or the glances container stopped. {% elif
+        trigger.id in [''disk_warn'', ''disk_critical''] %}{{ trigger.to_state.name
+        }} is at {{ trigger.to_state.state }}% ({{ states(trigger.entity_id | replace(''_usage'',
+        ''_free'')) }} GiB free). {{ ''Check Frigate retention.'' if ''frigate'' in
+        trigger.entity_id else ''Check docker system df / image usage.'' }} {% else
+        %}{{ trigger.to_state.name }} is at {{ trigger.to_state.state }}% for {{ {''memory'':
+        15, ''swap'': 15, ''cpu'': 20}[trigger.id] }} min.{% endif %}'
   - action: notify.mobile_app_pc_iphone
     data:
       title: '{{ title }}'
