@@ -18399,7 +18399,7 @@
 - id: '1792800000001'
   alias: 'Docker VMs: Host Health Alert'
   description: Glances on Docker (192.168.2.18, Portainer server) and Docker2 (192.168.70.155,
-    HA/Frigate/MA). Alerts on OS / containerd / boot disk at 85% and 95%, Frigate
+    HA/Frigate/MA). Alerts on OS / Docker data / boot disk at 85% and 95%, Frigate
     storage at 97% (Frigate prunes its own recordings, so it normally runs high),
     memory or swap pressure, high CPU, or Glances going offline. Docker2 offline
     can only catch the glances container stopping - if Docker2 itself is down, HA
@@ -18411,6 +18411,7 @@
     - sensor.192_168_2_18_rootfs_var_lib_containerd_disk_usage
     - sensor.192_168_2_18_rootfs_boot_disk_usage
     - sensor.192_168_70_155_rootfs_disk_usage
+    - sensor.192_168_70_155_rootfs_mnt_docker_data_disk_usage
     above: 85
     for:
       minutes: 10
@@ -18421,6 +18422,7 @@
     - sensor.192_168_2_18_rootfs_var_lib_containerd_disk_usage
     - sensor.192_168_2_18_rootfs_boot_disk_usage
     - sensor.192_168_70_155_rootfs_disk_usage
+    - sensor.192_168_70_155_rootfs_mnt_docker_data_disk_usage
     above: 95
     for:
       minutes: 2
