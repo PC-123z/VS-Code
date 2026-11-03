@@ -18470,7 +18470,7 @@
   max: 5
 - id: '1792900000001'
   alias: 'Kitchen: Ambient Video On Presence'
-  description: Added 2026-11-02 at the user's request. Someone in the kitchen 60 s
+  description: Added 2026-11-02 at the user's request. Someone in the kitchen 30 s
     and the TV is off -> wake the TV, mute it, and open a 10-hour ambient YouTube video
     in the TV's own signed-in (Premium) YouTube app via the Android TV Remote entity
     (media_player.kitchen_3 url play_media - Cast would play as a guest with ads).
@@ -18480,11 +18480,12 @@
     media_title is saved so a different YouTube video counts as other content. Videos
     picked 2026-11-02; to swap one, change the ID in the scene map below.
   triggers:
-  - trigger: state
+  - alias: 30 s of presence (was 60 s; changed 2026-11-02 at the user's request)
+    trigger: state
     entity_id: binary_sensor.kitchen_sensor_group
     to: 'on'
     for:
-      seconds: 60
+      seconds: 30
   conditions:
   - alias: Don't take over a TV that's already on (or offline)
     condition: state
@@ -18611,18 +18612,19 @@
           }}'
   mode: single
 - id: '1792900000002'
-  alias: 'Kitchen: Ambient Video Off When Kitchen Empty 5 Min'
-  description: Added 2026-11-02. Companion to 1792900000001. Kitchen empty 5 min and
+  alias: 'Kitchen: Ambient Video Off When Kitchen Empty 90 s'
+  description: Added 2026-11-02. Companion to 1792900000001. Kitchen empty 90 s and
     the TV is still on the ambient video -> turn it off (standby via remote.kitchen,
     never a plug). Leaves the mute on; the next time anyone puts other content on,
     1792900000003 unmutes. Also clears the ambient flag whenever the TV goes off.
   triggers:
   - id: empty
+    alias: 90 s empty (was 5 min; changed 2026-11-02 at the user's request)
     trigger: state
     entity_id: binary_sensor.kitchen_sensor_group
     to: 'off'
     for:
-      minutes: 5
+      seconds: 90
   - id: tv_off
     trigger: state
     entity_id: remote.kitchen
