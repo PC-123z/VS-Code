@@ -18567,22 +18567,34 @@
       entity_id: media_player.kitchen_tv
     data:
       is_volume_muted: true
-  - action: media_player.play_media
-    target:
-      entity_id: media_player.kitchen_3
-    data:
-      media_content_type: url
-      media_content_id: https://www.youtube.com/watch?v={{ video_id }}
+  - alias: Open the video - re-send up to 3x; a cold-started YouTube app played ~4 s
+      then stalled idle with no title on the first launch (2026-11-02 test), and a
+      second send with the app already open played straight away
+    repeat:
+      sequence:
+      - action: media_player.play_media
+        target:
+          entity_id: media_player.kitchen_3
+        data:
+          media_content_type: url
+          media_content_id: https://www.youtube.com/watch?v={{ video_id }}
+      - wait_template: '{{ is_state(''media_player.kitchen_tv_cast'', ''playing'')
+          and (state_attr(''media_player.kitchen_tv_cast'', ''media_title'') or '''')
+          != '''' }}'
+        timeout:
+          seconds: 20
+        continue_on_timeout: true
+      until:
+      - condition: template
+        value_template: '{{ (is_state(''media_player.kitchen_tv_cast'', ''playing'')
+          and (state_attr(''media_player.kitchen_tv_cast'', ''media_title'') or '''')
+          != '''') or repeat.index >= 3 or not is_state(''remote.kitchen'', ''on'') }}'
   - alias: Save the title YouTube reports so a different video later counts as other
       content
-    wait_template: '{{ (state_attr(''media_player.kitchen_tv_cast'', ''media_title'')
-      or '''') != '''' }}'
-    timeout:
-      seconds: 45
-    continue_on_timeout: true
-  - if:
+    if:
     - condition: template
-      value_template: '{{ wait.completed }}'
+      value_template: '{{ (state_attr(''media_player.kitchen_tv_cast'', ''media_title'')
+        or '''') != '''' }}'
     then:
     - action: input_text.set_value
       target:
