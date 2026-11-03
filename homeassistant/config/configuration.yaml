@@ -169,6 +169,15 @@ input_boolean:
   welcome_home_living_room_joined:
     name: "Welcome Home Living Room Joined (latch, once per session)"
     initial: off
+  kitchen_ambient_video:
+    name: "Kitchen Ambient Video Active (TV started by presence, muted)"
+    icon: mdi:television-ambient-light
+    initial: off
+
+input_text:
+  kitchen_ambient_video_title:
+    name: "Kitchen Ambient Video Title (what the presence automation started)"
+    max: 255
 
 # Template switches + sensors
 template:
@@ -332,6 +341,28 @@ template:
                    ['playing', 'paused', 'buffering'])
                or (states('media_player.living_room') not in
                    ['off', 'unavailable', 'unknown']) }}
+          {% endif %}
+
+      # 2026-11-02: kitchen TV is on and showing something OTHER than the presence
+      # ambient video - another app, an HDMI input (Zone 2), or a different YouTube
+      # video (Cast reports the YouTube app's title). Home screen and screensaver
+      # don't count; an empty/unavailable Cast title during buffering doesn't either.
+      # Ends Welcome Home (1791000000001) and unmutes the TV (1792900000003).
+      - name: "Kitchen TV Other Content"
+        unique_id: kitchen_tv_other_content
+        icon: mdi:television-play
+        state: >
+          {% set app = state_attr('remote.kitchen', 'current_activity') or '' %}
+          {% set title = (state_attr('media_player.kitchen_tv_cast', 'media_title') or '')[:255] %}
+          {% if not is_state('remote.kitchen', 'on') or app in ['',
+               'com.google.android.apps.tv.launcherx', 'com.google.android.apps.tv.dreamx'] %}
+            false
+          {% elif is_state('input_boolean.kitchen_ambient_video', 'on')
+               and app == 'com.google.android.youtube.tv' %}
+            {{ title != '' and states('input_text.kitchen_ambient_video_title') not in ['', 'unknown']
+               and title != states('input_text.kitchen_ambient_video_title') }}
+          {% else %}
+            true
           {% endif %}
 
   # Presence sensor fleet issues for the phone alert (automation 1792500000001). Logic
