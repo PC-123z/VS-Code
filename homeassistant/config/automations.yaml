@@ -18401,7 +18401,8 @@
   description: Glances on Docker (192.168.2.18, Portainer server) and Docker2 (192.168.70.155,
     HA/Frigate/MA). Alerts on OS / Docker data / boot disk at 85% and 95%, Frigate
     storage at 97% (Frigate prunes its own recordings, so it normally runs high),
-    memory or swap pressure, high CPU, or Glances going offline. Docker2 offline can
+    or Glances going offline. Disk only by choice (2026-11-02) - swap/memory/CPU alerts
+    removed as noise. Docker2 offline can
     only catch the glances container stopping - if Docker2 itself is down, HA is too.
   triggers:
   - trigger: numeric_state
@@ -18432,30 +18433,6 @@
     for:
       minutes: 30
     id: disk_critical
-  - trigger: numeric_state
-    entity_id:
-    - sensor.192_168_2_18_memory_usage
-    - sensor.192_168_70_155_memory_usage
-    above: 90
-    for:
-      minutes: 15
-    id: memory
-  - trigger: numeric_state
-    entity_id:
-    - sensor.192_168_2_18_swap_usage
-    - sensor.192_168_70_155_swap_usage
-    above: 80
-    for:
-      minutes: 15
-    id: swap
-  - trigger: numeric_state
-    entity_id:
-    - sensor.192_168_2_18_cpu_usage
-    - sensor.192_168_70_155_cpu_usage
-    above: 90
-    for:
-      minutes: 20
-    id: cpu
   - trigger: state
     entity_id:
     - sensor.192_168_2_18_rootfs_disk_usage
@@ -18477,9 +18454,8 @@
         trigger.id in [''disk_warn'', ''disk_critical''] %}{{ trigger.to_state.name
         }} is at {{ trigger.to_state.state }}% ({{ states(trigger.entity_id | replace(''_usage'',
         ''_free'')) }} GiB free). {{ ''Check Frigate retention.'' if ''frigate'' in
-        trigger.entity_id else ''Check docker system df / image usage.'' }} {% else
-        %}{{ trigger.to_state.name }} is at {{ trigger.to_state.state }}% for {{ {''memory'':
-        15, ''swap'': 15, ''cpu'': 20}[trigger.id] }} min.{% endif %}'
+        trigger.entity_id else ''Check docker system df / image usage.'' }}{% endif
+        %}'
   - action: notify.mobile_app_pc_iphone
     data:
       title: '{{ title }}'
