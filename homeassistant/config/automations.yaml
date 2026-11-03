@@ -7658,8 +7658,10 @@
 - id: '1776828862786'
   alias: 'Hue Button 1 - Big Bedroom: Restore AL'
   description: Pico 'on' press clears all overrides, re-enables AL switches and motion
-    automation, clears manual_control, applies adaptive lighting, and always turns
-    sleep mode off - sleep mode is manual only via Hue button 2/3. Press sets AL min
+    automation, clears manual_control and applies adaptive lighting. A PRESS while
+    sleep mode is on keeps sleep mode on (dim red lights + Nanoleaf) - only a HOLD or
+    the Good Morning routine ends sleep mode (2026-11-03). Otherwise turns sleep mode
+    off - sleep mode is manual only via Hue button 2/3. Press sets AL min
     brightness floor to 45%, hold sets it to 85%. Also sets the Nanoleaf scene/brightness
     by time of day (same table as presence automation).
   triggers:
@@ -7679,6 +7681,9 @@
     id: hold
   conditions: []
   actions:
+  - variables:
+      stay_sleep: '{{ trigger.id == ''press'' and is_state(''switch.al_sleep_mode_big_bedroom'',
+        ''on'') }}'
   - alias: Clear manual override flag
     action: input_boolean.turn_off
     target:
@@ -7724,14 +7729,19 @@
           entity_id: switch.al_big_bedroom
         data:
           min_brightness: 85
-  - alias: Always turn sleep mode off for every switch Hue button 2/3 turns on (Big
-      Bedroom + both Bathroom) - manual only via Hue button 2/3
-    action: switch.turn_off
-    target:
-      entity_id:
-      - switch.al_sleep_mode_big_bedroom
-      - switch.al_sleep_mode_bathroom
-      - switch.al_sleep_mode_bathroom_main
+  - alias: Turn sleep mode off for every switch Hue button 2/3 turns on (Big Bedroom
+      + both Bathroom) - unless this is a press while sleep mode is on (hold or Good
+      Morning ends sleep mode)
+    if:
+    - condition: template
+      value_template: '{{ not stay_sleep }}'
+    then:
+    - action: switch.turn_off
+      target:
+        entity_id:
+        - switch.al_sleep_mode_big_bedroom
+        - switch.al_sleep_mode_bathroom
+        - switch.al_sleep_mode_bathroom_main
   - alias: Re-enable motion/presence automation
     action: automation.turn_on
     target:
@@ -7743,12 +7753,28 @@
       entity_id: input_select.bedroom_scene_mode
     data:
       option: al
-  - alias: Turn on lights so AL has something to adapt
-    action: light.turn_on
-    target:
-      entity_id: light.bedroom
-    data:
-      transition: 2
+  - alias: Turn on lights so AL has something to adapt - dim red if staying in sleep
+      mode (same as Smart Motion's sleep branch, avoids a white flash)
+    if:
+    - condition: template
+      value_template: '{{ stay_sleep }}'
+    then:
+    - action: light.turn_on
+      target:
+        entity_id: light.bedroom
+      data:
+        brightness_pct: 10
+        rgb_color:
+        - 255
+        - 30
+        - 0
+        transition: 2
+    else:
+    - action: light.turn_on
+      target:
+        entity_id: light.bedroom
+      data:
+        transition: 2
   - alias: Apply adaptive lighting now
     action: adaptive_lighting.apply
     continue_on_error: true
@@ -7764,8 +7790,24 @@
       adapt_brightness: true
       prefer_rgb_color: true
   - alias: Nanoleaf scene by time of day - same table as Big Bedroom Smart Motion
-      & Presence, so the Nanoleaf follows AL whenever button 1 is pressed
+      & Presence, so the Nanoleaf follows AL whenever button 1 is pressed (static red
+      10% while staying in sleep mode)
     choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ stay_sleep }}'
+      sequence:
+      - action: light.turn_on
+        continue_on_error: true
+        target:
+          entity_id: light.nano_sand_dune
+        data:
+          brightness_pct: 10
+          rgb_color:
+          - 255
+          - 30
+          - 0
+          transition: 2
     - conditions:
       - condition: time
         after: 07:00:00
