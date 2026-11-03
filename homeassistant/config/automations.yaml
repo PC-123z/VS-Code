@@ -18677,10 +18677,22 @@
     to: 'off'
     for:
       seconds: 10
+  - id: empty
+    alias: Once-a-minute backstop - an automation reload/HA restart wipes the 90 s
+      'for' timer above (2026-11-03 reload 27 s after the table emptied left the TV
+      on); fires the same path once zone 3 has been clear 90 s+
+    trigger: time_pattern
+    minutes: /1
   conditions:
   - condition: state
     entity_id: input_boolean.kitchen_ambient_video
     state: 'on'
+  - alias: Table really clear 90 s+ (matters for the backstop; always true for the
+      state triggers)
+    condition: template
+    value_template: '{{ trigger.id == ''tv_off'' or (is_state(''binary_sensor.kitchen_occupancy_sensor_radar_zone_3_occupancy'',
+      ''off'') and (now() - states.binary_sensor.kitchen_occupancy_sensor_radar_zone_3_occupancy.last_changed).total_seconds()
+      >= 90) }}'
   actions:
   - if:
     - condition: trigger
