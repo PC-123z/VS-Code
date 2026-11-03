@@ -12991,8 +12991,8 @@
         entity_id: '{{ rx }}'
   mode: single
 - id: '1791000000001'
-  alias: 'Welcome Home: End Session When Living Room, Big Bedroom or Kitchen TV Turns
-    On'
+  alias: 'Welcome Home: End Session When Living Room or Big Bedroom TV Turns On or
+    Kitchen TV Shows Other Content'
   description: Added 2026-10-04 at the user's request - turning on the living room
     TV ends Welcome Home and stops its music in every room. This only clears welcome_home_active;
     "Unjoin All Satellites on Deactivation" (1779800000007) then stops the kitchen
@@ -13018,14 +13018,16 @@
     for:
       seconds: 3
     id: big_bedroom
-  - alias: Kitchen TV (added 2026-10-25 at the user's request). from 'off' only, so
-      an integration reconnect (unavailable -> on) can't end the session
+  - alias: Kitchen TV showing something other than the silent presence ambient video
+      - another app, an HDMI input (Zone 2) or a different YouTube video. Changed
+      2026-11-02 at the user's request (was any kitchen TV turn-on, added 2026-10-25)
+      - the ambient video (1792900000001) is muted and must not end the session.
     trigger: state
-    entity_id: remote.kitchen
+    entity_id: binary_sensor.kitchen_tv_other_content
     from: 'off'
     to: 'on'
     for:
-      seconds: 3
+      seconds: 5
     id: kitchen
   conditions:
   - condition: state
@@ -18466,3 +18468,191 @@
       message: '{{ title }}: {{ message }}'
   mode: queued
   max: 5
+- id: '1792900000001'
+  alias: 'Kitchen: Ambient Video On Presence'
+  description: Added 2026-11-02 at the user's request. Someone in the kitchen 60 s
+    and the TV is off -> wake the TV, mute it, and open a 10-hour ambient YouTube video
+    in the TV's own signed-in (Premium) YouTube app via the Android TV Remote entity
+    (media_player.kitchen_3 url play_media - Cast would play as a guest with ads).
+    Scene follows the weather and time of day. Silent on purpose so Welcome Home keeps
+    playing - the kitchen TV turning on no longer ends Welcome Home, only switching
+    it to OTHER content does (binary_sensor.kitchen_tv_other_content). The Cast entity's
+    media_title is saved so a different YouTube video counts as other content. Videos
+    picked 2026-11-02; to swap one, change the ID in the scene map below.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    to: 'on'
+    for:
+      seconds: 60
+  conditions:
+  - alias: Don't take over a TV that's already on (or offline)
+    condition: state
+    entity_id: remote.kitchen
+    state: 'off'
+  - alias: Zone 2 isn't feeding the TV (1792600000001 owns it then)
+    condition: state
+    entity_id: media_player.living_room_av_zone2
+    state: 'off'
+  - alias: Not armed away - kitchen radar ghosts while nobody is home (2026-10-30)
+    condition: not
+    conditions:
+    - condition: state
+      entity_id: alarm_control_panel.3302_alarm
+      state: armed_away
+  variables:
+    videos:
+      sunrise: p76Vjvioypg
+      beach: tFc8iOC1oNk
+      beach_sunset: N-fxuoSb-3M
+      forest: fiXCwlyTGKE
+      fireplace: wp2GVCZgpPE
+      rain: cjrZwn7JQvc
+      storm_day: iLs04Z6uBqU
+      storm_night: JhEShtyJgIk
+      snow: ZPE19pfQMdw
+    scene: >
+      {% set cond = states('weather.forecast_home') %}
+      {% set temp = state_attr('weather.forecast_home', 'temperature') | float(60) %}
+      {% set elev = state_attr('sun.sun', 'elevation') | float(0) %}
+      {% set rising = state_attr('sun.sun', 'rising') %}
+      {% if cond in ['lightning', 'lightning-rainy'] %}
+        {{ 'storm_day' if elev > 0 else 'storm_night' }}
+      {% elif cond in ['snowy', 'snowy-rainy', 'hail'] %} snow
+      {% elif cond in ['rainy', 'pouring'] %} rain
+      {% elif rising and -6 < elev < 15 %} sunrise
+      {% elif elev <= 0 %}
+        {{ 'fireplace' if temp < 65 else 'beach_sunset' }}
+      {% elif not rising and elev < 10 %}
+        {{ 'beach_sunset' if temp >= 60 else 'fireplace' }}
+      {% elif temp >= 70 and cond in ['sunny', 'clear', 'partlycloudy'] %} beach
+      {% elif temp < 45 %} fireplace
+      {% else %} forest
+      {% endif %}
+    video_id: '{{ videos[scene | trim] }}'
+  actions:
+  - action: input_text.set_value
+    target:
+      entity_id: input_text.kitchen_ambient_video_title
+    data:
+      value: ''
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.kitchen_ambient_video
+  - action: remote.turn_on
+    target:
+      entity_id: remote.kitchen
+  - alias: Wait for the BRAVIA entity (polled) to see the TV on - it won't take a
+      mute while in standby; forcing updates got it in ~5 s in testing
+    repeat:
+      until:
+      - condition: or
+        conditions:
+        - condition: state
+          entity_id: media_player.kitchen_tv
+          state: 'on'
+        - condition: template
+          value_template: '{{ repeat.index >= 15 }}'
+      sequence:
+      - action: homeassistant.update_entity
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen_tv
+      - delay:
+          seconds: 2
+  - alias: Mute before the video starts so it never plays over Welcome Home
+    action: media_player.volume_mute
+    continue_on_error: true
+    target:
+      entity_id: media_player.kitchen_tv
+    data:
+      is_volume_muted: true
+  - action: media_player.play_media
+    target:
+      entity_id: media_player.kitchen_3
+    data:
+      media_content_type: url
+      media_content_id: https://www.youtube.com/watch?v={{ video_id }}
+  - alias: Save the title YouTube reports so a different video later counts as other
+      content
+    wait_template: '{{ (state_attr(''media_player.kitchen_tv_cast'', ''media_title'')
+      or '''') != '''' }}'
+    timeout:
+      seconds: 45
+    continue_on_timeout: true
+  - if:
+    - condition: template
+      value_template: '{{ wait.completed }}'
+    then:
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.kitchen_ambient_video_title
+      data:
+        value: '{{ state_attr(''media_player.kitchen_tv_cast'', ''media_title'')[:255]
+          }}'
+  mode: single
+- id: '1792900000002'
+  alias: 'Kitchen: Ambient Video Off When Kitchen Empty 5 Min'
+  description: Added 2026-11-02. Companion to 1792900000001. Kitchen empty 5 min and
+    the TV is still on the ambient video -> turn it off (standby via remote.kitchen,
+    never a plug). Leaves the mute on; the next time anyone puts other content on,
+    1792900000003 unmutes. Also clears the ambient flag whenever the TV goes off.
+  triggers:
+  - id: empty
+    trigger: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    to: 'off'
+    for:
+      minutes: 5
+  - id: tv_off
+    trigger: state
+    entity_id: remote.kitchen
+    to: 'off'
+    for:
+      seconds: 10
+  conditions:
+  - condition: state
+    entity_id: input_boolean.kitchen_ambient_video
+    state: 'on'
+  actions:
+  - if:
+    - condition: trigger
+      id: empty
+    - condition: state
+      entity_id: remote.kitchen
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.kitchen_tv_other_content
+      state: 'off'
+    then:
+    - action: remote.turn_off
+      target:
+        entity_id: remote.kitchen
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.kitchen_ambient_video
+  mode: single
+- id: '1792900000003'
+  alias: 'Kitchen: Ambient Video Hand-off When TV Shows Other Content'
+  description: Added 2026-11-02. Someone switched the kitchen TV to another app, input
+    or YouTube video (or turned it on themselves) -> it's no longer the ambient video,
+    so clear the flag (auto-off stops managing it) and unmute it so what they picked
+    has sound.
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.kitchen_tv_other_content
+    from: 'off'
+    to: 'on'
+    for:
+      seconds: 5
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.kitchen_ambient_video
+  - action: media_player.volume_mute
+    continue_on_error: true
+    target:
+      entity_id: media_player.kitchen_tv
+    data:
+      is_volume_muted: false
+  mode: single
