@@ -18511,12 +18511,16 @@
       storm_day: iLs04Z6uBqU
       storm_night: JhEShtyJgIk
       snow: ZPE19pfQMdw
+      late_night: q4_ka1Wkgps
     scene: >
       {% set cond = states('weather.forecast_home') %}
       {% set temp = state_attr('weather.forecast_home', 'temperature') | float(60) %}
       {% set elev = state_attr('sun.sun', 'elevation') | float(0) %}
       {% set rising = state_attr('sun.sun', 'rising') %}
-      {% if cond in ['lightning', 'lightning-rainy'] %}
+      {# 2026-11-02 user: after 10 PM until dawn, something much calmer and dark -
+         moon over the sea, regardless of weather #}
+      {% if now().hour >= 22 or (now().hour < 12 and elev <= -6) %} late_night
+      {% elif cond in ['lightning', 'lightning-rainy'] %}
         {{ 'storm_day' if elev > 0 else 'storm_night' }}
       {% elif cond in ['snowy', 'snowy-rainy', 'hail'] %} snow
       {% elif cond in ['rainy', 'pouring'] %} rain
