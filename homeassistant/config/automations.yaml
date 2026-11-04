@@ -7659,11 +7659,11 @@
   alias: 'Hue Button 1 - Big Bedroom: Restore AL'
   description: Pico 'on' press clears all overrides, re-enables AL switches and motion
     automation, clears manual_control and applies adaptive lighting. A PRESS while
-    sleep mode is on keeps sleep mode on (dim red lights + Nanoleaf) - only a HOLD or
-    the Good Morning routine ends sleep mode (2026-11-03). Otherwise turns sleep mode
-    off - sleep mode is manual only via Hue button 2/3. Press sets AL min
-    brightness floor to 45%, hold sets it to 85%. Also sets the Nanoleaf scene/brightness
-    by time of day (same table as presence automation).
+    sleep mode is on keeps sleep mode on (dim red lights + Nanoleaf) - only a HOLD
+    or the Good Morning routine ends sleep mode (2026-11-03). Otherwise turns sleep
+    mode off - sleep mode is manual only via Hue button 2/3. Press sets AL min brightness
+    floor to 45%, hold sets it to 85%. Also sets the Nanoleaf scene/brightness by
+    time of day (same table as presence automation).
   triggers:
   - device_id: aa30217bd770e8befb593a51899cbf4b
     domain: hue
@@ -7790,8 +7790,8 @@
       adapt_brightness: true
       prefer_rgb_color: true
   - alias: Nanoleaf scene by time of day - same table as Big Bedroom Smart Motion
-      & Presence, so the Nanoleaf follows AL whenever button 1 is pressed (static red
-      10% while staying in sleep mode)
+      & Presence, so the Nanoleaf follows AL whenever button 1 is pressed (static
+      red 10% while staying in sleep mode)
     choose:
     - conditions:
       - condition: template
@@ -10921,7 +10921,7 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 07:25:00
+    at: 07:55:00
     weekday:
     - mon
     - tue
@@ -18446,8 +18446,8 @@
     HA/Frigate/MA). Alerts on OS / Docker data / boot disk at 85% and 95%, Frigate
     storage at 97% (Frigate prunes its own recordings, so it normally runs high),
     or Glances going offline. Disk only by choice (2026-11-02) - swap/memory/CPU alerts
-    removed as noise. Docker2 offline can
-    only catch the glances container stopping - if Docker2 itself is down, HA is too.
+    removed as noise. Docker2 offline can only catch the glances container stopping
+    - if Docker2 itself is down, HA is too.
   triggers:
   - trigger: numeric_state
     entity_id:
@@ -18512,15 +18512,16 @@
   max: 5
 - id: '1792900000001'
   alias: 'Kitchen: Ambient Video When Someone At The Table'
-  description: Added 2026-11-02 at the user's request. Someone at the kitchen table (radar zone 3) 30 s
-    and the TV is off -> wake the TV, mute it, and open a 10-hour ambient YouTube video
-    in the TV's own signed-in (Premium) YouTube app via the Android TV Remote entity
-    (media_player.kitchen_3 url play_media - Cast would play as a guest with ads).
-    Scene follows the weather and time of day. Silent on purpose so Welcome Home keeps
-    playing - the kitchen TV turning on no longer ends Welcome Home, only switching
-    it to OTHER content does (binary_sensor.kitchen_tv_other_content). The Cast entity's
-    media_title is saved so a different YouTube video counts as other content. Videos
-    picked 2026-11-02; to swap one, change the ID in the scene map below.
+  description: Added 2026-11-02 at the user's request. Someone at the kitchen table
+    (radar zone 3) 30 s and the TV is off -> wake the TV, mute it, and open a 10-hour
+    ambient YouTube video in the TV's own signed-in (Premium) YouTube app via the
+    Android TV Remote entity (media_player.kitchen_3 url play_media - Cast would play
+    as a guest with ads). Scene follows the weather and time of day. Silent on purpose
+    so Welcome Home keeps playing - the kitchen TV turning on no longer ends Welcome
+    Home, only switching it to OTHER content does (binary_sensor.kitchen_tv_other_content).
+    The Cast entity's media_title is saved so a different YouTube video counts as
+    other content. Videos picked 2026-11-02; to swap one, change the ID in the scene
+    map below.
   triggers:
   - alias: 30 s at the kitchen table - radar zone 3 (400-600 cm, the table) only;
       changed 2026-11-03 at the user's request (was the whole-kitchen sensor group).
@@ -18559,29 +18560,20 @@
       snow: ZPE19pfQMdw
       late_night: q4_ka1Wkgps
       after_midnight: KZtiBOgRSCA
-    scene: >
-      {% set cond = states('weather.forecast_home') %}
-      {% set temp = state_attr('weather.forecast_home', 'temperature') | float(60) %}
-      {% set elev = state_attr('sun.sun', 'elevation') | float(0) %}
-      {% set rising = state_attr('sun.sun', 'rising') %}
-      {# 2026-11-02 user: after 10 PM until dawn, something much calmer and dark -
-         moon over the sea 10 PM-midnight, red moon on the beach midnight-dawn,
-         regardless of weather #}
-      {% if now().hour >= 22 %} late_night
-      {% elif now().hour < 12 and elev <= -6 %} after_midnight
-      {% elif cond in ['lightning', 'lightning-rainy'] %}
-        {{ 'storm_day' if elev > 0 else 'storm_night' }}
-      {% elif cond in ['snowy', 'snowy-rainy', 'hail'] %} snow
-      {% elif cond in ['rainy', 'pouring'] %} rain
-      {% elif rising and -6 < elev < 15 %} sunrise
-      {% elif elev <= 0 %}
-        {{ 'fireplace' if temp < 65 else 'beach_sunset' }}
-      {% elif not rising and elev < 10 %}
-        {{ 'beach_sunset' if temp >= 60 else 'fireplace' }}
-      {% elif temp >= 70 and cond in ['sunny', 'clear', 'partlycloudy'] %} beach
-      {% elif temp < 45 %} fireplace
-      {% else %} forest
-      {% endif %}
+    scene: "{% set cond = states('weather.forecast_home') %} {% set temp = state_attr('weather.forecast_home',
+      'temperature') | float(60) %} {% set elev = state_attr('sun.sun', 'elevation')
+      | float(0) %} {% set rising = state_attr('sun.sun', 'rising') %} {# 2026-11-02
+      user: after 10 PM until dawn, something much calmer and dark -\n   moon over
+      the sea 10 PM-midnight, red moon on the beach midnight-dawn,\n   regardless
+      of weather #}\n{% if now().hour >= 22 %} late_night {% elif now().hour < 12
+      and elev <= -6 %} after_midnight {% elif cond in ['lightning', 'lightning-rainy']
+      %}\n  {{ 'storm_day' if elev > 0 else 'storm_night' }}\n{% elif cond in ['snowy',
+      'snowy-rainy', 'hail'] %} snow {% elif cond in ['rainy', 'pouring'] %} rain
+      {% elif rising and -6 < elev < 15 %} sunrise {% elif elev <= 0 %}\n  {{ 'fireplace'
+      if temp < 65 else 'beach_sunset' }}\n{% elif not rising and elev < 10 %}\n  {{
+      'beach_sunset' if temp >= 60 else 'fireplace' }}\n{% elif temp >= 70 and cond
+      in ['sunny', 'clear', 'partlycloudy'] %} beach {% elif temp < 45 %} fireplace
+      {% else %} forest {% endif %}\n"
     video_id: '{{ videos[scene | trim] }}'
   actions:
   - action: input_text.set_value
@@ -18620,9 +18612,9 @@
       entity_id: media_player.kitchen_tv
     data:
       is_volume_muted: true
-  - alias: Open the video - re-send up to 3x; a cold-started YouTube app played ~4 s
-      then stalled idle with no title on the first launch (2026-11-02 test), and a
-      second send with the app already open played straight away
+  - alias: Open the video - re-send up to 3x; a cold-started YouTube app played ~4
+      s then stalled idle with no title on the first launch (2026-11-02 test), and
+      a second send with the app already open played straight away
     repeat:
       sequence:
       - action: media_player.play_media
@@ -18641,7 +18633,8 @@
       - condition: template
         value_template: '{{ (is_state(''media_player.kitchen_tv_cast'', ''playing'')
           and (state_attr(''media_player.kitchen_tv_cast'', ''media_title'') or '''')
-          != '''') or repeat.index >= 3 or not is_state(''remote.kitchen'', ''on'') }}'
+          != '''') or repeat.index >= 3 or not is_state(''remote.kitchen'', ''on'')
+          }}'
   - alias: Save the title YouTube reports so a different video later counts as other
       content
     if:
@@ -18658,8 +18651,8 @@
   mode: single
 - id: '1792900000002'
   alias: 'Kitchen: Ambient Video Off When Table Empty 90 s'
-  description: Added 2026-11-02. Companion to 1792900000001. Nobody at the table (zone 3) 90 s and
-    the TV is still on the ambient video -> turn it off (standby via remote.kitchen,
+  description: Added 2026-11-02. Companion to 1792900000001. Nobody at the table (zone
+    3) 90 s and the TV is still on the ambient video -> turn it off (standby via remote.kitchen,
     never a plug). Leaves the mute on; the next time anyone puts other content on,
     1792900000003 unmutes. Also clears the ambient flag whenever the TV goes off.
   triggers:
@@ -18737,9 +18730,9 @@
   mode: single
 - id: '1793000000001'
   alias: 'Bathroom: Keep Radar Engineering Mode On'
-  description: 'binary_sensor.bathroom_radar_energy_presence is computed from per-gate
+  description: binary_sensor.bathroom_radar_energy_presence is computed from per-gate
     energies, which only update while engineering mode is on. Radar restarts, setting
-    changes and reboots turn it off. Added 2026-11-03.'
+    changes and reboots turn it off. Added 2026-11-03.
   triggers:
   - trigger: state
     entity_id: switch.bathroom_bathroom_050_engineering_mode
