@@ -181,6 +181,25 @@ input_text:
 
 # Template switches + sensors
 template:
+  # Bathroom radar presence computed from per-gate energies (engineering mode),
+  # because the radar's own presence output ignores the thresholds we send
+  # (2026-11-03: user read 15-30 still energy vs threshold 10-15, presence stayed off).
+  # Empty room (vanity mount, 2026-11-03): g2 still <=11, g3 still <=7, g1 move <=21, g2/g3 move <=9.
+  # Person on toilet (door open): g2 still 11-30, g3 still 9-27.
+  - binary_sensor:
+      - name: "Bathroom Radar Energy Presence"
+        unique_id: bathroom_radar_energy_presence
+        device_class: occupancy
+        delay_off: "00:00:30"
+        state: >
+          {% set g1m = states('sensor.bathroom_bathroom_g1_move_energy') | float(0) %}
+          {% set g2m = states('sensor.bathroom_bathroom_g2_move_energy') | float(0) %}
+          {% set g3m = states('sensor.bathroom_bathroom_g3_move_energy') | float(0) %}
+          {% set g2s = states('sensor.bathroom_bathroom_g2_still_energy') | float(0) %}
+          {% set g3s = states('sensor.bathroom_bathroom_g3_still_energy') | float(0) %}
+          {{ is_state('binary_sensor.bathroom_bathroom_presence', 'on')
+             or g1m >= 35 or g2m >= 20 or g3m >= 20
+             or g2s >= 14 or g3s >= 11 }}
   # Resolves the Yamaha RX-A4A's Music Assistant player by device MODEL rather than
   # entity id. MA wraps the receiver's AirPlay/DLNA/Sendspin protocols in a "universal
   # player" whose id is random and gets regenerated on MA restarts/provider reloads
