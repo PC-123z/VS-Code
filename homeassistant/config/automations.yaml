@@ -290,7 +290,7 @@
             entity_id:
             - binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
             - binary_sensor.bathroom_motion
-            - binary_sensor.bathroom_bathroom_presence
+            - binary_sensor.bathroom_radar_energy_presence
             - binary_sensor.hallway_motion
             - binary_sensor.kitchen_sensor_group
             to: 'on'
@@ -335,7 +335,7 @@
               entity_id:
               - binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
               - binary_sensor.bathroom_motion
-              - binary_sensor.bathroom_bathroom_presence
+              - binary_sensor.bathroom_radar_energy_presence
               - binary_sensor.hallway_motion
               - binary_sensor.kitchen_sensor_group
               to: 'on'
@@ -2058,7 +2058,7 @@
   - trigger: state
     entity_id:
     - binary_sensor.bathroom_motion
-    - binary_sensor.bathroom_bathroom_presence
+    - binary_sensor.bathroom_radar_energy_presence
     to: 'on'
     id: detected
   - trigger: state
@@ -11829,7 +11829,7 @@
   - trigger: state
     entity_id:
     - binary_sensor.bathroom_motion
-    - binary_sensor.bathroom_bathroom_presence
+    - binary_sensor.bathroom_radar_energy_presence
     to: 'on'
     id: motion_on
   - trigger: state
@@ -18734,4 +18734,28 @@
       entity_id: media_player.kitchen_tv
     data:
       is_volume_muted: false
+  mode: single
+- id: '1793000000001'
+  alias: 'Bathroom: Keep Radar Engineering Mode On'
+  description: 'binary_sensor.bathroom_radar_energy_presence is computed from per-gate
+    energies, which only update while engineering mode is on. Radar restarts, setting
+    changes and reboots turn it off. Added 2026-11-03.'
+  triggers:
+  - trigger: state
+    entity_id: switch.bathroom_bathroom_050_engineering_mode
+    to: 'off'
+    for:
+      seconds: 10
+  - trigger: homeassistant
+    event: start
+  - trigger: time_pattern
+    minutes: /10
+  conditions:
+  - condition: state
+    entity_id: switch.bathroom_bathroom_050_engineering_mode
+    state: 'off'
+  actions:
+  - action: switch.turn_on
+    target:
+      entity_id: switch.bathroom_bathroom_050_engineering_mode
   mode: single
