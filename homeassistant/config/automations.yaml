@@ -6263,10 +6263,10 @@
   mode: single
 - id: '1776378473889'
   alias: '*Bedroom 2 Good Morning Routine'
-  description: Triggers at 6:50am only if bedroom2_occupied is on. Pre-staged lights to prevent flash. Staged ramp, wake album, TTS on motion, fans off. Music until presence clears or 7:30am.
+  description: Triggers on weekdays at input_datetime.bedroom_2_wake_time only if bedroom2_occupied is on. Pre-staged lights to prevent flash, skipped if the room is already lit so a late run never dims it. Staged ramp, wake album, TTS on motion, fans off. Music until presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: 06:55:00
+    at: input_datetime.bedroom_2_wake_time
     weekday:
     - mon
     - tue
@@ -6284,6 +6284,10 @@
     entity_id: input_boolean.bedroom2_occupied
     state: 'on'
   actions:
+  - alias: Note how bright the room already is, before anything changes it. If someone is up and the lights are on, the pre-stage is skipped and the ramps never go below these levels (2026-11-06 - the 1% pre-stage was dimming an already-lit room).
+    variables:
+      b2_office_start: '{{ (["light.office_1", "light.office_2", "light.hue_white_lamp_1"] | map("state_attr", "brightness") | map("int", 0) | max / 2.55) | round(0) | int }}'
+      b2_panels_start: '{{ (["light.ribbon", "light.fluttershy"] | map("state_attr", "brightness") | map("int", 0) | max / 2.55) | round(0) | int }}'
   - alias: Power the Nanoleaf P115 outlets back on first so the panels have time to reboot/rejoin WiFi before being commanded (see Bedtime Routine's hard_lights_out for where they get cut)
     action: switch.turn_on
     target:
@@ -6302,20 +6306,27 @@
       entity_id:
       - switch.adaptive_lighting_sleep_mode_office
       - switch.adaptive_lighting_office
-  - alias: Pre-stage Nanoleafs with Morning Sky at 1%
-    action: light.turn_on
-    target:
-      entity_id:
-      - light.ribbon
-      - light.fluttershy
-    data:
-      effect: Morning Sky
-      brightness_pct: 1
-      transition: 1
+  - alias: Pre-stage Nanoleafs with Morning Sky at 1% unless they are already lit
+    if:
+    - condition: template
+      value_template: '{{ b2_panels_start == 0 }}'
+    then:
+    - action: light.turn_on
+      target:
+        entity_id:
+        - light.ribbon
+        - light.fluttershy
+      data:
+        effect: Morning Sky
+        brightness_pct: 1
+        transition: 1
   - delay:
       seconds: 2
-  - alias: Pre-stage office Hue at 1% warm white [lamp only after dark]
-    sequence:
+  - alias: Pre-stage office Hue at 1% warm white unless the room is already lit [lamp only after dark]
+    if:
+    - condition: template
+      value_template: '{{ b2_office_start == 0 }}'
+    then:
     - action: light.turn_on
       target:
         entity_id:
@@ -6353,7 +6364,7 @@
               - light.ribbon
               - light.fluttershy
             data:
-              brightness_pct: '{{ [1 + (repeat.index * 4.4), 80] | min | round(0) }}'
+              brightness_pct: '{{ [[1 + (repeat.index * 4.4), 80] | min, b2_panels_start] | max | round(0) }}'
               transition: 3
           - delay:
               seconds: 10
@@ -6373,7 +6384,7 @@
                 - light.office_1
                 - light.office_2
               data:
-                brightness_pct: '{{ [1 + (repeat.index * 6.6), 100] | min | round(0) }}'
+                brightness_pct: '{{ [[1 + (repeat.index * 6.6), 100] | min, b2_office_start] | max | round(0) }}'
                 color_temp_kelvin: 2700
                 transition: 3
             - alias: Bedroom 2 Lamp only after dark (sun below horizon) - 2026-10-20
@@ -6386,7 +6397,7 @@
                 target:
                   entity_id: light.hue_white_lamp_1
                 data:
-                  brightness_pct: '{{ [1 + (repeat.index * 6.6), 100] | min | round(0) }}'
+                  brightness_pct: '{{ [[1 + (repeat.index * 6.6), 100] | min, b2_office_start] | max | round(0) }}'
                   color_temp_kelvin: 2700
                   transition: 3
           - delay:
@@ -9379,8 +9390,7 @@
               data:
                 player: media_player.kitchen_2
                 skip_primary: true
-                fallback_id: >-
-                  {% set h = current_hour|int %}{% if 6 <= h < 12 %}spotify--LXCMhnPg://album/1dQDdZKvdJ5gNhUF56S8Qu{% elif 12 <= h < 15 %}spotify--LXCMhnPg://album/5OcK9W8oa6cIJi6gSovkot{% elif 15 <= h < 20 %}library://album/1248{% elif h == 20 %}spotify--LXCMhnPg://playlist/7jeLTMiA3idI2JnPqBhyWL{% else %}library://album/1525{% endif %}
+                fallback_id: '{% set h = current_hour|int %}{% if 6 <= h < 12 %}spotify--LXCMhnPg://album/1dQDdZKvdJ5gNhUF56S8Qu{% elif 12 <= h < 15 %}spotify--LXCMhnPg://album/5OcK9W8oa6cIJi6gSovkot{% elif 15 <= h < 20 %}library://album/1248{% elif h == 20 %}spotify--LXCMhnPg://playlist/7jeLTMiA3idI2JnPqBhyWL{% else %}library://album/1525{% endif %}'
                 fallback_type: '{{ ''playlist'' if current_hour|int == 20 else ''album'' }}'
       continue_on_error: true
   mode: single
@@ -16662,7 +16672,7 @@
   max: 5
 - id: '1792900000001'
   alias: 'Kitchen: Ambient Video When Someone At The Table'
-  description: 'Added 2026-11-02 at the user''s request. Someone at the kitchen table (radar zone 3) 30 s and the TV is off -> wake the TV, set volume 3, and open a 10-hour ambient YouTube video in the TV''s own signed-in (Premium) YouTube app via the Android TV Remote entity (media_player.kitchen_3 url play_media - Cast would play as a guest with ads). Scene follows the weather and time of day. Quiet on purpose so Welcome Home keeps playing - the kitchen TV turning on no longer ends Welcome Home, only switching it to OTHER content does (binary_sensor.kitchen_tv_other_content). The Cast entity''s media_title is saved so a different YouTube video counts as other content. Each scene has a pool of videos (2026-11-06, the single video got old fast): a random one that has not played yet this round, then the pool starts over - input_text.kitchen_ambient_video_recent tracks it. To swap one, change the ID in the scene map below.'
+  description: 'Added 2026-11-02 at the user''s request. Someone at the kitchen table (radar zone 3) 30 s and the TV is off -> wake the TV, set volume 3, and open a 10-hour ambient YouTube video in the TV''s own signed-in (Premium) YouTube app via the Android TV Remote entity (media_player.kitchen_3 url play_media - Cast would play as a guest with ads). Scene follows the weather and time of day. Quiet on purpose so Welcome Home keeps playing - the kitchen TV turning on no longer ends Welcome Home, only switching it to OTHER content does (binary_sensor.kitchen_tv_other_content). The Cast entity''s media_title is saved so a different YouTube video counts as other content. Each scene has a pool of videos (2026-11-06, the single video got old fast): a random one that has not played yet this round, then the pool starts over - input_text.kitchen_ambient_video_recent tracks it. To swap one, change the ID in the scene map below. The video also switches every 15 minutes while it stays on (2026-11-06): the saved title is cleared first, so the change is never read as other content and Welcome Home keeps playing.'
   triggers:
   - alias: 30 s at the kitchen table - radar zone 3 (400-600 cm, the table) only; changed 2026-11-03 at the user's request (was the whole-kitchen sensor group). Since the 2026-10-30 far-gate retune, every 30 s+ zone 3 detection had a Frigate person with it
     trigger: state
@@ -16670,21 +16680,49 @@
     to: 'on'
     for:
       seconds: 30
+    id: presence
+  - alias: Every minute, for the 15-minute video switch below
+    id: rotate
+    trigger: time_pattern
+    minutes: /1
   conditions:
-  - alias: Don't take over a TV that's already on (or offline)
-    condition: state
-    entity_id: remote.kitchen
-    state: 'off'
-  - alias: Zone 2 isn't feeding the TV (1792600000001 owns it then)
-    condition: state
-    entity_id: media_player.living_room_av_zone2
-    state: 'off'
-  - alias: Not armed away - kitchen radar ghosts while nobody is home (2026-10-30)
-    condition: not
+  - condition: or
     conditions:
-    - condition: state
-      entity_id: alarm_control_panel.3302_alarm
-      state: armed_away
+    - alias: 'Start: table presence and the TV is free'
+      condition: and
+      conditions:
+      - condition: trigger
+        id: presence
+      - alias: Don't take over a TV that's already on (or offline)
+        condition: state
+        entity_id: remote.kitchen
+        state: 'off'
+      - alias: Zone 2 isn't feeding the TV (1792600000001 owns it then)
+        condition: state
+        entity_id: media_player.living_room_av_zone2
+        state: 'off'
+      - alias: Not armed away - kitchen radar ghosts while nobody is home (2026-10-30)
+        condition: not
+        conditions:
+        - condition: state
+          entity_id: alarm_control_panel.3302_alarm
+          state: armed_away
+    - alias: 'Switch: our video has been on 15 min and the TV is still ours (2026-11-06)'
+      condition: and
+      conditions:
+      - condition: trigger
+        id: rotate
+      - condition: state
+        entity_id: input_boolean.kitchen_ambient_video
+        state: 'on'
+      - condition: state
+        entity_id: remote.kitchen
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.kitchen_tv_other_content
+        state: 'off'
+      - condition: template
+        value_template: '{{ state_attr(''remote.kitchen'', ''current_activity'') == ''com.google.android.youtube.tv'' and now() - states.input_text.kitchen_ambient_video_title.last_changed >= timedelta(minutes=15) }}'
   variables:
     videos:
       sunrise:
@@ -16757,6 +16795,7 @@
 
       '
     recent: '{{ states(''input_text.kitchen_ambient_video_recent'').split() | reject(''in'', [''unknown'', ''unavailable'']) | list }}'
+    old_title: '{{ state_attr(''media_player.kitchen_tv_cast'', ''media_title'') or '''' }}'
   actions:
   - action: input_text.set_value
     target:
@@ -16772,47 +16811,52 @@
   - action: input_boolean.turn_on
     target:
       entity_id: input_boolean.kitchen_ambient_video
-  - action: remote.turn_on
-    target:
-      entity_id: remote.kitchen
-  - alias: Wait for the BRAVIA entity (polled) to see the TV on - it won't take a mute while in standby; forcing updates got it in ~5 s in testing
-    repeat:
-      until:
-      - condition: or
-        conditions:
-        - condition: state
-          entity_id: media_player.kitchen_tv
-          state: 'on'
-        - condition: template
-          value_template: '{{ repeat.index >= 15 }}'
-      sequence:
-      - action: homeassistant.update_entity
-        continue_on_error: true
-        target:
-          entity_id: media_player.kitchen_tv
-      - delay:
-          seconds: 2
-  - alias: Unmute and set volume 3 (out of 100) - quiet background sound
-    action: media_player.volume_mute
-    continue_on_error: true
-    target:
-      entity_id: media_player.kitchen_tv
-    data:
-      is_volume_muted: false
-  - action: media_player.volume_set
-    continue_on_error: true
-    target:
-      entity_id: media_player.kitchen_tv
-    data:
-      volume_level: 0.03
-  - alias: Let the TV finish booting - the launcher grabbed focus back right after the first video send (2026-11-05); wait for the home screen, then 3 s
-    wait_template: '{{ state_attr(''remote.kitchen'',''current_activity'') in [''com.google.android.apps.tv.launcherx'',''com.google.android.youtube.tv''] }}'
-    timeout:
-      seconds: 15
-    continue_on_timeout: true
-  - delay:
-      seconds: 3
-  - alias: Open the video - re-send up to 3x; a cold-started YouTube app played ~4 s then stalled idle with no title on the first launch (2026-11-02 test), and a second send with the app already open played straight away
+  - alias: Power up only on a fresh start - a 15-minute switch leaves the TV and volume alone
+    if:
+    - condition: trigger
+      id: presence
+    then:
+    - action: remote.turn_on
+      target:
+        entity_id: remote.kitchen
+    - alias: Wait for the BRAVIA entity (polled) to see the TV on - it won't take a mute while in standby; forcing updates got it in ~5 s in testing
+      repeat:
+        until:
+        - condition: or
+          conditions:
+          - condition: state
+            entity_id: media_player.kitchen_tv
+            state: 'on'
+          - condition: template
+            value_template: '{{ repeat.index >= 15 }}'
+        sequence:
+        - action: homeassistant.update_entity
+          continue_on_error: true
+          target:
+            entity_id: media_player.kitchen_tv
+        - delay:
+            seconds: 2
+    - alias: Unmute and set volume 3 (out of 100) - quiet background sound
+      action: media_player.volume_mute
+      continue_on_error: true
+      target:
+        entity_id: media_player.kitchen_tv
+      data:
+        is_volume_muted: false
+    - action: media_player.volume_set
+      continue_on_error: true
+      target:
+        entity_id: media_player.kitchen_tv
+      data:
+        volume_level: 0.03
+    - alias: Let the TV finish booting - the launcher grabbed focus back right after the first video send (2026-11-05); wait for the home screen, then 3 s
+      wait_template: '{{ state_attr(''remote.kitchen'',''current_activity'') in [''com.google.android.apps.tv.launcherx'',''com.google.android.youtube.tv''] }}'
+      timeout:
+        seconds: 15
+      continue_on_timeout: true
+    - delay:
+        seconds: 3
+  - alias: Open the video - re-send up to 3x; a cold-started YouTube app played ~4 s then stalled idle with no title on the first launch (2026-11-02 test), and a second send with the app already open played straight away. Waits for a title that differs from the old video, or a switch would save the old title and the new one would count as other content
     repeat:
       sequence:
       - action: media_player.play_media
@@ -16821,17 +16865,17 @@
         data:
           media_content_type: url
           media_content_id: https://www.youtube.com/watch?v={{ video_id }}
-      - wait_template: '{{ is_state(''media_player.kitchen_tv_cast'', ''playing'') and (state_attr(''media_player.kitchen_tv_cast'', ''media_title'') or '''') != '''' }}'
+      - wait_template: '{{ is_state(''media_player.kitchen_tv_cast'', ''playing'') and (state_attr(''media_player.kitchen_tv_cast'', ''media_title'') or '''') not in ['''', old_title] }}'
         timeout:
           seconds: 20
         continue_on_timeout: true
       until:
       - condition: template
-        value_template: '{{ (is_state(''media_player.kitchen_tv_cast'', ''playing'') and (state_attr(''media_player.kitchen_tv_cast'', ''media_title'') or '''') != '''') or repeat.index >= 3 or not is_state(''remote.kitchen'', ''on'') }}'
+        value_template: '{{ (is_state(''media_player.kitchen_tv_cast'', ''playing'') and (state_attr(''media_player.kitchen_tv_cast'', ''media_title'') or '''') not in ['''', old_title]) or repeat.index >= 3 or not is_state(''remote.kitchen'', ''on'') }}'
   - alias: Save the title YouTube reports so a different video later counts as other content
     if:
     - condition: template
-      value_template: '{{ (state_attr(''media_player.kitchen_tv_cast'', ''media_title'') or '''') != '''' }}'
+      value_template: '{{ (state_attr(''media_player.kitchen_tv_cast'', ''media_title'') or '''') not in ['''', old_title] }}'
     then:
     - action: input_text.set_value
       target:
@@ -16839,6 +16883,7 @@
       data:
         value: '{{ state_attr(''media_player.kitchen_tv_cast'', ''media_title'')[:255] }}'
   mode: single
+  max_exceeded: silent
 - id: '1792900000002'
   alias: 'Kitchen: Ambient Video Off When Table Empty 90 s'
   description: Added 2026-11-02. Companion to 1792900000001. Nobody at the table (zone 3) 90 s and the TV is still on the ambient video -> turn it off (standby via remote.kitchen, never a plug). Leaves the mute on; the next time anyone puts other content on, 1792900000003 unmutes. Also clears the ambient flag whenever the TV goes off.
