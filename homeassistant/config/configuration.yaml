@@ -405,6 +405,24 @@ rest:
             off
           {% endif %}
 
+  # Is Music Assistant's YouTube Music source logged in? A provider that fails to load
+  # (expired cookie) is simply missing from this list. Drives script.ma_play_with_fallback
+  # and alert 1793100000001. Added 2026-11-06.
+  - resource: http://192.168.70.155:8095/api
+    method: POST
+    headers:
+      Authorization: !secret music_assistant_api_bearer
+      Content-Type: application/json
+    payload: '{"command": "providers"}'
+    scan_interval: 120
+    timeout: 20
+    binary_sensor:
+      - name: "MA YouTube Music Available"
+        unique_id: ma_youtube_music_available
+        device_class: connectivity
+        value_template: >-
+          {{ value_json | selectattr('domain', 'eq', 'ytmusic') | selectattr('available', 'eq', true) | list | count > 0 }}
+
 # Music Assistant JSON-RPC API. The HA integration exposes no service for the
 # queue's Autoplay ("Don't stop the music") toggle, which the Good Morning routine
 # must switch off while its single opening track plays - otherwise MA appends a

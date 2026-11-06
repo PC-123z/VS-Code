@@ -1081,3 +1081,77 @@ stop_room_speaker_safely:
           entity_id: '{{ entity_id }}'
   mode: parallel
   max: 10
+
+# Added 2026-11-06. One place for "play this, and if it does not start, play that".
+# Skips straight to the backup when YouTube Music is known to be down, otherwise tries
+# the primary and checks the player really started. Blocks until music is confirmed.
+ma_play_with_fallback:
+  alias: Music Assistant - Play With Fallback
+  description: Plays media_id on a Music Assistant player, falling back to fallback_id if it does not start. Alerts only when something unexpected happens or nothing plays.
+  mode: parallel
+  max: 10
+  fields:
+    player:
+      description: Music Assistant media_player entity
+    media_id:
+      description: Primary URI (optional with skip_primary)
+    media_type:
+      description: Primary media type
+    fallback_id:
+      description: Backup URI
+    fallback_type:
+      description: Backup media type
+    skip_primary:
+      description: True when the caller already tried its own primary
+  sequence:
+  - variables:
+      primary_uri: "{{ media_id | default('') | string }}"
+      try_primary: >-
+        {{ primary_uri != '' and not (skip_primary | default(false) | bool)
+        and (is_state('binary_sensor.ma_youtube_music_available', 'on') or not primary_uri.startswith('ytmusic://')) }}
+  - if:
+    - condition: template
+      value_template: "{{ try_primary }}"
+    then:
+    - continue_on_error: true
+      action: music_assistant.play_media
+      target:
+        entity_id: "{{ player }}"
+      data:
+        media_id: "{{ primary_uri }}"
+        media_type: "{{ media_type }}"
+        enqueue: replace
+        radio_mode: false
+    - wait_template: "{{ is_state(player, 'playing') }}"
+      timeout:
+        seconds: 15
+      continue_on_timeout: true
+  - if:
+    - condition: template
+      value_template: "{{ not try_primary or not is_state(player, 'playing') }}"
+    then:
+    - continue_on_error: true
+      action: music_assistant.play_media
+      target:
+        entity_id: "{{ player }}"
+      data:
+        media_id: "{{ fallback_id }}"
+        media_type: "{{ fallback_type }}"
+        enqueue: replace
+        radio_mode: false
+    - wait_template: "{{ is_state(player, 'playing') }}"
+      timeout:
+        seconds: 20
+      continue_on_timeout: true
+    - if:
+      - condition: template
+        value_template: "{{ try_primary or not is_state(player, 'playing') }}"
+      then:
+      - continue_on_error: true
+        action: notify.mobile_app_pc_iphone
+        data:
+          title: Music problem
+          message: >-
+            {{ state_attr(player, 'friendly_name') or player }}:
+            {{ 'backup music is playing because the first choice did not start.' if is_state(player, 'playing')
+            else 'neither the first choice nor the backup would start.' }}

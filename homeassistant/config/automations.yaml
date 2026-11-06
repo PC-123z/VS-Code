@@ -230,13 +230,13 @@
           routine needs to clear any leftover queue, but it is user-configurable in
           MA and would silently change this routine's behaviour if it were ever edited.
         continue_on_error: true
-        action: music_assistant.play_media
-        target:
-          entity_id: media_player.bedroom_2
+        action: script.ma_play_with_fallback
         data:
+          player: media_player.bedroom_2
           media_id: ytmusic://playlist/VLPLRbcUrcJVEmVVwV-e_kcAxzDRowsLhtIN
           media_type: playlist
-          enqueue: replace
+          fallback_id: library://playlist/94
+          fallback_type: playlist
       - alias: Shuffle nap wake up playlist
         continue_on_error: true
         action: media_player.shuffle_set
@@ -4790,13 +4790,13 @@
         data:
           shuffle: true
       - continue_on_error: true
-        action: music_assistant.play_media
-        target:
-          entity_id: media_player.bedroom_2
+        action: script.ma_play_with_fallback
         data:
+          player: media_player.bedroom_2
           media_id: ytmusic://playlist/VLPLOS9HJPmm92-46p6EL6vUxfuZ6AGVDkRG
           media_type: playlist
-          radio_mode: false
+          fallback_id: spotify--LXCMhnPg://playlist/0RHsdwnhb6qesAieMOHKG4
+          fallback_type: playlist
       - alias: Give playback a few seconds to start
         wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
         timeout:
@@ -5128,13 +5128,13 @@
         data:
           shuffle: true
       - continue_on_error: true
-        action: music_assistant.play_media
-        target:
-          entity_id: media_player.bedroom_2
+        action: script.ma_play_with_fallback
         data:
+          player: media_player.bedroom_2
           media_id: ytmusic://playlist/VLPLQ_PIlf6OzqIeQygYMd8DccQ3XnJlSGcG
           media_type: playlist
-          radio_mode: false
+          fallback_id: library://playlist/64
+          fallback_type: playlist
       - alias: Give playback a few seconds to start
         wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
         timeout:
@@ -6060,12 +6060,13 @@
         repeat:
           sequence:
           - continue_on_error: true
-            action: music_assistant.play_media
-            target:
-              entity_id: media_player.office_2
+            action: script.ma_play_with_fallback
             data:
+              player: media_player.office_2
               media_id: ytmusic://album/MPREb_A9AHzoUYd7b
-              radio_mode: false
+              media_type: album
+              fallback_id: spotify--LXCMhnPg://album/0JLN7JryQ2T7lBEYIrSQF1
+              fallback_type: album
           - continue_on_error: true
             action: media_player.shuffle_set
             target:
@@ -6172,12 +6173,13 @@
         repeat:
           sequence:
           - continue_on_error: true
-            action: music_assistant.play_media
-            target:
-              entity_id: media_player.office_2
+            action: script.ma_play_with_fallback
             data:
+              player: media_player.office_2
               media_id: ytmusic://album/MPREb_A9AHzoUYd7b
-              radio_mode: false
+              media_type: album
+              fallback_id: spotify--LXCMhnPg://album/0JLN7JryQ2T7lBEYIrSQF1
+              fallback_type: album
           - continue_on_error: true
             action: media_player.shuffle_set
             target:
@@ -6664,7 +6666,7 @@
     presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: 08:30:00
+    at: 06:55:00
     weekday:
     - mon
     - tue
@@ -6825,12 +6827,13 @@
           volume_level: 0.05
       - alias: Play wake album via Music Assistant
         continue_on_error: true
-        action: music_assistant.play_media
-        target:
-          entity_id: media_player.office_2
+        action: script.ma_play_with_fallback
         data:
+          player: media_player.office_2
           media_id: ytmusic://album/MPREb_eRqlXW8MAYH
           media_type: album
+          fallback_id: spotify--LXCMhnPg://album/4FBud2TTHOv79nmdQSe0RG
+          fallback_type: album
       - delay:
           seconds: 15
       - alias: Get today's daily forecast (high/low/expected condition) for the announcements
@@ -7113,12 +7116,13 @@
                   state: 'on'
                 then:
                 - continue_on_error: true
-                  action: music_assistant.play_media
-                  target:
-                    entity_id: media_player.office_2
+                  action: script.ma_play_with_fallback
                   data:
+                    player: media_player.office_2
                     media_id: ytmusic://album/MPREb_eRqlXW8MAYH
                     media_type: album
+                    fallback_id: spotify--LXCMhnPg://album/4FBud2TTHOv79nmdQSe0RG
+                    fallback_type: album
               - alias: Self-heal - keep the Nanoleaf panels on for the full run. They
                   were getting switched off mid-routine by the separate presence automation's
                   own inactivity timeout, and they also drop offline (unavailable)
@@ -11176,11 +11180,23 @@
         action: rest_command.ma_bedroom_play_from
         data:
           start_item: '{{ gm_start_uri }}'
-      - alias: Wait for the playlist to actually start
-        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') }}'
+      - alias: Wait for the playlist to actually start (no point waiting if YouTube Music is known to be down)
+        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') or is_state(''binary_sensor.ma_youtube_music_available'', ''off'') }}'
         timeout:
           seconds: 30
         continue_on_timeout: true
+      - alias: Backup music - same-named Spotify playlist (library 56) when the YouTube Music playlist did not start. Added 2026-11-06 after an expired cookie left the speaker silent.
+        if:
+        - condition: template
+          value_template: '{{ not is_state(''media_player.bedroom_2'', ''playing'') }}'
+        then:
+        - continue_on_error: true
+          action: script.ma_play_with_fallback
+          data:
+            player: media_player.bedroom_2
+            skip_primary: true
+            fallback_id: library://playlist/56
+            fallback_type: playlist
       - delay:
           seconds: 3
       - alias: Ensure playback is not paused after unjoin
@@ -11382,6 +11398,23 @@
                       in gm_heal_browse) else [] %}{% set p = states(''input_number.good_morning_playlist_position'')
                       | int(0) %}{% if t | length > 0 %}{{ t[p] if p < (t | length)
                       else t[0] }}{% endif %}'
+                - alias: Give the re-queue a moment, unless YouTube Music is known to be down
+                  wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') or is_state(''binary_sensor.ma_youtube_music_available'', ''off'') }}'
+                  timeout:
+                    seconds: 20
+                  continue_on_timeout: true
+                - alias: Backup music if the re-queue did not start (2026-11-06)
+                  if:
+                  - condition: template
+                    value_template: '{{ not is_state(''media_player.bedroom_2'', ''playing'') }}'
+                  then:
+                  - continue_on_error: true
+                    action: script.ma_play_with_fallback
+                    data:
+                      player: media_player.bedroom_2
+                      skip_primary: true
+                      fallback_id: library://playlist/56
+                      fallback_type: playlist
               - alias: Hold the volume - continue_on_error added 2026-09-28, a transient
                   Sonos network read-timeout on this call threw an unhandled exception
                   that killed the entire occupancy-driven music loop for the rest
@@ -16243,14 +16276,14 @@
                   entity_id: media_player.office_2
                 data:
                   shuffle: true
-              - action: music_assistant.play_media
+              - action: script.ma_play_with_fallback
                 continue_on_error: true
-                target:
-                  entity_id: media_player.office_2
                 data:
+                  player: media_player.office_2
                   media_id: ytmusic://playlist/VLPLOS9HJPmm92-46p6EL6vUxfuZ6AGVDkRG
                   media_type: playlist
-                  radio_mode: false
+                  fallback_id: spotify--LXCMhnPg://playlist/0RHsdwnhb6qesAieMOHKG4
+                  fallback_type: playlist
               - wait_template: '{{ is_state(''media_player.office_2'', ''playing'')
                   }}'
                 timeout:
@@ -16351,13 +16384,14 @@
                 entity_id: media_player.office_2
               data:
                 shuffle: true
-            - action: music_assistant.play_media
+            - action: script.ma_play_with_fallback
               continue_on_error: true
-              target:
-                entity_id: media_player.office_2
               data:
+                player: media_player.office_2
                 media_id: ytmusic://album/MPREb_A9AHzoUYd7b
-                radio_mode: false
+                media_type: album
+                fallback_id: spotify--LXCMhnPg://album/0JLN7JryQ2T7lBEYIrSQF1
+                fallback_type: album
             - wait_template: '{{ is_state(''media_player.office_2'', ''playing'')
                 }}'
               timeout:
@@ -18742,4 +18776,41 @@
       entity_id: media_player.kitchen_tv
     data:
       is_volume_muted: false
+  mode: single
+- id: '1793100000001'
+  alias: Music Assistant - YouTube Music down alert
+  description: Added 2026-11-06. An expired cookie took YouTube Music out at a 9:18 PM
+    container restart and nobody knew until the next morning's silent alarm. Warns
+    10 minutes after it goes down, and again at 8 PM while it stays down, so it can
+    be fixed before bedtime and wake routines need it. Routines use their backups
+    meanwhile (script.ma_play_with_fallback).
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.ma_youtube_music_available
+    to: 'off'
+    for:
+      minutes: 10
+  - trigger: state
+    entity_id: binary_sensor.ma_youtube_music_available
+    to: unavailable
+    for:
+      minutes: 10
+  - trigger: time
+    at: '20:00:00'
+  conditions:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: binary_sensor.ma_youtube_music_available
+      state: 'on'
+  actions:
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: YouTube Music is down
+      message: '{{ ''Music Assistant is not responding.'' if is_state(''binary_sensor.ma_youtube_music_available'',
+        ''unavailable'') else ''Music Assistant cannot log in to YouTube Music, usually
+        an expired cookie. Refresh it in Music Assistant under Settings, Providers,
+        YouTube Music.'' }} Routines use their Spotify backups until then.'
+      data:
+        tag: ma_youtube_music_down
   mode: single
