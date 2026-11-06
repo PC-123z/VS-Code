@@ -9192,7 +9192,7 @@
           - alias: Play late night slow sax playlist (11 PM - 6 AM) - added 2026-10-10, user wanted very slow and calming after 11 PM (Kenny G ballads like Sentimental / The Wedding Song, Coltrane Ballads, gentle Dean Fraser). Music Assistant library playlist "Late Night Slow Sax" (library://playlist/100, 30 hand-picked tracks), Silhouette first then shuffled, repeat all. Edit the track list in Music Assistant, not here.
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 23 or current_hour|int < 6 }}'
+              value_template: '{{ (current_hour|int >= 23 or current_hour|int < 6) and is_state(''binary_sensor.ma_youtube_music_available'', ''on'') }}'
             then:
             - continue_on_error: true
               action: media_player.shuffle_set
@@ -9226,7 +9226,7 @@
           - alias: Play morning music (6 AM - 12 PM)
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 6 and current_hour|int < 12 }}'
+              value_template: '{{ (current_hour|int >= 6 and current_hour|int < 12) and is_state(''binary_sensor.ma_youtube_music_available'', ''on'') }}'
             then:
             - continue_on_error: true
               action: music_assistant.play_media
@@ -9244,7 +9244,7 @@
           - alias: Play afternoon music (12 PM - 3 PM)
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 12 and current_hour|int < 15 }}'
+              value_template: '{{ (current_hour|int >= 12 and current_hour|int < 15) and is_state(''binary_sensor.ma_youtube_music_available'', ''on'') }}'
             then:
             - continue_on_error: true
               action: music_assistant.play_media
@@ -9269,7 +9269,7 @@
           - alias: Play Dean Fraser Sax Reggae playlist (3 PM - 8 PM) - user preference 2026-09-27; since 2026-10-10 an MA library playlist (library://playlist/103, 35 YT Music tracks - Melodies of D.E.B, Dean Plays Bob Vol. 2, Tony Greene Midnight Blue) instead of the 9-track Spotify list (ran dry in under an hour, Spotify 1-stream limit). Shuffled, repeat all.
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 15 and current_hour|int < 20 }}'
+              value_template: '{{ (current_hour|int >= 15 and current_hour|int < 20) and is_state(''binary_sensor.ma_youtube_music_available'', ''on'') }}'
             then:
             - continue_on_error: true
               action: media_player.shuffle_set
@@ -9294,7 +9294,7 @@
           - alias: Play Evening Kenny G playlist (9 PM - 11 PM) - 2026-10-10, MA library playlist library://playlist/102 (28 slow tracks - Breathless ballads, Classics in the Key of G, New Standards, Brazilian Nights, etc.), shuffled, repeat all. Replaced the full Breathless album (G-Bop, Sister Rose etc. too upbeat). Edit tracks in Music Assistant.
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 21 and current_hour|int < 23 }}'
+              value_template: '{{ (current_hour|int >= 21 and current_hour|int < 23) and is_state(''binary_sensor.ma_youtube_music_available'', ''on'') }}'
             then:
             - continue_on_error: true
               action: media_player.shuffle_set
@@ -9319,7 +9319,7 @@
           - alias: Play Piano Guys playlist (8 PM - 9 PM since 2026-10-10, swapped with Kenny G Breathless; was 9 PM+) - added 2026-10-03, the 8 PM album was too fast for late night. Since 2026-10-10 the curated MA library playlist "Welcome Home - Piano Guys Calm" (library://playlist/101, 33 calm pieces; replaced YT Music Most Popular, which had upbeat, Christmas and vlog tracks), in the playlist's order, started as ONE playlist item at input_number.welcome_home_night_playlist_position so each night resumes where the last ended (never expanded into per-track URIs, see the Good Morning playlist notes). The tracker automation advances the helper.
             if:
             - condition: template
-              value_template: '{{ current_hour|int >= 20 and current_hour|int < 21 }}'
+              value_template: '{{ (current_hour|int >= 20 and current_hour|int < 21) and is_state(''binary_sensor.ma_youtube_music_available'', ''on'') }}'
             then:
             - alias: Shuffle off and repeat all - curator's order, queue never runs dry
               continue_on_error: true
@@ -9352,6 +9352,36 @@
               action: rest_command.ma_kitchen_night_play_from
               data:
                 start_item: '{{ wh_night_start }}'
+          - alias: Give the chosen music a moment to start. The hour windows above only run while YouTube Music is up, because their library playlists are nearly all YouTube tracks and can half-work without it (2026-11-06).
+            wait_template: '{{ is_state(''media_player.kitchen_2'', ''playing'') or not is_state(''binary_sensor.ma_youtube_music_available'', ''on'') }}'
+            timeout:
+              seconds: 20
+            continue_on_timeout: true
+          - alias: Backup music for this hour when nothing started. Local albums first where a close match exists, since Spotify allows one stream at a time.
+            if:
+            - condition: template
+              value_template: '{{ not is_state(''media_player.kitchen_2'', ''playing'') }}'
+            then:
+            - continue_on_error: true
+              action: media_player.shuffle_set
+              target:
+                entity_id: media_player.kitchen_2
+              data:
+                shuffle: '{{ current_hour|int != 20 }}'
+            - continue_on_error: true
+              action: media_player.repeat_set
+              target:
+                entity_id: media_player.kitchen_2
+              data:
+                repeat: all
+            - continue_on_error: true
+              action: script.ma_play_with_fallback
+              data:
+                player: media_player.kitchen_2
+                skip_primary: true
+                fallback_id: >-
+                  {% set h = current_hour|int %}{% if 6 <= h < 12 %}spotify--LXCMhnPg://album/1dQDdZKvdJ5gNhUF56S8Qu{% elif 12 <= h < 15 %}spotify--LXCMhnPg://album/5OcK9W8oa6cIJi6gSovkot{% elif 15 <= h < 20 %}library://album/1248{% elif h == 20 %}spotify--LXCMhnPg://playlist/7jeLTMiA3idI2JnPqBhyWL{% else %}library://album/1525{% endif %}
+                fallback_type: '{{ ''playlist'' if current_hour|int == 20 else ''album'' }}'
       continue_on_error: true
   mode: single
   max_exceeded: silent

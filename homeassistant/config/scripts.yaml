@@ -1153,7 +1153,7 @@ ma_play_with_fallback:
         target:
           entity_id: "{{ player }}"
         data:
-          media_id: library://album/1311
+          media_id: library://album/1525
           media_type: album
           enqueue: replace
           radio_mode: false
