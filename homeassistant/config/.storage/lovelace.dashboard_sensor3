@@ -2748,10 +2748,6 @@
                       "name": "Still Energy"
                     },
                     {
-                      "entity": "sensor.bathroom_bathroom_presence_sensor_ambient_light",
-                      "name": "Ambient Light"
-                    },
-                    {
                       "entity": "binary_sensor.bathroom_sensor_group",
                       "name": "Bathroom Sensor Group"
                     }
