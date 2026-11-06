@@ -1143,6 +1143,24 @@ ma_play_with_fallback:
       timeout:
         seconds: 20
       continue_on_timeout: true
+    - alias: Last resort - local files, no login. Spotify allows one stream at a time, so a second room can be refused even when Spotify is healthy.
+      if:
+      - condition: template
+        value_template: "{{ not is_state(player, 'playing') }}"
+      then:
+      - continue_on_error: true
+        action: music_assistant.play_media
+        target:
+          entity_id: "{{ player }}"
+        data:
+          media_id: library://album/1311
+          media_type: album
+          enqueue: replace
+          radio_mode: false
+      - wait_template: "{{ is_state(player, 'playing') }}"
+        timeout:
+          seconds: 20
+        continue_on_timeout: true
     - if:
       - condition: template
         value_template: "{{ try_primary or not is_state(player, 'playing') }}"
@@ -1154,4 +1172,4 @@ ma_play_with_fallback:
           message: >-
             {{ state_attr(player, 'friendly_name') or player }}:
             {{ 'backup music is playing because the first choice did not start.' if is_state(player, 'playing')
-            else 'neither the first choice nor the backup would start.' }}
+            else 'no music would start, including the local backup.' }}
