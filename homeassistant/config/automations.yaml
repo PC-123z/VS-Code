@@ -16787,6 +16787,7 @@
       - a7D1ipDGa0s
       - kT-f2mfNL7s
     scene: "{% set cond = states('weather.forecast_home') %} {% set temp = state_attr('weather.forecast_home', 'temperature') | float(60) %} {% set elev = state_attr('sun.sun', 'elevation') | float(0) %} {% set rising = state_attr('sun.sun', 'rising') %} {# 2026-11-02 user: after 10 PM until dawn, something much calmer and dark -\n   moon over the sea 10 PM-midnight, red moon on the beach midnight-dawn,\n   regardless of weather #}\n{% if now().hour >= 22 %} late_night {% elif now().hour < 12 and elev <= -6 %} after_midnight {% elif cond in ['lightning', 'lightning-rainy'] %}\n  {{ 'storm_day' if elev > 0 else 'storm_night' }}\n{% elif cond in ['snowy', 'snowy-rainy', 'hail'] %} snow {% elif cond in ['rainy', 'pouring'] %} rain {% elif rising and -6 < elev < 15 %} sunrise {% elif elev <= 0 %}\n  {{ 'fireplace' if temp < 65 else 'beach_sunset' }}\n{% elif not rising and elev < 10 %}\n  {{ 'beach_sunset' if temp >= 60 else 'fireplace' }}\n{% elif temp >= 70 and cond in ['sunny', 'clear', 'partlycloudy'] %} beach {% elif temp < 45 %} fireplace {% else %} forest {% endif %}\n"
+    recent: '{{ states(''input_text.kitchen_ambient_video_recent'').split() | reject(''in'', [''unknown'', ''unavailable'']) | list }}'
     video_id: '{% set pool = videos[scene | trim] %}
 
       {% set fresh = pool | reject(''in'', recent) | list %}
@@ -16794,7 +16795,6 @@
       {{ (fresh or (pool | reject(''in'', recent[-1:]) | list) or pool) | random }}
 
       '
-    recent: '{{ states(''input_text.kitchen_ambient_video_recent'').split() | reject(''in'', [''unknown'', ''unavailable'']) | list }}'
     old_title: '{{ state_attr(''media_player.kitchen_tv_cast'', ''media_title'') or '''' }}'
   actions:
   - action: input_text.set_value
