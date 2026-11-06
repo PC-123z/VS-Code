@@ -2419,55 +2419,55 @@
                   "title": "Bathroom Radar Controls",
                   "entities": [
                     {
-                      "entity": "switch.bathroom_bathroom_050_engineering_mode",
+                      "entity": "switch.bathroom_bathroom_presence_sensor_050_engineering_mode",
                       "name": "Engineering Mode"
                     },
                     {
-                      "entity": "switch.bathroom_bathroom_010_radar_auto_calibration",
+                      "entity": "switch.bathroom_bathroom_presence_sensor_010_radar_auto_calibration",
                       "name": "Auto Calibration"
                     },
                     {
-                      "entity": "sensor.bathroom_bathroom_01_calibration_status",
+                      "entity": "sensor.bathroom_bathroom_presence_sensor_01_calibration_status",
                       "name": "Calibration Status"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_011_duration",
+                      "entity": "number.bathroom_bathroom_presence_sensor_011_duration",
                       "name": "Calibration Duration"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_012_margin",
+                      "entity": "number.bathroom_bathroom_presence_sensor_012_margin",
                       "name": "Calibration Margin"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_020_presence_hold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_020_presence_hold",
                       "name": "Presence Hold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_030_max_move_distance_gate",
+                      "entity": "number.bathroom_bathroom_presence_sensor_030_max_move_distance_gate",
                       "name": "Max Move Distance Gate"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_040_max_still_distance_gate",
+                      "entity": "number.bathroom_bathroom_presence_sensor_040_max_still_distance_gate",
                       "name": "Max Still Distance Gate"
                     },
                     {
-                      "entity": "button.bathroom_bathroom_01_radar_refresh_values",
+                      "entity": "button.bathroom_bathroom_presence_sensor_01_radar_refresh_values",
                       "name": "Refresh Values"
                     },
                     {
-                      "entity": "button.bathroom_bathroom_02_radar_restart",
+                      "entity": "button.bathroom_bathroom_presence_sensor_02_radar_restart",
                       "name": "Restart Radar"
                     },
                     {
-                      "entity": "button.bathroom_bathroom_04_esp32_restart",
+                      "entity": "button.bathroom_bathroom_presence_sensor_04_esp32_restart",
                       "name": "ESP Reboot"
                     },
                     {
-                      "entity": "sensor.bathroom_bathroom_02_radar_firmware",
+                      "entity": "sensor.bathroom_bathroom_presence_sensor_02_radar_firmware",
                       "name": "Radar Firmware"
                     },
                     {
-                      "entity": "update.bathroom_bathroom_06_mcu_firmware",
+                      "entity": "update.bathroom_bathroom_presence_sensor_06_mcu_firmware",
                       "name": "MCU Firmware"
                     }
                   ]
@@ -2491,7 +2491,7 @@
                   },
                   "entities": [
                     {
-                      "entity": "sensor.bathroom_bathroom_still_distance",
+                      "entity": "sensor.bathroom_bathroom_presence_sensor_still_distance",
                       "name": "Still",
                       "marker": {
                         "color": "#274e13"
@@ -2501,7 +2501,7 @@
                       ]
                     },
                     {
-                      "entity": "sensor.bathroom_bathroom_moving_distance",
+                      "entity": "sensor.bathroom_bathroom_presence_sensor_moving_distance",
                       "name": "Moving",
                       "marker": {
                         "color": "#4b0082"
@@ -2511,7 +2511,7 @@
                       ]
                     },
                     {
-                      "entity": "sensor.bathroom_bathroom_detection_distance",
+                      "entity": "sensor.bathroom_bathroom_presence_sensor_detection_distance",
                       "name": "Detection",
                       "marker": {
                         "color": "#8b0000"
@@ -2553,15 +2553,15 @@
                   "hours_to_show": 6,
                   "entities": [
                     {
-                      "entity": "binary_sensor.bathroom_bathroom_presence",
+                      "entity": "binary_sensor.bathroom_bathroom_presence_sensor_presence",
                       "name": "Radar Presence"
                     },
                     {
-                      "entity": "binary_sensor.bathroom_bathroom_moving_target",
+                      "entity": "binary_sensor.bathroom_bathroom_presence_sensor_moving_target",
                       "name": "Moving"
                     },
                     {
-                      "entity": "binary_sensor.bathroom_bathroom_still_target",
+                      "entity": "binary_sensor.bathroom_bathroom_presence_sensor_still_target",
                       "name": "Still"
                     },
                     {
@@ -2582,7 +2582,7 @@
                   "raw_plotly_config": true,
                   "init": [
                     "$ex { vars.get_entity_state = (entity, default_state) => { let entity_obj = hass.states[entity]; if (entity_obj === undefined) { if (default_state === undefined) { throw new TypeError(\"Entity not found -> \" + entity); } return default_state; } var state = entity_obj.state; if (state === undefined || state === null || state === 'unknown') { if (default_state === undefined) { throw new TypeError(\"Entity state is undefined or null -> \" + entity); } return default_state; } return state; }; }",
-                    "$ex { let eng = vars.get_entity_state('switch.bathroom_bathroom_050_engineering_mode', 'off'); vars.show_eng = eng === 'on'; }"
+                    "$ex { let eng = vars.get_entity_state('switch.bathroom_bathroom_presence_sensor_050_engineering_mode', 'off'); vars.show_eng = eng === 'on'; }"
                   ],
                   "defaults": {
                     "entity": {
@@ -2610,15 +2610,15 @@
                         "color": "#4b0082"
                       },
                       "y": [
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g0_move_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g1_move_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g2_move_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g3_move_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g4_move_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g5_move_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g6_move_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g7_move_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g8_move_energy', 0)"
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g0_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g1_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g2_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g3_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g4_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g5_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g6_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g7_move_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g8_move_energy', 0)"
                       ]
                     },
                     {
@@ -2634,15 +2634,15 @@
                         "color": "#9467bd"
                       },
                       "y": [
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g0_move_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g1_move_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g2_move_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g3_move_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g4_move_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g5_move_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g6_move_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g7_move_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g8_move_threshold')"
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g0_move_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g1_move_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g2_move_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g3_move_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g4_move_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g5_move_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g6_move_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g7_move_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g8_move_threshold')"
                       ]
                     },
                     {
@@ -2654,15 +2654,15 @@
                         "color": "#274e13"
                       },
                       "y": [
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g0_still_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g1_still_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g2_still_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g3_still_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g4_still_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g5_still_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g6_still_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g7_still_energy', 0)",
-                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_g8_still_energy', 0)"
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g0_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g1_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g2_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g3_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g4_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g5_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g6_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g7_still_energy', 0)",
+                        "$ex vars.get_entity_state('sensor.bathroom_bathroom_presence_sensor_g8_still_energy', 0)"
                       ]
                     },
                     {
@@ -2678,15 +2678,15 @@
                         "color": "#6aa84f"
                       },
                       "y": [
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g0_still_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g1_still_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g2_still_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g3_still_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g4_still_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g5_still_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g6_still_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g7_still_threshold')",
-                        "$ex vars.get_entity_state('number.bathroom_bathroom_g8_still_threshold')"
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g0_still_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g1_still_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g2_still_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g3_still_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g4_still_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g5_still_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g6_still_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g7_still_threshold')",
+                        "$ex vars.get_entity_state('number.bathroom_bathroom_presence_sensor_g8_still_threshold')"
                       ]
                     }
                   ],
@@ -2728,27 +2728,27 @@
                   "title": "Bathroom Radar Target / Presence",
                   "entities": [
                     {
-                      "entity": "binary_sensor.bathroom_bathroom_presence",
+                      "entity": "binary_sensor.bathroom_bathroom_presence_sensor_presence",
                       "name": "Presence"
                     },
                     {
-                      "entity": "binary_sensor.bathroom_bathroom_moving_target",
+                      "entity": "binary_sensor.bathroom_bathroom_presence_sensor_moving_target",
                       "name": "Moving Target"
                     },
                     {
-                      "entity": "binary_sensor.bathroom_bathroom_still_target",
+                      "entity": "binary_sensor.bathroom_bathroom_presence_sensor_still_target",
                       "name": "Still Target"
                     },
                     {
-                      "entity": "sensor.bathroom_bathroom_move_energy",
+                      "entity": "sensor.bathroom_bathroom_presence_sensor_move_energy",
                       "name": "Move Energy"
                     },
                     {
-                      "entity": "sensor.bathroom_bathroom_still_energy",
+                      "entity": "sensor.bathroom_bathroom_presence_sensor_still_energy",
                       "name": "Still Energy"
                     },
                     {
-                      "entity": "sensor.bathroom_bathroom_ambient_light",
+                      "entity": "sensor.bathroom_bathroom_presence_sensor_ambient_light",
                       "name": "Ambient Light"
                     },
                     {
@@ -2767,75 +2767,75 @@
                   "title": "Gate Thresholds",
                   "entities": [
                     {
-                      "entity": "number.bathroom_bathroom_g0_move_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g0_move_threshold",
                       "name": "G0 Move Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g0_still_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g0_still_threshold",
                       "name": "G0 Still Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g1_move_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g1_move_threshold",
                       "name": "G1 Move Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g1_still_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g1_still_threshold",
                       "name": "G1 Still Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g2_move_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g2_move_threshold",
                       "name": "G2 Move Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g2_still_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g2_still_threshold",
                       "name": "G2 Still Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g3_move_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g3_move_threshold",
                       "name": "G3 Move Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g3_still_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g3_still_threshold",
                       "name": "G3 Still Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g4_move_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g4_move_threshold",
                       "name": "G4 Move Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g4_still_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g4_still_threshold",
                       "name": "G4 Still Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g5_move_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g5_move_threshold",
                       "name": "G5 Move Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g5_still_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g5_still_threshold",
                       "name": "G5 Still Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g6_move_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g6_move_threshold",
                       "name": "G6 Move Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g6_still_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g6_still_threshold",
                       "name": "G6 Still Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g7_move_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g7_move_threshold",
                       "name": "G7 Move Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g7_still_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g7_still_threshold",
                       "name": "G7 Still Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g8_move_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g8_move_threshold",
                       "name": "G8 Move Threshold"
                     },
                     {
-                      "entity": "number.bathroom_bathroom_g8_still_threshold",
+                      "entity": "number.bathroom_bathroom_presence_sensor_g8_still_threshold",
                       "name": "G8 Still Threshold"
                     }
                   ]
