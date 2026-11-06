@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "minor_version": 2,
+  "minor_version": 3,
   "key": "repairs.issue_registry",
   "data": {
     "issues": [
@@ -9,238 +9,272 @@
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_311536795_tags/v5.14.1"
+        "issue_id": "restart_required_311536795_tags/v5.14.1",
+        "config_entry_id": null
       },
       {
         "created": "2026-02-28T05:49:43.190194+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_1081435944_tags/v2.5.1"
+        "issue_id": "restart_required_1081435944_tags/v2.5.1",
+        "config_entry_id": null
       },
       {
         "created": "2026-03-22T12:55:46.695735+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.7.1"
+        "issue_id": "restart_required_656992550_tags/v1.7.1",
+        "config_entry_id": null
       },
       {
         "created": "2026-03-23T05:43:18.159815+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.7.3"
+        "issue_id": "restart_required_656992550_tags/v1.7.3",
+        "config_entry_id": null
       },
       {
         "created": "2026-03-25T04:37:11.289662+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.7.4"
+        "issue_id": "restart_required_656992550_tags/v1.7.4",
+        "config_entry_id": null
       },
       {
         "created": "2026-03-25T04:37:33.237690+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_311536795_tags/v5.15.0"
+        "issue_id": "restart_required_311536795_tags/v5.15.0",
+        "config_entry_id": null
       },
       {
         "created": "2026-03-25T15:31:58.473218+00:00",
         "dismissed_version": null,
         "domain": "template",
         "is_persistent": false,
-        "issue_id": "deprecate_legacy_templates_switch_volvo_climatization_voice_27b0d25e8b2e5addad9615169bf819f6"
+        "issue_id": "deprecate_legacy_templates_switch_volvo_climatization_voice_27b0d25e8b2e5addad9615169bf819f6",
+        "config_entry_id": null
       },
       {
         "created": "2026-04-01T14:47:29.479338+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_1130928743_tags/v0.6.0"
+        "issue_id": "restart_required_1130928743_tags/v0.6.0",
+        "config_entry_id": null
       },
       {
         "created": "2026-04-05T19:17:23.550651+00:00",
         "dismissed_version": null,
         "domain": "homeassistant",
         "is_persistent": false,
-        "issue_id": "platform_integration_no_support_camera_generic"
+        "issue_id": "platform_integration_no_support_camera_generic",
+        "config_entry_id": null
       },
       {
         "created": "2026-04-27T18:42:23.458424+00:00",
         "dismissed_version": "2026.4.4",
         "domain": "template",
         "is_persistent": false,
-        "issue_id": "deprecate_legacy_templates_light_office_fan_light_951eda8a9ac52b5e60b74c02fbdc60fe"
+        "issue_id": "deprecate_legacy_templates_light_office_fan_light_951eda8a9ac52b5e60b74c02fbdc60fe",
+        "config_entry_id": null
       },
       {
         "created": "2026-04-27T18:50:33.647624+00:00",
         "dismissed_version": "2026.4.4",
         "domain": "template",
         "is_persistent": false,
-        "issue_id": "deprecate_legacy_templates_light_office_fan_light_07d1240f56304028ec45d2fc6ee43bf0"
+        "issue_id": "deprecate_legacy_templates_light_office_fan_light_07d1240f56304028ec45d2fc6ee43bf0",
+        "config_entry_id": null
       },
       {
         "created": "2026-05-01T11:52:32.513176+00:00",
         "dismissed_version": null,
         "domain": "homeassistant",
         "is_persistent": false,
-        "issue_id": "config_entry_reauth_volvo_01KQGX9D8VNNCG3FT0197ZAP9R"
+        "issue_id": "config_entry_reauth_volvo_01KQGX9D8VNNCG3FT0197ZAP9R",
+        "config_entry_id": null
       },
       {
         "created": "2026-05-13T04:22:36.042361+00:00",
         "dismissed_version": null,
         "domain": "homeassistant",
         "is_persistent": false,
-        "issue_id": "config_entry_reauth_vesync_01KJNB5QZM9BN78TEQSRMN3SMZ"
+        "issue_id": "config_entry_reauth_vesync_01KJNB5QZM9BN78TEQSRMN3SMZ",
+        "config_entry_id": null
       },
       {
         "created": "2026-05-13T04:23:32.468094+00:00",
         "dismissed_version": null,
         "domain": "cloud",
         "is_persistent": false,
-        "issue_id": "connection_error_2026-06-01 00:00:00+00:00"
+        "issue_id": "connection_error_2026-06-01 00:00:00+00:00",
+        "config_entry_id": null
       },
       {
         "created": "2026-05-17T19:52:26.656178+00:00",
         "dismissed_version": null,
         "domain": "mqtt",
         "is_persistent": false,
-        "issue_id": "-0x1a02427d04e3cced"
+        "issue_id": "-0x1a02427d04e3cced",
+        "config_entry_id": null
       },
       {
         "created": "2026-05-23T00:34:21.266727+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_139664351_tags/v5.15.4"
+        "issue_id": "restart_required_139664351_tags/v5.15.4",
+        "config_entry_id": null
       },
       {
         "created": "2026-05-23T00:34:30.837962+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.9.0"
+        "issue_id": "restart_required_656992550_tags/v1.9.0",
+        "config_entry_id": null
       },
       {
         "created": "2026-05-23T00:34:43.309419+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_1081435944_tags/v2.7.1"
+        "issue_id": "restart_required_1081435944_tags/v2.7.1",
+        "config_entry_id": null
       },
       {
         "created": "2026-06-01T06:33:16.453142+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.9.5"
+        "issue_id": "restart_required_656992550_tags/v1.9.5",
+        "config_entry_id": null
       },
       {
         "created": "2026-06-01T06:33:23.068658+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.9.7"
+        "issue_id": "restart_required_656992550_tags/v1.9.7",
+        "config_entry_id": null
       },
       {
         "created": "2026-06-05T04:09:42.128908+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.9.8"
+        "issue_id": "restart_required_656992550_tags/v1.9.8",
+        "config_entry_id": null
       },
       {
         "created": "2026-06-05T18:22:04.683025+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.9.9"
+        "issue_id": "restart_required_656992550_tags/v1.9.9",
+        "config_entry_id": null
       },
       {
         "created": "2026-06-27T15:15:09.400319+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_1081435944_tags/v2.8.2"
+        "issue_id": "restart_required_1081435944_tags/v2.8.2",
+        "config_entry_id": null
       },
       {
         "created": "2026-06-27T15:15:19.577042+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.9.21"
+        "issue_id": "restart_required_656992550_tags/v1.9.21",
+        "config_entry_id": null
       },
       {
         "created": "2026-07-12T21:36:04.034612+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.10.1"
+        "issue_id": "restart_required_656992550_tags/v1.10.1",
+        "config_entry_id": null
       },
       {
         "created": "2026-07-17T04:45:06.046598+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_1081435944_tags/v2.8.3"
+        "issue_id": "restart_required_1081435944_tags/v2.8.3",
+        "config_entry_id": null
       },
       {
         "created": "2026-07-20T20:26:24.994528+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_1130928743_tags/v0.7.0"
+        "issue_id": "restart_required_1130928743_tags/v0.7.0",
+        "config_entry_id": null
       },
       {
         "created": "2026-08-13T12:57:52.723891+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_1130928743_tags/v0.7.1"
+        "issue_id": "restart_required_1130928743_tags/v0.7.1",
+        "config_entry_id": null
       },
       {
         "created": "2026-08-13T12:58:10.041534+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.11.2"
+        "issue_id": "restart_required_656992550_tags/v1.11.2",
+        "config_entry_id": null
       },
       {
         "created": "2026-09-04T21:13:57.610190+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_311536795_tags/v5.15.6"
+        "issue_id": "restart_required_311536795_tags/v5.15.6",
+        "config_entry_id": null
       },
       {
         "created": "2026-09-04T21:14:12.779609+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_656992550_tags/v1.11.8"
+        "issue_id": "restart_required_656992550_tags/v1.11.8",
+        "config_entry_id": null
       },
       {
         "created": "2026-09-06T23:29:24.549972+00:00",
         "dismissed_version": null,
         "domain": "homeassistant",
         "is_persistent": false,
-        "issue_id": "config_entry_reauth_alexa_media_01KWB126HVY7XT65ZYWQK9Q43N"
+        "issue_id": "config_entry_reauth_alexa_media_01KWB126HVY7XT65ZYWQK9Q43N",
+        "config_entry_id": null
       },
       {
         "created": "2026-09-13T16:32:14.322059+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_139664351_tags/v5.16.0"
+        "issue_id": "restart_required_139664351_tags/v5.16.0",
+        "config_entry_id": null
       },
       {
         "created": "2026-09-21T00:33:32.536007+00:00",
         "dismissed_version": null,
         "domain": "hacs",
         "is_persistent": false,
-        "issue_id": "restart_required_1130928743_tags/v0.10.0"
+        "issue_id": "restart_required_1130928743_tags/v0.10.0",
+        "config_entry_id": null
       }
     ]
   }
