@@ -16836,13 +16836,19 @@
             entity_id: media_player.kitchen_tv
         - delay:
             seconds: 2
-    - alias: Unmute and set volume 3 (out of 100) - quiet background sound
-      action: media_player.volume_mute
-      continue_on_error: true
-      target:
+    - alias: Unmute only if actually muted - the BRAVIA integration ignores is_volume_muted and always toggles (2026-11-06)
+      if:
+      - condition: state
         entity_id: media_player.kitchen_tv
-      data:
-        is_volume_muted: false
+        attribute: is_volume_muted
+        state: true
+      then:
+      - action: media_player.volume_mute
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen_tv
+        data:
+          is_volume_muted: false
     - action: media_player.volume_set
       continue_on_error: true
       target:
@@ -16944,12 +16950,6 @@
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.kitchen_ambient_video
-  - action: media_player.volume_mute
-    continue_on_error: true
-    target:
-      entity_id: media_player.kitchen_tv
-    data:
-      is_volume_muted: false
   mode: single
 - id: '1793100000001'
   alias: Music Assistant - YouTube Music down alert
