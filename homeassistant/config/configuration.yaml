@@ -178,6 +178,9 @@ input_text:
   kitchen_ambient_video_title:
     name: "Kitchen Ambient Video Title (what the presence automation started)"
     max: 255
+  kitchen_ambient_video_recent:
+    name: "Kitchen Ambient Video Recent IDs (so each scene rotates before repeating)"
+    max: 255
 
 # Template switches + sensors
 template:
