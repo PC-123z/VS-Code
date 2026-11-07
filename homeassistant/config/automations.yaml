@@ -16981,3 +16981,35 @@
       data:
         tag: ma_youtube_music_down
   mode: single
+- id: '1793200000001'
+  alias: 'Kitchen: Empty-Room Lights-Off Watchdog'
+  description: 'Added 2026-11-06. Safety net for Smart Motion & Presence, whose off logic only fires on the sensor group changing to empty. Lights relit while the room is already empty (no-context relights of Kitchen - Up on 10-31, 11-03, 11-06, the last left on 6+ h) or a restart/reload wiping the 3:30 state-for timer leave nothing to turn them off. Checks every minute: any of the 5 kitchen Hue lights on + sensor group not on for 15+ min -> off. Pico hold needs no guard, it clears at 10 min empty.'
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+  conditions:
+  - condition: template
+    value_template: '{{ [''light.kitchen_1_color'', ''light.kitchen_2_color'', ''light.kitchen_lightstrip'', ''light.hue_datura_top_1'', ''light.hue_datura_bottom_1''] | select(''is_state'', ''on'') | list | count > 0 }}'
+  - condition: template
+    value_template: '{% set s = states.binary_sensor.kitchen_sensor_group %}{{ s is not none and s.state == ''off'' and (now() - s.last_changed).total_seconds() >= 900 }}'
+  actions:
+  - alias: AL off first so it can't re-adapt them back on
+    action: switch.turn_off
+    target:
+      entity_id: switch.al_kitchen
+  - continue_on_error: true
+    action: adaptive_lighting.set_manual_control
+    data:
+      entity_id: switch.al_kitchen
+      manual_control: false
+  - action: light.turn_off
+    target:
+      entity_id:
+      - light.kitchen_1_color
+      - light.kitchen_2_color
+      - light.kitchen_lightstrip
+      - light.hue_datura_top_1
+      - light.hue_datura_bottom_1
+    data:
+      transition: 5
+  mode: single
