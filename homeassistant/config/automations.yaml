@@ -15019,7 +15019,7 @@
       message: 'Unavailable after {{ trigger.id }}: {{ broken | join('', '') }}. Usually a config validation error (check Settings > System > Logs for "could not be validated") or a removed item''s leftover entity.'
 - id: '1790300000001'
   alias: 'Big Bedroom Radar: Fan-Aware Still Thresholds'
-  description: 'The ceiling + pedestal fans give the same still energy (~27/36/24/20 at gates 3-6, ~3 m) as a sleeper, so the MSR-2 cannot tell a still person from a running fan. Sensitive profile (fans off, or asleep flag on) detects someone lying in bed; high profile (any fan on and not asleep) sits above the fan floor so a fan left on in an empty room cannot hold the room occupied. Move thresholds are static (walk-in detection near the sensor). Measured 2026-10-08: empty-room still energy <=17, fan-only g3-g6 peaks 32/42/26/25.'
+  description: 'The ceiling + pedestal fans give the same still energy (~27/36/24/20 at gates 3-6, ~3 m) as a sleeper, so the MSR-2 cannot tell a still person from a running fan. Sensitive profile (fans off, or asleep flag on) detects someone lying in bed; high profile (any fan on and not asleep) sits above the fan floor so a fan left on in an empty room cannot hold the room occupied. Move thresholds are static (walk-in detection near the sensor). Measured 2026-10-08: empty-room still energy <=17, fan-only g3-g6 peaks 32/42/26/25. Fan-off revert to sensitive delayed 3 min (2026-11-08): without it, residual air movement kept the sensor group falsely occupied for several minutes after the fan switched off.'
   mode: queued
   max: 3
   triggers:
@@ -15027,7 +15027,18 @@
     entity_id:
     - fan.big_bedroom_fan
     - fan.air_circulator
-    - input_boolean.big_bedroom_asleep
+    to: 'on'
+    id: fan_on
+  - trigger: state
+    entity_id:
+    - fan.big_bedroom_fan
+    - fan.air_circulator
+    to: 'off'
+    for:
+      minutes: 3
+    id: fan_off
+  - trigger: state
+    entity_id: input_boolean.big_bedroom_asleep
     to:
     - 'on'
     - 'off'
