@@ -6263,10 +6263,10 @@
   mode: single
 - id: '1776378473889'
   alias: '*Bedroom 2 Good Morning Routine'
-  description: Triggers on weekdays at input_datetime.bedroom_2_wake_time only if bedroom2_occupied is on. Pre-staged lights to prevent flash, skipped if the room is already lit so a late run never dims it. Staged ramp, wake album, TTS on motion, fans off. Music until presence clears or 7:30am.
+  description: Triggers on weekdays at 6:30am (fixed time in the trigger, like Big Bedroom) only if bedroom2_occupied is on. Pre-staged lights to prevent flash, skipped if the room is already lit so a late run never dims it. Staged ramp, wake album, TTS on motion, fans off. Music until presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: input_datetime.bedroom_2_wake_time
+    at: 06:30:00
     weekday:
     - mon
     - tue
