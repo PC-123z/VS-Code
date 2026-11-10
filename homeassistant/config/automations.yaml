@@ -10997,16 +10997,16 @@
     - wed
     - thu
     - fri
-    enabled: true
+    enabled: false
   - trigger: time
-    at: 06:35:00
+    at: 08:05:00
     weekday:
     - mon
     - tue
     - wed
     - thu
     - fri
-    enabled: false
+    enabled: true
   - trigger: time
     at: 09:00:00
     weekday:
