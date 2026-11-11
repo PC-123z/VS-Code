@@ -12710,70 +12710,6 @@
     target:
       entity_id: input_boolean.office_pc_wake
   mode: single
-- id: '1790100000003'
-  alias: Presence Sensor Stuck-On Watchdog (Big Bedroom, Dining Room)
-  description: Added 2026-09-24. Companion to 'Presence Sensor Stuck-On Watchdog (Kitchen,
-    Bedroom 2, Living Room)' - same 30-min check and full ESP reboot with a phone
-    notification, for the two radar groups it does not cover. Replaces the earlier
-    Big Bedroom-only watchdog. Big Bedroom skips while the asleep flag is on (legitimate
-    long occupancy). A radar-only restart was unreliable (2026-09-23 it only moved
-    the ghost to another zone), hence the full reboot. Changed 2026-10-10 - stuck
-    time counts from the LATER of the zone turning on and the skip (asleep) flag last
-    changing, because at 10 AM the Good Morning routine cleared big_bedroom_asleep
-    0.2 s before this check and the zone occupied all night by the sleeper was flagged
-    and rebooted.
-  triggers:
-  - trigger: time_pattern
-    minutes: /30
-  conditions: []
-  actions:
-  - variables:
-      watch:
-      - name: Big Bedroom radar
-        sensors:
-        - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy
-        - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy
-        - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy
-        button: button.apollo_msr_2_big_bedroom_esp_reboot
-        skip:
-        - input_boolean.big_bedroom_asleep
-      - name: Dining Room radar
-        sensors:
-        - binary_sensor.dining_room_apollo_ld2450_presence
-        button: button.dining_room_apollo_esp_reboot
-        skip: []
-  - repeat:
-      for_each: '{{ watch }}'
-      sequence:
-      - variables:
-          stuck: '{% set ns = namespace(l=[]) %}{% for e in repeat.item.sensors %}{%
-            set st = states[e] %}{% if st is not none and st.state == ''on'' %}{%
-            set t = namespace(start=st.last_changed) %}{% for k in repeat.item.skip
-            %}{% set ks = states[k] %}{% if ks is not none and ks.last_changed > t.start
-            %}{% set t.start = ks.last_changed %}{% endif %}{% endfor %}{% if (now()
-            - t.start).total_seconds() >= 10800 %}{% set ns.l = ns.l + [e] %}{% endif
-            %}{% endif %}{% endfor %}{{ ns.l }}'
-          skipped: '{% set ns = namespace(v=false) %}{% for e in repeat.item.skip
-            %}{% if is_state(e, ''on'') or is_state(e, ''playing'') %}{% set ns.v
-            = true %}{% endif %}{% endfor %}{{ ns.v }}'
-      - alias: Sensor stuck on 3+ hours and not a legitimate long occupancy
-        if:
-        - condition: template
-          value_template: '{{ stuck | length > 0 and not skipped }}'
-        then:
-        - alias: Notify so it's visible when this fires
-          continue_on_error: true
-          action: notify.mobile_app_pc_iphone
-          data:
-            title: Presence Sensor Watchdog
-            message: '{{ repeat.item.name }} has read occupied for 3+ hours ({{ stuck
-              | join('', '') }}) - rebooting the sensor.'
-        - alias: Full ESP reboot
-          continue_on_error: true
-          action: button.press
-          target:
-            entity_id: '{{ repeat.item.button }}'
-  mode: single
 - id: '1775510700000'
   alias: 'Big Bedroom: Nanoleaf stuck-on watchdog'
   description: The Nanoleaf frequently drops offline (unavailable) and can miss the
@@ -14644,83 +14580,6 @@
         data: {}
   mode: queued
   max: 3
-- id: '1790100000002'
-  alias: Presence Sensor Stuck-On Watchdog (Kitchen, Bedroom 2, Living Room)
-  description: 'Added 2026-09-24. Checks every 30 min. If a radar presence sensor
-    has been continuously ON for 3+ hours it is treated as stuck (phantom still-target)
-    and its ESP is fully rebooted, with a phone notification; if it is still stuck
-    30 min later it retries. Presence that never clears keeps music, lights and fans
-    running, so this pairs with the Welcome Home 60-minute hard cap. Same approach
-    as ''Big Bedroom: Presence Sensor Stuck-On Watchdog'' (a full ESP reboot, not
-    just a radar restart). Skips legitimate long occupancy: Bedroom 2 while occupied/asleep,
-    Living Room while the TV or Apple TV is playing. Bathroom (Hue motion) has no
-    reset button so it is not covered.'
-  triggers:
-  - trigger: time_pattern
-    minutes: /30
-  conditions: []
-  actions:
-  - variables:
-      watch:
-      - name: Kitchen radar
-        sensors:
-        - binary_sensor.kitchen_occupancy_sensor_radar_zone_1_occupancy
-        - binary_sensor.kitchen_occupancy_sensor_radar_zone_2_occupancy
-        - binary_sensor.kitchen_occupancy_sensor_radar_zone_3_occupancy
-        button: button.kitchen_occupancy_sensor_esp_reboot
-        skip: []
-      - name: Bedroom 2 radar (Apollo)
-        sensors:
-        - binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy
-        - binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy
-        - binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
-        button: button.bedroom2_sensor_apollo_esp_reboot
-        skip:
-        - input_boolean.bedroom2_occupied
-        - input_boolean.bedroom2_asleep
-      - name: Bedroom 2 door radar
-        sensors:
-        - binary_sensor.bedroom2_office_bedroom2_door_presence
-        button: button.bedroom2_office_bedroom2_door_04_esp32_restart
-        skip:
-        - input_boolean.bedroom2_occupied
-        - input_boolean.bedroom2_asleep
-      - name: Living Room radar
-        sensors:
-        - binary_sensor.apollo_r_pro_1_740624_ld2450_presence
-        button: button.apollo_r_pro_1_740624_esp_reboot
-        skip:
-        - sensor.living_room_tv_ma_state
-        - media_player.living_room_appletv_2
-  - repeat:
-      for_each: '{{ watch }}'
-      sequence:
-      - variables:
-          stuck: '{% set ns = namespace(l=[]) %}{% for e in repeat.item.sensors %}{%
-            set st = states[e] %}{% if st is not none and st.state == ''on'' and (now()
-            - st.last_changed).total_seconds() >= 10800 %}{% set ns.l = ns.l + [e]
-            %}{% endif %}{% endfor %}{{ ns.l }}'
-          skipped: '{% set ns = namespace(v=false) %}{% for e in repeat.item.skip
-            %}{% if is_state(e, ''on'') or is_state(e, ''playing'') %}{% set ns.v
-            = true %}{% endif %}{% endfor %}{{ ns.v }}'
-      - alias: Sensor stuck on 3+ hours and not a legitimate long occupancy
-        if:
-        - condition: template
-          value_template: '{{ stuck | length > 0 and not skipped }}'
-        then:
-        - alias: Notify so it's visible when this fires
-          continue_on_error: true
-          action: notify.mobile_app_pc_iphone
-          data:
-            title: Presence Sensor Watchdog
-            message: '{{ repeat.item.name }} has read occupied for 3+ hours ({{ stuck
-              | join('', '') }}) - rebooting the sensor.'
-        - alias: Full ESP reboot
-          continue_on_error: true
-          action: button.press
-          target:
-            entity_id: '{{ repeat.item.button }}'
-  mode: single
 - id: '1790200000001'
   alias: Dining Room TV Dim - Watchdog
   description: Backstop for input_boolean.dining_room_tv_dim getting stuck on. The
@@ -16739,11 +16598,11 @@
   - action: notify.mobile_app_pc_iphone
     data:
       title: Outside lights were not at 80%
-      message: 'Hourly check at {{ now().strftime(''%-I:%M %p'') }} found {{ before
-        }} (expected on at 80%). Forced 80% - now Front Porch {{ states(''light.front_porch'')
-        }} {{ (state_attr(''light.front_porch'', ''brightness'') | int(0) / 2.55)
-        | round }}%, Back {{ states(''light.back_outside'') }} {{ (state_attr(''light.back_outside'',
-        ''brightness'') | int(0) / 2.55) | round }}%.'
+      message: Hourly check at {{ now().strftime('%-I:%M %p') }} found {{ before }}
+        (expected on at 80%). Forced 80% - now Front Porch {{ states('light.front_porch')
+        }} {{ (state_attr('light.front_porch', 'brightness') | int(0) / 2.55) | round
+        }}%, Back {{ states('light.back_outside') }} {{ (state_attr('light.back_outside',
+        'brightness') | int(0) / 2.55) | round }}%.
   mode: single
 - id: '1791000000102'
   alias: Outside Lights Turned Off At Night Alert
@@ -17423,7 +17282,8 @@
       ''on'') else 900 %}{{ s is none or (s.state != ''on'' and (now() - s.last_changed).total_seconds()
       >= limit) }}'
   actions:
-  - alias: Log + notify what was left on before switching it off (Lights Watchdog report, 2026-11-11)
+  - alias: Log + notify what was left on before switching it off (Lights Watchdog
+      report, 2026-11-11)
     continue_on_error: true
     action: script.lights_watchdog_report
     data:
@@ -17441,8 +17301,11 @@
         - light.dining_top_1
         - light.dining_top_2
         - light.dining_top_3
-        reason: '{{ ''room empty '' ~ (((now() - states.binary_sensor.dining_room_sensor_group.last_changed).total_seconds() / 60) | round | int) ~ '' min'' }}'
-        note: "{{ 'dimmer hold override was on - this is its normal 30-min off path, not a glitch' if is_state('input_boolean.dining_room_manual_override', 'on') else '' }}"
+        reason: '{{ ''room empty '' ~ (((now() - states.binary_sensor.dining_room_sensor_group.last_changed).total_seconds()
+          / 60) | round | int) ~ '' min'' }}'
+        note: '{{ ''dimmer hold override was on - this is its normal 30-min off path,
+          not a glitch'' if is_state(''input_boolean.dining_room_manual_override'',
+          ''on'') else '''' }}'
   - alias: Nothing playing - hand dining back from TV Mode
     if:
     - condition: template
@@ -19184,7 +19047,8 @@
       not none and s.state == ''off'' and (now() - s.last_changed).total_seconds()
       >= 900 }}'
   actions:
-  - alias: Log + notify what was left on before switching it off (Lights Watchdog report, 2026-11-11)
+  - alias: Log + notify what was left on before switching it off (Lights Watchdog
+      report, 2026-11-11)
     continue_on_error: true
     action: script.lights_watchdog_report
     data:
@@ -19198,8 +19062,10 @@
         - light.kitchen_lightstrip
         - light.hue_datura_top_1
         - light.hue_datura_bottom_1
-        reason: '{{ ''room empty '' ~ (((now() - states.binary_sensor.kitchen_sensor_group.last_changed).total_seconds() / 60) | round | int) ~ '' min'' }}'
-        note: "{{ 'Kitchen Smart Motion is DISABLED' if is_state('automation.kitchen_on', 'off') else '' }}"
+        reason: '{{ ''room empty '' ~ (((now() - states.binary_sensor.kitchen_sensor_group.last_changed).total_seconds()
+          / 60) | round | int) ~ '' min'' }}'
+        note: '{{ ''Kitchen Smart Motion is DISABLED'' if is_state(''automation.kitchen_on'',
+          ''off'') else '''' }}'
   - alias: AL off first so it can't re-adapt them back on
     action: switch.turn_off
     target:
@@ -19222,10 +19088,10 @@
   mode: single
 - id: '1793300000001'
   alias: 'Lights Watchdog: 30-Minute Whole-House Audit'
-  description: 'Added 2026-11-11. Every 30 minutes, compares every light in HA against
+  description: Added 2026-11-11. Every 30 minutes, compares every light in HA against
     what should be happening and corrects + reports the ones that should be off. A
     room is "should be off" when ALL of its raw presence sensors (not the debounced/sleep-aware
-    sensor groups - Big Bedroom''s group reads occupied the whole time sleep mode is
+    sensor groups - Big Bedroom's group reads occupied the whole time sleep mode is
     on, which is how Bedroom Lamp 2 sat on 3 h on 2026-11-11) have been off for empty_min
     minutes, no hold entity is on, and the light itself has been on 15+ min. Outside
     lights "should be off" once the sun has been up 30+ min. Only ever turns lights
@@ -19235,7 +19101,7 @@
     + iPhone notice with who turned the light on, from sensor.lights_turn_on_causes).
     Lights that are on but not listed in any room (a newly added light) are reported
     once so they can be added here AND to the trigger list of the Lights Turn-On Causes
-    template sensor in configuration.yaml. Status LEDs/backlights are ignored.'
+    template sensor in configuration.yaml. Status LEDs/backlights are ignored.
   triggers:
   - trigger: time_pattern
     minutes: /30
@@ -19415,53 +19281,34 @@
       flags: {}
   actions:
   - variables:
-      entries: >
-        {% set ns = namespace(out=[]) %}
-        {% set nowts = as_timestamp(now()) %}
-        {% for r in rooms %}
-          {% set held = r.holds | map('states') | select('in', ['on', 'open', 'opening', 'playing', 'paused']) | list | count > 0 %}
-          {% set rs = namespace(ok=false, mins=0) %}
-          {% if r.mode == 'daylight' %}
-            {% set rs.mins = ((nowts - as_timestamp(states.sun.sun.last_changed)) / 60) | int %}
-            {% set rs.ok = is_state('sun.sun', 'above_horizon') and rs.mins >= r.empty_min %}
-          {% elif r.sensors | map('states') | reject('eq', 'off') | list | count == 0 %}
-            {% set m = namespace(v=999999) %}
-            {% for s in r.sensors %}
-              {% set age = ((nowts - as_timestamp(states[s].last_changed)) / 60) | int %}
-              {% set m.v = [m.v, age] | min %}
-            {% endfor %}
-            {% set rs.mins = m.v %}
-            {% set rs.ok = m.v >= r.empty_min %}
-          {% endif %}
-          {% if rs.ok and not held %}
-            {% set ls = namespace(l=[]) %}
-            {% for l in r.lights if is_state(l, 'on') and (nowts - as_timestamp(states[l].last_changed)) / 60 >= min_on %}
-              {% set ls.l = ls.l + [l] %}
-            {% endfor %}
-            {% if ls.l %}
-              {% set nn = namespace(n=[]) %}
-              {% if r.auto and is_state(r.auto, 'off') %}
-                {% set nn.n = nn.n + [(state_attr(r.auto, 'friendly_name') or r.auto) ~ ' is DISABLED'] %}
-              {% endif %}
-              {% for f, label in r.flags.items() if is_state(f, 'on') %}
-                {% set nn.n = nn.n + [label] %}
-              {% endfor %}
-              {% set reason = ('sun up ' if r.mode == 'daylight' else 'room empty ') ~ rs.mins ~ ' min' %}
-              {% set ns.out = ns.out + [{'room': r.name, 'lights': ls.l, 'reason': reason, 'note': nn.n | join(', ')}] %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-        {{ ns.out }}
-      uncovered: >
-        {% set known = (rooms | map(attribute='lights') | sum(start=[])) + ignore %}
-        {% set ns = namespace(u=[]) %}
-        {% for s in states.light if s.state == 'on' and s.attributes.entity_id is not defined and s.entity_id not in known %}
-          {% set age = (as_timestamp(now()) - as_timestamp(s.last_changed)) / 60 %}
-          {% if age >= 30 and age < 60 %}
-            {% set ns.u = ns.u + [s.name ~ ' (' ~ s.entity_id ~ ')'] %}
-          {% endif %}
-        {% endfor %}
-        {{ ns.u }}
+      entries: "{% set ns = namespace(out=[]) %} {% set nowts = as_timestamp(now())
+        %} {% for r in rooms %}\n  {% set held = r.holds | map('states') | select('in',
+        ['on', 'open', 'opening', 'playing', 'paused']) | list | count > 0 %}\n  {%
+        set rs = namespace(ok=false, mins=0) %}\n  {% if r.mode == 'daylight' %}\n
+        \   {% set rs.mins = ((nowts - as_timestamp(states.sun.sun.last_changed))
+        / 60) | int %}\n    {% set rs.ok = is_state('sun.sun', 'above_horizon') and
+        rs.mins >= r.empty_min %}\n  {% elif r.sensors | map('states') | reject('eq',
+        'off') | list | count == 0 %}\n    {% set m = namespace(v=999999) %}\n    {%
+        for s in r.sensors %}\n      {% set age = ((nowts - as_timestamp(states[s].last_changed))
+        / 60) | int %}\n      {% set m.v = [m.v, age] | min %}\n    {% endfor %}\n
+        \   {% set rs.mins = m.v %}\n    {% set rs.ok = m.v >= r.empty_min %}\n  {%
+        endif %}\n  {% if rs.ok and not held %}\n    {% set ls = namespace(l=[]) %}\n
+        \   {% for l in r.lights if is_state(l, 'on') and (nowts - as_timestamp(states[l].last_changed))
+        / 60 >= min_on %}\n      {% set ls.l = ls.l + [l] %}\n    {% endfor %}\n    {%
+        if ls.l %}\n      {% set nn = namespace(n=[]) %}\n      {% if r.auto and is_state(r.auto,
+        'off') %}\n        {% set nn.n = nn.n + [(state_attr(r.auto, 'friendly_name')
+        or r.auto) ~ ' is DISABLED'] %}\n      {% endif %}\n      {% for f, label
+        in r.flags.items() if is_state(f, 'on') %}\n        {% set nn.n = nn.n + [label]
+        %}\n      {% endfor %}\n      {% set reason = ('sun up ' if r.mode == 'daylight'
+        else 'room empty ') ~ rs.mins ~ ' min' %}\n      {% set ns.out = ns.out +
+        [{'room': r.name, 'lights': ls.l, 'reason': reason, 'note': nn.n | join(',
+        ')}] %}\n    {% endif %}\n  {% endif %}\n{% endfor %} {{ ns.out }}\n"
+      uncovered: "{% set known = (rooms | map(attribute='lights') | sum(start=[]))
+        + ignore %} {% set ns = namespace(u=[]) %} {% for s in states.light if s.state
+        == 'on' and s.attributes.entity_id is not defined and s.entity_id not in known
+        %}\n  {% set age = (as_timestamp(now()) - as_timestamp(s.last_changed)) /
+        60 %}\n  {% if age >= 30 and age < 60 %}\n    {% set ns.u = ns.u + [s.name
+        ~ ' (' ~ s.entity_id ~ ')'] %}\n  {% endif %}\n{% endfor %} {{ ns.u }}\n"
   - if:
     - condition: template
       value_template: '{{ entries | count > 0 }}'
@@ -19480,25 +19327,26 @@
       action: notify.mobile_app_pc_iphone
       data:
         title: Lights watchdog - light not covered
-        message: '{{ uncovered | join('', '') }} has been on 30+ min but is not in any
-          Lights Watchdog room, so it is not being checked. Add it to automation 1793300000001
-          and to the Lights Turn-On Causes trigger list.'
+        message: '{{ uncovered | join('', '') }} has been on 30+ min but is not in
+          any Lights Watchdog room, so it is not being checked. Add it to automation
+          1793300000001 and to the Lights Turn-On Causes trigger list.'
   mode: single
 - id: '1793300000002'
   alias: 'Sensor Watchdog: 30-Minute Presence Sensor Audit'
   description: 'Added 2026-11-11. Replaces the two "Presence Sensor Stuck-On Watchdog"
-    automations (1790100000002/3) and extends them to every presence sensor (units in
-    custom_templates/presence_units.jinja). Runs at :10 and :40. Flags a unit as STUCK
-    ON when a signal has read occupied 3+ h at home (counted from the later of the signal
-    turning on and any skip flag - asleep, TV playing - last changing, and not while
-    a skip flag is on), or 20+ min once the house has been armed away 30+ min (nobody
-    is there, so it is a ghost). STUCK OFF when it has not seen anyone for 12+ h while
-    a witness sensor in the same room logged activity in 3 separate hours since, or
-    for 72+ h while any other sensor in the house was active in the last 12 h. OFFLINE
-    when all its signals have been unavailable 15-45 min (one shot; the fleet alert
-    covers the rest). Each finding goes to script.presence_sensor_reset, which resets,
-    verifies, logs to sensors_watchdog.csv and notifies. Rate limit per unit: stuck
-    on / offline 2 h, stuck off 24 h (sensor.presence_sensor_activity resets map).'
+    automations (1790100000002/3) and extends them to every presence sensor (units
+    in custom_templates/presence_units.jinja). Runs at :10 and :40. Flags a unit as
+    STUCK ON when a signal has read occupied 3+ h at home (counted from the later
+    of the signal turning on and any skip flag - asleep, TV playing - last changing,
+    and not while a skip flag is on), or 20+ min once the house has been armed away
+    30+ min (nobody is there, so it is a ghost). STUCK OFF when it has not seen anyone
+    for 12+ h while a witness sensor in the same room logged activity in 3 separate
+    hours since, or for 72+ h while any other sensor in the house was active in the
+    last 12 h. OFFLINE when all its signals have been unavailable 15-45 min (one shot;
+    the fleet alert covers the rest). Each finding goes to script.presence_sensor_reset,
+    which resets, verifies, logs to sensors_watchdog.csv and notifies. Rate limit
+    per unit: stuck on / offline 2 h, stuck off 24 h (sensor.presence_sensor_activity
+    resets map).'
   triggers:
   - trigger: time_pattern
     minutes: 10
@@ -19507,93 +19355,59 @@
   conditions: []
   actions:
   - variables:
-      findings: >
-        {% from 'presence_units.jinja' import presence_units %}
-        {% set units = presence_units() | from_json %}
-        {% set act = state_attr('sensor.presence_sensor_activity', 'last_on') %}
-        {% set act = act if act is mapping else {} %}
-        {% set rs = state_attr('sensor.presence_sensor_activity', 'resets') %}
-        {% set rs = rs if rs is mapping else {} %}
-        {% set nowts = as_timestamp(now()) %}
-        {% set alarm = states.alarm_control_panel['3302_alarm'] %}
-        {% set away = alarm is not none and alarm.state == 'armed_away' and nowts - as_timestamp(alarm.last_changed) >= 1800 %}
-        {# per-unit summary: last on-time and merged hourly history #}
-        {% set sm = namespace(m={}) %}
-        {% for u in units %}
-          {% set x = namespace(ts=0, hist=[], known=true) %}
-          {% for s in u.signals %}
-            {% set r = act.get(s) %}
-            {% if r is mapping %}
-              {% set x.ts = [x.ts, r.ts] | max %}
-              {% set x.hist = x.hist + (r.hist if r.hist is defined else []) %}
-            {% else %}
-              {% set x.known = false %}
-            {% endif %}
-          {% endfor %}
-          {% set sm.m = dict(sm.m, **{u.name: {'ts': x.ts, 'hist': x.hist | sort, 'known': x.known}}) %}
-        {% endfor %}
-        {% set house_recent = sm.m.values() | map(attribute='ts') | max | default(0) %}
-        {% set ns = namespace(out=[]) %}
-        {% for u in units %}
-          {% set st = u.signals | map('states') | list %}
-          {% set last_reset = (rs.get(u.name) or {}).get('ts', 0) %}
-          {% set since_reset = nowts - last_reset %}
-          {% set f = namespace(why='', detail='') %}
-          {% if st | reject('in', ['unavailable', 'unknown']) | list | count == 0 %}
-            {% set m = namespace(v=999999) %}
-            {% for s in u.signals if states[s] is not none %}
-              {% set m.v = [m.v, (nowts - as_timestamp(states[s].last_changed)) / 60] | min %}
-            {% endfor %}
-            {% if m.v >= 15 and m.v < 45 and since_reset >= 7200 %}
-              {% set f.why = 'offline' %}
-              {% set f.detail = 'Unavailable for ' ~ (m.v | int) ~ ' min' %}
-            {% endif %}
-          {% elif 'on' in st %}
-            {% set skipped = u.skip | map('states') | select('in', ['on', 'playing']) | list | count > 0 %}
-            {% set k = namespace(ts=0) %}
-            {% for e in u.skip if states[e] is not none %}
-              {% set k.ts = [k.ts, as_timestamp(states[e].last_changed)] | max %}
-            {% endfor %}
-            {% set w = namespace(dur=0, sig='') %}
-            {% for s in u.signals if is_state(s, 'on') %}
-              {% set start = as_timestamp(states[s].last_changed) if away else [as_timestamp(states[s].last_changed), k.ts] | max %}
-              {% if nowts - start > w.dur %}
-                {% set w.dur = nowts - start %}
-                {% set w.sig = s %}
-              {% endif %}
-            {% endfor %}
-            {% if since_reset >= 7200 %}
-              {% if away and w.dur >= 1200 %}
-                {% set f.why = 'stuck on' %}
-                {% set f.detail = 'Reads occupied for ' ~ (w.dur / 60) | int ~ ' min (' ~ w.sig ~ ') while the house is armed away' %}
-              {% elif not away and not skipped and w.dur >= 10800 %}
-                {% set f.why = 'stuck on' %}
-                {% set f.detail = 'Reads occupied for ' ~ (w.dur / 3600) | round(1) ~ ' h straight (' ~ w.sig ~ ')' %}
-              {% endif %}
-            {% endif %}
-          {% elif sm.m[u.name].known and since_reset >= 86400 %}
-            {% set me = sm.m[u.name] %}
-            {% set silent = nowts - me.ts %}
-            {% set wit = namespace(name='') %}
-            {% for o in units if o.room == u.room and o.name != u.name and o.witness %}
-              {% set oh = sm.m[o.name].hist | select('gt', me.ts) | list %}
-              {% if oh | count >= 3 %}
-                {% set wit.name = o.name %}
-              {% endif %}
-            {% endfor %}
-            {% if silent >= 43200 and wit.name %}
-              {% set f.why = 'stuck off' %}
-              {% set f.detail = 'Has not seen anyone for ' ~ (silent / 3600) | round(1) ~ ' h, but ' ~ wit.name ~ ' saw activity in 3+ separate hours since' %}
-            {% elif silent >= 259200 and nowts - house_recent <= 43200 %}
-              {% set f.why = 'stuck off' %}
-              {% set f.detail = 'Has not seen anyone for ' ~ (silent / 86400) | round(1) ~ ' days while other sensors in the house are active' %}
-            {% endif %}
-          {% endif %}
-          {% if f.why %}
-            {% set ns.out = ns.out + [{'unit': u.name, 'why': f.why, 'detail': f.detail}] %}
-          {% endif %}
-        {% endfor %}
-        {{ ns.out }}
+      findings: "{% from 'presence_units.jinja' import presence_units %} {% set units
+        = presence_units() | from_json %} {% set act = state_attr('sensor.presence_sensor_activity',
+        'last_on') %} {% set act = act if act is mapping else {} %} {% set rs = state_attr('sensor.presence_sensor_activity',
+        'resets') %} {% set rs = rs if rs is mapping else {} %} {% set nowts = as_timestamp(now())
+        %} {% set alarm = states.alarm_control_panel['3302_alarm'] %} {% set away
+        = alarm is not none and alarm.state == 'armed_away' and nowts - as_timestamp(alarm.last_changed)
+        >= 1800 %} {# per-unit summary: last on-time and merged hourly history #}
+        {% set sm = namespace(m={}) %} {% for u in units %}\n  {% set x = namespace(ts=0,
+        hist=[], known=true) %}\n  {% for s in u.signals %}\n    {% set r = act.get(s)
+        %}\n    {% if r is mapping %}\n      {% set x.ts = [x.ts, r.ts] | max %}\n
+        \     {% set x.hist = x.hist + (r.hist if r.hist is defined else []) %}\n
+        \   {% else %}\n      {% set x.known = false %}\n    {% endif %}\n  {% endfor
+        %}\n  {% set sm.m = dict(sm.m, **{u.name: {'ts': x.ts, 'hist': x.hist | sort,
+        'known': x.known}}) %}\n{% endfor %} {% set house_recent = sm.m.values() |
+        map(attribute='ts') | max | default(0) %} {% set ns = namespace(out=[]) %}
+        {% for u in units %}\n  {% set st = u.signals | map('states') | list %}\n
+        \ {% set last_reset = (rs.get(u.name) or {}).get('ts', 0) %}\n  {% set since_reset
+        = nowts - last_reset %}\n  {% set f = namespace(why='', detail='') %}\n  {%
+        if st | reject('in', ['unavailable', 'unknown']) | list | count == 0 %}\n
+        \   {% set m = namespace(v=999999) %}\n    {% for s in u.signals if states[s]
+        is not none %}\n      {% set m.v = [m.v, (nowts - as_timestamp(states[s].last_changed))
+        / 60] | min %}\n    {% endfor %}\n    {% if m.v >= 15 and m.v < 45 and since_reset
+        >= 7200 %}\n      {% set f.why = 'offline' %}\n      {% set f.detail = 'Unavailable
+        for ' ~ (m.v | int) ~ ' min' %}\n    {% endif %}\n  {% elif 'on' in st %}\n
+        \   {% set skipped = u.skip | map('states') | select('in', ['on', 'playing'])
+        | list | count > 0 %}\n    {% set k = namespace(ts=0) %}\n    {% for e in
+        u.skip if states[e] is not none %}\n      {% set k.ts = [k.ts, as_timestamp(states[e].last_changed)]
+        | max %}\n    {% endfor %}\n    {% set w = namespace(dur=0, sig='') %}\n    {%
+        for s in u.signals if is_state(s, 'on') %}\n      {% set start = as_timestamp(states[s].last_changed)
+        if away else [as_timestamp(states[s].last_changed), k.ts] | max %}\n      {%
+        if nowts - start > w.dur %}\n        {% set w.dur = nowts - start %}\n        {%
+        set w.sig = s %}\n      {% endif %}\n    {% endfor %}\n    {% if since_reset
+        >= 7200 %}\n      {% if away and w.dur >= 1200 %}\n        {% set f.why =
+        'stuck on' %}\n        {% set f.detail = 'Reads occupied for ' ~ (w.dur /
+        60) | int ~ ' min (' ~ w.sig ~ ') while the house is armed away' %}\n      {%
+        elif not away and not skipped and w.dur >= 10800 %}\n        {% set f.why
+        = 'stuck on' %}\n        {% set f.detail = 'Reads occupied for ' ~ (w.dur
+        / 3600) | round(1) ~ ' h straight (' ~ w.sig ~ ')' %}\n      {% endif %}\n
+        \   {% endif %}\n  {% elif sm.m[u.name].known and since_reset >= 86400 %}\n
+        \   {% set me = sm.m[u.name] %}\n    {% set silent = nowts - me.ts %}\n    {%
+        set wit = namespace(name='') %}\n    {% for o in units if o.room == u.room
+        and o.name != u.name and o.witness %}\n      {% set oh = sm.m[o.name].hist
+        | select('gt', me.ts) | list %}\n      {% if oh | count >= 3 %}\n        {%
+        set wit.name = o.name %}\n      {% endif %}\n    {% endfor %}\n    {% if silent
+        >= 43200 and wit.name %}\n      {% set f.why = 'stuck off' %}\n      {% set
+        f.detail = 'Has not seen anyone for ' ~ (silent / 3600) | round(1) ~ ' h,
+        but ' ~ wit.name ~ ' saw activity in 3+ separate hours since' %}\n    {% elif
+        silent >= 259200 and nowts - house_recent <= 43200 %}\n      {% set f.why
+        = 'stuck off' %}\n      {% set f.detail = 'Has not seen anyone for ' ~ (silent
+        / 86400) | round(1) ~ ' days while other sensors in the house are active'
+        %}\n    {% endif %}\n  {% endif %}\n  {% if f.why %}\n    {% set ns.out =
+        ns.out + [{'unit': u.name, 'why': f.why, 'detail': f.detail}] %}\n  {% endif
+        %}\n{% endfor %} {{ ns.out }}\n"
   - repeat:
       for_each: '{{ findings }}'
       sequence:

@@ -1323,7 +1323,7 @@ presence_sensor_reset:
         {% set off = u.signals | map('states') | reject('in', ['unavailable', 'unknown']) | list | count == 0 %}
         {% if u.kind == 'esp' and (off or states(u.reset.entity) == 'unavailable') %}reloaded its ESPHome integration entry
         {% elif u.reset.type == 'button' %}full ESP reboot
-        {% elif u.reset.type == 'toggle' %}cycled the Hue "sensor enabled" switch
+        {% elif u.reset.type == 'toggle' %}cycled the Hue sensor-enabled switch
         {% else %}none possible from HA - needs a look{% endif %}
   - event: presence_sensor_reset
     event_data:
