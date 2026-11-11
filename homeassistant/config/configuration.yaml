@@ -184,6 +184,108 @@ input_text:
 
 # Template switches + sensors
 template:
+  # Lights watchdog - turn-on cause recorder (2026-11-11). Every time a watched light
+  # turns on, remember WHO turned it on (the automation/script whose run context matches,
+  # a dashboard user, Adaptive Lighting, or "outside HA"). The 30-min watchdog
+  # (automation 1793300000001 -> script.lights_watchdog_report) reads this when it finds a
+  # light left on, because by then the automation has usually re-triggered and the
+  # context no longer matches. Lights commanded through a Hue room/zone get no context of
+  # their own, so the fallback names whatever automation fired in the previous 5 s.
+  - trigger:
+      - trigger: state
+        to: "on"
+        entity_id:
+          - light.bedroom_ceiling_1
+          - light.bedroom_ceiling_2
+          - light.bedroom_lamp_1
+          - light.bedroom_lamp_2
+          - light.nano_sand_dune
+          - light.bathroom_1
+          - light.bathroom_2
+          - light.bathroom_3
+          - light.bathroom_4
+          - light.bathroom_5
+          - light.bathroom_6
+          - light.bathroom_7
+          - light.bathroom_8
+          - light.bathroom_back
+          - light.bathroom_shower
+          - light.bathroom_tub_1
+          - light.bathroom_tub_2
+          - light.kitchen_1_color
+          - light.kitchen_2_color
+          - light.kitchen_lightstrip
+          - light.hue_datura_top_1
+          - light.hue_datura_bottom_1
+          - light.range_light
+          - light.dining_1
+          - light.dining_2
+          - light.dining_3
+          - light.dining_4
+          - light.dining_5
+          - light.dining_6
+          - light.dining_top_1
+          - light.dining_top_2
+          - light.dining_top_3
+          - light.living_room_1
+          - light.living_room_2
+          - light.living_room_small_lamp
+          - light.living_room_floor_lamp
+          - light.galaxy_projector
+          - light.hallway_front_1
+          - light.hallway_center
+          - light.hallway_living_room_3
+          - light.hallway_pc_bedroom
+          - light.office_1
+          - light.office_2
+          - light.hue_white_lamp_1
+          - light.fluttershy
+          - light.ribbon
+          - light.showtime_light
+          - light.garage_lights
+          - light.front_porch
+          - light.back_outside
+          - light.driveway_floodlight
+    sensor:
+      - name: "Lights Turn-On Causes"
+        unique_id: lights_turn_on_causes
+        icon: mdi:lightbulb-question
+        state: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+        attributes:
+          last_light: "{{ trigger.entity_id }}"
+          causes: >
+            {% set raw = this.attributes.get('causes') if this is defined and this.attributes is defined else none %}
+            {% set prev = raw if raw is mapping else {} %}
+            {% set frm = trigger.from_state.state if trigger.from_state is not none else 'none' %}
+            {% if frm != 'off' and trigger.entity_id in prev %}
+              {{ prev }}
+            {% else %}
+              {% set c = trigger.to_state.context %}
+              {% set ids = [c.id, c.parent_id] | reject('none') | list %}
+              {% set autos = states.automation | selectattr('context.id', 'in', ids) | map(attribute='name') | list %}
+              {% set scripts = states.script | selectattr('context.id', 'in', ids) | map(attribute='name') | list %}
+              {% set ns = namespace(recent=[]) %}
+              {% for a in states.automation if a.attributes.last_triggered is defined and a.attributes.last_triggered is not none and (now() - a.attributes.last_triggered).total_seconds() < 5 %}
+                {% set ns.recent = ns.recent + [a.name] %}
+              {% endfor %}
+              {% if frm != 'off' %}
+                {% set by = 'came back online already on (wall switch power, bridge reconnect or HA restart)' %}
+              {% elif autos %}
+                {% set by = autos[0] %}
+              {% elif scripts %}
+                {% set by = 'script ' ~ scripts[0] %}
+              {% elif c.user_id %}
+                {% set by = 'manual (HA dashboard or app)' %}
+              {% elif ':' in c.id %}
+                {% set by = 'Adaptive Lighting' %}
+              {% elif ns.recent %}
+                {% set by = 'probably ' ~ ns.recent[:3] | join(' / ') ~ ' (group command, fired within 5 s)' %}
+              {% else %}
+                {% set by = 'outside HA (Hue app, dimmer, wall switch) or unknown' %}
+              {% endif %}
+              {{ dict(prev, **{trigger.entity_id: {'by': by | replace('"', "'"), 'at': now().strftime('%Y-%m-%d %H:%M:%S')}}) }}
+            {% endif %}
+
   # Resolves the Yamaha RX-A4A's Music Assistant player by device MODEL rather than
   # entity id. MA wraps the receiver's AirPlay/DLNA/Sendspin protocols in a "universal
   # player" whose id is random and gets regenerated on MA restarts/provider reloads
@@ -506,3 +608,9 @@ emulated_hue:
     input_boolean.office_pc_wake:
       name: "Wake PC"
       hidden: false
+
+# Lights watchdog log (2026-11-11): the File notify entity appends one CSV line per
+# corrected light to /config/lights_watchdog/lights_watchdog.csv
+homeassistant:
+  allowlist_external_dirs:
+    - /config/lights_watchdog
