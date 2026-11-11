@@ -283,7 +283,7 @@ template:
               {% else %}
                 {% set by = 'outside HA (Hue app, dimmer, wall switch) or unknown' %}
               {% endif %}
-              {{ dict(prev, **{trigger.entity_id: {'by': by | replace('"', "'"), 'at': now().strftime('%Y-%m-%d %H:%M:%S')}}) }}
+              {{ dict(prev, **{trigger.entity_id: {'by': by | replace('"', "'"), 'at': now().strftime('%Y-%m-%d %H:%M:%S'), 'ts': as_timestamp(now()) | int}}) }}
             {% endif %}
 
   # Resolves the Yamaha RX-A4A's Music Assistant player by device MODEL rather than
