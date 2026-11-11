@@ -1173,3 +1173,97 @@ ma_play_with_fallback:
             {{ state_attr(player, 'friendly_name') or player }}:
             {{ 'backup music is playing because the first choice did not start.' if is_state(player, 'playing')
             else 'no music would start, including the local backup.' }}
+lights_watchdog_report:
+  alias: 'Lights Watchdog: Report (CSV log + iPhone)'
+  description: 'Added 2026-11-11. Shared reporter for every "light left on" correction.
+    Called by the 30-minute whole-house audit (automation 1793300000001, turn_off true)
+    and by the kitchen/dining empty-room watchdogs (turn_off false - they switch the lights
+    off themselves). For each listed light that is on right now it looks up who turned
+    it on (sensor.lights_turn_on_causes), optionally turns it off and verifies, appends
+    one CSV line to /config/lights_watchdog/lights_watchdog.csv (notify.file) and sends
+    one iPhone notice (silent/passive while Big Bedroom sleep mode is on).'
+  icon: mdi:lightbulb-alert
+  mode: queued
+  max: 10
+  fields:
+    entries:
+      description: 'List of {room, lights: [entity ids], reason, note}'
+    turn_off:
+      description: true = this script turns the lights off and verifies
+    source:
+      description: Name of the watchdog that made the correction
+  sequence:
+  - variables:
+      rows: >
+        {% set raw = state_attr('sensor.lights_turn_on_causes', 'causes') %}
+        {% set c = raw if raw is mapping else {} %}
+        {% set ns = namespace(rows=[]) %}
+        {% for e in entries %}
+          {% for l in e.lights if is_state(l, 'on') %}
+            {% set s = states[l] %}
+            {% set on_ts = as_timestamp(s.last_changed) %}
+            {% set t = s.last_changed | as_local %}
+            {% set rec = c.get(l) %}
+            {% set by = rec.by if rec is mapping and rec.ts is defined and rec.ts >= on_ts - 120 else 'unknown (no turn-on record)' %}
+            {% set ns.rows = ns.rows + [{
+              'room': e.room, 'entity': l, 'name': s.name | trim,
+              'on_since': t.strftime('%Y-%m-%d %H:%M:%S'),
+              'on_since_short': t.strftime('%-I:%M %p') if t.date() == now().date() else t.strftime('%b %-d %-I:%M %p'),
+              'on_min': ((as_timestamp(now()) - on_ts) / 60) | round | int,
+              'reason': e.reason, 'by': by, 'note': e.note | default('') }] %}
+          {% endfor %}
+        {% endfor %}
+        {{ ns.rows }}
+  - condition: template
+    value_template: '{{ rows | count > 0 }}'
+  - if:
+    - condition: template
+      value_template: '{{ turn_off | default(false) | bool }}'
+    then:
+    - continue_on_error: true
+      action: light.turn_off
+      target:
+        entity_id: '{{ rows | map(attribute=''entity'') | list }}'
+    - delay:
+        seconds: 8
+    - alias: One retry for anything that ignored the first command
+      if:
+      - condition: template
+        value_template: '{{ rows | map(attribute=''entity'') | select(''is_state'', ''on'') | list | count > 0 }}'
+      then:
+      - continue_on_error: true
+        action: light.turn_off
+        target:
+          entity_id: '{{ rows | map(attribute=''entity'') | select(''is_state'', ''on'') | list }}'
+      - delay:
+          seconds: 6
+  - variables:
+      still_on: '{{ rows | map(attribute=''entity'') | select(''is_state'', ''on'') | list if turn_off | default(false) | bool else [] }}'
+      src: '{{ source | default(''Lights Watchdog'') }}'
+  - alias: One CSV line per light
+    repeat:
+      for_each: '{{ rows }}'
+      sequence:
+      - continue_on_error: true
+        action: notify.send_message
+        target:
+          entity_id: notify.file
+        data:
+          message: >-
+            {% set r = repeat.item %}{% set res = 'FAILED - still on' if r.entity in still_on else 'turned off' %}"{{ now().strftime('%Y-%m-%d %H:%M:%S') }}","{{ r.room }}","{{ r.name | replace('"', "'") }}","{{ r.entity }}","{{ r.on_since }}",{{ r.on_min }},"{{ r.reason | replace('"', "'") }}","{{ r.by | replace('"', "'") }}","{{ r.note | replace('"', "'") }}","{{ src | replace('"', "'") }}","{{ res }}"
+  - continue_on_error: true
+    action: notify.mobile_app_pc_iphone
+    data:
+      title: >-
+        {% set rooms = rows | map(attribute='room') | unique | list %}{{ rooms | join(', ') }} should be off - {{ rows | count }} light{{ 's' if rows | count != 1 else '' }} left on
+      message: >-
+        {% for room, items in rows | groupby('room') %}
+        {% set f = items | first %}{{ room }} ({{ f.reason }}{{ '; ' ~ f.note if f.note else '' }}):
+
+        {% for by, lights in items | groupby('by') %}- {{ lights | map(attribute='name') | join(', ') }} - on since {{ (lights | first).on_since_short }}. Turned on by: {{ by }}.
+
+        {% endfor %}
+        {% endfor %}{% if still_on %}FAILED to turn off: {{ still_on | map('state_attr', 'friendly_name') | join(', ') }}.{% else %}Turned off by {{ src }}.{% endif %}
+      data:
+        push:
+          interruption-level: '{{ ''passive'' if is_state(''input_boolean.big_bedroom_asleep'', ''on'') else ''active'' }}'
