@@ -5467,6 +5467,12 @@
                 state: playing
             - condition: template
               value_template: '{{ repeat.index >= 3 }}'
+      - alias: Final Nanoleaf off - backstop in case the TV shutdown above relit it
+          (2026-11-11)
+        continue_on_error: true
+        action: light.turn_off
+        target:
+          entity_id: light.nano_sand_dune
       - alias: Reset scene mode
         action: input_select.select_option
         target:
@@ -8196,7 +8202,37 @@
     - conditions:
       - condition: trigger
         id: paused
+      - alias: Never light a dark room while asleep (2026-11-11 - switching the TV
+          on at 7:08 AM lit the Nanoleaf). Something must already be on, or the room
+          must not be asleep
+        condition: or
+        conditions:
+        - condition: state
+          entity_id: input_boolean.big_bedroom_asleep
+          state: 'off'
+        - condition: state
+          entity_id:
+          - light.bedroom_ceiling_1
+          - light.bedroom_ceiling_2
+          - light.bedroom_lamp_1
+          - light.bedroom_lamp_2
+          - light.nano_sand_dune
+          match: any
+          state: 'on'
       sequence:
+      - alias: Idle is usually a transient - TV powering off (playing -> idle -> off)
+          or starting up (off -> idle -> playing), both within ms. 2026-11-11 each
+          one lit the Nanoleaf. Wait 2 s - the off/playing trigger restarts this run
+          and cancels it
+        if:
+        - condition: template
+          value_template: '{{ trigger.to_state.state == ''idle'' }}'
+        then:
+        - delay:
+            seconds: 2
+        - condition: state
+          entity_id: media_player.bedroom_tv
+          state: idle
       - alias: Pre-stage Nanoleaf at 1% to avoid flash-to-white
         action: light.turn_on
         target:
