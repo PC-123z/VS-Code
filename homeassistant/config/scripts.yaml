@@ -1267,3 +1267,123 @@ lights_watchdog_report:
       data:
         push:
           interruption-level: '{{ ''passive'' if is_state(''input_boolean.big_bedroom_asleep'', ''on'') else ''active'' }}'
+presence_sensor_reset:
+  alias: 'Sensor Watchdog: Reset a Presence Sensor'
+  description: 'Added 2026-11-11. THE reset mechanism for presence sensors - run it by
+    hand (unit = a name from custom_templates/presence_units.jinja, e.g. "Kitchen radar")
+    or let the 30-min sensor audit (automation 1793300000002) call it. ESP radars get
+    a full ESP reboot (a radar-only restart just moved the ghost, 2026-09-23); if the
+    ESP is offline its integration entry is reloaded instead. Hue motion sensors get
+    their "sensor enabled" switch cycled. Cameras / Ring / ecobee have nothing to reset
+    from HA, so those are log + notify only. Waits 3 min, checks the result, appends a
+    line to /config/lights_watchdog/sensors_watchdog.csv (notify.file_2) and notifies
+    the iPhone (silent while Big Bedroom sleep mode is on).'
+  icon: mdi:motion-sensor-off
+  mode: parallel
+  max: 20
+  fields:
+    unit:
+      description: Sensor unit name from presence_units.jinja
+      required: true
+      selector:
+        select:
+          options:
+          - Big Bedroom radar
+          - Big Bedroom ecobee sensor
+          - Bathroom radar
+          - Bathroom Hue motion
+          - Kitchen radar
+          - Kitchen Hue motion
+          - Kitchen camera person
+          - Dining Room radar
+          - Living Room radar
+          - Living Room Ring motion
+          - Living Room camera person
+          - Hallway Hue motion
+          - Bedroom 2 radar
+          - Bedroom 2 door radar
+          - Garage radar
+          - Garage camera person
+    why:
+      description: stuck on / stuck off / offline / manual
+    detail:
+      description: Evidence text for the log and the notice
+  sequence:
+  - variables:
+      u: >
+        {% from 'presence_units.jinja' import presence_units %}
+        {{ presence_units() | from_json | selectattr('name', 'eq', unit) | list | first | default({}) }}
+      reason: '{{ why | default(''manual'') }}'
+      info: '{{ detail | default(''requested by hand'') }}'
+  - condition: template
+    value_template: '{{ u is mapping and u.name is defined }}'
+  - variables:
+      offline: '{{ u.signals | map(''states'') | reject(''in'', [''unavailable'', ''unknown'']) | list | count == 0 }}'
+      action_taken: >-
+        {% set off = u.signals | map('states') | reject('in', ['unavailable', 'unknown']) | list | count == 0 %}
+        {% if u.kind == 'esp' and (off or states(u.reset.entity) == 'unavailable') %}reloaded its ESPHome integration entry
+        {% elif u.reset.type == 'button' %}full ESP reboot
+        {% elif u.reset.type == 'toggle' %}cycled the Hue "sensor enabled" switch
+        {% else %}none possible from HA - needs a look{% endif %}
+  - event: presence_sensor_reset
+    event_data:
+      unit: '{{ u.name }}'
+      why: '{{ reason }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ ''reloaded'' in action_taken }}'
+      sequence:
+      - continue_on_error: true
+        action: homeassistant.reload_config_entry
+        target:
+          entity_id: '{{ u.signals[0] }}'
+    - conditions:
+      - condition: template
+        value_template: '{{ u.reset.type == ''button'' }}'
+      sequence:
+      - continue_on_error: true
+        action: button.press
+        target:
+          entity_id: '{{ u.reset.entity }}'
+    - conditions:
+      - condition: template
+        value_template: '{{ u.reset.type == ''toggle'' }}'
+      sequence:
+      - continue_on_error: true
+        action: switch.turn_off
+        target:
+          entity_id: '{{ u.reset.entity }}'
+      - delay:
+          seconds: 5
+      - continue_on_error: true
+        action: switch.turn_on
+        target:
+          entity_id: '{{ u.reset.entity }}'
+  - delay:
+      minutes: 3
+  - variables:
+      result: >-
+        {% set st = u.signals | map('states') | list %}
+        {% set dead = st | reject('in', ['unavailable', 'unknown']) | list | count == 0 %}
+        {% if dead %}STILL OFFLINE - check power / Wi-Fi
+        {% elif reason == 'stuck on' and 'on' in st %}still reads occupied 3 min after the reset - someone is really there, or it needs retuning
+        {% elif reason == 'stuck on' %}cleared
+        {% elif reason == 'offline' %}back online
+        {% elif reason == 'stuck off' %}{{ 'now detecting' if 'on' in st else 'reset sent - watching whether it starts detecting again' }}
+        {% else %}online, reads {{ 'occupied' if 'on' in st else 'clear' }}{% endif %}
+  - continue_on_error: true
+    action: notify.send_message
+    target:
+      entity_id: notify.file_2
+    data:
+      message: >-
+        "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}","{{ u.name }}","{{ u.room }}","{{ reason }}","{{ info | replace('"', "'") }}","{{ action_taken | trim }}","{{ result | trim }}"
+  - continue_on_error: true
+    action: notify.mobile_app_pc_iphone
+    data:
+      title: '{{ u.name }}: {{ reason }}'
+      message: '{{ info }}. Reset: {{ action_taken | trim }}. Result: {{ result | trim }}.'
+      data:
+        push:
+          interruption-level: '{{ ''passive'' if is_state(''input_boolean.big_bedroom_asleep'', ''on'') else ''active'' }}'

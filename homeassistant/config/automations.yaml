@@ -19484,3 +19484,126 @@
           Lights Watchdog room, so it is not being checked. Add it to automation 1793300000001
           and to the Lights Turn-On Causes trigger list.'
   mode: single
+- id: '1793300000002'
+  alias: 'Sensor Watchdog: 30-Minute Presence Sensor Audit'
+  description: 'Added 2026-11-11. Replaces the two "Presence Sensor Stuck-On Watchdog"
+    automations (1790100000002/3) and extends them to every presence sensor (units in
+    custom_templates/presence_units.jinja). Runs at :10 and :40. Flags a unit as STUCK
+    ON when a signal has read occupied 3+ h at home (counted from the later of the signal
+    turning on and any skip flag - asleep, TV playing - last changing, and not while
+    a skip flag is on), or 20+ min once the house has been armed away 30+ min (nobody
+    is there, so it is a ghost). STUCK OFF when it has not seen anyone for 12+ h while
+    a witness sensor in the same room logged activity in 3 separate hours since, or
+    for 72+ h while any other sensor in the house was active in the last 12 h. OFFLINE
+    when all its signals have been unavailable 15-45 min (one shot; the fleet alert
+    covers the rest). Each finding goes to script.presence_sensor_reset, which resets,
+    verifies, logs to sensors_watchdog.csv and notifies. Rate limit per unit: stuck
+    on / offline 2 h, stuck off 24 h (sensor.presence_sensor_activity resets map).'
+  triggers:
+  - trigger: time_pattern
+    minutes: 10
+  - trigger: time_pattern
+    minutes: 40
+  conditions: []
+  actions:
+  - variables:
+      findings: >
+        {% from 'presence_units.jinja' import presence_units %}
+        {% set units = presence_units() | from_json %}
+        {% set act = state_attr('sensor.presence_sensor_activity', 'last_on') %}
+        {% set act = act if act is mapping else {} %}
+        {% set rs = state_attr('sensor.presence_sensor_activity', 'resets') %}
+        {% set rs = rs if rs is mapping else {} %}
+        {% set nowts = as_timestamp(now()) %}
+        {% set alarm = states.alarm_control_panel['3302_alarm'] %}
+        {% set away = alarm is not none and alarm.state == 'armed_away' and nowts - as_timestamp(alarm.last_changed) >= 1800 %}
+        {# per-unit summary: last on-time and merged hourly history #}
+        {% set sm = namespace(m={}) %}
+        {% for u in units %}
+          {% set x = namespace(ts=0, hist=[], known=true) %}
+          {% for s in u.signals %}
+            {% set r = act.get(s) %}
+            {% if r is mapping %}
+              {% set x.ts = [x.ts, r.ts] | max %}
+              {% set x.hist = x.hist + (r.hist if r.hist is defined else []) %}
+            {% else %}
+              {% set x.known = false %}
+            {% endif %}
+          {% endfor %}
+          {% set sm.m = dict(sm.m, **{u.name: {'ts': x.ts, 'hist': x.hist | sort, 'known': x.known}}) %}
+        {% endfor %}
+        {% set house_recent = sm.m.values() | map(attribute='ts') | max | default(0) %}
+        {% set ns = namespace(out=[]) %}
+        {% for u in units %}
+          {% set st = u.signals | map('states') | list %}
+          {% set last_reset = (rs.get(u.name) or {}).get('ts', 0) %}
+          {% set since_reset = nowts - last_reset %}
+          {% set f = namespace(why='', detail='') %}
+          {% if st | reject('in', ['unavailable', 'unknown']) | list | count == 0 %}
+            {% set m = namespace(v=999999) %}
+            {% for s in u.signals if states[s] is not none %}
+              {% set m.v = [m.v, (nowts - as_timestamp(states[s].last_changed)) / 60] | min %}
+            {% endfor %}
+            {% if m.v >= 15 and m.v < 45 and since_reset >= 7200 %}
+              {% set f.why = 'offline' %}
+              {% set f.detail = 'Unavailable for ' ~ (m.v | int) ~ ' min' %}
+            {% endif %}
+          {% elif 'on' in st %}
+            {% set skipped = u.skip | map('states') | select('in', ['on', 'playing']) | list | count > 0 %}
+            {% set k = namespace(ts=0) %}
+            {% for e in u.skip if states[e] is not none %}
+              {% set k.ts = [k.ts, as_timestamp(states[e].last_changed)] | max %}
+            {% endfor %}
+            {% set w = namespace(dur=0, sig='') %}
+            {% for s in u.signals if is_state(s, 'on') %}
+              {% set start = as_timestamp(states[s].last_changed) if away else [as_timestamp(states[s].last_changed), k.ts] | max %}
+              {% if nowts - start > w.dur %}
+                {% set w.dur = nowts - start %}
+                {% set w.sig = s %}
+              {% endif %}
+            {% endfor %}
+            {% if since_reset >= 7200 %}
+              {% if away and w.dur >= 1200 %}
+                {% set f.why = 'stuck on' %}
+                {% set f.detail = 'Reads occupied for ' ~ (w.dur / 60) | int ~ ' min (' ~ w.sig ~ ') while the house is armed away' %}
+              {% elif not away and not skipped and w.dur >= 10800 %}
+                {% set f.why = 'stuck on' %}
+                {% set f.detail = 'Reads occupied for ' ~ (w.dur / 3600) | round(1) ~ ' h straight (' ~ w.sig ~ ')' %}
+              {% endif %}
+            {% endif %}
+          {% elif sm.m[u.name].known and since_reset >= 86400 %}
+            {% set me = sm.m[u.name] %}
+            {% set silent = nowts - me.ts %}
+            {% set wit = namespace(name='') %}
+            {% for o in units if o.room == u.room and o.name != u.name and o.witness %}
+              {% set oh = sm.m[o.name].hist | select('gt', me.ts) | list %}
+              {% if oh | count >= 3 %}
+                {% set wit.name = o.name %}
+              {% endif %}
+            {% endfor %}
+            {% if silent >= 43200 and wit.name %}
+              {% set f.why = 'stuck off' %}
+              {% set f.detail = 'Has not seen anyone for ' ~ (silent / 3600) | round(1) ~ ' h, but ' ~ wit.name ~ ' saw activity in 3+ separate hours since' %}
+            {% elif silent >= 259200 and nowts - house_recent <= 43200 %}
+              {% set f.why = 'stuck off' %}
+              {% set f.detail = 'Has not seen anyone for ' ~ (silent / 86400) | round(1) ~ ' days while other sensors in the house are active' %}
+            {% endif %}
+          {% endif %}
+          {% if f.why %}
+            {% set ns.out = ns.out + [{'unit': u.name, 'why': f.why, 'detail': f.detail}] %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.out }}
+  - repeat:
+      for_each: '{{ findings }}'
+      sequence:
+      - continue_on_error: true
+        action: script.turn_on
+        target:
+          entity_id: script.presence_sensor_reset
+        data:
+          variables:
+            unit: '{{ repeat.item.unit }}'
+            why: '{{ repeat.item.why }}'
+            detail: '{{ repeat.item.detail }}'
+  mode: single
