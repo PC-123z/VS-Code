@@ -184,6 +184,80 @@ input_text:
 
 # Template switches + sensors
 template:
+  # Sensor Watchdog - activity tracker (2026-11-11). Remembers, across restarts, when each
+  # presence signal last turned ON (ts) plus up to 3 earlier on-times at least 1 h apart
+  # (hist), and when each sensor unit was last reset (resets, fed by the
+  # presence_sensor_reset event from script.presence_sensor_reset). This is what lets the
+  # 30-min sensor audit (automation 1793300000002) spot a sensor that is stuck OFF: silent
+  # for hours while another sensor in the same room keeps seeing someone. Signals with no
+  # record yet are seeded with "now" (hourly + on start) so a sensor that is already dead
+  # still ages out. Unit list: custom_templates/presence_units.jinja.
+  - trigger:
+      - trigger: state
+        to: "on"
+        entity_id:
+          - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy
+          - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy
+          - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy
+          - binary_sensor.bedroom_motion
+          - binary_sensor.bedroom_occupancy
+          - binary_sensor.bathroom_bathroom_presence_sensor_presence
+          - binary_sensor.bathroom_motion
+          - binary_sensor.kitchen_occupancy_sensor_radar_zone_1_occupancy
+          - binary_sensor.kitchen_occupancy_sensor_radar_zone_2_occupancy
+          - binary_sensor.kitchen_occupancy_sensor_radar_zone_3_occupancy
+          - binary_sensor.kitchen_motion
+          - binary_sensor.kitchen_person_occupancy
+          - binary_sensor.dining_room_apollo_ld2450_presence
+          - binary_sensor.apollo_r_pro_1_740624_ld2450_presence
+          - binary_sensor.living_room
+          - binary_sensor.living_room_person_occupancy
+          - binary_sensor.hallway_motion
+          - binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy
+          - binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy
+          - binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
+          - binary_sensor.bedroom2_office_bedroom2_door_presence
+          - binary_sensor.garage_garage_people_detection_presence
+          - binary_sensor.garage_person_occupancy
+      - trigger: event
+        event_type: presence_sensor_reset
+      - trigger: homeassistant
+        event: start
+      - trigger: time_pattern
+        minutes: 7
+    sensor:
+      - name: "Presence Sensor Activity"
+        unique_id: presence_sensor_activity
+        icon: mdi:motion-sensor
+        state: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+        attributes:
+          last_on: >
+            {% from 'presence_units.jinja' import presence_units %}
+            {% set units = presence_units() | from_json %}
+            {% set raw = this.attributes.get('last_on') if this is defined and this.attributes is defined else none %}
+            {% set nowts = as_timestamp(now()) | int %}
+            {% set ns = namespace(m=raw if raw is mapping else {}) %}
+            {% for u in units %}
+              {% for s in u.signals if s not in ns.m %}
+                {% set ns.m = dict(ns.m, **{s: {'ts': nowts, 'hist': [], 'seeded': true}}) %}
+              {% endfor %}
+            {% endfor %}
+            {% if trigger.platform == 'state' %}
+              {% set old = ns.m.get(trigger.entity_id, {}) %}
+              {% set h = old.hist if old.hist is defined and old.hist is sequence and old.hist is not string else [] %}
+              {% set h = (h + [nowts])[-3:] if (h | count == 0 or nowts - h[-1] >= 3600) else h %}
+              {% set ns.m = dict(ns.m, **{trigger.entity_id: {'ts': nowts, 'hist': h}}) %}
+            {% endif %}
+            {{ ns.m }}
+          resets: >
+            {% set raw = this.attributes.get('resets') if this is defined and this.attributes is defined else none %}
+            {% set prev = raw if raw is mapping else {} %}
+            {% if trigger.platform == 'event' and trigger.event.data.unit is defined %}
+              {{ dict(prev, **{trigger.event.data.unit: {'ts': as_timestamp(now()) | int, 'why': trigger.event.data.why | default('')}}) }}
+            {% else %}
+              {{ prev }}
+            {% endif %}
+
   # Lights watchdog - turn-on cause recorder (2026-11-11). Every time a watched light
   # turns on, remember WHO turned it on (the automation/script whose run context matches,
   # a dashboard user, Adaptive Lighting, or "outside HA"). The 30-min watchdog
