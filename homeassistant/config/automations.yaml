@@ -17423,6 +17423,26 @@
       ''on'') else 900 %}{{ s is none or (s.state != ''on'' and (now() - s.last_changed).total_seconds()
       >= limit) }}'
   actions:
+  - alias: Log + notify what was left on before switching it off (Lights Watchdog report, 2026-11-11)
+    continue_on_error: true
+    action: script.lights_watchdog_report
+    data:
+      source: 'Dining Room: Empty-Room Lights-Off Watchdog'
+      turn_off: false
+      entries:
+      - room: Dining Room
+        lights:
+        - light.dining_1
+        - light.dining_2
+        - light.dining_3
+        - light.dining_4
+        - light.dining_5
+        - light.dining_6
+        - light.dining_top_1
+        - light.dining_top_2
+        - light.dining_top_3
+        reason: '{{ ''room empty '' ~ (((now() - states.binary_sensor.dining_room_sensor_group.last_changed).total_seconds() / 60) | round | int) ~ '' min'' }}'
+        note: "{{ 'dimmer hold override was on - this is its normal 30-min off path, not a glitch' if is_state('input_boolean.dining_room_manual_override', 'on') else '' }}"
   - alias: Nothing playing - hand dining back from TV Mode
     if:
     - condition: template
@@ -19164,6 +19184,22 @@
       not none and s.state == ''off'' and (now() - s.last_changed).total_seconds()
       >= 900 }}'
   actions:
+  - alias: Log + notify what was left on before switching it off (Lights Watchdog report, 2026-11-11)
+    continue_on_error: true
+    action: script.lights_watchdog_report
+    data:
+      source: 'Kitchen: Empty-Room Lights-Off Watchdog'
+      turn_off: false
+      entries:
+      - room: Kitchen
+        lights:
+        - light.kitchen_1_color
+        - light.kitchen_2_color
+        - light.kitchen_lightstrip
+        - light.hue_datura_top_1
+        - light.hue_datura_bottom_1
+        reason: '{{ ''room empty '' ~ (((now() - states.binary_sensor.kitchen_sensor_group.last_changed).total_seconds() / 60) | round | int) ~ '' min'' }}'
+        note: "{{ 'Kitchen Smart Motion is DISABLED' if is_state('automation.kitchen_on', 'off') else '' }}"
   - alias: AL off first so it can't re-adapt them back on
     action: switch.turn_off
     target:
@@ -19183,4 +19219,268 @@
       - light.hue_datura_bottom_1
     data:
       transition: 5
+  mode: single
+- id: '1793300000001'
+  alias: 'Lights Watchdog: 30-Minute Whole-House Audit'
+  description: 'Added 2026-11-11. Every 30 minutes, compares every light in HA against
+    what should be happening and corrects + reports the ones that should be off. A
+    room is "should be off" when ALL of its raw presence sensors (not the debounced/sleep-aware
+    sensor groups - Big Bedroom''s group reads occupied the whole time sleep mode is
+    on, which is how Bedroom Lamp 2 sat on 3 h on 2026-11-11) have been off for empty_min
+    minutes, no hold entity is on, and the light itself has been on 15+ min. Outside
+    lights "should be off" once the sun has been up 30+ min. Only ever turns lights
+    OFF. A room is skipped while any of its sensors is unavailable/unknown, and the
+    whole audit is skipped during Good Morning and Goodbye. Corrections go through
+    script.lights_watchdog_report (CSV log at /config/lights_watchdog/lights_watchdog.csv
+    + iPhone notice with who turned the light on, from sensor.lights_turn_on_causes).
+    Lights that are on but not listed in any room (a newly added light) are reported
+    once so they can be added here AND to the trigger list of the Lights Turn-On Causes
+    template sensor in configuration.yaml. Status LEDs/backlights are ignored.'
+  triggers:
+  - trigger: time_pattern
+    minutes: /30
+  conditions:
+  - condition: state
+    entity_id: input_boolean.good_morning_active
+    state: 'off'
+  - condition: state
+    entity_id: input_boolean.goodbye_routine_active
+    state: 'off'
+  variables:
+    min_on: 15
+    ignore:
+    - light.fridge_freezer_monitor_display_backlight
+    - light.garage_bluetooth_status_led
+    - light.kitchen_occupancy_sensor_rgb_light
+    - light.apollo_msr_2_big_bedroom_rgb_light
+    - light.driveway_status_led
+    rooms:
+    - name: Big Bedroom
+      mode: presence
+      empty_min: 30
+      lights:
+      - light.bedroom_ceiling_1
+      - light.bedroom_ceiling_2
+      - light.bedroom_lamp_1
+      - light.bedroom_lamp_2
+      - light.nano_sand_dune
+      sensors:
+      - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy
+      - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy
+      - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy
+      holds:
+      - input_boolean.big_bedroom_manual_override
+      - media_player.bedroom_tv_2
+      auto: automation.big_bedroom_smart_motion_presence
+      flags:
+        input_boolean.big_bedroom_asleep: sleep mode on
+    - name: Bathroom
+      mode: presence
+      empty_min: 30
+      lights:
+      - light.bathroom_1
+      - light.bathroom_2
+      - light.bathroom_3
+      - light.bathroom_4
+      - light.bathroom_5
+      - light.bathroom_6
+      - light.bathroom_7
+      - light.bathroom_8
+      - light.bathroom_back
+      - light.bathroom_shower
+      - light.bathroom_tub_1
+      - light.bathroom_tub_2
+      sensors:
+      - binary_sensor.bathroom_motion
+      - binary_sensor.bathroom_bathroom_presence_sensor_presence
+      holds: []
+      auto: automation.bathroom_smart_motion_presence
+      flags:
+        switch.al_sleep_mode_bathroom: sleep mode on
+    - name: Kitchen
+      mode: presence
+      empty_min: 30
+      lights:
+      - light.kitchen_1_color
+      - light.kitchen_2_color
+      - light.kitchen_lightstrip
+      - light.hue_datura_top_1
+      - light.hue_datura_bottom_1
+      - light.range_light
+      sensors:
+      - binary_sensor.kitchen_motion
+      - binary_sensor.kitchen_occupancy_sensor_radar_zone_1_occupancy
+      - binary_sensor.kitchen_occupancy_sensor_radar_zone_2_occupancy
+      - binary_sensor.kitchen_occupancy_sensor_radar_zone_3_occupancy
+      - binary_sensor.kitchen_person_occupancy
+      holds: []
+      auto: automation.kitchen_on
+      flags:
+        input_boolean.kitchen_pico_hold: Pico hold on
+        input_boolean.kitchen_manual_override: manual override on
+    - name: Dining Room
+      mode: presence
+      empty_min: 35
+      lights:
+      - light.dining_1
+      - light.dining_2
+      - light.dining_3
+      - light.dining_4
+      - light.dining_5
+      - light.dining_6
+      - light.dining_top_1
+      - light.dining_top_2
+      - light.dining_top_3
+      sensors:
+      - binary_sensor.dining_room_apollo_ld2450_presence
+      - binary_sensor.dining_room_apollo_ld2450_still_target
+      - binary_sensor.dining_room_apollo_ld2450_moving_target
+      holds: []
+      auto: automation.dining_room_smart_motion_presence
+      flags:
+        input_boolean.dining_room_manual_override: dimmer hold override on
+        input_boolean.dining_room_tv_dim: TV dim on
+    - name: Living Room
+      mode: presence
+      empty_min: 30
+      lights:
+      - light.living_room_1
+      - light.living_room_2
+      - light.living_room_small_lamp
+      - light.living_room_floor_lamp
+      - light.galaxy_projector
+      sensors:
+      - binary_sensor.apollo_r_pro_1_740624_ld2450_presence
+      - binary_sensor.apollo_r_pro_1_740624_ld2412_presence
+      holds: []
+      auto: automation.living_room_smart_motion_presence
+      flags:
+        input_boolean.living_room_manual_override: dimmer hold override on
+    - name: Hallway
+      mode: presence
+      empty_min: 30
+      lights:
+      - light.hallway_front_1
+      - light.hallway_center
+      - light.hallway_living_room_3
+      - light.hallway_pc_bedroom
+      sensors:
+      - binary_sensor.hallway_motion
+      holds: []
+      auto: automation.hallway_on_for_motion
+      flags: {}
+    - name: Bedroom 2
+      mode: presence
+      empty_min: 45
+      lights:
+      - light.office_1
+      - light.office_2
+      - light.hue_white_lamp_1
+      - light.fluttershy
+      - light.ribbon
+      - light.showtime_light
+      sensors:
+      - binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy
+      - binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy
+      - binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy
+      - binary_sensor.bedroom2_office_bedroom2_door_presence
+      holds:
+      - input_boolean.bedroom2_fading_out
+      auto: automation.office_bedroom_2_smart_motion_presence_2
+      flags:
+        input_boolean.bedroom2_manual_override: manual override on
+        input_boolean.bedroom2_asleep: sleep mode on
+    - name: Garage
+      mode: presence
+      empty_min: 30
+      lights:
+      - light.garage_lights
+      sensors:
+      - binary_sensor.garage_garage_people_detection_presence
+      - binary_sensor.garage_person_occupancy
+      holds:
+      - input_boolean.volvo_start_active
+      auto: automation.garage_lights_on_presence_door_cover_open_or_volvo_start
+      flags: {}
+    - name: Outside
+      mode: daylight
+      empty_min: 30
+      lights:
+      - light.front_porch
+      - light.back_outside
+      - light.driveway_floodlight
+      sensors: []
+      holds: []
+      auto: automation.outside_lights_off_at_sunrise
+      flags: {}
+  actions:
+  - variables:
+      entries: >
+        {% set ns = namespace(out=[]) %}
+        {% set nowts = as_timestamp(now()) %}
+        {% for r in rooms %}
+          {% set held = r.holds | map('states') | select('in', ['on', 'open', 'opening', 'playing', 'paused']) | list | count > 0 %}
+          {% set rs = namespace(ok=false, mins=0) %}
+          {% if r.mode == 'daylight' %}
+            {% set rs.mins = ((nowts - as_timestamp(states.sun.sun.last_changed)) / 60) | int %}
+            {% set rs.ok = is_state('sun.sun', 'above_horizon') and rs.mins >= r.empty_min %}
+          {% elif r.sensors | map('states') | reject('eq', 'off') | list | count == 0 %}
+            {% set m = namespace(v=999999) %}
+            {% for s in r.sensors %}
+              {% set age = ((nowts - as_timestamp(states[s].last_changed)) / 60) | int %}
+              {% set m.v = [m.v, age] | min %}
+            {% endfor %}
+            {% set rs.mins = m.v %}
+            {% set rs.ok = m.v >= r.empty_min %}
+          {% endif %}
+          {% if rs.ok and not held %}
+            {% set ls = namespace(l=[]) %}
+            {% for l in r.lights if is_state(l, 'on') and (nowts - as_timestamp(states[l].last_changed)) / 60 >= min_on %}
+              {% set ls.l = ls.l + [l] %}
+            {% endfor %}
+            {% if ls.l %}
+              {% set nn = namespace(n=[]) %}
+              {% if r.auto and is_state(r.auto, 'off') %}
+                {% set nn.n = nn.n + [(state_attr(r.auto, 'friendly_name') or r.auto) ~ ' is DISABLED'] %}
+              {% endif %}
+              {% for f, label in r.flags.items() if is_state(f, 'on') %}
+                {% set nn.n = nn.n + [label] %}
+              {% endfor %}
+              {% set reason = ('sun up ' if r.mode == 'daylight' else 'room empty ') ~ rs.mins ~ ' min' %}
+              {% set ns.out = ns.out + [{'room': r.name, 'lights': ls.l, 'reason': reason, 'note': nn.n | join(', ')}] %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.out }}
+      uncovered: >
+        {% set known = (rooms | map(attribute='lights') | sum(start=[])) + ignore %}
+        {% set ns = namespace(u=[]) %}
+        {% for s in states.light if s.state == 'on' and s.attributes.entity_id is not defined and s.entity_id not in known %}
+          {% set age = (as_timestamp(now()) - as_timestamp(s.last_changed)) / 60 %}
+          {% if age >= 30 and age < 60 %}
+            {% set ns.u = ns.u + [s.name ~ ' (' ~ s.entity_id ~ ')'] %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.u }}
+  - if:
+    - condition: template
+      value_template: '{{ entries | count > 0 }}'
+    then:
+    - continue_on_error: true
+      action: script.lights_watchdog_report
+      data:
+        source: Lights Watchdog (30-min audit)
+        turn_off: true
+        entries: '{{ entries }}'
+  - if:
+    - condition: template
+      value_template: '{{ uncovered | count > 0 }}'
+    then:
+    - continue_on_error: true
+      action: notify.mobile_app_pc_iphone
+      data:
+        title: Lights watchdog - light not covered
+        message: '{{ uncovered | join('', '') }} has been on 30+ min but is not in any
+          Lights Watchdog room, so it is not being checked. Add it to automation 1793300000001
+          and to the Lights Turn-On Causes trigger list.'
   mode: single
