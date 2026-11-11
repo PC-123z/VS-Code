@@ -16557,54 +16557,118 @@
   mode: single
 - id: '1791000000099'
   alias: Outside Lights On at Sunset
-  description: Turns the front porch and back outside lights on at sunset. Alerts
-    Paul's iPhone if either fails to turn on.
+  description: 'Reworked 2026-11-10. 5 min after sunset: front porch + back outside
+    come on at 1% and fade up to 80% over 15 min. Brightness is ALWAYS sent explicitly
+    - the morning fade-off leaves the Hue bulbs remembering ~0%, so a bare turn_on
+    brought them back "on" at 0% (dark) and every watchdog saw state on. After the
+    ramp, verifies both are on at ~80%; if not, forces 80% and alerts Paul''s iPhone.'
   triggers:
   - trigger: sun
     event: sunset
+    offset: 00:05:00
+  variables:
+    lights:
+    - light.front_porch
+    - light.back_outside
   actions:
   - action: light.turn_on
     target:
-      entity_id: light.outside
-  - delay: 00:00:30
+      entity_id: '{{ lights }}'
+    data:
+      brightness_pct: 1
+  - delay: 00:00:05
+  - action: light.turn_on
+    target:
+      entity_id: '{{ lights }}'
+    data:
+      brightness_pct: 80
+      transition: 900
+  - delay: 00:15:30
   - if:
-    - condition: or
-      conditions:
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: light.front_porch
-          state: 'on'
-      - condition: not
-        conditions:
-        - condition: state
-          entity_id: light.back_outside
-          state: 'on'
+    - condition: template
+      value_template: '{{ lights | reject(''is_state'', ''on'') | list | count > 0
+        or lights | map(''state_attr'', ''brightness'') | map(''int'', 0) | min <
+        190 }}'
     then:
+    - variables:
+        before: Front Porch {{ states('light.front_porch') }} {{ (state_attr('light.front_porch',
+          'brightness') | int(0) / 2.55) | round }}%, Back {{ states('light.back_outside')
+          }} {{ (state_attr('light.back_outside', 'brightness') | int(0) / 2.55) |
+          round }}%
+    - action: light.turn_on
+      target:
+        entity_id: '{{ lights }}'
+      data:
+        brightness_pct: 80
+    - delay: 00:00:30
     - action: notify.mobile_app_pc_iphone
       data:
-        title: Outside lights failed to turn on
-        message: Front Porch is {{ states('light.front_porch') }} and Back is {{ states('light.back_outside')
-          }} at {{ now().strftime('%-I:%M %p') }}.
+        title: Outside lights sunset ramp failed
+        message: 'After the sunset fade-up: {{ before }} (expected 80%). Forced 80%
+          - now Front Porch {{ states(''light.front_porch'') }} {{ (state_attr(''light.front_porch'',
+          ''brightness'') | int(0) / 2.55) | round }}%, Back {{ states(''light.back_outside'')
+          }} {{ (state_attr(''light.back_outside'', ''brightness'') | int(0) / 2.55)
+          | round }}%.'
   mode: single
 - id: '1791000000100'
   alias: Outside Lights Fade Off at Sunrise
-  description: Fades the front porch and back outside lights off over 5 minutes at
-    sunrise.
+  description: 'Reworked 2026-11-10. Starts 5 min BEFORE sunrise: dims front porch
+    + back outside to 1% over 5 min, then switches them off just after sunrise. (The
+    old turn_off with a 300 s transition made HA flip off/on/off and on 2026-11-10
+    left both stuck "on" at 0% all day.) Verifies both are off; if not, forces off
+    and alerts Paul''s iPhone.'
   triggers:
   - trigger: sun
     event: sunrise
+    offset: -00:05:00
+  variables:
+    lights:
+    - light.front_porch
+    - light.back_outside
   actions:
+  - variables:
+      lit: '{{ lights | select(''is_state'', ''on'') | list }}'
+  - if:
+    - condition: template
+      value_template: '{{ lit | count > 0 }}'
+    then:
+    - action: light.turn_on
+      target:
+        entity_id: '{{ lit }}'
+      data:
+        brightness_pct: 1
+        transition: 300
+  - delay: 00:05:10
   - action: light.turn_off
     target:
-      entity_id: light.outside
-    data:
-      transition: 300
+      entity_id: '{{ lights }}'
+  - delay: 00:00:30
+  - if:
+    - condition: template
+      value_template: '{{ lights | reject(''is_state'', ''off'') | list | count >
+        0 }}'
+    then:
+    - variables:
+        before: Front Porch {{ states('light.front_porch') }}, Back {{ states('light.back_outside')
+          }}
+    - action: light.turn_off
+      target:
+        entity_id: '{{ lights }}'
+    - delay: 00:00:30
+    - action: notify.mobile_app_pc_iphone
+      data:
+        title: Outside lights sunrise fade-off failed
+        message: 'After the sunrise fade: {{ before }} (expected off). Sent off again
+          - now Front Porch {{ states(''light.front_porch'') }}, Back {{ states(''light.back_outside'')
+          }}.'
   mode: single
 - id: '1791000000101'
   alias: Outside Lights Hourly Check
-  description: Every hour between sunset and sunrise, turn the outside lights back
-    on if either is off.
+  description: 'Reworked 2026-11-10. Every hour while it is dark (from 25 min after
+    sunset, i.e. after the fade-up, until 6 min before sunrise): if either outside
+    light is not on or is below ~75% brightness, force both to 80% and alert Paul''s
+    iPhone. Previously only checked state == on and never alerted, so "on at 0%" passed
+    silently.'
   triggers:
   - trigger: time_pattern
     minutes: '0'
@@ -16612,27 +16676,44 @@
   - condition: state
     entity_id: sun.sun
     state: below_horizon
-  - condition: or
-    conditions:
-    - condition: not
-      conditions:
-      - condition: state
-        entity_id: light.front_porch
-        state: 'on'
-    - condition: not
-      conditions:
-      - condition: state
-        entity_id: light.back_outside
-        state: 'on'
+  - alias: Outside the sunset fade-up and sunrise fade-off windows
+    condition: template
+    value_template: '{{ now() > as_datetime(state_attr(''sun.sun'', ''next_setting''))
+      - timedelta(hours=24) + timedelta(minutes=25) and now() < as_datetime(state_attr(''sun.sun'',
+      ''next_rising'')) - timedelta(minutes=6) }}'
+  - alias: Either light not on, or dimmer than ~75%
+    condition: template
+    value_template: '{{ not is_state(''light.front_porch'', ''on'') or not is_state(''light.back_outside'',
+      ''on'') or state_attr(''light.front_porch'', ''brightness'') | int(0) < 190
+      or state_attr(''light.back_outside'', ''brightness'') | int(0) < 190 }}'
   actions:
+  - variables:
+      before: Front Porch {{ states('light.front_porch') }} {{ (state_attr('light.front_porch',
+        'brightness') | int(0) / 2.55) | round }}%, Back {{ states('light.back_outside')
+        }} {{ (state_attr('light.back_outside', 'brightness') | int(0) / 2.55) | round
+        }}%
   - action: light.turn_on
     target:
-      entity_id: light.outside
+      entity_id:
+      - light.front_porch
+      - light.back_outside
+    data:
+      brightness_pct: 80
+  - delay: 00:00:30
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Outside lights were not at 80%
+      message: 'Hourly check at {{ now().strftime(''%-I:%M %p'') }} found {{ before
+        }} (expected on at 80%). Forced 80% - now Front Porch {{ states(''light.front_porch'')
+        }} {{ (state_attr(''light.front_porch'', ''brightness'') | int(0) / 2.55)
+        | round }}%, Back {{ states(''light.back_outside'') }} {{ (state_attr(''light.back_outside'',
+        ''brightness'') | int(0) / 2.55) | round }}%.'
   mode: single
 - id: '1791000000102'
   alias: Outside Lights Turned Off At Night Alert
   description: If an outside light turns off (for 30 seconds) while the sun is down,
-    alert Paul's iPhone and turn the lights back on.
+    alert Paul's iPhone and turn the lights back on at 80%. Skipped from 6 min before
+    sunrise so the morning fade-off never trips it (2026-11-10).
   triggers:
   - trigger: state
     entity_id:
@@ -16644,10 +16725,17 @@
   - condition: state
     entity_id: sun.sun
     state: below_horizon
+  - condition: template
+    value_template: '{{ now() < as_datetime(state_attr(''sun.sun'', ''next_rising''))
+      - timedelta(minutes=6) }}'
   actions:
   - action: light.turn_on
     target:
-      entity_id: light.outside
+      entity_id:
+      - light.front_porch
+      - light.back_outside
+    data:
+      brightness_pct: 80
   - action: notify.mobile_app_pc_iphone
     data:
       title: Outside light turned off
