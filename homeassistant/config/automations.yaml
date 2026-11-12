@@ -1624,12 +1624,7 @@
       - alias: Fade the 5 Hue lights off over 2 seconds
         action: light.turn_off
         target:
-          entity_id:
-          - light.kitchen_1_color
-          - light.kitchen_2_color
-          - light.kitchen_lightstrip
-          - light.hue_datura_top_1
-          - light.hue_datura_bottom_1
+          entity_id: light.kitchen
         data:
           transition: 2
   mode: queued
@@ -14387,12 +14382,7 @@
       - alias: All 5 kitchen Hue lights off
         action: light.turn_off
         target:
-          entity_id:
-          - light.kitchen_1_color
-          - light.kitchen_2_color
-          - light.kitchen_lightstrip
-          - light.hue_datura_top_1
-          - light.hue_datura_bottom_1
+          entity_id: light.kitchen
         data:
           transition: 1
     - conditions:
@@ -17038,12 +17028,7 @@
       manual_control: false
   - action: light.turn_off
     target:
-      entity_id:
-      - light.kitchen_1_color
-      - light.kitchen_2_color
-      - light.kitchen_lightstrip
-      - light.hue_datura_top_1
-      - light.hue_datura_bottom_1
+      entity_id: light.kitchen
     data:
       transition: 30
   mode: single
@@ -19171,12 +19156,7 @@
       manual_control: false
   - action: light.turn_off
     target:
-      entity_id:
-      - light.kitchen_1_color
-      - light.kitchen_2_color
-      - light.kitchen_lightstrip
-      - light.hue_datura_top_1
-      - light.hue_datura_bottom_1
+      entity_id: light.kitchen
     data:
       transition: 5
   mode: single
@@ -19515,3 +19495,41 @@
             why: '{{ repeat.item.why }}'
             detail: '{{ repeat.item.detail }}'
   mode: single
+- id: '1793500000001'
+  alias: 'Lights: Room-Wide Final Off'
+  description: 'After a Hue room has shown fully off for longer than its longest fade-out, send one more off to the whole Hue room (a single Zigbee group command). Catches a bulb that missed its own off command while HA already shows it off - seen in rooms with many bulbs (dining, kitchen, big bedroom). The wait per room must stay longer than that room''s longest turn-off transition, or this would cut a fade short: kitchen/living/hallway 1 min, dining 6 min (300 s fades), big bedroom 9 min (480 s ceiling fade), Bedroom 2 31 min (30-min bedtime fade). Bathroom is handled by script.bathroom_fade_out. A bulb that comes back ON by itself makes the room show on, so this does not fire - the Lights Watchdog (1793300000001) handles that.'
+  triggers:
+  - trigger: state
+    entity_id:
+    - light.kitchen
+    - light.living_room
+    - light.hallway
+    to: 'off'
+    for:
+      minutes: 1
+  - trigger: state
+    entity_id: light.dining_room_dining_room
+    to: 'off'
+    for:
+      minutes: 6
+  - trigger: state
+    entity_id: light.bedroom
+    to: 'off'
+    for:
+      minutes: 9
+  - trigger: state
+    entity_id: light.office
+    to: 'off'
+    for:
+      minutes: 31
+  conditions:
+  - condition: template
+    value_template: '{{ is_state(trigger.entity_id, ''off'') }}'
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id: '{{ trigger.entity_id }}'
+    data:
+      transition: 0
+  mode: queued
+  max: 10
