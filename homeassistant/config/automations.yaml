@@ -1074,6 +1074,11 @@
     - conditions:
       - condition: trigger
         id: motion_detected
+      - alias: Manual override (Tap / Hue app) - leave lights as set until they turn
+          off
+        condition: template
+        value_template: "{{ not (is_state('light.hallway', 'on') and 'light.hallway'
+          in (state_attr('switch.al_hallway', 'manual_control') or [])) }}"
       sequence:
       - choose:
         - alias: Sleep mode on - go straight to dim red to avoid white flash
@@ -1137,6 +1142,87 @@
         data:
           transition: 10
   mode: restart
+- id: '1793400000001'
+  alias: 'Hallway: Manual Override Latch'
+  description: 'A Hallway Tap press/turn or a Hue-app change (any light change that
+    did not come from HA or Adaptive Lighting) marks light.hallway as manually controlled
+    on Hallway - AL, so AL''s 90 s tick and the motion automation stop re-adapting
+    it. The override is cleared when the hallway lights turn off (motion stopped),
+    after which the next motion gets the normal expected lighting. 2026-11-12.'
+  triggers:
+  - entity_id:
+    - event.hallway_tap_button_1
+    - event.hallway_tap_button_2
+    - event.hallway_tap_button_3
+    - event.hallway_tap_button_4
+    - event.hallway_tap_rotary
+    not_from:
+    - unavailable
+    - unknown
+    not_to:
+    - unavailable
+    - unknown
+    id: tap
+    trigger: state
+  - entity_id: light.hallway
+    id: light_changed
+    trigger: state
+  - entity_id: light.hallway
+    to: 'off'
+    id: light_off
+    trigger: state
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: light_off
+      sequence:
+      - alias: Lights off - override ends, next motion gets the expected lighting
+        action: adaptive_lighting.set_manual_control
+        continue_on_error: true
+        data:
+          entity_id: switch.al_hallway
+          lights:
+          - light.hallway
+          manual_control: false
+    - conditions:
+      - condition: trigger
+        id: tap
+      - condition: state
+        entity_id: light.hallway
+        state: 'on'
+      sequence:
+      - action: adaptive_lighting.set_manual_control
+        continue_on_error: true
+        data:
+          entity_id: switch.al_hallway
+          lights:
+          - light.hallway
+          manual_control: true
+    - conditions:
+      - condition: trigger
+        id: light_changed
+      - alias: Stayed on, brightness or color changed, and the change came from outside
+          HA (no automation/user/AL context) = Hue app or Tap
+        condition: template
+        value_template: "{{ trigger.from_state is not none and trigger.from_state.state
+          == 'on' and trigger.to_state.state == 'on' and trigger.to_state.context.parent_id
+          is none and trigger.to_state.context.user_id is none and ':al:' not in
+          (trigger.to_state.context.id | string) and (trigger.from_state.attributes.brightness
+          != trigger.to_state.attributes.brightness or trigger.from_state.attributes.xy_color
+          != trigger.to_state.attributes.xy_color or trigger.from_state.attributes.color_temp_kelvin
+          != trigger.to_state.attributes.color_temp_kelvin) }}"
+      sequence:
+      - action: adaptive_lighting.set_manual_control
+        continue_on_error: true
+        data:
+          entity_id: switch.al_hallway
+          lights:
+          - light.hallway
+          manual_control: true
+  mode: queued
+  max: 10
+  max_exceeded: silent
 - id: '1775348628799'
   alias: 'Kitchen: Smart Motion & Presence (Split Color/White)'
   description: 'Hue sensors trigger lights on immediately. All kitchen fixtures are
