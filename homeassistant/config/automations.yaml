@@ -1077,8 +1077,8 @@
       - alias: Manual override (Tap / Hue app) - leave lights as set until they turn
           off
         condition: template
-        value_template: "{{ not (is_state('light.hallway', 'on') and 'light.hallway'
-          in (state_attr('switch.al_hallway', 'manual_control') or [])) }}"
+        value_template: '{{ not (is_state(''light.hallway'', ''on'') and ''light.hallway''
+          in (state_attr(''switch.al_hallway'', ''manual_control'') or [])) }}'
       sequence:
       - choose:
         - alias: Sleep mode on - go straight to dim red to avoid white flash
@@ -1144,11 +1144,11 @@
   mode: restart
 - id: '1793400000001'
   alias: 'Hallway: Manual Override Latch'
-  description: 'A Hallway Tap press/turn or a Hue-app change (any light change that
+  description: A Hallway Tap press/turn or a Hue-app change (any light change that
     did not come from HA or Adaptive Lighting) marks light.hallway as manually controlled
-    on Hallway - AL, so AL''s 90 s tick and the motion automation stop re-adapting
+    on Hallway - AL, so AL's 90 s tick and the motion automation stop re-adapting
     it. The override is cleared when the hallway lights turn off (motion stopped),
-    after which the next motion gets the normal expected lighting. 2026-11-12.'
+    after which the next motion gets the normal expected lighting. 2026-11-12.
   triggers:
   - entity_id:
     - event.hallway_tap_button_1
@@ -1205,13 +1205,13 @@
       - alias: Stayed on, brightness or color changed, and the change came from outside
           HA (no automation/user/AL context) = Hue app or Tap
         condition: template
-        value_template: "{{ trigger.from_state is not none and trigger.from_state.state
-          == 'on' and trigger.to_state.state == 'on' and trigger.to_state.context.parent_id
-          is none and trigger.to_state.context.user_id is none and ':al:' not in
+        value_template: '{{ trigger.from_state is not none and trigger.from_state.state
+          == ''on'' and trigger.to_state.state == ''on'' and trigger.to_state.context.parent_id
+          is none and trigger.to_state.context.user_id is none and '':al:'' not in
           (trigger.to_state.context.id | string) and (trigger.from_state.attributes.brightness
           != trigger.to_state.attributes.brightness or trigger.from_state.attributes.xy_color
           != trigger.to_state.attributes.xy_color or trigger.from_state.attributes.color_temp_kelvin
-          != trigger.to_state.attributes.color_temp_kelvin) }}"
+          != trigger.to_state.attributes.color_temp_kelvin) }}'
       sequence:
       - action: adaptive_lighting.set_manual_control
         continue_on_error: true
@@ -2133,10 +2133,10 @@
   alias: 'Bathroom: Smart Motion & Presence (Split Color/White)'
   description: 'Hue motion (fast entry) or Akamatis radar presence turns lights on;
     off-timers run on binary_sensor.bathroom_sensor_group so someone sitting still
-    keeps the lights on. Staggered no-motion off, run by script.bathroom_fade_out after 7 empty min:
-    main lights off, shower/tub/back off 5 min later, then one room-wide off for light.bathroom
-    plus re-check sweeps. Adaptive Lighting is switched off for the fade-out and back
-    on at the next detection.'
+    keeps the lights on. Staggered no-motion off, run by script.bathroom_fade_out
+    after 7 empty min: main lights off, shower/tub/back off 5 min later, then one
+    room-wide off for light.bathroom plus re-check sweeps. Adaptive Lighting is switched
+    off for the fade-out and back on at the next detection.'
   triggers:
   - trigger: state
     entity_id:
@@ -2172,14 +2172,16 @@
         target:
           entity_id: script.bathroom_fade_out
       - condition: template
-        alias: Room not already lit - an accent left at a ghost level (brightness 5 or less, e.g. re-lit by Adaptive Lighting during the fade-out) does not count
-        value_template: >-
-          {% set accents = ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2', 'light.bathroom_back'] %}
-          {% set ns = namespace(lit=0) %}
-          {% for l in accents if is_state(l, 'on') and (state_attr(l, 'brightness') | int(255)) > 5 %}{% set ns.lit = ns.lit + 1 %}{% endfor %}
-          {{ (is_state('light.bathroom_main_lights', 'off') and ns.lit == 0)
-             or is_state('switch.al_bathroom', 'off') }}
-      - alias: Adaptive Lighting back on - the fade-out switches it off (AL off also means a fade-out is running or finished, so the room is re-lit)
+        alias: Room not already lit - an accent left at a ghost level (brightness
+          5 or less, e.g. re-lit by Adaptive Lighting during the fade-out) does not
+          count
+        value_template: "{% set accents = ['light.bathroom_shower', 'light.bathroom_tub_1',
+          'light.bathroom_tub_2', 'light.bathroom_back'] %} {% set ns = namespace(lit=0)
+          %} {% for l in accents if is_state(l, 'on') and (state_attr(l, 'brightness')
+          | int(255)) > 5 %}{% set ns.lit = ns.lit + 1 %}{% endfor %} {{ (is_state('light.bathroom_main_lights',
+          'off') and ns.lit == 0)\n   or is_state('switch.al_bathroom', 'off') }}"
+      - alias: Adaptive Lighting back on - the fade-out switches it off (AL off also
+          means a fade-out is running or finished, so the room is re-lit)
         action: switch.turn_on
         target:
           entity_id:
@@ -2272,13 +2274,16 @@
         entity_id: binary_sensor.bathroom_sensor_group
         state: 'off'
       sequence:
-      - alias: Adaptive Lighting off for the fade-out - its 90 s poll saw a still-fading light as on and re-lit it at 1% (2026-11-11). Turned back on at the next detection.
+      - alias: Adaptive Lighting off for the fade-out - its 90 s poll saw a still-fading
+          light as on and re-lit it at 1% (2026-11-11). Turned back on at the next
+          detection.
         action: switch.turn_off
         target:
           entity_id:
           - switch.al_bathroom
           - switch.al_bathroom_main
-      - alias: Fade out in its own script (dims to 1% then off) so this automation is not held up and HA shows the lights on while they are still lit
+      - alias: Fade out in its own script (dims to 1% then off) so this automation
+          is not held up and HA shows the lights on while they are still lit
         action: script.turn_on
         target:
           entity_id: script.bathroom_fade_out
@@ -9973,7 +9978,8 @@
       Armed Stay, disarmed by keypad, and the keypad path alone started Welcome Home
       and hijacked Good Morning.
     variables:
-      arrival_evidence: "{% set recent = now() - timedelta(minutes=15) %}{% set seen = states('sensor.arrival_evidence_last_seen') | as_datetime(none) %}{{ is_state('input_boolean.welcome_home_pending','on')\n
+      arrival_evidence: "{% set recent = now() - timedelta(minutes=15) %}{% set seen
+        = states('sensor.arrival_evidence_last_seen') | as_datetime(none) %}{{ is_state('input_boolean.welcome_home_pending','on')\n
         \ or is_state('input_boolean.arrival_recent','on')\n  or is_state('input_boolean.garage_open_recent','on')\n
         \ or (seen is not none and seen > recent) }}"
   - alias: Added 2026-10-11 - hard gate. If the alarm was already disarmed when the
@@ -11122,7 +11128,7 @@
     - wed
     - thu
     - fri
-    enabled: false
+    enabled: true
   - trigger: time
     at: 08:05:00
     weekday:
@@ -11131,7 +11137,7 @@
     - wed
     - thu
     - fri
-    enabled: true
+    enabled: false
   - trigger: time
     at: 09:00:00
     weekday:
@@ -19497,7 +19503,16 @@
   mode: single
 - id: '1793500000001'
   alias: 'Lights: Room-Wide Final Off'
-  description: 'After a Hue room has shown fully off for longer than its longest fade-out, send one more off to the whole Hue room (a single Zigbee group command). Catches a bulb that missed its own off command while HA already shows it off - seen in rooms with many bulbs (dining, kitchen, big bedroom). The wait per room must stay longer than that room''s longest turn-off transition, or this would cut a fade short: kitchen/living/hallway 1 min, dining 6 min (300 s fades), big bedroom 9 min (480 s ceiling fade), Bedroom 2 31 min (30-min bedtime fade). Bathroom is handled by script.bathroom_fade_out. A bulb that comes back ON by itself makes the room show on, so this does not fire - the Lights Watchdog (1793300000001) handles that.'
+  description: 'After a Hue room has shown fully off for longer than its longest fade-out,
+    send one more off to the whole Hue room (a single Zigbee group command). Catches
+    a bulb that missed its own off command while HA already shows it off - seen in
+    rooms with many bulbs (dining, kitchen, big bedroom). The wait per room must stay
+    longer than that room''s longest turn-off transition, or this would cut a fade
+    short: kitchen/living/hallway 1 min, dining 6 min (300 s fades), big bedroom 9
+    min (480 s ceiling fade), Bedroom 2 31 min (30-min bedtime fade). Bathroom is
+    handled by script.bathroom_fade_out. A bulb that comes back ON by itself makes
+    the room show on, so this does not fire - the Lights Watchdog (1793300000001)
+    handles that.'
   triggers:
   - trigger: state
     entity_id:
