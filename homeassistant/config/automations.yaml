@@ -9884,12 +9884,9 @@
       Armed Stay, disarmed by keypad, and the keypad path alone started Welcome Home
       and hijacked Good Morning.
     variables:
-      arrival_evidence: "{% set recent = now() - timedelta(minutes=15) %}{{ is_state('input_boolean.welcome_home_pending','on')\n
+      arrival_evidence: "{% set recent = now() - timedelta(minutes=15) %}{% set seen = states('sensor.arrival_evidence_last_seen') | as_datetime(none) %}{{ is_state('input_boolean.welcome_home_pending','on')\n
         \ or is_state('input_boolean.arrival_recent','on')\n  or is_state('input_boolean.garage_open_recent','on')\n
-        \ or (is_state('device_tracker.bcpro_204982_08b8','home') and states.device_tracker.bcpro_204982_08b8.last_changed
-        > recent)\n  or (is_state('person.paul','home') and states.person.paul.last_changed
-        > recent)\n  or (states.cover.garage is not none and states.cover.garage.last_changed
-        > recent) }}"
+        \ or (seen is not none and seen > recent) }}"
   - alias: Added 2026-10-11 - hard gate. If the alarm was already disarmed when the
       door opened, this is a normal in-and-out, never an arrival - on every path,
       including the arrival_recent fallback (which ignored this and started Welcome

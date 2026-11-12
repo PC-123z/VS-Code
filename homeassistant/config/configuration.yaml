@@ -184,6 +184,39 @@ input_text:
 
 # Template switches + sensors
 template:
+  # Arrival evidence timestamp (2026-11-12). Stamps "now" only on a REAL arrival signal from
+  # Paul's devices: car beacon not_home -> home (or back from 10+ min unavailable), phone
+  # not_home -> home, or the garage cover actually moving. Welcome Home STAGE 2 reads this
+  # instead of the entities' last_changed, because last_changed is reset by every HA restart
+  # and integration reload: on 2026-11-11 a restart made the beacon flip unavailable -> home,
+  # and a trip to the garage during Armed Stay 14 min later started Welcome Home.
+  - trigger:
+      - trigger: state
+        entity_id: device_tracker.bcpro_204982_08b8
+        from:
+          - not_home
+          - unavailable
+        to: home
+      - trigger: state
+        entity_id: person.paul
+        from: not_home
+        to: home
+      - trigger: state
+        entity_id: cover.garage
+        from: [open, opening, closed, closing]
+        to: [open, opening, closed, closing]
+    condition:
+      - condition: template
+        value_template: >-
+          {{ trigger.from_state is not none
+             and trigger.from_state.state != trigger.to_state.state
+             and (trigger.from_state.state != 'unavailable'
+                  or (trigger.to_state.last_changed - trigger.from_state.last_changed).total_seconds() >= 600) }}
+    sensor:
+      - name: Arrival Evidence Last Seen
+        unique_id: arrival_evidence_last_seen
+        device_class: timestamp
+        state: "{{ now().isoformat() }}"
   # Sensor Watchdog - activity tracker (2026-11-11). Remembers, across restarts, when each
   # presence signal last turned ON (ts) plus up to 3 earlier on-times at least 1 h apart
   # (hist), and when each sensor unit was last reset (resets, fed by the
