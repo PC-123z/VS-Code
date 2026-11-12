@@ -1389,54 +1389,55 @@ presence_sensor_reset:
           interruption-level: '{{ ''passive'' if is_state(''input_boolean.big_bedroom_asleep'', ''on'') else ''active'' }}'
 bathroom_fade_out:
   alias: 'Bathroom: Fade Out (empty room)'
-  description: 'Started by Bathroom: Smart Motion & Presence after 7 empty minutes; any new detection stops it. Dims the lights to 1% and only then switches them off, so HA shows them on for as long as the bulbs are really lit. (A long turn_off transition made HA show off at once while the bulbs glowed for 8 more minutes - 2026-11-12.) Mains are off after about 1 minute; shower/tub/back after about 8 minutes, or about 1 minute when they are already at night level (5% or less).'
+  description: 'Started by Bathroom: Smart Motion & Presence after 7 empty minutes; any new detection stops it. Lights already at night level (5% or less) get one room-wide off. Brighter lights are dimmed to 1% first (mains about 1 minute, shower/tub/back about 8 minutes) and only then switched off, so HA shows them on for as long as the bulbs are really lit. Never use a long turn_off transition here: HA shows off at once while the bulbs glow for the whole transition (2026-11-12). Ends with re-check sweeps because single bulbs came back on at 1% one to two minutes after the off.'
   mode: restart
   variables:
-    mains: light.bathroom_main_lights
-    accents: >-
+    mains_on: >-
+      {{ expand('light.bathroom_main_lights') | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | list }}
+    accents_on: >-
       {{ ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2', 'light.bathroom_back']
          | select('is_state', 'on') | list }}
     already_dim: >-
       {% set ns = namespace(mx=0) %}
-      {% for l in accents %}{% set ns.mx = [ns.mx, state_attr(l, 'brightness') | int(255)] | max %}{% endfor %}
+      {% for l in mains_on + accents_on %}{% set ns.mx = [ns.mx, state_attr(l, 'brightness') | int(255)] | max %}{% endfor %}
       {{ ns.mx <= 13 }}
-    accent_secs: '{{ 55 if already_dim else 465 }}'
   sequence:
-  - if: '{{ is_state(mains, ''on'') }}'
+  - if: '{{ not already_dim }}'
     then:
-    - action: light.turn_on
-      target:
-        entity_id: '{{ mains }}'
-      data:
-        brightness: 3
-        transition: 55
-  - if: '{{ accents | count > 0 }}'
-    then:
-    - action: light.turn_on
-      target:
-        entity_id: '{{ accents }}'
-      data:
-        brightness: 3
-        transition: '{{ accent_secs }}'
-  - delay: 57
-  - action: light.turn_off
+    - if: '{{ mains_on | count > 0 }}'
+      then:
+      - action: light.turn_on
+        target:
+          entity_id: '{{ mains_on }}'
+        data:
+          brightness: 3
+          transition: 55
+    - if: '{{ accents_on | count > 0 }}'
+      then:
+      - action: light.turn_on
+        target:
+          entity_id: '{{ accents_on }}'
+        data:
+          brightness: 3
+          transition: 465
+    - delay: 57
+    - if: '{{ mains_on | count > 0 }}'
+      then:
+      - action: light.turn_off
+        target:
+          entity_id: '{{ mains_on }}'
+        data:
+          transition: 2
+    - delay: 410
+  - alias: One room-wide off (a single Hue group command, not 12 separate ones)
+    action: light.turn_off
     target:
-      entity_id: '{{ mains }}'
+      entity_id: light.bathroom
     data:
       transition: 2
-  - delay: '{{ accent_secs | int - 55 }}'
-  - action: light.turn_off
-    target:
-      entity_id:
-      - light.bathroom_shower
-      - light.bathroom_tub_1
-      - light.bathroom_tub_2
-      - light.bathroom_back
-    data:
-      transition: 2
-  - alias: Sweep - a bulb sometimes comes back on at 1% about a minute after the off (Bathroom Back 2026-11-11, Tub 1 2026-11-12). Re-check three times and send one room-wide off for anything still lit.
+  - alias: Sweep - single bulbs came back on at 1% one to two minutes after the off (Bathroom Back 2026-11-11; Tub 1, Bathroom 4 and 8 on 2026-11-12). Re-check five times and send a room-wide off for anything still lit.
     repeat:
-      count: 3
+      count: 5
       sequence:
       - delay: 45
       - if: '{{ expand(''light.bathroom'') | selectattr(''state'', ''eq'', ''on'') | list | count > 0 }}'
