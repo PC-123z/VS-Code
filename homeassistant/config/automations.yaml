@@ -2086,9 +2086,12 @@
         id: detected
       sequence:
       - condition: template
-        value_template: "{% set lights = [\n  'light.bathroom_shower',\n  'light.bathroom_tub_1',\n
-          \ 'light.bathroom_tub_2',\n  'light.bathroom_back',\n  'light.bathroom_main_lights'\n]
-          %} {{ lights | select('is_state', 'on') | list | count == 0 }}\n"
+        alias: Room not already lit - an accent left at a ghost level (brightness 5 or less, e.g. re-lit by Adaptive Lighting during the fade-out) does not count
+        value_template: >-
+          {% set accents = ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2', 'light.bathroom_back'] %}
+          {% set ns = namespace(lit=0) %}
+          {% for l in accents if is_state(l, 'on') and (state_attr(l, 'brightness') | int(255)) > 5 %}{% set ns.lit = ns.lit + 1 %}{% endfor %}
+          {{ is_state('light.bathroom_main_lights', 'off') and ns.lit == 0 }}
       - choose:
         - conditions:
           - condition: state
