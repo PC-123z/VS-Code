@@ -2171,6 +2171,10 @@
       - condition: trigger
         id: detected
       sequence:
+      - alias: Someone is here - stop any fade-out in progress
+        action: script.turn_off
+        target:
+          entity_id: script.bathroom_fade_out
       - condition: template
         alias: Room not already lit - an accent left at a ghost level (brightness 5 or less, e.g. re-lit by Adaptive Lighting during the fade-out) does not count
         value_template: >-
@@ -2278,20 +2282,10 @@
           entity_id:
           - switch.al_bathroom
           - switch.al_bathroom_main
-      - action: light.turn_off
+      - alias: Fade out in its own script (dims to 1% then off) so this automation is not held up and HA shows the lights on while they are still lit
+        action: script.turn_on
         target:
-          entity_id: light.bathroom_main_lights
-        data:
-          transition: 60
-      - action: light.turn_off
-        target:
-          entity_id:
-          - light.bathroom_shower
-          - light.bathroom_tub_1
-          - light.bathroom_tub_2
-          - light.bathroom_back
-        data:
-          transition: 480
+          entity_id: script.bathroom_fade_out
     - conditions:
       - condition: trigger
         id: failsafe

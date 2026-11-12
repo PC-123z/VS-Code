@@ -1387,3 +1387,50 @@ presence_sensor_reset:
       data:
         push:
           interruption-level: '{{ ''passive'' if is_state(''input_boolean.big_bedroom_asleep'', ''on'') else ''active'' }}'
+bathroom_fade_out:
+  alias: 'Bathroom: Fade Out (empty room)'
+  description: 'Started by Bathroom: Smart Motion & Presence after 7 empty minutes; any new detection stops it. Dims the lights to 1% and only then switches them off, so HA shows them on for as long as the bulbs are really lit. (A long turn_off transition made HA show off at once while the bulbs glowed for 8 more minutes - 2026-11-12.) Mains are off after about 1 minute; shower/tub/back after about 8 minutes, or about 1 minute when they are already at night level (5% or less).'
+  mode: restart
+  variables:
+    mains: light.bathroom_main_lights
+    accents: >-
+      {{ ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2', 'light.bathroom_back']
+         | select('is_state', 'on') | list }}
+    already_dim: >-
+      {% set ns = namespace(mx=0) %}
+      {% for l in accents %}{% set ns.mx = [ns.mx, state_attr(l, 'brightness') | int(255)] | max %}{% endfor %}
+      {{ ns.mx <= 13 }}
+    accent_secs: '{{ 55 if already_dim else 465 }}'
+  sequence:
+  - if: '{{ is_state(mains, ''on'') }}'
+    then:
+    - action: light.turn_on
+      target:
+        entity_id: '{{ mains }}'
+      data:
+        brightness: 3
+        transition: 55
+  - if: '{{ accents | count > 0 }}'
+    then:
+    - action: light.turn_on
+      target:
+        entity_id: '{{ accents }}'
+      data:
+        brightness: 3
+        transition: '{{ accent_secs }}'
+  - delay: 57
+  - action: light.turn_off
+    target:
+      entity_id: '{{ mains }}'
+    data:
+      transition: 2
+  - delay: '{{ accent_secs | int - 55 }}'
+  - action: light.turn_off
+    target:
+      entity_id:
+      - light.bathroom_shower
+      - light.bathroom_tub_1
+      - light.bathroom_tub_2
+      - light.bathroom_back
+    data:
+      transition: 2
