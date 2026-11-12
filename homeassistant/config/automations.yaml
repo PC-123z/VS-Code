@@ -2177,7 +2177,14 @@
           {% set accents = ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2', 'light.bathroom_back'] %}
           {% set ns = namespace(lit=0) %}
           {% for l in accents if is_state(l, 'on') and (state_attr(l, 'brightness') | int(255)) > 5 %}{% set ns.lit = ns.lit + 1 %}{% endfor %}
-          {{ is_state('light.bathroom_main_lights', 'off') and ns.lit == 0 }}
+          {{ (is_state('light.bathroom_main_lights', 'off') and ns.lit == 0)
+             or is_state('switch.al_bathroom', 'off') }}
+      - alias: Adaptive Lighting back on - the fade-out switches it off (AL off also means a fade-out is running or finished, so the room is re-lit)
+        action: switch.turn_on
+        target:
+          entity_id:
+          - switch.al_bathroom
+          - switch.al_bathroom_main
       - choose:
         - conditions:
           - condition: state
@@ -2265,6 +2272,12 @@
         entity_id: binary_sensor.bathroom_sensor_group
         state: 'off'
       sequence:
+      - alias: Adaptive Lighting off for the fade-out - its 90 s poll saw a still-fading light as on and re-lit it at 1% (2026-11-11). Turned back on at the next detection.
+        action: switch.turn_off
+        target:
+          entity_id:
+          - switch.al_bathroom
+          - switch.al_bathroom_main
       - action: light.turn_off
         target:
           entity_id: light.bathroom_main_lights
