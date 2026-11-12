@@ -2138,9 +2138,10 @@
   alias: 'Bathroom: Smart Motion & Presence (Split Color/White)'
   description: 'Hue motion (fast entry) or Akamatis radar presence turns lights on;
     off-timers run on binary_sensor.bathroom_sensor_group so someone sitting still
-    keeps the lights on. Staggered no-motion off: main lights off at 7 min, shower/tub/back
-    lights fade off over the following 8 min (done by 15 min) so the room never goes
-    dark all at once.'
+    keeps the lights on. Staggered no-motion off, run by script.bathroom_fade_out after 7 empty min:
+    main lights off, shower/tub/back off 5 min later, then one room-wide off for light.bathroom
+    plus re-check sweeps. Adaptive Lighting is switched off for the fade-out and back
+    on at the next detection.'
   triggers:
   - trigger: state
     entity_id:

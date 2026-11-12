@@ -1389,7 +1389,7 @@ presence_sensor_reset:
           interruption-level: '{{ ''passive'' if is_state(''input_boolean.big_bedroom_asleep'', ''on'') else ''active'' }}'
 bathroom_fade_out:
   alias: 'Bathroom: Fade Out (empty room)'
-  description: 'Started by Bathroom: Smart Motion & Presence after 7 empty minutes; any new detection stops it. Lights already at night level (5% or less) get one room-wide off. Brighter lights are dimmed to 1% first (mains about 1 minute, shower/tub/back about 8 minutes) and only then switched off, so HA shows them on for as long as the bulbs are really lit. Never use a long turn_off transition here: HA shows off at once while the bulbs glow for the whole transition (2026-11-12). Ends with re-check sweeps because single bulbs came back on at 1% one to two minutes after the off.'
+  description: 'Started by Bathroom: Smart Motion & Presence after 7 empty minutes; any new detection stops it. Step 1: main lights off (dimmed to 1% over about a minute first if they are above night level). Step 2: shower/tub/back stay on 5 more minutes (dimming to 1% if above night level) so the room never goes dark all at once. Step 3: one room-wide off for light.bathroom catches everything. Then re-check sweeps, because single bulbs came back on at 1% one to two minutes after an off. Never use a long turn_off transition here: HA shows off at once while the bulbs glow for the whole transition (2026-11-12).'
   mode: restart
   variables:
     mains_on: >-
@@ -1397,45 +1397,52 @@ bathroom_fade_out:
     accents_on: >-
       {{ ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2', 'light.bathroom_back']
          | select('is_state', 'on') | list }}
-    already_dim: >-
+    mains_bright: >-
       {% set ns = namespace(mx=0) %}
-      {% for l in mains_on + accents_on %}{% set ns.mx = [ns.mx, state_attr(l, 'brightness') | int(255)] | max %}{% endfor %}
-      {{ ns.mx <= 13 }}
+      {% for l in mains_on %}{% set ns.mx = [ns.mx, state_attr(l, 'brightness') | int(255)] | max %}{% endfor %}
+      {{ ns.mx > 13 }}
+    accents_bright: >-
+      {% set ns = namespace(mx=0) %}
+      {% for l in accents_on %}{% set ns.mx = [ns.mx, state_attr(l, 'brightness') | int(255)] | max %}{% endfor %}
+      {{ ns.mx > 13 }}
   sequence:
-  - if: '{{ not already_dim }}'
+  - alias: Accents start a slow dim to 1% (only if above night level)
+    if: '{{ accents_bright }}'
     then:
-    - if: '{{ mains_on | count > 0 }}'
-      then:
-      - action: light.turn_on
-        target:
-          entity_id: '{{ mains_on }}'
-        data:
-          brightness: 3
-          transition: 55
-    - if: '{{ accents_on | count > 0 }}'
-      then:
-      - action: light.turn_on
-        target:
-          entity_id: '{{ accents_on }}'
-        data:
-          brightness: 3
-          transition: 465
+    - action: light.turn_on
+      target:
+        entity_id: '{{ accents_on }}'
+      data:
+        brightness: 3
+        transition: 340
+  - alias: Mains dim to 1% over about a minute (only if above night level)
+    if: '{{ mains_bright }}'
+    then:
+    - action: light.turn_on
+      target:
+        entity_id: '{{ mains_on }}'
+      data:
+        brightness: 3
+        transition: 55
     - delay: 57
-    - if: '{{ mains_on | count > 0 }}'
-      then:
-      - action: light.turn_off
-        target:
-          entity_id: '{{ mains_on }}'
-        data:
-          transition: 2
-    - delay: 410
-  - alias: One room-wide off (a single Hue group command, not 12 separate ones)
+  - alias: Mains off
+    if: '{{ mains_on | count > 0 }}'
+    then:
+    - action: light.turn_off
+      target:
+        entity_id: '{{ mains_on }}'
+      data:
+        transition: 2
+  - alias: Shower/tub/back stay on 5 more minutes
+    delay:
+      minutes: 5
+  - alias: One room-wide off (a single Hue group command) catches everything
     action: light.turn_off
     target:
       entity_id: light.bathroom
     data:
       transition: 2
-  - alias: Sweep - single bulbs came back on at 1% one to two minutes after the off (Bathroom Back 2026-11-11; Tub 1, Bathroom 4 and 8 on 2026-11-12). Re-check five times and send a room-wide off for anything still lit.
+  - alias: Sweep - single bulbs came back on at 1% one to two minutes after the off (Bathroom Back 2026-11-11; Tub 1, Shower, Bathroom 4 and 8 on 2026-11-12). Re-check five times and send a room-wide off for anything still lit.
     repeat:
       count: 5
       sequence:
