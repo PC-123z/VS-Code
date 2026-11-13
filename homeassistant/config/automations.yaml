@@ -17381,7 +17381,7 @@
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.apex_discharge_due
-      - action: notify.mobile_app_pc_iphone
+      - action: script.apex_notify
         data:
           title: Apex 200 discharge tomorrow
           message: >-
@@ -17401,7 +17401,7 @@
         entity_id: input_boolean.apex_discharge_active
         state: 'off'
       sequence:
-      - action: notify.mobile_app_pc_iphone
+      - action: script.apex_notify
         data:
           title: Apex 200 discharge still needed
           message: >-
@@ -17461,7 +17461,7 @@
       value_template: "{{ problems | trim | length > 0 }}"
     then:
     - alias: Conditions wrong - cancel this run, due stays on
-      action: notify.mobile_app_pc_iphone
+      action: script.apex_notify
       data:
         title: Apex 200 discharge cancelled
         message: >-
@@ -17503,13 +17503,13 @@
         action: input_boolean.turn_off
         target:
           entity_id: input_boolean.apex_discharge_active
-      - action: notify.mobile_app_pc_iphone
+      - action: script.apex_notify
         data:
           title: Apex 200 discharge cancelled
           message: The Power Station plug did not switch off, so the discharge was not started. You will get a daily reminder until it runs.
         continue_on_error: true
       else:
-      - action: notify.mobile_app_pc_iphone
+      - action: script.apex_notify
         data:
           title: Apex 200 discharge started
           message: >-
@@ -17557,7 +17557,7 @@
       entity_id:
       - input_boolean.apex_discharge_active
       - input_boolean.apex_discharge_due
-  - action: notify.mobile_app_pc_iphone
+  - action: script.apex_notify
     data:
       title: Apex 200 discharge complete
       message: >-
@@ -17625,7 +17625,7 @@
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.apex_discharge_active
-  - action: notify.mobile_app_pc_iphone
+  - action: script.apex_notify
     data:
       title: Apex 200 discharge stopped early
       message: >-
@@ -17693,7 +17693,7 @@
         - action: input_boolean.turn_off
           target:
             entity_id: input_boolean.apex_discharge_verify_charging
-        - action: notify.mobile_app_pc_iphone
+        - action: script.apex_notify
           data:
             title: Apex 200 is NOT charging
             message: >-
@@ -17718,7 +17718,7 @@
     - action: input_boolean.turn_off
       target:
         entity_id: input_boolean.apex_discharge_recharging
-    - action: notify.mobile_app_pc_iphone
+    - action: script.apex_notify
       data:
         title: Apex 200 recharged
         message: The Apex 200 is back at 100% after the discharge.
@@ -17740,7 +17740,7 @@
   - action: input_boolean.turn_off
     target:
       entity_id: input_boolean.apex_discharge_due
-  - action: notify.mobile_app_pc_iphone
+  - action: script.apex_notify
     data:
       title: Apex 200 discharge skipped
       message: Skipped for this quarter. The next one is scheduled for the first Saturday of the next quarter.
@@ -17845,7 +17845,7 @@
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.apex_plug_alert_active
-      - action: notify.mobile_app_pc_iphone
+      - action: script.apex_notify
         data:
           title: Apex 200 power problem
           message: "{{ problem | trim }} Battery is at {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}%."
@@ -17869,7 +17869,7 @@
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.apex_plug_alert_active
-      - action: notify.mobile_app_pc_iphone
+      - action: script.apex_notify
         data:
           title: Apex 200 power restored
           message: "The Power Station plug is on and the Apex 200 is getting grid power again. Battery is at {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}%."
