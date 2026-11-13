@@ -59,6 +59,17 @@
         "mode": "box",
         "unit_of_measurement": "%",
         "icon": "mdi:battery-25"
+      },
+      {
+        "id": "apex_discharge_min_start",
+        "name": "Apex Discharge Min Start",
+        "min": 10.0,
+        "max": 100.0,
+        "step": 1.0,
+        "initial": 90.0,
+        "mode": "box",
+        "unit_of_measurement": "%",
+        "icon": "mdi:battery-90"
       }
     ]
   }

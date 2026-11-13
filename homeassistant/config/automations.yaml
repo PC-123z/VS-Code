@@ -17417,7 +17417,7 @@
   mode: single
 - id: '1793600000002'
   alias: 'Apex Discharge: Start'
-  description: 'Added 2026-11-12. Starts the quarterly Apex 200 discharge by switching off the Tapo plug that feeds it (switch.kitchen_power_station). Runs Saturdays at 8 AM while input_boolean.apex_discharge_due is on, or any time from the Start now button on a reminder. If conditions are wrong (battery under 90%, battery/cloud not reporting, plug not on, Apex not drawing through the plug) the run is cancelled with a notification and due stays on, so the daily reminder (1793600000001) keeps going and it retries next Saturday. State lives in helpers, not in a long-running wait, so a restart or automation reload mid-discharge loses nothing.'
+  description: 'Added 2026-11-12. Starts the quarterly Apex 200 discharge by switching off the Tapo plug that feeds it (switch.kitchen_power_station). Runs Saturdays at 8 AM while input_boolean.apex_discharge_due is on, or any time from the Start now button on a reminder. If conditions are wrong (battery under input_number.apex_discharge_min_start, normally 90%, battery/cloud not reporting, plug not on, Apex not drawing through the plug) the run is cancelled with a notification and due stays on, so the daily reminder (1793600000001) keeps going and it retries next Saturday. State lives in helpers, not in a long-running wait, so a restart or automation reload mid-discharge loses nothing.'
   triggers:
   - trigger: time
     at: '08:00:00'
@@ -17444,7 +17444,7 @@
         {% set bat = states('sensor.kitchen_ap2002636113257432_battery_level') | float(-1) %}
         {% if bat < 0 %}
           {% set p.l = p.l + ['the battery level is not reporting'] %}
-        {% elif bat < 90 %}
+        {% elif bat < states('input_number.apex_discharge_min_start') | float(90) %}
           {% set p.l = p.l + ['the battery is only at ' ~ (bat | int) ~ '%'] %}
         {% endif %}
         {% if not is_state('binary_sensor.ap2002636113257432_cloud_api', 'on') %}
