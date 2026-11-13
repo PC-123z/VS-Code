@@ -67,6 +67,11 @@
         "id": "apex_discharge_recharging",
         "name": "Apex Discharge Recharging",
         "icon": "mdi:battery-charging"
+      },
+      {
+        "id": "apex_plug_alert_active",
+        "name": "Apex Plug Alert Active",
+        "icon": "mdi:power-plug-off"
       }
     ]
   }

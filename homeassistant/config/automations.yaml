@@ -17791,3 +17791,88 @@
         message: "{{ message }}"
       continue_on_error: true
   mode: single
+- id: '1793600000008'
+  alias: 'Apex: Power Station Plug Alert'
+  description: 'Added 2026-11-12. Alerts the iPhone (and queues a kitchen Echo message) when the Tapo plug feeding the Apex 200 (switch.kitchen_power_station) is switched off for 1+ min, goes offline for 5+ min, or is on but the Apex reports no grid input for 10+ min (unplugged, tripped breaker). Off and no-grid are ignored during a quarterly discharge, where off is intended. Repeats at 9 AM and 6 PM while the problem remains, and sends one all-clear when power is back. input_boolean.apex_plug_alert_active tracks an open alert so HA restarts do not produce all-clear spam.'
+  triggers:
+  - trigger: state
+    entity_id: switch.kitchen_power_station
+    to: 'off'
+    for: '00:01:00'
+    id: problem
+  - trigger: state
+    entity_id: switch.kitchen_power_station
+    to: unavailable
+    for: '00:05:00'
+    id: problem
+  - trigger: numeric_state
+    entity_id: sensor.kitchen_ap2002636113257432_grid_input_power
+    below: 1
+    for: '00:10:00'
+    id: problem
+  - trigger: time
+    at:
+    - '09:00:00'
+    - '18:00:00'
+    id: repeat
+  - trigger: state
+    entity_id: switch.kitchen_power_station
+    to: 'on'
+    for: '00:01:00'
+    id: check_clear
+  - trigger: numeric_state
+    entity_id: sensor.kitchen_ap2002636113257432_grid_input_power
+    above: 1
+    for: '00:01:00'
+    id: check_clear
+  actions:
+  - variables:
+      plug: "{{ states('switch.kitchen_power_station') }}"
+      discharging: "{{ is_state('input_boolean.apex_discharge_active', 'on') }}"
+      grid: "{{ states('sensor.kitchen_ap2002636113257432_grid_input_power') | float(-1) }}"
+      problem: >-
+        {% if plug in ['unavailable', 'unknown'] %}The Power Station plug is offline, so Home Assistant cannot see or control it.
+        {% elif discharging %}
+        {% elif plug == 'off' %}The Power Station plug is switched off, so the Apex 200 is not charging.
+        {% elif grid == 0 %}The Power Station plug is on, but the Apex 200 is getting no grid power. It may be unplugged.
+        {% endif %}
+  - choose:
+    - alias: Problem present - alert (new problem, or scheduled repeat of an open one)
+      conditions:
+      - condition: template
+        value_template: "{{ problem | trim | length > 0 and (trigger.id == 'problem' or (trigger.id == 'repeat' and is_state('input_boolean.apex_plug_alert_active', 'on'))) }}"
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.apex_plug_alert_active
+      - action: notify.mobile_app_pc_iphone
+        data:
+          title: Apex 200 power problem
+          message: "{{ problem | trim }} Battery is at {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}%."
+          data:
+            push:
+              interruption-level: time-sensitive
+        continue_on_error: true
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.apex_kitchen_announcement
+        data:
+          value: Warning. The Apex power station is not getting power. Please check the Power Station plug.
+    - alias: Problem gone - one all-clear
+      conditions:
+      - condition: state
+        entity_id: input_boolean.apex_plug_alert_active
+        state: 'on'
+      - condition: template
+        value_template: "{{ problem | trim | length == 0 and not discharging and plug == 'on' and grid > 0 }}"
+      sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.apex_plug_alert_active
+      - action: notify.mobile_app_pc_iphone
+        data:
+          title: Apex 200 power restored
+          message: "The Power Station plug is on and the Apex 200 is getting grid power again. Battery is at {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}%."
+        continue_on_error: true
+  mode: queued
+  max: 5
