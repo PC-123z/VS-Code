@@ -17363,3 +17363,431 @@
       transition: 0
   mode: queued
   max: 10
+- id: '1793600000001'
+  alias: 'Apex Discharge: Noon Alert & Daily Reminder'
+  description: 'Added 2026-11-12. Bluetti asks for a discharge of the Apex 200 once a quarter. Runs on the first Saturday of Jan/Apr/Jul/Oct at 8 AM (1793600000002). This one fires at noon: on the Friday before a scheduled Saturday it sets input_boolean.apex_discharge_due and sends the day-before alert; on any other day while the discharge is still due and not running it sends a daily reminder. Due stays on until a discharge reaches the target or the user taps Skip.'
+  triggers:
+  - trigger: time
+    at: '12:00:00'
+  actions:
+  - choose:
+    - alias: Friday before the first Saturday of a quarter
+      conditions:
+      - condition: template
+        value_template: >-
+          {% set t = now() + timedelta(days=1) %}
+          {{ t.isoweekday() == 6 and t.day <= 7 and t.month in [1, 4, 7, 10] }}
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.apex_discharge_due
+      - action: notify.mobile_app_pc_iphone
+        data:
+          title: Apex 200 discharge tomorrow
+          message: >-
+            The quarterly Apex 200 discharge runs tomorrow (Saturday) at 8 AM. The Power Station plug will switch off until the battery reaches {{ states('input_number.apex_discharge_target') | int(25) }}%. Battery is at {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}% now.
+          data:
+            actions:
+            - action: APEX_DISCHARGE_SKIP
+              title: Skip this quarter
+              destructive: true
+        continue_on_error: true
+    - alias: Still due and not running - daily reminder
+      conditions:
+      - condition: state
+        entity_id: input_boolean.apex_discharge_due
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.apex_discharge_active
+        state: 'off'
+      sequence:
+      - action: notify.mobile_app_pc_iphone
+        data:
+          title: Apex 200 discharge still needed
+          message: >-
+            The quarterly Apex 200 discharge has not been completed. It will try again Saturday at 8 AM, or you can start it now. Battery is at {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}%.
+          data:
+            actions:
+            - action: APEX_DISCHARGE_START
+              title: Start now
+            - action: APEX_DISCHARGE_SKIP
+              title: Skip this quarter
+              destructive: true
+        continue_on_error: true
+  mode: single
+- id: '1793600000002'
+  alias: 'Apex Discharge: Start'
+  description: 'Added 2026-11-12. Starts the quarterly Apex 200 discharge by switching off the Tapo plug that feeds it (switch.kitchen_power_station). Runs Saturdays at 8 AM while input_boolean.apex_discharge_due is on, or any time from the Start now button on a reminder. If conditions are wrong (battery under 90%, battery/cloud not reporting, plug not on, Apex not drawing through the plug) the run is cancelled with a notification and due stays on, so the daily reminder (1793600000001) keeps going and it retries next Saturday. State lives in helpers, not in a long-running wait, so a restart or automation reload mid-discharge loses nothing.'
+  triggers:
+  - trigger: time
+    at: '08:00:00'
+    id: scheduled
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: APEX_DISCHARGE_START
+    id: manual
+  conditions:
+  - condition: state
+    entity_id: input_boolean.apex_discharge_due
+    state: 'on'
+  - condition: state
+    entity_id: input_boolean.apex_discharge_active
+    state: 'off'
+  - condition: template
+    value_template: "{{ trigger.id == 'manual' or now().isoweekday() == 6 }}"
+  actions:
+  - variables:
+      target: "{{ states('input_number.apex_discharge_target') | int(25) }}"
+      problems: >-
+        {% set p = namespace(l=[]) %}
+        {% set bat = states('sensor.kitchen_ap2002636113257432_battery_level') | float(-1) %}
+        {% if bat < 0 %}
+          {% set p.l = p.l + ['the battery level is not reporting'] %}
+        {% elif bat < 90 %}
+          {% set p.l = p.l + ['the battery is only at ' ~ (bat | int) ~ '%'] %}
+        {% endif %}
+        {% if not is_state('binary_sensor.ap2002636113257432_cloud_api', 'on') %}
+          {% set p.l = p.l + ['the Bluetti cloud is not reporting'] %}
+        {% endif %}
+        {% if not is_state('switch.kitchen_power_station', 'on') %}
+          {% set p.l = p.l + ['the Power Station plug is ' ~ states('switch.kitchen_power_station')] %}
+        {% elif states('sensor.kitchen_power_station_current_consumption') | float(0) < 3 %}
+          {% set p.l = p.l + ['the Apex is not drawing power through the Power Station plug'] %}
+        {% endif %}
+        {{ p.l | join('; ') }}
+  - if:
+    - condition: template
+      value_template: "{{ problems | trim | length > 0 }}"
+    then:
+    - alias: Conditions wrong - cancel this run, due stays on
+      action: notify.mobile_app_pc_iphone
+      data:
+        title: Apex 200 discharge cancelled
+        message: >-
+          The discharge was not started: {{ problems | trim }}. You will get a daily reminder until it runs. It retries Saturday at 8 AM.
+        data:
+          actions:
+          - action: APEX_DISCHARGE_START
+            title: Start now
+          - action: APEX_DISCHARGE_SKIP
+            title: Skip this quarter
+            destructive: true
+      continue_on_error: true
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.apex_kitchen_announcement
+      data:
+        value: The Apex power station discharge was cancelled. Check your phone for the reason.
+    else:
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.apex_discharge_started
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.apex_discharge_active
+    - action: switch.turn_off
+      target:
+        entity_id: switch.kitchen_power_station
+      continue_on_error: true
+    - wait_template: "{{ is_state('switch.kitchen_power_station', 'off') }}"
+      timeout: '00:00:30'
+      continue_on_timeout: true
+    - if:
+      - condition: template
+        value_template: "{{ not wait.completed }}"
+      then:
+      - alias: Plug did not switch off - abandon, due stays on
+        action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.apex_discharge_active
+      - action: notify.mobile_app_pc_iphone
+        data:
+          title: Apex 200 discharge cancelled
+          message: The Power Station plug did not switch off, so the discharge was not started. You will get a daily reminder until it runs.
+        continue_on_error: true
+      else:
+      - action: notify.mobile_app_pc_iphone
+        data:
+          title: Apex 200 discharge started
+          message: >-
+            The quarterly discharge is under way. The Power Station plug is off and will come back on when the battery reaches {{ target }}%. Battery is at {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}% now.
+        continue_on_error: true
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.apex_kitchen_announcement
+        data:
+          value: "The Apex power station quarterly discharge has started. It will recharge when the battery reaches {{ target }} percent."
+  mode: single
+- id: '1793600000003'
+  alias: 'Apex Discharge: Finish at Target'
+  description: 'Added 2026-11-12. While input_boolean.apex_discharge_active is on, switches the Power Station plug back on once the Apex battery is at or below input_number.apex_discharge_target (25%). Also re-checks every 5 minutes and at HA start so a restart during the discharge cannot miss the crossing. Clears due (the quarter is done) and hands over to the charging follow-up (1793600000005).'
+  triggers:
+  - trigger: template
+    value_template: "{{ states('sensor.kitchen_ap2002636113257432_battery_level') | float(101) <= states('input_number.apex_discharge_target') | float(25) }}"
+  - trigger: time_pattern
+    minutes: /5
+  - trigger: homeassistant
+    event: start
+  conditions:
+  - condition: state
+    entity_id: input_boolean.apex_discharge_active
+    state: 'on'
+  - condition: template
+    value_template: "{{ states('sensor.kitchen_ap2002636113257432_battery_level') | float(101) <= states('input_number.apex_discharge_target') | float(25) }}"
+  actions:
+  - action: switch.turn_on
+    target:
+      entity_id: switch.kitchen_power_station
+    continue_on_error: true
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.apex_discharge_ended
+    data:
+      datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+  - action: input_boolean.turn_on
+    target:
+      entity_id:
+      - input_boolean.apex_discharge_verify_charging
+      - input_boolean.apex_discharge_recharging
+  - action: input_boolean.turn_off
+    target:
+      entity_id:
+      - input_boolean.apex_discharge_active
+      - input_boolean.apex_discharge_due
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Apex 200 discharge complete
+      message: >-
+        The battery reached {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}%. The Power Station plug is back on and the Apex is recharging.
+    continue_on_error: true
+  - action: input_text.set_value
+    target:
+      entity_id: input_text.apex_kitchen_announcement
+    data:
+      value: The Apex power station discharge is complete. It is recharging now.
+  mode: single
+- id: '1793600000004'
+  alias: 'Apex Discharge: Safety Watchdog'
+  description: 'Added 2026-11-12. While a discharge is active, switches the Power Station plug back on if the Bluetti cloud stops reporting for 5+ minutes (cloud API sensor not on, or battery level unavailable) or if the discharge has run 18+ hours without reaching the target. The battery only drops 1% about every 11 minutes at a ~115 W load, so an unchanged reading is NOT used as a cloud-loss signal. Due stays on after an abort, so the daily reminder continues. A Tapo-app schedule (plug on, Sundays 6 AM) is the backstop for HA itself being down.'
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.ap2002636113257432_cloud_api
+    to: 'off'
+    for: '00:05:00'
+  - trigger: state
+    entity_id: binary_sensor.ap2002636113257432_cloud_api
+    to: 'unavailable'
+    for: '00:05:00'
+  - trigger: state
+    entity_id: sensor.kitchen_ap2002636113257432_battery_level
+    to: 'unavailable'
+    for: '00:05:00'
+  - trigger: state
+    entity_id: sensor.kitchen_ap2002636113257432_battery_level
+    to: 'unknown'
+    for: '00:05:00'
+  - trigger: time_pattern
+    minutes: /5
+  - trigger: homeassistant
+    event: start
+  conditions:
+  - condition: state
+    entity_id: input_boolean.apex_discharge_active
+    state: 'on'
+  actions:
+  - variables:
+      cloud_lost: >-
+        {% set c = states.binary_sensor.ap2002636113257432_cloud_api %}
+        {% set b = states.sensor.kitchen_ap2002636113257432_battery_level %}
+        {{ c is none or b is none
+           or (c.state != 'on' and (now() - c.last_changed).total_seconds() >= 300)
+           or (b.state in ['unavailable', 'unknown'] and (now() - b.last_changed).total_seconds() >= 300) }}
+      hours: "{{ ((as_timestamp(now()) - (state_attr('input_datetime.apex_discharge_started', 'timestamp') | float(0))) / 3600) | round(1) }}"
+  - condition: template
+    value_template: "{{ cloud_lost or hours >= 18 }}"
+  - action: switch.turn_on
+    target:
+      entity_id: switch.kitchen_power_station
+    continue_on_error: true
+  - action: input_datetime.set_datetime
+    target:
+      entity_id: input_datetime.apex_discharge_ended
+    data:
+      datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+  - action: input_boolean.turn_on
+    target:
+      entity_id:
+      - input_boolean.apex_discharge_verify_charging
+      - input_boolean.apex_discharge_recharging
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.apex_discharge_active
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Apex 200 discharge stopped early
+      message: >-
+        {% if cloud_lost %}The Bluetti cloud stopped reporting for more than 5 minutes{% else %}The discharge ran {{ hours }} hours without reaching the target{% endif %}, so the Power Station plug was switched back on to recharge. Last battery reading: {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}%. The discharge still counts as not done.
+      data:
+        actions:
+        - action: APEX_DISCHARGE_SKIP
+          title: Skip this quarter
+          destructive: true
+    continue_on_error: true
+  - action: input_text.set_value
+    target:
+      entity_id: input_text.apex_kitchen_announcement
+    data:
+      value: The Apex power station discharge was stopped early and it is recharging. Check your phone for details.
+  mode: single
+- id: '1793600000005'
+  alias: 'Apex Discharge: Charging Follow-up'
+  description: 'Added 2026-11-12. After a discharge ends (finished or aborted): every 5 minutes re-sends plug on if the Power Station plug is not on, confirms the Apex is actually charging (Tapo plug draw or Bluetti grid input above 50 W) and alerts if it still is not after 30 minutes; then sends one notice when the battery is back at 100%.'
+  triggers:
+  - trigger: time_pattern
+    minutes: /5
+  conditions:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.apex_discharge_verify_charging
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.apex_discharge_recharging
+      state: 'on'
+  - condition: state
+    entity_id: input_boolean.apex_discharge_active
+    state: 'off'
+  actions:
+  - variables:
+      mins: "{{ ((as_timestamp(now()) - (state_attr('input_datetime.apex_discharge_ended', 'timestamp') | float(0))) / 60) | round(0) }}"
+      charging: "{{ states('sensor.kitchen_power_station_current_consumption') | float(0) > 50 or states('sensor.kitchen_ap2002636113257432_grid_input_power') | float(0) > 50 }}"
+  - if:
+    - condition: state
+      entity_id: input_boolean.apex_discharge_verify_charging
+      state: 'on'
+    then:
+    - if:
+      - condition: template
+        value_template: "{{ not is_state('switch.kitchen_power_station', 'on') }}"
+      then:
+      - alias: Plug is not on - send on again
+        action: switch.turn_on
+        target:
+          entity_id: switch.kitchen_power_station
+        continue_on_error: true
+    - choose:
+      - conditions:
+        - condition: template
+          value_template: "{{ charging }}"
+        sequence:
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.apex_discharge_verify_charging
+      - conditions:
+        - condition: template
+          value_template: "{{ mins >= 30 }}"
+        sequence:
+        - action: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.apex_discharge_verify_charging
+        - action: notify.mobile_app_pc_iphone
+          data:
+            title: Apex 200 is NOT charging
+            message: >-
+              {{ mins | int }} minutes after the discharge ended the Apex is still not charging. Power Station plug is {{ states('switch.kitchen_power_station') }}, drawing {{ states('sensor.kitchen_power_station_current_consumption') }} W. Battery: {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}%. Check the plug.
+            data:
+              push:
+                interruption-level: time-sensitive
+          continue_on_error: true
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.apex_kitchen_announcement
+          data:
+            value: Warning. The Apex power station is not charging. Please check the Power Station plug.
+  - if:
+    - condition: state
+      entity_id: input_boolean.apex_discharge_recharging
+      state: 'on'
+    - condition: numeric_state
+      entity_id: sensor.kitchen_ap2002636113257432_battery_level
+      above: 99
+    then:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.apex_discharge_recharging
+    - action: notify.mobile_app_pc_iphone
+      data:
+        title: Apex 200 recharged
+        message: The Apex 200 is back at 100% after the discharge.
+      continue_on_error: true
+  mode: single
+- id: '1793600000006'
+  alias: 'Apex Discharge: Skip Button'
+  description: 'Added 2026-11-12. Skip this quarter button on the Apex discharge notifications: clears input_boolean.apex_discharge_due so the reminders stop until the next quarter. Ignored while a discharge is running.'
+  triggers:
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: APEX_DISCHARGE_SKIP
+  conditions:
+  - condition: state
+    entity_id: input_boolean.apex_discharge_active
+    state: 'off'
+  actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.apex_discharge_due
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Apex 200 discharge skipped
+      message: Skipped for this quarter. The next one is scheduled for the first Saturday of the next quarter.
+    continue_on_error: true
+  mode: single
+- id: '1793600000007'
+  alias: 'Apex Discharge: Kitchen Echo Announcement'
+  description: 'Added 2026-11-12. Speaks the queued Apex discharge message (input_text.apex_kitchen_announcement) on the kitchen Echo Show the next time someone is in the kitchen (binary_sensor.kitchen_sensor_group), 7 AM - 10 PM only. The Alexa integration is often rate-limited by Amazon and its notify entities go unavailable, so the message stays queued until the Echo entity is available; a message older than 12 hours is dropped unspoken. Phone notifications are sent separately and immediately.'
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    to: 'on'
+  - trigger: state
+    entity_id: input_text.apex_kitchen_announcement
+  - trigger: state
+    entity_id: notify.echo_show_kitchen_announce
+    from: unavailable
+  - trigger: time
+    at: '07:00:00'
+  conditions:
+  - condition: template
+    value_template: "{{ states('input_text.apex_kitchen_announcement') not in ['', 'unknown', 'unavailable'] }}"
+  - condition: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    state: 'on'
+  - condition: time
+    after: '07:00:00'
+    before: '22:00:00'
+  - condition: template
+    value_template: "{{ states('notify.echo_show_kitchen_announce') != 'unavailable' }}"
+  actions:
+  - variables:
+      message: "{{ states('input_text.apex_kitchen_announcement') }}"
+      fresh: "{{ (now() - states.input_text.apex_kitchen_announcement.last_changed).total_seconds() < 43200 }}"
+  - action: input_text.set_value
+    target:
+      entity_id: input_text.apex_kitchen_announcement
+    data:
+      value: ''
+  - if:
+    - condition: template
+      value_template: "{{ fresh }}"
+    then:
+    - action: notify.send_message
+      target:
+        entity_id: notify.echo_show_kitchen_announce
+      data:
+        message: "{{ message }}"
+      continue_on_error: true
+  mode: single
