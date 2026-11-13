@@ -17793,7 +17793,7 @@
   mode: single
 - id: '1793600000008'
   alias: 'Apex: Power Station Plug Alert'
-  description: 'Added 2026-11-12. Alerts the iPhone (and queues a kitchen Echo message) when the Tapo plug feeding the Apex 200 (switch.kitchen_power_station) is switched off for 1+ min or goes offline for 5+ min. Off is ignored during a quarterly discharge, where it is intended. The Apex grid-input check was removed 2026-11-13 at user request: a full battery draws 0 W, which is normal. Repeats at 9 AM and 6 PM while the problem remains, and sends one all-clear when power is back. input_boolean.apex_plug_alert_active tracks an open alert so HA restarts do not produce all-clear spam.'
+  description: 'Added 2026-11-12. Alerts the iPhone (and queues a kitchen Echo message) when the Tapo plug feeding the Apex 200 (switch.kitchen_power_station) is switched off for 1+ min or goes offline for 5+ min. Off is ignored during a quarterly discharge, where it is intended. Also alerts when the plug is on, the Apex battery is below 90% and grid input is 0 W for 10+ min (unplugged, tripped breaker). The battery gate was added 2026-11-13: near full the Apex stops pulling, so 0 W is normal there and must not alert. Repeats at 9 AM and 6 PM while the problem remains, and sends one all-clear when power is back. input_boolean.apex_plug_alert_active tracks an open alert so HA restarts do not produce all-clear spam.'
   triggers:
   - trigger: state
     entity_id: switch.kitchen_power_station
@@ -17805,6 +17805,10 @@
     to: unavailable
     for: '00:05:00'
     id: problem
+  - trigger: template
+    value_template: "{{ is_state('switch.kitchen_power_station', 'on') and states('sensor.kitchen_ap2002636113257432_battery_level') | float(100) < 90 and states('sensor.kitchen_ap2002636113257432_grid_input_power') | float(999) < 1 }}"
+    for: '00:10:00'
+    id: problem
   - trigger: time
     at:
     - '09:00:00'
@@ -17815,14 +17819,27 @@
     to: 'on'
     for: '00:01:00'
     id: check_clear
+  - trigger: numeric_state
+    entity_id: sensor.kitchen_ap2002636113257432_grid_input_power
+    above: 1
+    for: '00:01:00'
+    id: check_clear
+  - trigger: numeric_state
+    entity_id: sensor.kitchen_ap2002636113257432_battery_level
+    above: 89
+    for: '00:01:00'
+    id: check_clear
   actions:
   - variables:
       plug: "{{ states('switch.kitchen_power_station') }}"
       discharging: "{{ is_state('input_boolean.apex_discharge_active', 'on') }}"
+      grid: "{{ states('sensor.kitchen_ap2002636113257432_grid_input_power') | float(999) }}"
+      battery: "{{ states('sensor.kitchen_ap2002636113257432_battery_level') | float(100) }}"
       problem: >-
         {% if plug in ['unavailable', 'unknown'] %}The Power Station plug is offline, so Home Assistant cannot see or control it.
         {% elif discharging %}
         {% elif plug == 'off' %}The Power Station plug is switched off, so the Apex 200 is not charging.
+        {% elif battery < 90 and grid < 1 %}The Power Station plug is on, but the Apex 200 is below 90% and getting no grid power. It may be unplugged.
         {% endif %}
   - choose:
     - alias: Problem present - alert (new problem, or scheduled repeat of an open one)
@@ -17845,7 +17862,7 @@
         target:
           entity_id: input_text.apex_kitchen_announcement
         data:
-          value: Warning. The Power Station plug is off or offline. Please check it.
+          value: Warning. The Apex power station is not getting power. Please check the Power Station plug.
     - alias: Problem gone - one all-clear
       conditions:
       - condition: state
@@ -17860,7 +17877,7 @@
       - action: script.apex_notify
         data:
           title: Apex 200 power restored
-          message: "The Power Station plug is back on. Battery is at {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}%."
+          message: "The Power Station plug is on and the Apex 200 is OK again. Battery is at {{ states('sensor.kitchen_ap2002636113257432_battery_level') }}%."
         continue_on_error: true
   mode: queued
   max: 5
