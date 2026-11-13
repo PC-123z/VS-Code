@@ -47,6 +47,21 @@
         "id": "dining_room_tv_dim",
         "name": "Dining Room TV Dim",
         "icon": "mdi:television-ambient-light"
+      },
+      {
+        "id": "apex_discharge_active",
+        "name": "Apex Discharge Active",
+        "icon": "mdi:battery-arrow-down"
+      },
+      {
+        "id": "apex_discharge_due",
+        "name": "Apex Discharge Due",
+        "icon": "mdi:calendar-alert"
+      },
+      {
+        "id": "apex_discharge_verify_charging",
+        "name": "Apex Discharge Verify Charging",
+        "icon": "mdi:battery-charging"
       }
     ]
   }

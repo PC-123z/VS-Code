@@ -48,6 +48,17 @@
         "step": 1.0,
         "mode": "slider",
         "icon": "mdi:palette"
+      },
+      {
+        "id": "apex_discharge_target",
+        "name": "Apex Discharge Target",
+        "min": 10.0,
+        "max": 95.0,
+        "step": 1.0,
+        "initial": 25.0,
+        "mode": "box",
+        "unit_of_measurement": "%",
+        "icon": "mdi:battery-25"
       }
     ]
   }
