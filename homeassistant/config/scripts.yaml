@@ -1456,7 +1456,7 @@ bathroom_fade_out:
             transition: 0
 apex_notify:
   alias: 'Script: Apex Notify'
-  description: 'Added 2026-11-12. One place for every Apex 200 notification (discharge automations 1793600000001-8). Sends it to the iPhone - tapping opens the Apex device page in HA - and also posts it to HA''s own Notifications panel (the bell in the sidebar), so the text can still be read after the phone notification is tapped away.'
+  description: 'Added 2026-11-12. One place for every Apex 200 notification (discharge automations 1793600000001-8). Sends it to the iPhone; tapping opens the Apex device page in HA. The copy in HA''s Notifications panel comes from the house-wide mirror automation 1793700000001, not from here.'
   fields:
     title:
       description: Notification title
@@ -1470,11 +1470,6 @@ apex_notify:
       title: '{{ title }}'
       message: '{{ message }}'
       data: "{{ dict(data | default({}, true), url='/config/devices/device/9467d93864e50d4902e9765450d1f308') }}"
-    continue_on_error: true
-  - action: persistent_notification.create
-    data:
-      title: '{{ title }}'
-      message: "{{ message }}\n\n{{ now().strftime('%a %b %-d, %-I:%M %p') }}"
     continue_on_error: true
   mode: queued
   max: 10

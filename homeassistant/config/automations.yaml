@@ -17876,3 +17876,30 @@
         continue_on_error: true
   mode: queued
   max: 5
+- id: '1793700000001'
+  alias: 'Notifications: Mirror iPhone to HA Panel'
+  description: 'Added 2026-11-12 at user request. Copies every notification sent to Paul''s iPhone (any notify.mobile_app_pc_iphone call, from any automation or script, present or future) into HA''s own Notifications panel (the bell in the sidebar) with a timestamp, so the text can be read after the phone notification is tapped away. Works by listening for the notify service call itself, so nothing else needs editing. App command messages (clear_notification etc.) are skipped. Keeps the newest 50: the notification id cycles through 50 slots via counter.iphone_notification_mirror, so the panel cannot grow without limit.'
+  triggers:
+  - trigger: event
+    event_type: call_service
+    event_data:
+      domain: notify
+      service: mobile_app_pc_iphone
+  variables:
+    sd: "{{ trigger.event.data.service_data | default({}, true) }}"
+    title: "{{ (trigger.event.data.service_data | default({}, true)).get('title') or 'Home Assistant' }}"
+    message: "{{ (trigger.event.data.service_data | default({}, true)).get('message') or '' }}"
+  conditions:
+  - condition: template
+    value_template: "{{ message | string | trim | length > 0 and message | string | trim not in ['clear_notification', 'request_location_update', 'delete_alert', 'clear_badge', 'update_complications', 'update_widgets'] and not (message | string).startswith('command_') }}"
+  actions:
+  - action: counter.increment
+    target:
+      entity_id: counter.iphone_notification_mirror
+  - action: persistent_notification.create
+    data:
+      notification_id: "iphone_mirror_{{ states('counter.iphone_notification_mirror') | int(0) % 50 }}"
+      title: "{{ title }}"
+      message: "{{ message }}\n\n{{ now().strftime('%a %b %-d, %-I:%M %p') }}"
+  mode: queued
+  max: 20
