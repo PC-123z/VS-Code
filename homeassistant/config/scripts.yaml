@@ -1255,15 +1255,48 @@ lights_watchdog_report:
     action: notify.mobile_app_pc_iphone
     data:
       title: >-
-        {% set rooms = rows | map(attribute='room') | unique | list %}{{ rooms | join(', ') }} should be off - {{ rows | count }} light{{ 's' if rows | count != 1 else '' }} left on
+        {% set rooms = rows | map(attribute='room') | unique | list %}
+        {% set n = rows | count %}
+        {{ rooms | join(', ') }}:
+        {{ n }} light{{ 's' if n != 1 else '' }} left on -
+        {{ (still_on | count) ~ " won't turn off" if still_on else 'now off' }}
       message: >-
+        {% set multi = rows | map(attribute='room') | unique | list | count > 1 %}
+        {% set ns = namespace(lines=[], disabled=[]) %}
         {% for room, items in rows | groupby('room') %}
-        {% set f = items | first %}{{ room }} ({{ f.reason }}{{ '; ' ~ f.note if f.note else '' }}):
-
-        {% for by, lights in items | groupby('by') %}- {{ lights | map(attribute='name') | join(', ') }} - on since {{ (lights | first).on_since_short }}. Turned on by: {{ by }}.
-
+          {% set f = items | first %}
+          {% set n = items | count %}
+          {% set since = (items | sort(attribute='on_since') | first).on_since_short %}
+          {% set who = (items | map(attribute='name') | join(', ')) if n <= 3 else (n ~ ' lights') %}
+          {% set head = (room ~ ': ' if multi else '') ~ who ~ ' on since ' ~ since ~ ', ' ~ f.reason ~ (' (' ~ f.note ~ ')' if f.note else '') ~ '.' %}
+          {% set ns.lines = ns.lines + [head] %}
+          {% if 'DISABLED' in f.note %}{% set ns.disabled = ns.disabled + [f.note] %}{% endif %}
+          {% set c = namespace(items=[]) %}
+          {% for i in items %}
+            {% set why = i.by
+               | replace('outside HA (Hue app, dimmer, wall switch) or unknown', 'not switched on by Home Assistant (Hue app, dimmer or wall switch)')
+               | replace('unknown (no turn-on record)', 'not recorded')
+               | regex_replace('^probably .*fired within 5 s\\)$', 'not recorded')
+               | regex_replace('^came back on by itself .*$', 'came back on with no Home Assistant command, shortly after being switched off') %}
+            {% set c.items = c.items + [{'name': i.name, 'why': why}] %}
+          {% endfor %}
+          {% set groups = c.items | groupby('why') %}
+          {% if groups | count == 1 %}
+            {% set ns.lines = ns.lines + ['Why: ' ~ groups[0][0] ~ '.'] %}
+          {% else %}
+            {% for why, ls in groups %}
+              {% set ns.lines = ns.lines + ['- ' ~ ls | map(attribute='name') | join(', ') ~ ': ' ~ why ~ '.'] %}
+            {% endfor %}
+          {% endif %}
         {% endfor %}
-        {% endfor %}{% if still_on %}FAILED to turn off: {{ still_on | map('state_attr', 'friendly_name') | join(', ') }}.{% else %}Turned off by {{ src }}.{% endif %}
+        {% if still_on %}
+          {% set ns.lines = ns.lines + ['Needs you: ' ~ still_on | map('state_attr', 'friendly_name') | join(', ') ~ ' did not turn off after 2 tries - switch off in the Hue app.'] %}
+        {% elif ns.disabled %}
+          {% set ns.lines = ns.lines + ['Lights are off now. Needs you: ' ~ ns.disabled | join(', ') ~ ' - turn it back on or this will repeat.'] %}
+        {% else %}
+          {% set ns.lines = ns.lines + ['Already switched off - nothing to do.'] %}
+        {% endif %}
+        {{ ns.lines | join('\n') }}
       data:
         push:
           interruption-level: '{{ ''passive'' if is_state(''input_boolean.big_bedroom_asleep'', ''on'') else ''active'' }}'

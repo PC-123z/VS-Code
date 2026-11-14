@@ -297,7 +297,9 @@ template:
   # (automation 1793300000001 -> script.lights_watchdog_report) reads this when it finds a
   # light left on, because by then the automation has usually re-triggered and the
   # context no longer matches. Lights commanded through a Hue room/zone get no context of
-  # their own, so the fallback names whatever automation fired in the previous 5 s.
+  # their own, so the fallback names an automation FOR THAT ROOM that fired in the previous
+  # 5 s (2026-11-13: any-room guess blamed Bedroom 2 automations for kitchen lights). A light
+  # that comes on with no command within 5 min of going off is recorded as a self re-light.
   - trigger:
       - trigger: state
         to: "on"
@@ -372,13 +374,16 @@ template:
               {% set autos = states.automation | selectattr('context.id', 'in', ids) | map(attribute='name') | list %}
               {% set scripts = states.script | selectattr('context.id', 'in', ids) | map(attribute='name') | list %}
               {% set ns = namespace(recent=[]) %}
-              {% for a in states.automation if a.attributes.last_triggered is defined and a.attributes.last_triggered is not none and (now() - a.attributes.last_triggered).total_seconds() < 5 %}
+              {% set room_words = {'Kitchen': 'kitchen', 'Bedroom2 / Office': 'bedroom 2', 'Bedroom - Big': 'big bedroom', 'Hallway': 'hallway', 'Living Room': 'living room', 'Dining Room': 'dining', 'Bathroom': 'bathroom', 'Garage': 'garage'} %}
+              {% set word = room_words.get(area_name(trigger.entity_id), 'outside') %}
+              {% for a in states.automation if word in a.name | lower and a.attributes.last_triggered is defined and a.attributes.last_triggered is not none and (now() - a.attributes.last_triggered).total_seconds() < 5 %}
                 {% set ns.recent = ns.recent + [a.name] %}
               {% endfor %}
+              {% set gap = (as_timestamp(now()) - as_timestamp(trigger.from_state.last_changed)) | int if trigger.from_state is not none else 999999 %}
               {% if frm != 'off' %}
                 {% set by = 'came back online already on (wall switch power, bridge reconnect or HA restart)' %}
               {% elif autos %}
-                {% set by = autos[0] %}
+                {% set by = 'automation ' ~ autos[0] %}
               {% elif scripts %}
                 {% set by = 'script ' ~ scripts[0] %}
               {% elif c.user_id %}
@@ -386,9 +391,11 @@ template:
               {% elif ':' in c.id %}
                 {% set by = 'Adaptive Lighting' %}
               {% elif ns.recent %}
-                {% set by = 'probably ' ~ ns.recent[:3] | join(' / ') ~ ' (group command, fired within 5 s)' %}
+                {% set by = 'probably ' ~ ns.recent[0] ~ ' (room-wide command)' %}
+              {% elif gap < 300 %}
+                {% set by = 'came back on by itself ' ~ (gap ~ ' s' if gap < 90 else (gap / 60) | round | int ~ ' min') ~ ' after being switched off (no Home Assistant command)' %}
               {% else %}
-                {% set by = 'outside HA (Hue app, dimmer, wall switch) or unknown' %}
+                {% set by = 'not switched on by Home Assistant (Hue app, dimmer or wall switch)' %}
               {% endif %}
               {{ dict(prev, **{trigger.entity_id: {'by': by | replace('"', "'"), 'at': now().strftime('%Y-%m-%d %H:%M:%S'), 'ts': as_timestamp(now()) | int}}) }}
             {% endif %}
