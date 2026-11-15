@@ -481,7 +481,7 @@ goodbye_routine_someone_home_arm_stay:
     timeout:
       seconds: 20
     continue_on_timeout: true
-  - alias: Not armed - say nothing here, automation 1793700000001 (Alarm - Arm Request Failed Alert) reports why and retries
+  - alias: Not armed - say nothing here, automation 1793800000001 (Alarm - Arm Request Failed Alert) reports why and retries
     condition: state
     entity_id: alarm_control_panel.3302_alarm
     state: armed_home

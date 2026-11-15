@@ -17908,7 +17908,7 @@
       message: "{{ message }}\n\n{{ now().strftime('%a %b %-d, %-I:%M %p') }}"
   mode: queued
   max: 20
-- id: '1793700000001'
+- id: '1793800000001'
   alias: 'Alarm: Arm Request Failed Alert'
   description: Added 2026-11-15. Ring refuses to arm while a door contact is open (bypass is only possible in the Ring app) and nothing reported it - on 2026-11-14 the Goodbye routine said "Alarm set to Stay" while the
     panel stayed disarmed because the garage to house door was left open. Watches every arm command sent from HA (any automation, script or dashboard); if the panel is still disarmed 30 s later it alerts the iPhone naming
