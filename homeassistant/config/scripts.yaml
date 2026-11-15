@@ -476,6 +476,15 @@ goodbye_routine_someone_home_arm_stay:
         entity_id: alarm_control_panel.3302_alarm
       data:
         code: ''
+  - alias: Confirm the panel really armed - Ring refuses while a door is open (2026-11-14 it said "set to Stay" while disarmed)
+    wait_template: "{{ is_state('alarm_control_panel.3302_alarm', 'armed_home') }}"
+    timeout:
+      seconds: 20
+    continue_on_timeout: true
+  - alias: Not armed - say nothing here, automation 1793700000001 (Alarm - Arm Request Failed Alert) reports why and retries
+    condition: state
+    entity_id: alarm_control_panel.3302_alarm
+    state: armed_home
   - action: notify.mobile_app_pc_iphone
     data:
       title: Someone's Home

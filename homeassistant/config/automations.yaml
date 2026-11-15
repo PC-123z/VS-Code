@@ -17908,3 +17908,86 @@
       message: "{{ message }}\n\n{{ now().strftime('%a %b %-d, %-I:%M %p') }}"
   mode: queued
   max: 20
+- id: '1793700000001'
+  alias: 'Alarm: Arm Request Failed Alert'
+  description: Added 2026-11-15. Ring refuses to arm while a door contact is open (bypass is only possible in the Ring app) and nothing reported it - on 2026-11-14 the Goodbye routine said "Alarm set to Stay" while the
+    panel stayed disarmed because the garage to house door was left open. Watches every arm command sent from HA (any automation, script or dashboard); if the panel is still disarmed 30 s later it alerts the iPhone naming
+    the open door(s). If Paul is away (car beacon not home) it then waits up to 30 min for the doors to close and sends the same arm command once more, reporting the result; a Stay arm also restarts the Goodbye Stay re-check.
+  triggers:
+  - trigger: event
+    event_type: call_service
+    event_data:
+      domain: alarm_control_panel
+      service: alarm_arm_home
+    id: Stay
+  - trigger: event
+    event_type: call_service
+    event_data:
+      domain: alarm_control_panel
+      service: alarm_arm_away
+    id: Away
+  variables:
+    doors:
+      binary_sensor.garage_door: garage to house door
+      binary_sensor.front_door: front door
+      binary_sensor.back_door: back door
+    panel: alarm_control_panel.3302_alarm
+    service: '{{ trigger.event.data.service }}'
+  actions:
+  - alias: Give the panel 30 s to arm (ring-mqtt gives up after about 11 s)
+    wait_template: '{{ states(panel) in [''armed_home'', ''armed_away'', ''arming'', ''pending'', ''triggered''] }}'
+    timeout:
+      seconds: 30
+    continue_on_timeout: true
+  - condition: template
+    alias: Still disarmed - the arm command was refused
+    value_template: '{{ is_state(panel, ''disarmed'') }}'
+  - variables:
+      open_doors: '{{ doors.items() | selectattr(''0'', ''is_state'', ''on'') | map(attribute=''1'') | list }}'
+      away: '{{ not is_state(''device_tracker.bcpro_204982_08b8'', ''home'') }}'
+  - continue_on_error: true
+    action: notify.mobile_app_pc_iphone
+    data:
+      title: Alarm did NOT arm ({{ trigger.id }})
+      message: >-
+        {% if open_doors %}Ring refused because the {{ open_doors | join(' and ') }} {{ 'are' if open_doors | count > 1 else 'is' }} open.
+        {{ 'It will arm by itself if the door is closed in the next 30 min, or' if away else 'Close it and arm again, or' }} arm in the Ring app and bypass that sensor.
+        {% else %}Ring refused the command and no door shows open. Arm it from the Ring app or keypad.{% endif %}
+      data:
+        push:
+          interruption-level: time-sensitive
+  - condition: template
+    alias: Retry only while Paul is away and a door was the reason
+    value_template: '{{ away and open_doors | count > 0 }}'
+  - wait_template: '{{ doors.keys() | select(''is_state'', ''on'') | list | count == 0 }}'
+    timeout:
+      minutes: 30
+    continue_on_timeout: false
+  - delay:
+      seconds: 10
+  - condition: template
+    alias: Still away and still disarmed
+    value_template: '{{ is_state(panel, ''disarmed'') and not is_state(''device_tracker.bcpro_204982_08b8'', ''home'') }}'
+  - action: alarm_control_panel.{{ service }}
+    target:
+      entity_id: '{{ panel }}'
+    data:
+      code: ''
+  - wait_template: '{{ states(panel) in [''armed_home'', ''armed_away'', ''arming''] }}'
+    timeout:
+      seconds: 30
+    continue_on_timeout: true
+  - continue_on_error: true
+    action: notify.mobile_app_pc_iphone
+    data:
+      title: '{{ ''Alarm armed ('' ~ trigger.id ~ '')'' if not is_state(panel, ''disarmed'') else ''Alarm STILL not armed'' }}'
+      message: '{{ ''The door was closed, so the alarm is now armed '' ~ trigger.id ~ ''.'' if not is_state(panel, ''disarmed'') else ''The doors are closed but Ring refused again. Arm it from the Ring app.'' }}'
+  - if:
+    - condition: template
+      value_template: '{{ trigger.id == ''Stay'' and is_state(panel, ''armed_home'') }}'
+    then:
+    - action: script.turn_on
+      target:
+        entity_id: script.goodbye_routine_stay_re_check
+  mode: single
+  max_exceeded: silent
