@@ -17991,3 +17991,31 @@
         entity_id: script.goodbye_routine_stay_re_check
   mode: single
   max_exceeded: silent
+- id: '1793900000001'
+  alias: 'Big Bedroom TV: Power Off via Sony IP Control'
+  description: Added 2026-11-15. After a TV firmware update the XBR-65X900H ignores the power/sleep key sent by the Android TV Remote integration while it is on (power-on and other keys still work), so Apple Home (HomeKit
+    accessory on remote.bedroom_tv) and every automation that turns off remote.bedroom_tv / media_player.bedroom_tv_2 left the TV on. Any such turn_off call is repeated here through the Sony Bravia integration (IP control,
+    pre-shared key), which the TV does obey. Same reason the kitchen TV uses BRAVIA IP control.
+  triggers:
+  - trigger: event
+    event_type: call_service
+    event_data:
+      domain: remote
+      service: turn_off
+  - trigger: event
+    event_type: call_service
+    event_data:
+      domain: media_player
+      service: turn_off
+  conditions:
+  - condition: template
+    value_template: >-
+      {% set e = trigger.event.data.service_data.entity_id | default([]) %}
+      {% set e = [e] if e is string else e %}
+      {{ 'remote.bedroom_tv' in e or 'media_player.bedroom_tv_2' in e }}
+  actions:
+  - action: media_player.turn_off
+    target:
+      entity_id: media_player.bedroom_big_big_bedroom_tv
+  mode: single
+  max_exceeded: silent
