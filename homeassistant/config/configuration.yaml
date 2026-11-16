@@ -469,10 +469,85 @@ template:
         delay_off:
           seconds: 45
         state: >
-          {{ is_state('input_boolean.big_bedroom_asleep', 'on')
-             or is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy', 'on')
-             or is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy', 'on')
-             or is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy', 'on') }}
+          {# 2026-11-16 movement-to-start: radar zones alone keep the room occupied but a Hue
+             motion or radar moving target is needed to start (the 45 s delay_off doubles as
+             the dropout grace). Unknown state after a restart counts as already occupied. #}
+          {% set zones = ['binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy',
+                          'binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy',
+                          'binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy'] | select('is_state', 'on') | list | count > 0 %}
+          {% set start = ['binary_sensor.bedroom_motion',
+                          'binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target'] | select('is_state', 'on') | list | count > 0 %}
+          {% set was = this.state if this is defined and this is not none else 'unknown' %}
+          {{ is_state('input_boolean.big_bedroom_asleep', 'on') or (zones and (was != 'off' or start)) }}
+
+  # Movement-to-start presence (2026-11-16). One per room; each room's "Sensor Group" helper
+  # now has ONLY this sensor as its member, so every automation that follows the group
+  # inherits the rule: a movement signal (Hue motion or radar moving target) is needed to
+  # START occupancy, any presence signal keeps it. Five-day replay: blocks ~6 one-second
+  # camera blips a day in the kitchen and the still-only radar blips that lit the bathroom.
+  # Logic lives in custom_templates/presence_latch.jinja. Big Bedroom has the same rule
+  # inside its own debounced template above.
+  - binary_sensor:
+      - name: "Kitchen Presence Confirmed"
+        unique_id: kitchen_presence_confirmed
+        device_class: occupancy
+        icon: mdi:silverware-fork-knife
+        state: >
+          {% from 'presence_latch.jinja' import presence_latch %}
+          {{ presence_latch(this.state if this is defined and this is not none else 'unknown',
+               this.last_changed if this is defined and this is not none else none,
+               ['binary_sensor.kitchen_motion', 'binary_sensor.kitchen_occupancy_sensor_radar_zone_1_occupancy', 'binary_sensor.kitchen_occupancy_sensor_radar_zone_2_occupancy', 'binary_sensor.kitchen_occupancy_sensor_radar_zone_3_occupancy', 'binary_sensor.kitchen_person_occupancy'],
+               ['binary_sensor.kitchen_motion', 'binary_sensor.kitchen_occupancy_sensor_radar_moving_target']) }}
+      - name: "Living Room Presence Confirmed"
+        unique_id: living_room_presence_confirmed
+        device_class: occupancy
+        icon: mdi:sofa
+        state: >
+          {% from 'presence_latch.jinja' import presence_latch %}
+          {{ presence_latch(this.state if this is defined and this is not none else 'unknown',
+               this.last_changed if this is defined and this is not none else none,
+               ['binary_sensor.apollo_r_pro_1_740624_ld2450_presence'],
+               ['binary_sensor.living_room_motion', 'binary_sensor.apollo_r_pro_1_740624_ld2450_moving_target', 'binary_sensor.apollo_r_pro_1_740624_ld2412_moving_target']) }}
+      - name: "Dining Room Presence Confirmed"
+        unique_id: dining_room_presence_confirmed
+        device_class: occupancy
+        icon: mdi:table-chair
+        state: >
+          {% from 'presence_latch.jinja' import presence_latch %}
+          {{ presence_latch(this.state if this is defined and this is not none else 'unknown',
+               this.last_changed if this is defined and this is not none else none,
+               ['binary_sensor.dining_room_apollo_ld2450_presence', 'binary_sensor.dining_room_apollo_ld2450_still_target', 'binary_sensor.dining_room_apollo_ld2450_moving_target'],
+               ['binary_sensor.dining_room_apollo_ld2450_moving_target']) }}
+      - name: "Bedroom 2 Presence Confirmed"
+        unique_id: bedroom_2_presence_confirmed
+        device_class: occupancy
+        icon: mdi:bed
+        state: >
+          {% from 'presence_latch.jinja' import presence_latch %}
+          {{ presence_latch(this.state if this is defined and this is not none else 'unknown',
+               this.last_changed if this is defined and this is not none else none,
+               ['binary_sensor.bedroom2_sensor_apollo_radar_zone_1_occupancy', 'binary_sensor.bedroom2_sensor_apollo_radar_zone_2_occupancy', 'binary_sensor.bedroom2_sensor_apollo_radar_zone_3_occupancy', 'binary_sensor.bedroom2_office_bedroom2_door_presence'],
+               ['binary_sensor.bedroom2_sensor_apollo_radar_moving_target', 'binary_sensor.bedroom2_office_bedroom2_door_moving_target']) }}
+      - name: "Garage Presence Confirmed"
+        unique_id: garage_presence_confirmed
+        device_class: occupancy
+        icon: mdi:garage
+        state: >
+          {% from 'presence_latch.jinja' import presence_latch %}
+          {{ presence_latch(this.state if this is defined and this is not none else 'unknown',
+               this.last_changed if this is defined and this is not none else none,
+               ['binary_sensor.garage_garage_people_detection_presence'],
+               ['binary_sensor.garage_motion', 'binary_sensor.garage_garage_people_detection_moving_target']) }}
+      - name: "Bathroom Presence Confirmed"
+        unique_id: bathroom_presence_confirmed
+        device_class: occupancy
+        icon: mdi:shower
+        state: >
+          {% from 'presence_latch.jinja' import presence_latch %}
+          {{ presence_latch(this.state if this is defined and this is not none else 'unknown',
+               this.last_changed if this is defined and this is not none else none,
+               ['binary_sensor.bathroom_motion', 'binary_sensor.bathroom_bathroom_presence_sensor_presence'],
+               ['binary_sensor.bathroom_motion', 'binary_sensor.bathroom_bathroom_presence_sensor_moving_target']) }}
 
   # Goodbye-only view of Big Bedroom occupancy. With either fan running the MSR-2 reads an
   # empty room as occupied (still energy 50-80, spikes past threshold 100), which held
