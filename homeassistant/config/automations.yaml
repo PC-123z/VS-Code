@@ -12075,7 +12075,7 @@
   - trigger: state
     entity_id:
     - binary_sensor.bathroom_motion
-    - binary_sensor.bathroom_bathroom_presence_sensor_presence
+    - binary_sensor.bathroom_presence_confirmed
     to: 'on'
     id: motion_on
   - trigger: state
