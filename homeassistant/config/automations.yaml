@@ -2142,6 +2142,7 @@
     entity_id:
     - binary_sensor.bathroom_motion
     - binary_sensor.bathroom_bathroom_presence_sensor_presence
+    - binary_sensor.bathroom_bathroom_presence_sensor_moving_target
     to: 'on'
     id: detected
   - trigger: state
@@ -2167,6 +2168,13 @@
       - condition: trigger
         id: detected
       sequence:
+      - alias: Radar alone may not light a dark room - 2026-11-16 a 46 s still-only radar blip (no Hue motion, no moving target) lit all 12 lights for 13 min; about one such false start a day. Radar still counts once the room is lit.
+        condition: template
+        value_template: >-
+          {{ trigger.entity_id == 'binary_sensor.bathroom_motion'
+             or is_state('binary_sensor.bathroom_motion', 'on')
+             or is_state('binary_sensor.bathroom_bathroom_presence_sensor_moving_target', 'on')
+             or is_state('light.bathroom', 'on') }}
       - alias: Someone is here - stop any fade-out in progress
         action: script.turn_off
         target:
