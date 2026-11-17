@@ -75,6 +75,22 @@
         "domain": "homeassistant",
         "is_persistent": false,
         "issue_id": "config_entry_reauth_alexa_media_01KWB126HVY7XT65ZYWQK9Q43N"
+      },
+      {
+        "config_entry_id": null,
+        "created": "2026-11-17T06:56:18.342002+00:00",
+        "dismissed_version": null,
+        "domain": "marketplace",
+        "is_persistent": false,
+        "issue_id": "restart_required_697816279_tags/2.5.0"
+      },
+      {
+        "config_entry_id": null,
+        "created": "2026-11-17T06:56:27.848971+00:00",
+        "dismissed_version": null,
+        "domain": "marketplace",
+        "is_persistent": false,
+        "issue_id": "restart_required_311536795_tags/v5.15.7"
       }
     ]
   }
