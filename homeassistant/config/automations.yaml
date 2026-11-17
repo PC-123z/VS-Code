@@ -11045,7 +11045,7 @@
     - wed
     - thu
     - fri
-    enabled: true
+    enabled: false
   - trigger: time
     at: 08:05:00
     weekday:
@@ -11054,7 +11054,7 @@
     - wed
     - thu
     - fri
-    enabled: false
+    enabled: true
   - trigger: time
     at: 09:00:00
     weekday:
