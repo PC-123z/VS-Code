@@ -118,10 +118,8 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: false
   - alias: Stage 1 - Nanoleaf Morning Sky effect at 5%
     action: light.turn_on
@@ -155,8 +153,7 @@
         action: light.turn_on
         target:
           entity_id:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
+          - light.bedroom_ceiling
         data:
           color_temp_kelvin: 2700
           brightness_pct: 1
@@ -168,8 +165,7 @@
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
             data:
               brightness_pct: '{{ [1 + (repeat.index * 4.3), 70] | min | round(0)
                 }}'
@@ -193,8 +189,7 @@
         action: light.turn_on
         target:
           entity_id:
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_lamps
         data:
           color_temp_kelvin: 2700
           brightness_pct: 1
@@ -206,8 +201,7 @@
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
             data:
               brightness_pct: '{{ [1 + (repeat.index * 6.6), 94] | min | round(0)
                 }}'
@@ -444,10 +438,8 @@
         data:
           entity_id: switch.al_big_bedroom
           lights:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
           manual_control: false
       - action: switch.turn_on
         target:
@@ -469,10 +461,8 @@
         data:
           entity_id: switch.al_big_bedroom
           lights:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
           transition: 30
           adapt_color: true
           adapt_brightness: true
@@ -730,10 +720,8 @@
     target:
       entity_id:
       - light.nano_sand_dune
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
     data:
       transition: 15
   - alias: Wait for transition to complete before re-enabling AL
@@ -759,10 +747,8 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: false
   mode: single
 - id: '1774970377473'
@@ -795,10 +781,8 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: true
   - choose:
     - conditions:
@@ -2168,13 +2152,13 @@
       - condition: trigger
         id: detected
       sequence:
-      - alias: Radar alone may not light a dark room - 2026-11-16 a 46 s still-only radar blip (no Hue motion, no moving target) lit all 12 lights for 13 min; about one such false start a day. Radar still counts once the room is lit.
+      - alias: Radar alone may not light a dark room - 2026-11-16 a 46 s still-only
+          radar blip (no Hue motion, no moving target) lit all 12 lights for 13 min;
+          about one such false start a day. Radar still counts once the room is lit.
         condition: template
-        value_template: >-
-          {{ trigger.entity_id == 'binary_sensor.bathroom_motion'
-             or is_state('binary_sensor.bathroom_motion', 'on')
-             or is_state('binary_sensor.bathroom_bathroom_presence_sensor_moving_target', 'on')
-             or is_state('light.bathroom', 'on') }}
+        value_template: "{{ trigger.entity_id == 'binary_sensor.bathroom_motion'\n
+          \  or is_state('binary_sensor.bathroom_motion', 'on')\n   or is_state('binary_sensor.bathroom_bathroom_presence_sensor_moving_target',
+          'on')\n   or is_state('light.bathroom', 'on') }}"
       - alias: Someone is here - stop any fade-out in progress
         action: script.turn_off
         target:
@@ -2469,10 +2453,8 @@
         data:
           entity_id: switch.al_big_bedroom
           lights:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
           manual_control: false
       - choose:
         - conditions:
@@ -2483,8 +2465,7 @@
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
             data:
               transition: 5
             alias: Ceilings first
@@ -2493,8 +2474,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
               transition: 5
               adapt_color: true
               adapt_brightness: true
@@ -2512,16 +2492,14 @@
             - action: light.turn_off
               target:
                 entity_id:
-                - light.bedroom_ceiling_1
-                - light.bedroom_ceiling_2
+                - light.bedroom_ceiling
               data:
                 transition: 300
             - stop: Presence dropped before lamp stage
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
             data:
               transition: 10
             alias: Lamps fade in
@@ -2530,8 +2508,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
               transition: 10
               adapt_color: true
               adapt_brightness: true
@@ -2555,8 +2532,7 @@
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
             data:
               transition: 5
             alias: Ceilings first
@@ -2565,8 +2541,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
               transition: 5
               adapt_color: true
               adapt_brightness: true
@@ -2584,16 +2559,14 @@
             - action: light.turn_off
               target:
                 entity_id:
-                - light.bedroom_ceiling_1
-                - light.bedroom_ceiling_2
+                - light.bedroom_ceiling
               data:
                 transition: 300
             - stop: Presence dropped before lamp stage
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
             data:
               transition: 10
             alias: Lamps fade in
@@ -2602,8 +2575,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
               transition: 10
               adapt_color: true
               adapt_brightness: true
@@ -2627,8 +2599,7 @@
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
             data:
               transition: 5
             alias: Ceilings first
@@ -2637,8 +2608,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
               transition: 5
               adapt_color: true
               adapt_brightness: true
@@ -2656,16 +2626,14 @@
             - action: light.turn_off
               target:
                 entity_id:
-                - light.bedroom_ceiling_1
-                - light.bedroom_ceiling_2
+                - light.bedroom_ceiling
               data:
                 transition: 300
             - stop: Presence dropped before lamp stage
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
             data:
               transition: 10
             alias: Lamps fade in
@@ -2674,8 +2642,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
               transition: 10
               adapt_color: true
               adapt_brightness: true
@@ -2699,8 +2666,7 @@
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
             data:
               transition: 5
             alias: Ceilings first
@@ -2709,8 +2675,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
               transition: 5
               adapt_color: true
               adapt_brightness: true
@@ -2728,16 +2693,14 @@
             - action: light.turn_off
               target:
                 entity_id:
-                - light.bedroom_ceiling_1
-                - light.bedroom_ceiling_2
+                - light.bedroom_ceiling
               data:
                 transition: 300
             - stop: Presence dropped before lamp stage
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
             data:
               transition: 10
             alias: Lamps fade in
@@ -2746,8 +2709,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
               transition: 10
               adapt_color: true
               adapt_brightness: true
@@ -2771,8 +2733,7 @@
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
             data:
               transition: 5
             alias: Ceilings first
@@ -2781,8 +2742,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
               transition: 5
               adapt_color: true
               adapt_brightness: true
@@ -2800,16 +2760,14 @@
             - action: light.turn_off
               target:
                 entity_id:
-                - light.bedroom_ceiling_1
-                - light.bedroom_ceiling_2
+                - light.bedroom_ceiling
               data:
                 transition: 300
             - stop: Presence dropped before lamp stage
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
             data:
               transition: 10
             alias: Lamps fade in
@@ -2818,8 +2776,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
               transition: 10
               adapt_color: true
               adapt_brightness: true
@@ -2865,8 +2822,7 @@
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
             data:
               transition: 0
             alias: Ceilings first - instant, not the 10s fade lamps/Nanoleaf still
@@ -2876,8 +2832,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
               transition: 0
               adapt_color: true
               adapt_brightness: true
@@ -2895,16 +2850,14 @@
             - action: light.turn_off
               target:
                 entity_id:
-                - light.bedroom_ceiling_1
-                - light.bedroom_ceiling_2
+                - light.bedroom_ceiling
               data:
                 transition: 300
             - stop: Presence dropped before lamp stage
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
             data:
               transition: 10
             alias: Lamps fade in
@@ -2913,8 +2866,7 @@
             data:
               entity_id: switch.al_big_bedroom
               lights:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
               transition: 10
               adapt_color: true
               adapt_brightness: true
@@ -2967,8 +2919,7 @@
             - action: light.turn_on
               target:
                 entity_id:
-                - light.bedroom_ceiling_1
-                - light.bedroom_ceiling_2
+                - light.bedroom_ceiling
               data:
                 transition: 0
               alias: Ceilings first - instant, not the 10s fade lamps/Nanoleaf still
@@ -2978,8 +2929,7 @@
               data:
                 entity_id: switch.al_big_bedroom
                 lights:
-                - light.bedroom_ceiling_1
-                - light.bedroom_ceiling_2
+                - light.bedroom_ceiling
                 transition: 0
                 adapt_color: true
                 adapt_brightness: true
@@ -2997,16 +2947,14 @@
               - action: light.turn_off
                 target:
                   entity_id:
-                  - light.bedroom_ceiling_1
-                  - light.bedroom_ceiling_2
+                  - light.bedroom_ceiling
                 data:
                   transition: 300
               - stop: Presence dropped before lamp stage
             - action: light.turn_on
               target:
                 entity_id:
-                - light.bedroom_lamp_1
-                - light.bedroom_lamp_2
+                - light.bedroom_lamps
               data:
                 transition: 10
               alias: Lamps fade in
@@ -3015,8 +2963,7 @@
               data:
                 entity_id: switch.al_big_bedroom
                 lights:
-                - light.bedroom_lamp_1
-                - light.bedroom_lamp_2
+                - light.bedroom_lamps
                 transition: 10
                 adapt_color: true
                 adapt_brightness: true
@@ -3047,16 +2994,14 @@
         target:
           entity_id:
           - light.nano_sand_dune
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_lamps
         data:
           transition: 60
       - alias: Ceiling lights fade off over the next 8 minutes
         action: light.turn_off
         target:
           entity_id:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
+          - light.bedroom_ceiling
         data:
           transition: 480
       - alias: Wait for ceiling fade to complete before re-enabling AL
@@ -3067,10 +3012,8 @@
         data:
           entity_id: switch.al_big_bedroom
           lights:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
           manual_control: false
       - alias: Re-enable AL switches so they're ready for next motion
         action: switch.turn_on
@@ -4761,10 +4704,8 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: true
   - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
       Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
@@ -5096,10 +5037,8 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: true
   - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
       Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
@@ -5433,10 +5372,8 @@
         data:
           entity_id: switch.al_big_bedroom
           lights:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
           manual_control: true
       - alias: Turn off all bedroom lights including Nanoleaf
         action: light.turn_off
@@ -5522,10 +5459,8 @@
         data:
           entity_id: switch.al_big_bedroom
           lights:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
           manual_control: true
       - alias: Turn off all bedroom lights including Nanoleaf
         action: light.turn_off
@@ -5639,10 +5574,8 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: true
   - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
       Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
@@ -5820,10 +5753,8 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: true
   - alias: Engage sleep mode for bathroom and big bedroom - without this, Bathroom
       Smart Motion & Presence and Big Bedroom Smart Motion & Presence have no way
@@ -7832,10 +7763,8 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: false
   - alias: Re-enable AL switches
     action: switch.turn_on
@@ -7916,10 +7845,8 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       transition: 2
       adapt_color: true
       adapt_brightness: true
@@ -8093,10 +8020,8 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: true
   - variables:
       sun_elev: '{{ state_attr(''sun.sun'', ''elevation'') | float(0) }}'
@@ -8116,10 +8041,8 @@
     - action: light.turn_on
       target:
         entity_id:
-        - light.bedroom_ceiling_1
-        - light.bedroom_ceiling_2
-        - light.bedroom_lamp_1
-        - light.bedroom_lamp_2
+        - light.bedroom_ceiling
+        - light.bedroom_lamps
       data:
         brightness_pct: '{{ tv_brightness | int }}'
         color_temp_kelvin: '{{ tv_kelvin | int }}'
@@ -8165,20 +8088,16 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: true
   - parallel:
     - alias: Set bedroom lights to red at 2%
       action: light.turn_on
       target:
         entity_id:
-        - light.bedroom_ceiling_1
-        - light.bedroom_ceiling_2
-        - light.bedroom_lamp_1
-        - light.bedroom_lamp_2
+        - light.bedroom_ceiling
+        - light.bedroom_lamps
         - light.nano_sand_dune
       data:
         rgb_color:
@@ -8268,10 +8187,8 @@
         data:
           entity_id: switch.al_big_bedroom
           lights:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
           manual_control: true
       - alias: Pre-stage Nanoleaf at 1% to avoid flash-to-white
         action: light.turn_on
@@ -8284,10 +8201,8 @@
         - action: light.turn_on
           target:
             entity_id:
-            - light.bedroom_ceiling_1
-            - light.bedroom_ceiling_2
-            - light.bedroom_lamp_1
-            - light.bedroom_lamp_2
+            - light.bedroom_ceiling
+            - light.bedroom_lamps
           data:
             brightness_pct: '{{ playing_brightness | int }}'
             color_temp_kelvin: '{{ tv_kelvin | int }}'
@@ -8349,10 +8264,8 @@
         - action: light.turn_on
           target:
             entity_id:
-            - light.bedroom_ceiling_1
-            - light.bedroom_ceiling_2
-            - light.bedroom_lamp_1
-            - light.bedroom_lamp_2
+            - light.bedroom_ceiling
+            - light.bedroom_lamps
           data:
             brightness_pct: '{{ paused_brightness | int }}'
             color_temp_kelvin: '{{ tv_kelvin | int }}'
@@ -8376,10 +8289,8 @@
         data:
           entity_id: switch.al_big_bedroom
           lights:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
           manual_control: false
       - action: switch.turn_on
         target:
@@ -8395,10 +8306,8 @@
         data:
           entity_id: switch.al_big_bedroom
           lights:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
           transition: 3
           adapt_color: true
           adapt_brightness: true
@@ -11223,10 +11132,8 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: false
   - alias: Stage 1 - Nanoleaf Morning Sky effect at 5%
     action: light.turn_on
@@ -11260,8 +11167,7 @@
         action: light.turn_on
         target:
           entity_id:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
+          - light.bedroom_ceiling
         data:
           color_temp_kelvin: 2700
           brightness_pct: 1
@@ -11273,8 +11179,7 @@
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
+              - light.bedroom_ceiling
             data:
               brightness_pct: '{{ [1 + (repeat.index * 4.3), 70] | min | round(0)
                 }}'
@@ -11297,8 +11202,7 @@
         action: light.turn_on
         target:
           entity_id:
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_lamps
         data:
           color_temp_kelvin: 2700
           brightness_pct: 1
@@ -11310,8 +11214,7 @@
           - action: light.turn_on
             target:
               entity_id:
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
+              - light.bedroom_lamps
             data:
               brightness_pct: '{{ [1 + (repeat.index * 6.6), 94] | min | round(0)
                 }}'
@@ -11852,10 +11755,8 @@
         data:
           entity_id: switch.al_big_bedroom
           lights:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
           manual_control: false
       - action: switch.turn_on
         target:
@@ -11873,10 +11774,8 @@
         data:
           entity_id: switch.al_big_bedroom
           lights:
-          - light.bedroom_ceiling_1
-          - light.bedroom_ceiling_2
-          - light.bedroom_lamp_1
-          - light.bedroom_lamp_2
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
           transition: 30
           adapt_color: true
           adapt_brightness: true
@@ -12391,17 +12290,14 @@
     data:
       entity_id: switch.al_big_bedroom
       lights:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
       manual_control: true
   - alias: Set deep warm red at 25% (matching Bedtime mood)
     action: light.turn_on
     target:
       entity_id:
-      - light.bedroom_ceiling_1
-      - light.bedroom_ceiling_2
+      - light.bedroom_ceiling
     data:
       rgb_color:
       - 255
@@ -12413,8 +12309,7 @@
     action: light.turn_on
     target:
       entity_id:
-      - light.bedroom_lamp_1
-      - light.bedroom_lamp_2
+      - light.bedroom_lamps
     data:
       rgb_color:
       - 255
