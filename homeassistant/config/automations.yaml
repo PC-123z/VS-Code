@@ -715,6 +715,16 @@
       entity_id: automation.big_bedroom_smart_motion_presence
       state: 'off'
   actions:
+  - alias: Hold AL off the lights during the fade (AL interval relit fades 2026-11-17);
+      cleared by the last step
+    action: adaptive_lighting.set_manual_control
+    continue_on_error: true
+    data:
+      entity_id: switch.al_big_bedroom
+      lights:
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
+      manual_control: true
   - alias: Turn lights off first before re-enabling AL to prevent race condition
     action: light.turn_off
     target:
@@ -2489,6 +2499,15 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
+            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
+                2026-11-17); detected branch clears this on next motion
+              action: adaptive_lighting.set_manual_control
+              continue_on_error: true
+              data:
+                entity_id: switch.al_big_bedroom
+                lights:
+                - light.bedroom_ceiling
+                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -2556,6 +2575,15 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
+            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
+                2026-11-17); detected branch clears this on next motion
+              action: adaptive_lighting.set_manual_control
+              continue_on_error: true
+              data:
+                entity_id: switch.al_big_bedroom
+                lights:
+                - light.bedroom_ceiling
+                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -2623,6 +2651,15 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
+            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
+                2026-11-17); detected branch clears this on next motion
+              action: adaptive_lighting.set_manual_control
+              continue_on_error: true
+              data:
+                entity_id: switch.al_big_bedroom
+                lights:
+                - light.bedroom_ceiling
+                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -2690,6 +2727,15 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
+            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
+                2026-11-17); detected branch clears this on next motion
+              action: adaptive_lighting.set_manual_control
+              continue_on_error: true
+              data:
+                entity_id: switch.al_big_bedroom
+                lights:
+                - light.bedroom_ceiling
+                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -2757,6 +2803,15 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
+            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
+                2026-11-17); detected branch clears this on next motion
+              action: adaptive_lighting.set_manual_control
+              continue_on_error: true
+              data:
+                entity_id: switch.al_big_bedroom
+                lights:
+                - light.bedroom_ceiling
+                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -2847,6 +2902,15 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
+            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
+                2026-11-17); detected branch clears this on next motion
+              action: adaptive_lighting.set_manual_control
+              continue_on_error: true
+              data:
+                entity_id: switch.al_big_bedroom
+                lights:
+                - light.bedroom_ceiling
+                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -2944,6 +3008,15 @@
               - condition: template
                 value_template: '{{ wait.completed }}'
               then:
+              - alias: Hold AL off the ceiling during the fade (AL interval relit fades
+                  2026-11-17); detected branch clears this on next motion
+                action: adaptive_lighting.set_manual_control
+                continue_on_error: true
+                data:
+                  entity_id: switch.al_big_bedroom
+                  lights:
+                  - light.bedroom_ceiling
+                  manual_control: true
               - action: light.turn_off
                 target:
                   entity_id:
@@ -3140,6 +3213,11 @@
       - condition: trigger
         id: cleared
       sequence:
+      - alias: AL off BEFORE the fade - its 90s interval adapt can relight a light
+          that has just started fading (2026-11-17)
+        action: switch.turn_off
+        target:
+          entity_id: switch.al_living_room
       - action: light.turn_off
         target:
           entity_id: light.living_room
@@ -3148,9 +3226,6 @@
       - action: light.turn_off
         target:
           entity_id: light.galaxy_projector
-      - action: switch.turn_off
-        target:
-          entity_id: switch.al_living_room
     - conditions:
       - condition: trigger
         id: cleared_night
@@ -3163,6 +3238,11 @@
           after: '23:00:00'
           before: 07:00:00
       sequence:
+      - alias: AL off BEFORE the fade - its 90s interval adapt can relight a light
+          that has just started fading (2026-11-17)
+        action: switch.turn_off
+        target:
+          entity_id: switch.al_living_room
       - action: light.turn_off
         target:
           entity_id: light.living_room
@@ -3171,9 +3251,6 @@
       - action: light.turn_off
         target:
           entity_id: light.galaxy_projector
-      - action: switch.turn_off
-        target:
-          entity_id: switch.al_living_room
     - alias: Added 2026-10-11 - nobody present for 5 minutes outside the night window
         - turn off ONLY the galaxy projector (user preference); the room lights keep
         their 14.5-minute 'cleared' timing
@@ -3484,6 +3561,13 @@
           lights:
           - light.dining_room_top
           manual_control: false
+      - alias: AL off BEFORE the fade - its 90s interval adapt can relight a light
+          that has just started fading (2026-11-17)
+        action: switch.turn_off
+        target:
+          entity_id:
+          - switch.al_dining_room_bottom
+          - switch.al_dining_room_top
       - alias: Turn off lights before re-enabling AL (avoid AL flashing them back
           on)
         action: light.turn_off
@@ -3498,6 +3582,9 @@
           entity_id: light.dining_room_top
         data:
           transition: 30
+      - alias: Let Hue report the lights off before AL comes back
+        delay:
+          seconds: 3
       - alias: Only re-enable AL switches if room is still unoccupied
         condition: state
         entity_id: binary_sensor.dining_room_sensor_group
@@ -3555,6 +3642,13 @@
         - action: input_boolean.turn_off
           target:
             entity_id: input_boolean.dining_room_tv_dim
+      - alias: AL off BEFORE the fade - its 90s interval adapt can relight a light
+          that has just started fading (2026-11-17)
+        action: switch.turn_off
+        target:
+          entity_id:
+          - switch.al_dining_room_bottom
+          - switch.al_dining_room_top
       - action: light.turn_off
         target:
           label_id: dining_room_bottom
@@ -3567,11 +3661,6 @@
           entity_id: light.dining_room_top
         data:
           transition: 300
-      - action: switch.turn_off
-        target:
-          entity_id:
-          - switch.al_dining_room_bottom
-          - switch.al_dining_room_top
     - conditions:
       - condition: trigger
         id: midnight_off
@@ -3584,6 +3673,13 @@
         condition: state
         entity_id: binary_sensor.dining_room_sensor_group
         state: 'off'
+      - alias: AL off BEFORE the fade - its 90s interval adapt can relight a light
+          that has just started fading (2026-11-17)
+        action: switch.turn_off
+        target:
+          entity_id:
+          - switch.al_dining_room_bottom
+          - switch.al_dining_room_top
       - action: light.turn_off
         target:
           label_id: dining_room_bottom
@@ -3596,11 +3692,6 @@
           entity_id: light.dining_room_top
         data:
           transition: 30
-      - action: switch.turn_off
-        target:
-          entity_id:
-          - switch.al_dining_room_bottom
-          - switch.al_dining_room_top
     - conditions:
       - condition: trigger
         id: morning_transition
@@ -18066,6 +18157,13 @@
       lights:
       - light.dining_room_top
       manual_control: false
+  - alias: AL off BEFORE the fade - its 90s interval adapt can relight a light that
+      has just started fading (2026-11-17)
+    action: switch.turn_off
+    target:
+      entity_id:
+      - switch.al_dining_room_bottom
+      - switch.al_dining_room_top
   - alias: Turn off lights before re-enabling AL (avoid AL flashing them back on)
     action: light.turn_off
     target:
@@ -18074,6 +18172,9 @@
       - light.dining_room_top
     data:
       transition: 30
+  - alias: Let Hue report the lights off before AL comes back
+    delay:
+      seconds: 3
   - alias: Only re-enable AL if the room is still empty
     condition: state
     entity_id: binary_sensor.dining_room_sensor_group

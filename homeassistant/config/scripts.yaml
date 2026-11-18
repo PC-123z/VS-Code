@@ -784,6 +784,17 @@ goodbye_routine_all_clear_arm_and_power_off:
       entity_id: input_boolean.goodbye_routine_active
     action: input_boolean.turn_off
     data: {}
+  - alias: Safety net - Adaptive Lighting's 90s interval adapt can relight a light
+      in the second after it was turned off (Bedroom 2 lamp stayed on 12 min after
+      Goodbye on 2026-11-09); wait, then turn off anything that came back on
+    delay:
+      seconds: 5
+  - continue_on_error: true
+    target:
+      entity_id: >-
+        {{ ['light.indoor', 'light.hallway', 'light.galaxy_projector', 'light.garage_lights', 'light.kitchen_1_color', 'light.kitchen_2_color', 'light.hue_datura_top_1', 'light.hue_datura_bottom_1', 'light.dining_room_bottom', 'light.dining_room_top', 'light.ribbon', 'light.nano_sand_dune', 'light.fluttershy', 'light.office', 'light.office_1', 'light.office_2', 'light.hue_white_lamp_1', 'light.living_room', 'light.bathroom_main_lights', 'light.bathroom_shower', 'light.bathroom_back', 'light.showtime_light', 'light.bedroom', 'light.bedroom_2', 'light.bedroom_ceiling_1', 'light.bedroom_ceiling_2', 'light.bedroom_lamp_1', 'light.bedroom_lamp_2'] | select('is_state', 'on') | list }}
+    action: light.turn_off
+    data: {}
   mode: single
   icon: mdi:shield-lock
 goodbye_routine_abort_and_restore:
