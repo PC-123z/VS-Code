@@ -2989,6 +2989,17 @@
         entity_id: input_boolean.big_bedroom_manual_override
         state: 'off'
       sequence:
+      - alias: Hold AL off the lights during the fade - its 90s interval adapt relit
+          them mid-fade (2026-11-17 22:32); detected branch and the final step below
+          both clear this
+        action: adaptive_lighting.set_manual_control
+        continue_on_error: true
+        data:
+          entity_id: switch.al_big_bedroom
+          lights:
+          - light.bedroom_ceiling
+          - light.bedroom_lamps
+          manual_control: true
       - alias: Lamps off first
         action: light.turn_off
         target:
