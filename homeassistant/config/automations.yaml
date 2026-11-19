@@ -5597,10 +5597,27 @@
         action: automation.turn_off
         target:
           entity_id: automation.big_bedroom_smart_motion_presence
+      - alias: Pause Purifier Only During Sleep (added 2026-11-18) - marking asleep
+          below would otherwise start the purifier this off-hold is shutting down
+        action: automation.turn_off
+        target:
+          entity_id: automation.big_bedroom_purifier_only_during_sleep
+        data:
+          stop_actions: true
       - alias: Mark asleep so nothing re-arms lighting until Good Morning
         action: input_boolean.turn_on
         target:
           entity_id: input_boolean.big_bedroom_asleep
+      - alias: Purifier off now, while the purifier automation is paused
+        continue_on_error: true
+        action: fan.turn_off
+        target:
+          entity_id: fan.bedroom_purifier
+      - alias: Re-arm Purifier Only During Sleep - it missed the asleep change, so the
+          purifier stays off tonight unless turned on by hand
+        action: automation.turn_on
+        target:
+          entity_id: automation.big_bedroom_purifier_only_during_sleep
       - alias: Turn off AL switches
         action: switch.turn_off
         target:
@@ -8226,6 +8243,12 @@
     trigger: device
   conditions: []
   actions:
+  - alias: Mark asleep (added 2026-11-18) - keeps the purifier running via Purifier
+      Only During Sleep (it switched it off after 1 min otherwise) and stops anything
+      re-arming the lighting until Good Morning, same as the Hue bedtime buttons
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.big_bedroom_asleep
   - alias: Disable motion automation so lights stay as set
     action: automation.turn_off
     target:
