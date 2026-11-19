@@ -2135,8 +2135,8 @@ big_bedroom_lights_off:
         text: {}
   sequence:
   - variables:
-      lf: '{{ (lamps_fade | default(60)) | int }}'
-      cf: '{{ (ceiling_fade | default(480)) | int }}'
+      lf: '{{ (lamps_fade | default(60)) | int(60) }}'
+      cf: '{{ (ceiling_fade | default(480)) | int(480) }}'
       watch: '{{ stay_off_unless | default(''binary_sensor.big_bedroom_sensor_group'', true) }}'
       why: '{{ reason | default('''', true) }}'
       started: '{{ now().timestamp() }}'
