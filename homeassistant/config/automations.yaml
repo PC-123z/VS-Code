@@ -737,6 +737,24 @@
     timeout:
       seconds: 90
     continue_on_timeout: true
+  - alias: Hue room groups lag their bulbs - sync them off so AL coming back doesn't relight them (2026-11-18 23:22)
+    if:
+    - condition: state
+      entity_id: binary_sensor.big_bedroom_sensor_group
+      state: 'off'
+    - condition: template
+      value_template: '{{ [''light.bedroom_ceiling'',''light.bedroom_lamps''] | select(''is_state'',''on'') | list | count > 0 }}'
+    then:
+    - action: light.turn_off
+      continue_on_error: true
+      target:
+        entity_id:
+        - light.bedroom_ceiling
+        - light.bedroom_lamps
+    - wait_template: '{{ [''light.bedroom_ceiling'',''light.bedroom_lamps''] | select(''is_state'',''on'') | list | count == 0 }}'
+      timeout:
+        seconds: 15
+      continue_on_timeout: true
   - alias: Clear manual override boolean
     action: input_boolean.turn_off
     target:
@@ -3114,6 +3132,24 @@
             - light.bedroom_lamps
         - delay:
             seconds: 5
+      - alias: Hue room groups lag their bulbs - sync them off so AL coming back doesn't relight them (2026-11-18 23:22)
+        if:
+        - condition: state
+          entity_id: binary_sensor.big_bedroom_sensor_group
+          state: 'off'
+        - condition: template
+          value_template: '{{ [''light.bedroom_ceiling'',''light.bedroom_lamps''] | select(''is_state'',''on'') | list | count > 0 }}'
+        then:
+        - action: light.turn_off
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.bedroom_ceiling
+            - light.bedroom_lamps
+        - wait_template: '{{ [''light.bedroom_ceiling'',''light.bedroom_lamps''] | select(''is_state'',''on'') | list | count == 0 }}'
+          timeout:
+            seconds: 15
+          continue_on_timeout: true
       - alias: Clear manual_control so AL can take over on next motion
         action: adaptive_lighting.set_manual_control
         data:
@@ -3674,6 +3710,24 @@
             - light.dining_room_top
         - delay:
             seconds: 5
+      - alias: Hue room groups lag their bulbs - sync them off so AL coming back doesn't relight them (2026-11-18 23:22)
+        if:
+        - condition: state
+          entity_id: binary_sensor.dining_room_sensor_group
+          state: 'off'
+        - condition: template
+          value_template: '{{ [''light.dining_room_bottom'',''light.dining_room_top''] | select(''is_state'',''on'') | list | count > 0 }}'
+        then:
+        - action: light.turn_off
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.dining_room_bottom
+            - light.dining_room_top
+        - wait_template: '{{ [''light.dining_room_bottom'',''light.dining_room_top''] | select(''is_state'',''on'') | list | count == 0 }}'
+          timeout:
+            seconds: 15
+          continue_on_timeout: true
       - alias: Only re-enable AL switches if room is still unoccupied
         condition: state
         entity_id: binary_sensor.dining_room_sensor_group
@@ -18382,6 +18436,24 @@
         - light.dining_room_top
     - delay:
         seconds: 5
+  - alias: Hue room groups lag their bulbs - sync them off so AL coming back doesn't relight them (2026-11-18 23:22)
+    if:
+    - condition: state
+      entity_id: binary_sensor.dining_room_sensor_group
+      state: 'off'
+    - condition: template
+      value_template: '{{ [''light.dining_room_bottom'',''light.dining_room_top''] | select(''is_state'',''on'') | list | count > 0 }}'
+    then:
+    - action: light.turn_off
+      continue_on_error: true
+      target:
+        entity_id:
+        - light.dining_room_bottom
+        - light.dining_room_top
+    - wait_template: '{{ [''light.dining_room_bottom'',''light.dining_room_top''] | select(''is_state'',''on'') | list | count == 0 }}'
+      timeout:
+        seconds: 15
+      continue_on_timeout: true
   - alias: Only re-enable AL if the room is still empty
     condition: state
     entity_id: binary_sensor.dining_room_sensor_group
