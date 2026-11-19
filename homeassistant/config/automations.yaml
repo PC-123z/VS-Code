@@ -20475,3 +20475,47 @@
           entity_id: fan.bedroom_purifier
   mode: queued
   max: 5
+- id: '1794100000001'
+  alias: 'Maintenance: Purifier Filter Empty Daily Alert'
+  description: Added 2026-11-18. When a purifier's filter life reaches 0%, alerts the
+    iPhone right away and then every day at 9:00 AM until the filter is replaced and
+    its counter reset (Kitchen has a Reset filter button in HA; the Bedroom purifier
+    resets in the VeSync app). Companion to the Maintenance page problem sensors
+    binary_sensor.kitchen_purifier_filter / bedroom_purifier_filter (on at <= 10%).
+  triggers:
+  - trigger: time
+    at: 09:00:00
+    id: daily
+  - trigger: numeric_state
+    entity_id:
+    - sensor.kitchen_purifier_filter_lifetime
+    - sensor.bedroom_purifier_filter_lifetime
+    below: 1
+    for:
+      minutes: 5
+    id: reached_zero
+  variables:
+    empty: >-
+      {% set ns = namespace(names=[]) %}
+      {% for e, n in [('sensor.kitchen_purifier_filter_lifetime', 'Kitchen'),
+                      ('sensor.bedroom_purifier_filter_lifetime', 'Bedroom')] %}
+        {% if states(e) | is_number and states(e) | float <= 0 %}
+          {% set ns.names = ns.names + [n] %}
+        {% endif %}
+      {% endfor %}
+      {{ ns.names }}
+  conditions:
+  - condition: template
+    value_template: '{{ empty | count > 0 }}'
+  actions:
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: Replace purifier filter
+      message: >-
+        {{ empty | join(' and ') }} purifier filter{{ 's are' if empty | count > 1 else ' is' }}
+        at 0%. Replace it, then reset the filter counter
+        {%- if 'Kitchen' in empty %} (Kitchen: Reset filter button in HA{{ '; Bedroom: VeSync app' if 'Bedroom' in empty }}){% else %} in the VeSync app{% endif %}.
+      data:
+        tag: purifier_filter_empty
+        url: /maintenance
+  mode: single
