@@ -232,8 +232,6 @@ template:
           - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy
           - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy
           - binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy
-          - binary_sensor.bedroom_motion
-          - binary_sensor.bedroom_occupancy
           - binary_sensor.bathroom_bathroom_presence_sensor_presence
           - binary_sensor.bathroom_motion
           - binary_sensor.kitchen_occupancy_sensor_radar_zone_1_occupancy
@@ -475,11 +473,11 @@ template:
           {% set zones = ['binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy',
                           'binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy',
                           'binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy'] | select('is_state', 'on') | list | count > 0 %}
-          {# 2026-11-18: radar movement only counts once it has lasted 2 s with presence
+          {# 2026-11-18: start = the Apollo radar's motion AND presence agreeing for 2 s
              (binary_sensor.big_bedroom_sustained_movement). Ghosts (purifier, 23:01 blip)
-             were single 1.0-1.4 s moving flashes; real walk-ins run 2.5-14 s. #}
-          {% set start = ['binary_sensor.bedroom_motion',
-                          'binary_sensor.big_bedroom_sustained_movement'] | select('is_state', 'on') | list | count > 0 %}
+             were single 1.0-1.4 s moving flashes; real walk-ins run 2.5-14 s. The ecobee
+             remote sensor (binary_sensor.bedroom_motion) is NOT used - user doesn't trust it. #}
+          {% set start = is_state('binary_sensor.big_bedroom_sustained_movement', 'on') %}
           {% set was = this.state if this is defined and this is not none else 'unknown' %}
           {{ is_state('input_boolean.big_bedroom_asleep', 'on') or (zones and (was != 'off' or start)) }}
 
