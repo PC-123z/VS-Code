@@ -79,10 +79,10 @@ script_volvo_start_core:
         entity_id: input_boolean.volvo_start_active
     - stop: Car is not home
   - alias: Check the Volvo integration is online. If it's logged out (e.g. 2026-09-14
-      token refresh 400) the press can't work - skip it, but keep the rest of the routine
-      (garage open on presence, unlock, scenes, announcements) running
+      token refresh 400) the press can't work - skip it, but keep the rest of the
+      routine (garage open on presence, unlock, scenes, announcements) running
     variables:
-      volvo_online: "{{ not is_state('lock.volvo_xc60_lock', 'unavailable') }}"
+      volvo_online: '{{ not is_state(''lock.volvo_xc60_lock'', ''unavailable'') }}'
   - alias: Turn on garage lights (Garage - AL sets brightness; Garage Lights automation
       turns them off 5 min after presence clears once this start cycle ends)
     action: light.turn_on
@@ -94,11 +94,11 @@ script_volvo_start_core:
     parallel:
     - sequence:
       - alias: Press climatization - up to 3 attempts 30s apart. The press lives in
-          script.script_volvo_press_climatization, which only returns {ok:true} if the
-          press didn't raise. On 2026-09-16 the Volvo API returned 503 ("Could not fetch
-          opt-out list from service") and the uncaught error killed this whole script -
-          no garage open, no announcements, no alert. A failed press must never stop
-          the rest of the routine.
+          script.script_volvo_press_climatization, which only returns {ok:true} if
+          the press didn't raise. On 2026-09-16 the Volvo API returned 503 ("Could
+          not fetch opt-out list from service") and the uncaught error killed this
+          whole script - no garage open, no announcements, no alert. A failed press
+          must never stop the rest of the routine.
         if:
         - condition: template
           value_template: '{{ volvo_online }}'
@@ -135,15 +135,15 @@ script_volvo_start_core:
         - alias: Announce departure with weather
           action: notify.send_message
           target:
-            # One speaker, where someone is: Big Bedroom first, then Living Room, else Kitchen.
-            # 2026-09-27: 15s grace period on each room - a radar blip flapping the
-            # sensor group off for a few seconds (Big Bedroom MSR-2 does this) no longer
-            # falls through to the wrong room; still counts as occupied if it flipped off
-            # in just the last 15 seconds.
-            entity_id: "{% set bb = 'binary_sensor.big_bedroom_sensor_group' %}{% set lr = 'binary_sensor.living_room_sensor_group' %}{% set bb_occ = is_state(bb, 'on') or (now() - states[bb].last_changed).total_seconds() < 15 %}{% set lr_occ = is_state(lr, 'on') or (now() - states[lr].last_changed).total_seconds() < 15 %}{{ 'notify.bedroom_dot_speak' if bb_occ else ('notify.living_room_dot_announce' if lr_occ else 'notify.echo_show_kitchen_announce') }}"
+            entity_id: '{% set bb = ''binary_sensor.big_bedroom_sensor_group'' %}{%
+              set lr = ''binary_sensor.living_room_sensor_group'' %}{% set bb_occ
+              = is_state(bb, ''on'') or (now() - states[bb].last_changed).total_seconds()
+              < 15 %}{% set lr_occ = is_state(lr, ''on'') or (now() - states[lr].last_changed).total_seconds()
+              < 15 %}{{ ''notify.bedroom_dot_speak'' if bb_occ else (''notify.living_room_dot_announce''
+              if lr_occ else ''notify.echo_show_kitchen_announce'') }}'
           data:
-            message: XC60 will be Ready to Depart in 5 Minutes. Current conditions are
-              {{ states('weather.forecast_home') }}, {{ state_attr('weather.forecast_home',
+            message: XC60 will be Ready to Depart in 5 Minutes. Current conditions
+              are {{ states('weather.forecast_home') }}, {{ state_attr('weather.forecast_home',
               'temperature') }} degrees.
           continue_on_error: true
         - alias: Send departure iPhone notification
@@ -157,21 +157,21 @@ script_volvo_start_core:
           action: notify.mobile_app_pc_iphone
           data:
             title: Volvo Start Failed
-            message: "{% if volvo_online %}Car was NOT started - the Volvo API rejected
+            message: '{% if volvo_online %}Car was NOT started - the Volvo API rejected
               climatization 3 times (Volvo service error). {% else %}Car was NOT started
-              - the Volvo integration is offline. Re-authenticate it in HA (Settings >
-              Devices & services > Volvo, Local application credentials). {% endif %}Garage
-              will still open on presence."
+              - the Volvo integration is offline. Re-authenticate it in HA (Settings
+              > Devices & services > Volvo, Local application credentials). {% endif
+              %}Garage will still open on presence.'
           continue_on_error: true
         - alias: Announce car not started
           action: notify.send_message
           target:
-            # One speaker, where someone is: Big Bedroom first, then Living Room, else Kitchen.
-            # 2026-09-27: 15s grace period on each room - a radar blip flapping the
-            # sensor group off for a few seconds (Big Bedroom MSR-2 does this) no longer
-            # falls through to the wrong room; still counts as occupied if it flipped off
-            # in just the last 15 seconds.
-            entity_id: "{% set bb = 'binary_sensor.big_bedroom_sensor_group' %}{% set lr = 'binary_sensor.living_room_sensor_group' %}{% set bb_occ = is_state(bb, 'on') or (now() - states[bb].last_changed).total_seconds() < 15 %}{% set lr_occ = is_state(lr, 'on') or (now() - states[lr].last_changed).total_seconds() < 15 %}{{ 'notify.bedroom_dot_speak' if bb_occ else ('notify.living_room_dot_announce' if lr_occ else 'notify.echo_show_kitchen_announce') }}"
+            entity_id: '{% set bb = ''binary_sensor.big_bedroom_sensor_group'' %}{%
+              set lr = ''binary_sensor.living_room_sensor_group'' %}{% set bb_occ
+              = is_state(bb, ''on'') or (now() - states[bb].last_changed).total_seconds()
+              < 15 %}{% set lr_occ = is_state(lr, ''on'') or (now() - states[lr].last_changed).total_seconds()
+              < 15 %}{{ ''notify.bedroom_dot_speak'' if bb_occ else (''notify.living_room_dot_announce''
+              if lr_occ else ''notify.echo_show_kitchen_announce'') }}'
           data:
             message: The XC60 could not be started remotely.
           continue_on_error: true
@@ -192,12 +192,12 @@ script_volvo_start_core:
         - alias: Announce ready
           action: notify.send_message
           target:
-            # One speaker, where someone is: Big Bedroom first, then Living Room, else Kitchen.
-            # 2026-09-27: 15s grace period on each room - a radar blip flapping the
-            # sensor group off for a few seconds (Big Bedroom MSR-2 does this) no longer
-            # falls through to the wrong room; still counts as occupied if it flipped off
-            # in just the last 15 seconds.
-            entity_id: "{% set bb = 'binary_sensor.big_bedroom_sensor_group' %}{% set lr = 'binary_sensor.living_room_sensor_group' %}{% set bb_occ = is_state(bb, 'on') or (now() - states[bb].last_changed).total_seconds() < 15 %}{% set lr_occ = is_state(lr, 'on') or (now() - states[lr].last_changed).total_seconds() < 15 %}{{ 'notify.bedroom_dot_speak' if bb_occ else ('notify.living_room_dot_announce' if lr_occ else 'notify.echo_show_kitchen_announce') }}"
+            entity_id: '{% set bb = ''binary_sensor.big_bedroom_sensor_group'' %}{%
+              set lr = ''binary_sensor.living_room_sensor_group'' %}{% set bb_occ
+              = is_state(bb, ''on'') or (now() - states[bb].last_changed).total_seconds()
+              < 15 %}{% set lr_occ = is_state(lr, ''on'') or (now() - states[lr].last_changed).total_seconds()
+              < 15 %}{{ ''notify.bedroom_dot_speak'' if bb_occ else (''notify.living_room_dot_announce''
+              if lr_occ else ''notify.echo_show_kitchen_announce'') }}'
           data:
             message: 'Vehicle Ready, Time to Go!!!!  '
           continue_on_error: true
@@ -349,15 +349,18 @@ goodbye_routine_main:
   icon: mdi:logout
 goodbye_routine_motion_tracking:
   alias: Goodbye Routine - Motion Tracking
-  description: 'Decides home vs empty. First allows up to 5 min for Paul''s own exit motion to clear (must
-    stay clear for 30 s), then runs up to 5 consecutive 2-minute checks (fewer when post-departure quiet
-    time already elapsed - added 2026-10-12, always at least 1). Motion only counts if it stays on for
-    30 s, so a radar blip or a sensor flapping for a second cannot decide the outcome (2026-09-25: a Bedroom
-    2 radar zone flap ended the settle wait and tripped check 1 in 2 seconds). Returns {someone_home,
-    detected}. 2026-10-12: indoor Frigate person detection (kitchen, living room) and the front/back/garage-to-house
-    doors also count as someone home, and cap the quiet-time credit.'
+  description: 'Decides home vs empty. First allows up to 5 min for Paul''s own exit
+    motion to clear (must stay clear for 30 s), then runs up to 5 consecutive 2-minute
+    checks (fewer when post-departure quiet time already elapsed - added 2026-10-12,
+    always at least 1). Motion only counts if it stays on for 30 s, so a radar blip
+    or a sensor flapping for a second cannot decide the outcome (2026-09-25: a Bedroom
+    2 radar zone flap ended the settle wait and tripped check 1 in 2 seconds). Returns
+    {someone_home, detected}. 2026-10-12: indoor Frigate person detection (kitchen,
+    living room) and the front/back/garage-to-house doors also count as someone home,
+    and cap the quiet-time credit.'
   sequence:
-  - alias: Settle - let departure motion clear (must be off 30 s; still-on after 5 min fails check 1)
+  - alias: Settle - let departure motion clear (must be off 30 s; still-on after 5
+      min fails check 1)
     if:
     - condition: not
       conditions:
@@ -376,28 +379,31 @@ goodbye_routine_motion_tracking:
       timeout:
         minutes: 5
       continue_on_timeout: true
-  - alias: Added 2026-10-12 - credit post-departure quiet time toward the 10 quiet minutes. Capped at
-      the time since the garage, any outside door (front/back/garage-to-house) or an indoor Frigate person
-      sensor last changed, and at 8 min, so at least one live 2-minute check runs. No credit while a camera
-      sees a person.
+  - alias: Added 2026-10-12 - credit post-departure quiet time toward the 10 quiet
+      minutes. Capped at the time since the garage, any outside door (front/back/garage-to-house)
+      or an indoor Frigate person sensor last changed, and at 8 min, so at least one
+      live 2-minute check runs. No credit while a camera sees a person.
     variables:
-      quiet_credit_s: '{% set g = states.binary_sensor.goodbye_motion_sensors %}{% set people = [''binary_sensor.kitchen_person_occupancy'',
-        ''binary_sensor.living_room_person_occupancy''] | select(''is_state'', ''on'') | list %}{% if
-        g is none or g.state != ''off'' or people | length > 0 %}0{% else %}{% set ns = namespace(q=(now()
-        - g.last_changed).total_seconds()) %}{% for e in [''cover.garage''] + [''binary_sensor.front_door'',
-        ''binary_sensor.back_door'', ''binary_sensor.garage_door''] + [''binary_sensor.kitchen_person_occupancy'',
-        ''binary_sensor.living_room_person_occupancy''] %}{% set st = states[e] %}{% if st is not none
-        %}{% set ns.q = [ns.q, (now() - st.last_changed).total_seconds()] | min %}{% endif %}{% endfor
-        %}{{ [ns.q, 480] | min | int }}{% endif %}'
-      checks_needed: '{{ [[((600 - (quiet_credit_s | int)) / 120) | round(0, ''ceil'') | int, 1] | max,
-        5] | min }}'
+      quiet_credit_s: '{% set g = states.binary_sensor.goodbye_motion_sensors %}{%
+        set people = [''binary_sensor.kitchen_person_occupancy'', ''binary_sensor.living_room_person_occupancy'']
+        | select(''is_state'', ''on'') | list %}{% if g is none or g.state != ''off''
+        or people | length > 0 %}0{% else %}{% set ns = namespace(q=(now() - g.last_changed).total_seconds())
+        %}{% for e in [''cover.garage''] + [''binary_sensor.front_door'', ''binary_sensor.back_door'',
+        ''binary_sensor.garage_door''] + [''binary_sensor.kitchen_person_occupancy'',
+        ''binary_sensor.living_room_person_occupancy''] %}{% set st = states[e] %}{%
+        if st is not none %}{% set ns.q = [ns.q, (now() - st.last_changed).total_seconds()]
+        | min %}{% endif %}{% endfor %}{{ [ns.q, 480] | min | int }}{% endif %}'
+      checks_needed: '{{ [[((600 - (quiet_credit_s | int)) / 120) | round(0, ''ceil'')
+        | int, 1] | max, 5] | min }}'
   - repeat:
       count: '{{ checks_needed }}'
       sequence:
-      - alias: Sustained motion (on 30 s), a camera seeing a person, or an outside door opening at any
-          point in this 2-minute window = someone is home (cameras/doors added 2026-10-12)
+      - alias: Sustained motion (on 30 s), a camera seeing a person, or an outside
+          door opening at any point in this 2-minute window = someone is home (cameras/doors
+          added 2026-10-12)
         variables:
-          already_on: '{{ (is_state(''binary_sensor.goodbye_motion_sensors'', ''on'') and (now() - states.binary_sensor.goodbye_motion_sensors.last_changed).total_seconds()
+          already_on: '{{ (is_state(''binary_sensor.goodbye_motion_sensors'', ''on'')
+            and (now() - states.binary_sensor.goodbye_motion_sensors.last_changed).total_seconds()
             >= 30) or ([''binary_sensor.kitchen_person_occupancy'', ''binary_sensor.living_room_person_occupancy'']
             | select(''is_state'', ''on'') | list | length > 0) }}'
       - if:
@@ -428,17 +434,19 @@ goodbye_routine_motion_tracking:
           continue_on_timeout: true
       - if:
         - condition: template
-          value_template: '{{ already_on or (wait is defined and wait.trigger is not none) }}'
+          value_template: '{{ already_on or (wait is defined and wait.trigger is not
+            none) }}'
         then:
         - variables:
             result:
               someone_home: true
               detected: '{% if wait is defined and wait.trigger is not none and wait.trigger.entity_id
-                != ''binary_sensor.goodbye_motion_sensors'' %}{{ wait.trigger.to_state.name }}{% else
-                %}{% set cams = [''binary_sensor.kitchen_person_occupancy'', ''binary_sensor.living_room_person_occupancy'']
-                | select(''is_state'',''on'') | map(''state_attr'',''friendly_name'') | list %}{{ (cams
-                + (expand(state_attr(''binary_sensor.goodbye_motion_sensors'', ''entity_id'')) | selectattr(''state'',
-                ''eq'', ''on'') | map(attribute=''name'') | list)) | join('', '') }}{% endif %}'
+                != ''binary_sensor.goodbye_motion_sensors'' %}{{ wait.trigger.to_state.name
+                }}{% else %}{% set cams = [''binary_sensor.kitchen_person_occupancy'',
+                ''binary_sensor.living_room_person_occupancy''] | select(''is_state'',''on'')
+                | map(''state_attr'',''friendly_name'') | list %}{{ (cams + (expand(state_attr(''binary_sensor.goodbye_motion_sensors'',
+                ''entity_id'')) | selectattr(''state'', ''eq'', ''on'') | map(attribute=''name'')
+                | list)) | join('', '') }}{% endif %}'
         - stop: Motion detected - someone is home
           response_variable: result
   - variables:
@@ -476,12 +484,15 @@ goodbye_routine_someone_home_arm_stay:
         entity_id: alarm_control_panel.3302_alarm
       data:
         code: ''
-  - alias: Confirm the panel really armed - Ring refuses while a door is open (2026-11-14 it said "set to Stay" while disarmed)
-    wait_template: "{{ is_state('alarm_control_panel.3302_alarm', 'armed_home') }}"
+  - alias: Confirm the panel really armed - Ring refuses while a door is open (2026-11-14
+      it said "set to Stay" while disarmed)
+    wait_template: '{{ is_state(''alarm_control_panel.3302_alarm'', ''armed_home'')
+      }}'
     timeout:
       seconds: 20
     continue_on_timeout: true
-  - alias: Not armed - say nothing here, automation 1793800000001 (Alarm - Arm Request Failed Alert) reports why and retries
+  - alias: Not armed - say nothing here, automation 1793800000001 (Alarm - Arm Request
+      Failed Alert) reports why and retries
     condition: state
     entity_id: alarm_control_panel.3302_alarm
     state: armed_home
@@ -499,11 +510,11 @@ goodbye_routine_someone_home_arm_stay:
   icon: mdi:home-account
 goodbye_routine_stay_recheck:
   alias: Goodbye Routine - Stay Re-check
-  description: 'Added 2026-09-25. After the routine armed Stay because of motion, keep
+  description: Added 2026-09-25. After the routine armed Stay because of motion, keep
     watching while Paul is away. Once every goodbye motion sensor has been clear for
     10 continuous minutes (and the alarm is still on Stay), run the all-clear arm
     Away + power down. Gives up when the car beacon shows home, the alarm leaves Stay
-    (someone disarmed/changed it), or after ~6 hours.'
+    (someone disarmed/changed it), or after ~6 hours.
   sequence:
   - repeat:
       sequence:
@@ -564,10 +575,11 @@ goodbye_routine_stay_recheck:
   icon: mdi:shield-refresh
 goodbye_routine_all_clear_arm_and_power_off:
   alias: Goodbye Routine - All Clear, Arm and Power Off
-  description: 'House confirmed empty by motion tracking - arm Away, then power down. 2026-10-12: never
-    Away while any goodbye motion sensor group is on or an indoor camera (kitchen/living room Frigate)
-    sees a person - arms Stay instead. Otherwise sends a 1-minute ''Arming Away'' notification with Arm
-    Stay instead / Cancel buttons before arming.'
+  description: 'House confirmed empty by motion tracking - arm Away, then power down.
+    2026-10-12: never Away while any goodbye motion sensor group is on or an indoor
+    camera (kitchen/living room Frigate) sees a person - arms Stay instead. Otherwise
+    sends a 1-minute ''Arming Away'' notification with Arm Stay instead / Cancel buttons
+    before arming.'
   sequence:
   - alias: Abort if car beacon shows Paul is actually home (stale/premature away trigger)
     if:
@@ -578,13 +590,15 @@ goodbye_routine_all_clear_arm_and_power_off:
     - action: script.goodbye_routine_abort_and_restore
       data: {}
     - stop: Beacon confirms Paul is home - not arming
-  - alias: Added 2026-10-12, sensor-only per user - any goodbye motion sensor group on, or an indoor Frigate
-      camera (kitchen/living room) seeing a person right now, means Stay, never Away
+  - alias: Added 2026-10-12, sensor-only per user - any goodbye motion sensor group
+      on, or an indoor Frigate camera (kitchen/living room) seeing a person right
+      now, means Stay, never Away
     variables:
-      stay_reasons: '{% set r = expand(state_attr(''binary_sensor.goodbye_motion_sensors'', ''entity_id''))
-        | selectattr(''state'', ''eq'', ''on'') | map(attribute=''name'') | list %}{% set cams = [''binary_sensor.kitchen_person_occupancy'',
-        ''binary_sensor.living_room_person_occupancy''] | select(''is_state'', ''on'') | map(''state_attr'',
-        ''friendly_name'') | list %}{{ r + cams }}'
+      stay_reasons: '{% set r = expand(state_attr(''binary_sensor.goodbye_motion_sensors'',
+        ''entity_id'')) | selectattr(''state'', ''eq'', ''on'') | map(attribute=''name'')
+        | list %}{% set cams = [''binary_sensor.kitchen_person_occupancy'', ''binary_sensor.living_room_person_occupancy'']
+        | select(''is_state'', ''on'') | map(''state_attr'', ''friendly_name'') |
+        list %}{{ r + cams }}'
   - if:
     - condition: template
       value_template: '{{ stay_reasons | length > 0 }}'
@@ -602,13 +616,14 @@ goodbye_routine_all_clear_arm_and_power_off:
     - action: notify.mobile_app_pc_iphone
       data:
         title: Staying on Stay
-        message: 'Not arming Away: {{ stay_reasons | join(''; '') }}. Alarm is on Stay; lights, TVs and
-          music left alone.'
+        message: 'Not arming Away: {{ stay_reasons | join(''; '') }}. Alarm is on
+          Stay; lights, TVs and music left alone.'
     - action: input_boolean.turn_off
       target:
         entity_id: input_boolean.goodbye_routine_active
     - stop: Someone should be home - Stay, not Away
-  - alias: Added 2026-10-12 - one-minute warning with Arm Stay instead / Cancel buttons before any Away
+  - alias: Added 2026-10-12 - one-minute warning with Arm Stay instead / Cancel buttons
+      before any Away
     action: notify.mobile_app_pc_iphone
     data:
       title: Arming Away in 1 minute
@@ -639,8 +654,8 @@ goodbye_routine_all_clear_arm_and_power_off:
     - alias: Arm Stay instead
       conditions:
       - condition: template
-        value_template: '{{ wait.trigger is not none and wait.trigger.platform == ''event'' and wait.trigger.event.data.action
-          == ''GOODBYE_ARM_STAY'' }}'
+        value_template: '{{ wait.trigger is not none and wait.trigger.platform ==
+          ''event'' and wait.trigger.event.data.action == ''GOODBYE_ARM_STAY'' }}'
       sequence:
       - if:
         - condition: state
@@ -663,13 +678,14 @@ goodbye_routine_all_clear_arm_and_power_off:
     - alias: Cancel
       conditions:
       - condition: template
-        value_template: '{{ wait.trigger is not none and wait.trigger.platform == ''event'' and wait.trigger.event.data.action
-          == ''GOODBYE_CANCEL'' }}'
+        value_template: '{{ wait.trigger is not none and wait.trigger.platform ==
+          ''event'' and wait.trigger.event.data.action == ''GOODBYE_CANCEL'' }}'
       sequence:
       - action: notify.mobile_app_pc_iphone
         data:
           title: Goodbye cancelled
-          message: Alarm left as it was ({{ states('alarm_control_panel.3302_alarm') }}); nothing changed.
+          message: Alarm left as it was ({{ states('alarm_control_panel.3302_alarm')
+            }}); nothing changed.
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.goodbye_routine_active
@@ -683,7 +699,8 @@ goodbye_routine_all_clear_arm_and_power_off:
       - action: script.goodbye_routine_abort_and_restore
         data: {}
       - stop: Beacon home during warning
-  - alias: Re-check the cameras after the warning minute - a person seen meanwhile means Stay
+  - alias: Re-check the cameras after the warning minute - a person seen meanwhile
+      means Stay
     if:
     - condition: template
       value_template: '{{ [''binary_sensor.kitchen_person_occupancy'', ''binary_sensor.living_room_person_occupancy'']
@@ -776,7 +793,8 @@ goodbye_routine_all_clear_arm_and_power_off:
       - fan.bedroom2_fan
     action: fan.turn_off
     data: {}
-  - alias: House is empty - end any Welcome Home session (unjoin/cleanup automations key off this flag)
+  - alias: House is empty - end any Welcome Home session (unjoin/cleanup automations
+      key off this flag)
     action: input_boolean.turn_off
     target:
       entity_id: input_boolean.welcome_home_active
@@ -791,18 +809,53 @@ goodbye_routine_all_clear_arm_and_power_off:
       seconds: 5
   - continue_on_error: true
     target:
-      entity_id: >-
-        {{ ['light.indoor', 'light.hallway', 'light.galaxy_projector', 'light.garage_lights', 'light.kitchen_1_color', 'light.kitchen_2_color', 'light.hue_datura_top_1', 'light.hue_datura_bottom_1', 'light.dining_room_bottom', 'light.dining_room_top', 'light.ribbon', 'light.nano_sand_dune', 'light.fluttershy', 'light.office', 'light.office_1', 'light.office_2', 'light.hue_white_lamp_1', 'light.living_room', 'light.bathroom_main_lights', 'light.bathroom_shower', 'light.bathroom_back', 'light.showtime_light', 'light.bedroom', 'light.bedroom_2', 'light.bedroom_ceiling_1', 'light.bedroom_ceiling_2', 'light.bedroom_lamp_1', 'light.bedroom_lamp_2'] | select('is_state', 'on') | list }}
+      entity_id: '{{ [''light.indoor'', ''light.hallway'', ''light.galaxy_projector'',
+        ''light.garage_lights'', ''light.kitchen_1_color'', ''light.kitchen_2_color'',
+        ''light.hue_datura_top_1'', ''light.hue_datura_bottom_1'', ''light.dining_room_bottom'',
+        ''light.dining_room_top'', ''light.ribbon'', ''light.nano_sand_dune'', ''light.fluttershy'',
+        ''light.office'', ''light.office_1'', ''light.office_2'', ''light.hue_white_lamp_1'',
+        ''light.living_room'', ''light.bathroom_main_lights'', ''light.bathroom_shower'',
+        ''light.bathroom_back'', ''light.showtime_light'', ''light.bedroom'', ''light.bedroom_2'',
+        ''light.bedroom_ceiling_1'', ''light.bedroom_ceiling_2'', ''light.bedroom_lamp_1'',
+        ''light.bedroom_lamp_2''] | select(''is_state'', ''on'') | list }}'
     action: light.turn_off
     data: {}
-  - alias: Second sweep a minute later - a bulb that missed the off shows up when the
-      bridge next polls it
+  - alias: Second sweep a minute later - a bulb that missed the off shows up when
+      the bridge next polls it
     action: script.turn_on
     target:
       entity_id: script.lights_off_recheck
     data:
       variables:
-        lights: ['light.indoor', 'light.hallway', 'light.galaxy_projector', 'light.garage_lights', 'light.kitchen_1_color', 'light.kitchen_2_color', 'light.hue_datura_top_1', 'light.hue_datura_bottom_1', 'light.dining_room_bottom', 'light.dining_room_top', 'light.ribbon', 'light.nano_sand_dune', 'light.fluttershy', 'light.office', 'light.office_1', 'light.office_2', 'light.hue_white_lamp_1', 'light.living_room', 'light.bathroom_main_lights', 'light.bathroom_shower', 'light.bathroom_back', 'light.showtime_light', 'light.bedroom', 'light.bedroom_2', 'light.bedroom_ceiling_1', 'light.bedroom_ceiling_2', 'light.bedroom_lamp_1', 'light.bedroom_lamp_2']
+        lights:
+        - light.indoor
+        - light.hallway
+        - light.galaxy_projector
+        - light.garage_lights
+        - light.kitchen_1_color
+        - light.kitchen_2_color
+        - light.hue_datura_top_1
+        - light.hue_datura_bottom_1
+        - light.dining_room_bottom
+        - light.dining_room_top
+        - light.ribbon
+        - light.nano_sand_dune
+        - light.fluttershy
+        - light.office
+        - light.office_1
+        - light.office_2
+        - light.hue_white_lamp_1
+        - light.living_room
+        - light.bathroom_main_lights
+        - light.bathroom_shower
+        - light.bathroom_back
+        - light.showtime_light
+        - light.bedroom
+        - light.bedroom_2
+        - light.bedroom_ceiling_1
+        - light.bedroom_ceiling_2
+        - light.bedroom_lamp_1
+        - light.bedroom_lamp_2
         wait_seconds: 60
         room: Goodbye
   mode: single
@@ -1057,26 +1110,27 @@ kitchen_up_light_apply:
           transition: '{{ fade }}'
 stop_room_speaker_safely:
   alias: 'Script: Stop Room Speaker Without Killing a Shared Stream'
-  description: 'Added 2026-09-24. Stops one room speaker, but if it shares a group with
-    other speakers (e.g. Welcome Home kitchen/receiver AirPlay group) it leaves the
-    group first. With AirPlay grouping, media_stop on a member stops the WHOLE group
-    (MA redirects it to the leader and tears down every session), so an "empty room
-    - turn off" automation would kill the music for people still listening elsewhere.
+  description: Added 2026-09-24. Stops one room speaker, but if it shares a group
+    with other speakers (e.g. Welcome Home kitchen/receiver AirPlay group) it leaves
+    the group first. With AirPlay grouping, media_stop on a member stops the WHOLE
+    group (MA redirects it to the leader and tears down every session), so an "empty
+    room - turn off" automation would kill the music for people still listening elsewhere.
     Unjoin first, then stop, so only this room goes quiet. Used by the room-empty
-    automations (Bedroom 2 - Off When Empty, Big Bedroom Empty - Off).'
+    automations (Bedroom 2 - Off When Empty, Big Bedroom Empty - Off).
   fields:
     entity_id:
-      description: The Music Assistant media_player entity of the room speaker to stop
+      description: The Music Assistant media_player entity of the room speaker to
+        stop
       example: media_player.office_2
   sequence:
-  - alias: In a shared group - just leave it. Do NOT send media_stop afterwards - Music
-      Assistant still routes that stop to the group's session and kills the stream
-      for everyone (confirmed in the 2026-09-24 test), while the unjoin alone already
-      silences this speaker
+  - alias: In a shared group - just leave it. Do NOT send media_stop afterwards -
+      Music Assistant still routes that stop to the group's session and kills the
+      stream for everyone (confirmed in the 2026-09-24 test), while the unjoin alone
+      already silences this speaker
     if:
     - condition: template
-      value_template: '{{ (state_attr(entity_id, ''group_members'') | default([], true)
-        | length) > 1 }}'
+      value_template: '{{ (state_attr(entity_id, ''group_members'') | default([],
+        true) | length) > 1 }}'
     then:
     - continue_on_error: true
       action: media_player.unjoin
@@ -1085,8 +1139,8 @@ stop_room_speaker_safely:
       data: {}
     - delay:
         seconds: 3
-    - alias: Only if it somehow kept playing on its own after leaving, stop it now that
-        it is solo
+    - alias: Only if it somehow kept playing on its own after leaving, stop it now
+        that it is solo
       if:
       - condition: template
         value_template: '{{ is_state(entity_id, ''playing'') and (state_attr(entity_id,
@@ -1097,13 +1151,14 @@ stop_room_speaker_safely:
         target:
           entity_id: '{{ entity_id }}'
     else:
-    - alias: Not in a group - only stop it if it is actually playing/paused on its own.
-        Sending a stop to an IDLE speaker that recently left a group still makes
-        Music Assistant tear down the whole shared session (16:45 on 2026-09-24
-        killed Kitchen/Bathroom/Office/receiver via an idle Big Bedroom)
+    - alias: Not in a group - only stop it if it is actually playing/paused on its
+        own. Sending a stop to an IDLE speaker that recently left a group still makes
+        Music Assistant tear down the whole shared session (16:45 on 2026-09-24 killed
+        Kitchen/Bathroom/Office/receiver via an idle Big Bedroom)
       if:
       - condition: template
-        value_template: '{{ states(entity_id) in [''playing'', ''paused'', ''buffering''] }}'
+        value_template: '{{ states(entity_id) in [''playing'', ''paused'', ''buffering'']
+          }}'
       then:
       - continue_on_error: true
         action: media_player.media_stop
@@ -1111,13 +1166,11 @@ stop_room_speaker_safely:
           entity_id: '{{ entity_id }}'
   mode: parallel
   max: 10
-
-# Added 2026-11-06. One place for "play this, and if it does not start, play that".
-# Skips straight to the backup when YouTube Music is known to be down, otherwise tries
-# the primary and checks the player really started. Blocks until music is confirmed.
 ma_play_with_fallback:
   alias: Music Assistant - Play With Fallback
-  description: Plays media_id on a Music Assistant player, falling back to fallback_id if it does not start. Alerts only when something unexpected happens or nothing plays.
+  description: Plays media_id on a Music Assistant player, falling back to fallback_id
+    if it does not start. Alerts only when something unexpected happens or nothing
+    plays.
   mode: parallel
   max: 10
   fields:
@@ -1135,83 +1188,85 @@ ma_play_with_fallback:
       description: True when the caller already tried its own primary
   sequence:
   - variables:
-      primary_uri: "{{ media_id | default('') | string }}"
-      try_primary: >-
-        {{ primary_uri != '' and not (skip_primary | default(false) | bool)
-        and (is_state('binary_sensor.ma_youtube_music_available', 'on') or not primary_uri.startswith('ytmusic://')) }}
+      primary_uri: '{{ media_id | default('''') | string }}'
+      try_primary: '{{ primary_uri != '''' and not (skip_primary | default(false)
+        | bool) and (is_state(''binary_sensor.ma_youtube_music_available'', ''on'')
+        or not primary_uri.startswith(''ytmusic://'')) }}'
   - if:
     - condition: template
-      value_template: "{{ try_primary }}"
+      value_template: '{{ try_primary }}'
     then:
     - continue_on_error: true
       action: music_assistant.play_media
       target:
-        entity_id: "{{ player }}"
+        entity_id: '{{ player }}'
       data:
-        media_id: "{{ primary_uri }}"
-        media_type: "{{ media_type }}"
+        media_id: '{{ primary_uri }}'
+        media_type: '{{ media_type }}'
         enqueue: replace
         radio_mode: false
-    - wait_template: "{{ is_state(player, 'playing') }}"
+    - wait_template: '{{ is_state(player, ''playing'') }}'
       timeout:
         seconds: 15
       continue_on_timeout: true
   - if:
     - condition: template
-      value_template: "{{ not try_primary or not is_state(player, 'playing') }}"
+      value_template: '{{ not try_primary or not is_state(player, ''playing'') }}'
     then:
     - continue_on_error: true
       action: music_assistant.play_media
       target:
-        entity_id: "{{ player }}"
+        entity_id: '{{ player }}'
       data:
-        media_id: "{{ fallback_id }}"
-        media_type: "{{ fallback_type }}"
+        media_id: '{{ fallback_id }}'
+        media_type: '{{ fallback_type }}'
         enqueue: replace
         radio_mode: false
-    - wait_template: "{{ is_state(player, 'playing') }}"
+    - wait_template: '{{ is_state(player, ''playing'') }}'
       timeout:
         seconds: 20
       continue_on_timeout: true
-    - alias: Last resort - local files, no login. Spotify allows one stream at a time, so a second room can be refused even when Spotify is healthy.
+    - alias: Last resort - local files, no login. Spotify allows one stream at a time,
+        so a second room can be refused even when Spotify is healthy.
       if:
       - condition: template
-        value_template: "{{ not is_state(player, 'playing') }}"
+        value_template: '{{ not is_state(player, ''playing'') }}'
       then:
       - continue_on_error: true
         action: music_assistant.play_media
         target:
-          entity_id: "{{ player }}"
+          entity_id: '{{ player }}'
         data:
           media_id: library://album/1525
           media_type: album
           enqueue: replace
           radio_mode: false
-      - wait_template: "{{ is_state(player, 'playing') }}"
+      - wait_template: '{{ is_state(player, ''playing'') }}'
         timeout:
           seconds: 20
         continue_on_timeout: true
     - if:
       - condition: template
-        value_template: "{{ try_primary or not is_state(player, 'playing') }}"
+        value_template: '{{ try_primary or not is_state(player, ''playing'') }}'
       then:
       - continue_on_error: true
         action: notify.mobile_app_pc_iphone
         data:
           title: Music problem
-          message: >-
-            {{ state_attr(player, 'friendly_name') or player }}:
-            {{ 'backup music is playing because the first choice did not start.' if is_state(player, 'playing')
-            else 'no music would start, including the local backup.' }}
+          message: '{{ state_attr(player, ''friendly_name'') or player }}: {{ ''backup
+            music is playing because the first choice did not start.'' if is_state(player,
+            ''playing'') else ''no music would start, including the local backup.''
+            }}'
 lights_watchdog_report:
   alias: 'Lights Watchdog: Report (CSV log + iPhone)'
-  description: 'Added 2026-11-11. Shared reporter for every "light left on" correction.
-    Called by the 30-minute whole-house audit (automation 1793300000001, turn_off true)
-    and by the kitchen/dining empty-room watchdogs (turn_off false - they switch the lights
-    off themselves). For each listed light that is on right now it looks up who turned
-    it on (sensor.lights_turn_on_causes), optionally turns it off and verifies, appends
-    one CSV line to /config/lights_watchdog/lights_watchdog.csv (notify.file) and sends
-    one iPhone notice (silent/passive while Big Bedroom sleep mode is on).'
+  description: Added 2026-11-11. Shared reporter for every "light left on" correction.
+    Called by the 30-minute whole-house audit (automation 1793300000001, turn_off
+    true) and by the kitchen/dining empty-room watchdogs (turn_off false - they switch
+    the lights off themselves). For each listed light that is on right now it looks
+    up who turned it on (sensor.lights_turn_on_causes), optionally turns it off and
+    verifies, appends one CSV line to /config/lights_watchdog/lights_watchdog.csv
+    (notify.file) and sends one iPhone notice (silent/passive while Big Bedroom sleep
+    mode is on).
   icon: mdi:lightbulb-alert
   mode: queued
   max: 10
@@ -1224,26 +1279,19 @@ lights_watchdog_report:
       description: Name of the watchdog that made the correction
   sequence:
   - variables:
-      rows: >
-        {% set raw = state_attr('sensor.lights_turn_on_causes', 'causes') %}
-        {% set c = raw if raw is mapping else {} %}
-        {% set ns = namespace(rows=[]) %}
-        {% for e in entries %}
-          {% for l in e.lights if is_state(l, 'on') %}
-            {% set s = states[l] %}
-            {% set on_ts = as_timestamp(s.last_changed) %}
-            {% set t = s.last_changed | as_local %}
-            {% set rec = c.get(l) %}
-            {% set by = rec.by if rec is mapping and rec.ts is defined and rec.ts >= on_ts - 120 else 'unknown (no turn-on record)' %}
-            {% set ns.rows = ns.rows + [{
-              'room': e.room, 'entity': l, 'name': s.name | trim,
-              'on_since': t.strftime('%Y-%m-%d %H:%M:%S'),
-              'on_since_short': t.strftime('%-I:%M %p') if t.date() == now().date() else t.strftime('%b %-d %-I:%M %p'),
-              'on_min': ((as_timestamp(now()) - on_ts) / 60) | round | int,
-              'reason': e.reason, 'by': by, 'note': e.note | default('') }] %}
-          {% endfor %}
-        {% endfor %}
-        {{ ns.rows }}
+      rows: "{% set raw = state_attr('sensor.lights_turn_on_causes', 'causes') %}
+        {% set c = raw if raw is mapping else {} %} {% set ns = namespace(rows=[])
+        %} {% for e in entries %}\n  {% for l in e.lights if is_state(l, 'on') %}\n
+        \   {% set s = states[l] %}\n    {% set on_ts = as_timestamp(s.last_changed)
+        %}\n    {% set t = s.last_changed | as_local %}\n    {% set rec = c.get(l)
+        %}\n    {% set by = rec.by if rec is mapping and rec.ts is defined and rec.ts
+        >= on_ts - 120 else 'unknown (no turn-on record)' %}\n    {% set ns.rows =
+        ns.rows + [{\n      'room': e.room, 'entity': l, 'name': s.name | trim,\n
+        \     'on_since': t.strftime('%Y-%m-%d %H:%M:%S'),\n      'on_since_short':
+        t.strftime('%-I:%M %p') if t.date() == now().date() else t.strftime('%b %-d
+        %-I:%M %p'),\n      'on_min': ((as_timestamp(now()) - on_ts) / 60) | round
+        | int,\n      'reason': e.reason, 'by': by, 'note': e.note | default('') }]
+        %}\n  {% endfor %}\n{% endfor %} {{ ns.rows }}\n"
   - condition: template
     value_template: '{{ rows | count > 0 }}'
   - if:
@@ -1259,16 +1307,19 @@ lights_watchdog_report:
     - alias: One retry for anything that ignored the first command
       if:
       - condition: template
-        value_template: '{{ rows | map(attribute=''entity'') | select(''is_state'', ''on'') | list | count > 0 }}'
+        value_template: '{{ rows | map(attribute=''entity'') | select(''is_state'',
+          ''on'') | list | count > 0 }}'
       then:
       - continue_on_error: true
         action: light.turn_off
         target:
-          entity_id: '{{ rows | map(attribute=''entity'') | select(''is_state'', ''on'') | list }}'
+          entity_id: '{{ rows | map(attribute=''entity'') | select(''is_state'', ''on'')
+            | list }}'
       - delay:
           seconds: 6
   - variables:
-      still_on: '{{ rows | map(attribute=''entity'') | select(''is_state'', ''on'') | list if turn_off | default(false) | bool else [] }}'
+      still_on: '{{ rows | map(attribute=''entity'') | select(''is_state'', ''on'')
+        | list if turn_off | default(false) | bool else [] }}'
       src: '{{ source | default(''Lights Watchdog'') }}'
   - alias: One CSV line per light
     repeat:
@@ -1279,68 +1330,62 @@ lights_watchdog_report:
         target:
           entity_id: notify.file
         data:
-          message: >-
-            {% set r = repeat.item %}{% set res = 'FAILED - still on' if r.entity in still_on else 'turned off' %}"{{ now().strftime('%Y-%m-%d %H:%M:%S') }}","{{ r.room }}","{{ r.name | replace('"', "'") }}","{{ r.entity }}","{{ r.on_since }}",{{ r.on_min }},"{{ r.reason | replace('"', "'") }}","{{ r.by | replace('"', "'") }}","{{ r.note | replace('"', "'") }}","{{ src | replace('"', "'") }}","{{ res }}"
+          message: '{% set r = repeat.item %}{% set res = ''FAILED - still on'' if
+            r.entity in still_on else ''turned off'' %}"{{ now().strftime(''%Y-%m-%d
+            %H:%M:%S'') }}","{{ r.room }}","{{ r.name | replace(''"'', "''") }}","{{
+            r.entity }}","{{ r.on_since }}",{{ r.on_min }},"{{ r.reason | replace(''"'',
+            "''") }}","{{ r.by | replace(''"'', "''") }}","{{ r.note | replace(''"'',
+            "''") }}","{{ src | replace(''"'', "''") }}","{{ res }}"'
   - continue_on_error: true
     action: notify.mobile_app_pc_iphone
     data:
-      title: >-
-        {% set rooms = rows | map(attribute='room') | unique | list %}
-        {% set n = rows | count %}
-        {{ rooms | join(', ') }}:
-        {{ n }} light{{ 's' if n != 1 else '' }} left on -
-        {{ (still_on | count) ~ " won't turn off" if still_on else 'now off' }}
-      message: >-
-        {% set multi = rows | map(attribute='room') | unique | list | count > 1 %}
-        {% set ns = namespace(lines=[], disabled=[]) %}
-        {% for room, items in rows | groupby('room') %}
-          {% set f = items | first %}
-          {% set n = items | count %}
-          {% set since = (items | sort(attribute='on_since') | first).on_since_short %}
-          {% set who = (items | map(attribute='name') | join(', ')) if n <= 3 else (n ~ ' lights') %}
-          {% set head = (room ~ ': ' if multi else '') ~ who ~ ' on since ' ~ since ~ ', ' ~ f.reason ~ (' (' ~ f.note ~ ')' if f.note else '') ~ '.' %}
-          {% set ns.lines = ns.lines + [head] %}
-          {% if 'DISABLED' in f.note %}{% set ns.disabled = ns.disabled + [f.note] %}{% endif %}
-          {% set c = namespace(items=[]) %}
-          {% for i in items %}
-            {% set why = i.by
-               | replace('outside HA (Hue app, dimmer, wall switch) or unknown', 'not switched on by Home Assistant (Hue app, dimmer or wall switch)')
-               | replace('unknown (no turn-on record)', 'not recorded')
-               | regex_replace('^probably .*fired within 5 s\\)$', 'not recorded')
-               | regex_replace('^came back on by itself .*$', 'came back on with no Home Assistant command, shortly after being switched off') %}
-            {% set c.items = c.items + [{'name': i.name, 'why': why}] %}
-          {% endfor %}
-          {% set groups = c.items | groupby('why') %}
-          {% if groups | count == 1 %}
-            {% set ns.lines = ns.lines + ['Why: ' ~ groups[0][0] ~ '.'] %}
-          {% else %}
-            {% for why, ls in groups %}
-              {% set ns.lines = ns.lines + ['- ' ~ ls | map(attribute='name') | join(', ') ~ ': ' ~ why ~ '.'] %}
-            {% endfor %}
-          {% endif %}
-        {% endfor %}
-        {% if still_on %}
-          {% set ns.lines = ns.lines + ['Needs you: ' ~ still_on | map('state_attr', 'friendly_name') | join(', ') ~ ' did not turn off after 2 tries - switch off in the Hue app.'] %}
-        {% elif ns.disabled %}
-          {% set ns.lines = ns.lines + ['Lights are off now. Needs you: ' ~ ns.disabled | join(', ') ~ ' - turn it back on or this will repeat.'] %}
-        {% else %}
-          {% set ns.lines = ns.lines + ['Already switched off - nothing to do.'] %}
-        {% endif %}
-        {{ ns.lines | join('\n') }}
+      title: '{% set rooms = rows | map(attribute=''room'') | unique | list %} {%
+        set n = rows | count %} {{ rooms | join('', '') }}: {{ n }} light{{ ''s''
+        if n != 1 else '''' }} left on - {{ (still_on | count) ~ " won''t turn off"
+        if still_on else ''now off'' }}'
+      message: "{% set multi = rows | map(attribute='room') | unique | list | count
+        > 1 %} {% set ns = namespace(lines=[], disabled=[]) %} {% for room, items
+        in rows | groupby('room') %}\n  {% set f = items | first %}\n  {% set n =
+        items | count %}\n  {% set since = (items | sort(attribute='on_since') | first).on_since_short
+        %}\n  {% set who = (items | map(attribute='name') | join(', ')) if n <= 3
+        else (n ~ ' lights') %}\n  {% set head = (room ~ ': ' if multi else '') ~
+        who ~ ' on since ' ~ since ~ ', ' ~ f.reason ~ (' (' ~ f.note ~ ')' if f.note
+        else '') ~ '.' %}\n  {% set ns.lines = ns.lines + [head] %}\n  {% if 'DISABLED'
+        in f.note %}{% set ns.disabled = ns.disabled + [f.note] %}{% endif %}\n  {%
+        set c = namespace(items=[]) %}\n  {% for i in items %}\n    {% set why = i.by\n
+        \      | replace('outside HA (Hue app, dimmer, wall switch) or unknown', 'not
+        switched on by Home Assistant (Hue app, dimmer or wall switch)')\n       |
+        replace('unknown (no turn-on record)', 'not recorded')\n       | regex_replace('^probably
+        .*fired within 5 s\\\\)$', 'not recorded')\n       | regex_replace('^came
+        back on by itself .*$', 'came back on with no Home Assistant command, shortly
+        after being switched off') %}\n    {% set c.items = c.items + [{'name': i.name,
+        'why': why}] %}\n  {% endfor %}\n  {% set groups = c.items | groupby('why')
+        %}\n  {% if groups | count == 1 %}\n    {% set ns.lines = ns.lines + ['Why:
+        ' ~ groups[0][0] ~ '.'] %}\n  {% else %}\n    {% for why, ls in groups %}\n
+        \     {% set ns.lines = ns.lines + ['- ' ~ ls | map(attribute='name') | join(',
+        ') ~ ': ' ~ why ~ '.'] %}\n    {% endfor %}\n  {% endif %}\n{% endfor %} {%
+        if still_on %}\n  {% set ns.lines = ns.lines + ['Needs you: ' ~ still_on |
+        map('state_attr', 'friendly_name') | join(', ') ~ ' did not turn off after
+        2 tries - switch off in the Hue app.'] %}\n{% elif ns.disabled %}\n  {% set
+        ns.lines = ns.lines + ['Lights are off now. Needs you: ' ~ ns.disabled | join(',
+        ') ~ ' - turn it back on or this will repeat.'] %}\n{% else %}\n  {% set ns.lines
+        = ns.lines + ['Already switched off - nothing to do.'] %}\n{% endif %} {{
+        ns.lines | join('\\n') }}"
       data:
         push:
-          interruption-level: '{{ ''passive'' if is_state(''input_boolean.big_bedroom_asleep'', ''on'') else ''active'' }}'
+          interruption-level: '{{ ''passive'' if is_state(''input_boolean.big_bedroom_asleep'',
+            ''on'') else ''active'' }}'
 presence_sensor_reset:
   alias: 'Sensor Watchdog: Reset a Presence Sensor'
-  description: 'Added 2026-11-11. THE reset mechanism for presence sensors - run it by
-    hand (unit = a name from custom_templates/presence_units.jinja, e.g. "Kitchen radar")
-    or let the 30-min sensor audit (automation 1793300000002) call it. ESP radars get
-    a full ESP reboot (a radar-only restart just moved the ghost, 2026-09-23); if the
-    ESP is offline its integration entry is reloaded instead. Hue motion sensors get
-    their "sensor enabled" switch cycled. Cameras / Ring / ecobee have nothing to reset
-    from HA, so those are log + notify only. Waits 3 min, checks the result, appends a
-    line to /config/lights_watchdog/sensors_watchdog.csv (notify.file_2) and notifies
-    the iPhone (silent while Big Bedroom sleep mode is on).'
+  description: Added 2026-11-11. THE reset mechanism for presence sensors - run it
+    by hand (unit = a name from custom_templates/presence_units.jinja, e.g. "Kitchen
+    radar") or let the 30-min sensor audit (automation 1793300000002) call it. ESP
+    radars get a full ESP reboot (a radar-only restart just moved the ghost, 2026-09-23);
+    if the ESP is offline its integration entry is reloaded instead. Hue motion sensors
+    get their "sensor enabled" switch cycled. Cameras / Ring / ecobee have nothing
+    to reset from HA, so those are log + notify only. Waits 3 min, checks the result,
+    appends a line to /config/lights_watchdog/sensors_watchdog.csv (notify.file_2)
+    and notifies the iPhone (silent while Big Bedroom sleep mode is on).
   icon: mdi:motion-sensor-off
   mode: parallel
   max: 20
@@ -1373,21 +1418,24 @@ presence_sensor_reset:
       description: Evidence text for the log and the notice
   sequence:
   - variables:
-      u: >
-        {% from 'presence_units.jinja' import presence_units %}
-        {{ presence_units() | from_json | selectattr('name', 'eq', unit) | list | first | default({}) }}
+      u: '{% from ''presence_units.jinja'' import presence_units %} {{ presence_units()
+        | from_json | selectattr(''name'', ''eq'', unit) | list | first | default({})
+        }}
+
+        '
       reason: '{{ why | default(''manual'') }}'
       info: '{{ detail | default(''requested by hand'') }}'
   - condition: template
     value_template: '{{ u is mapping and u.name is defined }}'
   - variables:
-      offline: '{{ u.signals | map(''states'') | reject(''in'', [''unavailable'', ''unknown'']) | list | count == 0 }}'
-      action_taken: >-
-        {% set off = u.signals | map('states') | reject('in', ['unavailable', 'unknown']) | list | count == 0 %}
-        {% if u.kind == 'esp' and (off or states(u.reset.entity) == 'unavailable') %}reloaded its ESPHome integration entry
-        {% elif u.reset.type == 'button' %}full ESP reboot
-        {% elif u.reset.type == 'toggle' %}cycled the Hue sensor-enabled switch
-        {% else %}none possible from HA - needs a look{% endif %}
+      offline: '{{ u.signals | map(''states'') | reject(''in'', [''unavailable'',
+        ''unknown'']) | list | count == 0 }}'
+      action_taken: '{% set off = u.signals | map(''states'') | reject(''in'', [''unavailable'',
+        ''unknown'']) | list | count == 0 %} {% if u.kind == ''esp'' and (off or states(u.reset.entity)
+        == ''unavailable'') %}reloaded its ESPHome integration entry {% elif u.reset.type
+        == ''button'' %}full ESP reboot {% elif u.reset.type == ''toggle'' %}cycled
+        the Hue sensor-enabled switch {% else %}none possible from HA - needs a look{%
+        endif %}'
   - event: presence_sensor_reset
     event_data:
       unit: '{{ u.name }}'
@@ -1426,51 +1474,59 @@ presence_sensor_reset:
   - delay:
       minutes: 3
   - variables:
-      result: >-
-        {% set st = u.signals | map('states') | list %}
-        {% set dead = st | reject('in', ['unavailable', 'unknown']) | list | count == 0 %}
-        {% if dead %}STILL OFFLINE - check power / Wi-Fi
-        {% elif reason == 'stuck on' and 'on' in st %}still reads occupied 3 min after the reset - someone is really there, or it needs retuning
-        {% elif reason == 'stuck on' %}cleared
-        {% elif reason == 'offline' %}back online
-        {% elif reason == 'stuck off' %}{{ 'now detecting' if 'on' in st else 'reset sent - watching whether it starts detecting again' }}
-        {% else %}online, reads {{ 'occupied' if 'on' in st else 'clear' }}{% endif %}
+      result: '{% set st = u.signals | map(''states'') | list %} {% set dead = st
+        | reject(''in'', [''unavailable'', ''unknown'']) | list | count == 0 %} {%
+        if dead %}STILL OFFLINE - check power / Wi-Fi {% elif reason == ''stuck on''
+        and ''on'' in st %}still reads occupied 3 min after the reset - someone is
+        really there, or it needs retuning {% elif reason == ''stuck on'' %}cleared
+        {% elif reason == ''offline'' %}back online {% elif reason == ''stuck off''
+        %}{{ ''now detecting'' if ''on'' in st else ''reset sent - watching whether
+        it starts detecting again'' }} {% else %}online, reads {{ ''occupied'' if
+        ''on'' in st else ''clear'' }}{% endif %}'
   - continue_on_error: true
     action: notify.send_message
     target:
       entity_id: notify.file_2
     data:
-      message: >-
-        "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}","{{ u.name }}","{{ u.room }}","{{ reason }}","{{ info | replace('"', "'") }}","{{ action_taken | trim }}","{{ result | trim }}"
+      message: '"{{ now().strftime(''%Y-%m-%d %H:%M:%S'') }}","{{ u.name }}","{{ u.room
+        }}","{{ reason }}","{{ info | replace(''"'', "''") }}","{{ action_taken |
+        trim }}","{{ result | trim }}"'
   - continue_on_error: true
     action: notify.mobile_app_pc_iphone
     data:
       title: '{{ u.name }}: {{ reason }}'
-      message: '{{ info }}. Reset: {{ action_taken | trim }}. Result: {{ result | trim }}.'
+      message: '{{ info }}. Reset: {{ action_taken | trim }}. Result: {{ result |
+        trim }}.'
       data:
         push:
-          interruption-level: '{{ ''passive'' if is_state(''input_boolean.big_bedroom_asleep'', ''on'') else ''active'' }}'
+          interruption-level: '{{ ''passive'' if is_state(''input_boolean.big_bedroom_asleep'',
+            ''on'') else ''active'' }}'
 bathroom_fade_out:
   alias: 'Bathroom: Fade Out (empty room)'
-  description: 'Started by Bathroom: Smart Motion & Presence after 7 empty minutes; any new detection stops it. Step 1: main lights off (dimmed to 1% over about a minute first if they are above night level). Step 2: shower/tub/back stay on 5 more minutes (dimming to 1% if above night level) so the room never goes dark all at once. Step 3: one room-wide off for light.bathroom catches everything. Then re-check sweeps, because single bulbs came back on at 1% one to two minutes after an off. Never use a long turn_off transition here: HA shows off at once while the bulbs glow for the whole transition (2026-11-12).'
+  description: 'Started by Bathroom: Smart Motion & Presence after 7 empty minutes;
+    any new detection stops it. Step 1: main lights off (dimmed to 1% over about a
+    minute first if they are above night level). Step 2: shower/tub/back stay on 5
+    more minutes (dimming to 1% if above night level) so the room never goes dark
+    all at once. Step 3: one room-wide off for light.bathroom catches everything.
+    Then re-check sweeps, because single bulbs came back on at 1% one to two minutes
+    after an off. Never use a long turn_off transition here: HA shows off at once
+    while the bulbs glow for the whole transition (2026-11-12).'
   mode: restart
   variables:
-    mains_on: >-
-      {# light.bathroom_main_lights is a Hue zone since 2026-11-16: one group command when all 8 are on (single-bulb bursts lost commands), single bulbs only when some are already off #}
-      {% set members = state_attr('light.bathroom_main_lights', 'entity_id') | default([], true) | list %}
-      {% set lit = members | select('is_state', 'on') | list %}
-      {{ ['light.bathroom_main_lights'] if (lit | count == members | count and lit | count > 0) else lit }}
-    accents_on: >-
-      {{ ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2', 'light.bathroom_back']
-         | select('is_state', 'on') | list }}
-    mains_bright: >-
-      {% set ns = namespace(mx=0) %}
-      {% for l in mains_on %}{% set ns.mx = [ns.mx, state_attr(l, 'brightness') | int(255)] | max %}{% endfor %}
-      {{ ns.mx > 13 }}
-    accents_bright: >-
-      {% set ns = namespace(mx=0) %}
-      {% for l in accents_on %}{% set ns.mx = [ns.mx, state_attr(l, 'brightness') | int(255)] | max %}{% endfor %}
-      {{ ns.mx > 13 }}
+    mains_on: '{# light.bathroom_main_lights is a Hue zone since 2026-11-16: one group
+      command when all 8 are on (single-bulb bursts lost commands), single bulbs only
+      when some are already off #} {% set members = state_attr(''light.bathroom_main_lights'',
+      ''entity_id'') | default([], true) | list %} {% set lit = members | select(''is_state'',
+      ''on'') | list %} {{ [''light.bathroom_main_lights''] if (lit | count == members
+      | count and lit | count > 0) else lit }}'
+    accents_on: "{{ ['light.bathroom_shower', 'light.bathroom_tub_1', 'light.bathroom_tub_2',
+      'light.bathroom_back']\n   | select('is_state', 'on') | list }}"
+    mains_bright: '{% set ns = namespace(mx=0) %} {% for l in mains_on %}{% set ns.mx
+      = [ns.mx, state_attr(l, ''brightness'') | int(255)] | max %}{% endfor %} {{
+      ns.mx > 13 }}'
+    accents_bright: '{% set ns = namespace(mx=0) %} {% for l in accents_on %}{% set
+      ns.mx = [ns.mx, state_attr(l, ''brightness'') | int(255)] | max %}{% endfor
+      %} {{ ns.mx > 13 }}'
   sequence:
   - alias: Accents start a slow dim to 1% (only if above night level)
     if: '{{ accents_bright }}'
@@ -1508,12 +1564,15 @@ bathroom_fade_out:
       entity_id: light.bathroom
     data:
       transition: 2
-  - alias: Sweep - single bulbs came back on at 1% one to two minutes after the off (Bathroom Back 2026-11-11; Tub 1, Shower, Bathroom 4 and 8 on 2026-11-12). Re-check five times and send a room-wide off for anything still lit.
+  - alias: Sweep - single bulbs came back on at 1% one to two minutes after the off
+      (Bathroom Back 2026-11-11; Tub 1, Shower, Bathroom 4 and 8 on 2026-11-12). Re-check
+      five times and send a room-wide off for anything still lit.
     repeat:
       count: 5
       sequence:
       - delay: 45
-      - if: '{{ expand(''light.bathroom'') | selectattr(''state'', ''eq'', ''on'') | list | count > 0 }}'
+      - if: '{{ expand(''light.bathroom'') | selectattr(''state'', ''eq'', ''on'')
+          | list | count > 0 }}'
         then:
         - action: light.turn_off
           target:
@@ -1522,7 +1581,10 @@ bathroom_fade_out:
             transition: 0
 apex_notify:
   alias: 'Script: Apex Notify'
-  description: 'Added 2026-11-12. One place for every Apex 200 notification (discharge automations 1793600000001-8). Sends it to the iPhone; tapping opens the Apex device page in HA. The copy in HA''s Notifications panel comes from the house-wide mirror automation 1793700000001, not from here.'
+  description: Added 2026-11-12. One place for every Apex 200 notification (discharge
+    automations 1793600000001-8). Sends it to the iPhone; tapping opens the Apex device
+    page in HA. The copy in HA's Notifications panel comes from the house-wide mirror
+    automation 1793700000001, not from here.
   fields:
     title:
       description: Notification title
@@ -1535,19 +1597,21 @@ apex_notify:
     data:
       title: '{{ title }}'
       message: '{{ message }}'
-      data: "{{ dict(data | default({}, true), url='/config/devices/device/9467d93864e50d4902e9765450d1f308') }}"
+      data: '{{ dict(data | default({}, true), url=''/config/devices/device/9467d93864e50d4902e9765450d1f308'')
+        }}'
     continue_on_error: true
   mode: queued
   max: 10
 lights_off_recheck:
   alias: 'Lights: Off Re-check'
-  description: 'Added 2026-11-18. Fire-and-forget backstop after an empty-room turn-off.
+  description: Added 2026-11-18. Fire-and-forget backstop after an empty-room turn-off.
     Waits wait_seconds (the fade length plus about 60 s, because the Hue bridge only
-    corrects its optimistic off when it next polls each bulb), then turns off any of
-    the given lights still on - but only if room_sensor (optional) has stayed off
+    corrects its optimistic off when it next polls each bulb), then turns off any
+    of the given lights still on - but only if room_sensor (optional) has stayed off
     the whole time, so it never fights someone walking back in. Covers bulbs that
-    missed the off command (Kitchen 2026-11-16, Bathroom 2026-11-14) and anything that
-    took a fading bulb back. Start it with script.turn_on so the caller does not wait.'
+    missed the off command (Kitchen 2026-11-16, Bathroom 2026-11-14) and anything
+    that took a fading bulb back. Start it with script.turn_on so the caller does
+    not wait.
   mode: parallel
   max: 20
   fields:
@@ -1566,7 +1630,8 @@ lights_off_recheck:
           min: 5
           max: 3600
     room_sensor:
-      description: Occupancy sensor that must stay off the whole wait (blank = no check)
+      description: Occupancy sensor that must stay off the whole wait (blank = no
+        check)
       default: ''
       selector:
         entity:
@@ -1599,5 +1664,46 @@ lights_off_recheck:
     continue_on_error: true
     data:
       name: Lights Off Re-check
-      message: '{{ room }}: {{ still_on | join('', '') }} still on {{ wait_seconds }} s after the off - turned off again'
-
+      message: '{{ room }}: {{ still_on | join('', '') }} still on {{ wait_seconds
+        }} s after the off - turned off again'
+zz_scope_test:
+  alias: zz scope test
+  mode: single
+  sequence:
+  - variables:
+      again: true
+      needed: true
+      n: 0
+  - repeat:
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ needed }}'
+        then:
+        - delay:
+            seconds: '{{ [0, 1.5 - 0.5] | max }}'
+        - wait_template: '{{ false }}'
+          timeout:
+            seconds: '{{ [1, 2 - 0.5] | max }}'
+          continue_on_timeout: true
+        - if:
+          - condition: template
+            value_template: '{{ not wait.completed }}'
+          then:
+          - variables:
+              needed: false
+              n: '{{ n + 1 }}'
+      - variables:
+          again: '{{ n < 2 and needed == false and repeat.index < 3 }}'
+      - action: logbook.log
+        data:
+          name: zz
+          message: iter {{ repeat.index }} needed={{ needed }} n={{ n }} again={{
+            again }}
+      until:
+      - condition: template
+        value_template: '{{ not again }}'
+  - action: logbook.log
+    data:
+      name: zz
+      message: done n={{ n }} needed={{ needed }}
