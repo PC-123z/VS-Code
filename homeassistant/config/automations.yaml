@@ -3088,9 +3088,41 @@
           - light.bedroom_ceiling
         data:
           transition: 480
-      - alias: Wait for ceiling fade to complete before re-enabling AL
-        delay:
-          seconds: 481
+      - variables:
+          fade_end: '{{ as_timestamp(now()) + 481 }}'
+      - alias: Catch Hue-side relights during the fade, then wait for it to finish -
+          the bulbs come back on 30 s-2 min after a long-transition off with no HA
+          command (8 of 8 fades on 2026-11-18); a short-transition off sticks
+        repeat:
+          while:
+          - condition: template
+            value_template: '{{ as_timestamp(now()) < fade_end | float(0) }}'
+          sequence:
+          - wait_for_trigger:
+            - trigger: state
+              entity_id:
+              - light.bedroom_ceiling_1
+              - light.bedroom_ceiling_2
+              - light.bedroom_lamp_1
+              - light.bedroom_lamp_2
+              to: 'on'
+            timeout:
+              seconds: '{{ [ (fade_end | float(0)) - as_timestamp(now()), 1 ] | max
+                | int }}'
+            continue_on_timeout: true
+          - if:
+            - condition: template
+              value_template: '{{ wait.trigger is not none }}'
+            - condition: state
+              entity_id: binary_sensor.big_bedroom_sensor_group
+              state: 'off'
+            then:
+            - action: light.turn_off
+              continue_on_error: true
+              target:
+                entity_id: '{{ wait.trigger.entity_id }}'
+              data:
+                transition: 2
       - alias: Clear manual_control so AL can take over on next motion
         action: adaptive_lighting.set_manual_control
         data:
@@ -3106,6 +3138,26 @@
           - switch.al_big_bedroom
           - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_color_big_bedroom_al
           - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_brightness_big_bedroom_al
+      - alias: Safety net - re-check 2 min after the fade; turn off anything still
+          on if the room is still empty
+        delay:
+          seconds: 120
+      - if:
+        - condition: state
+          entity_id: binary_sensor.big_bedroom_sensor_group
+          state: 'off'
+        - condition: template
+          value_template: '{{ [''light.bedroom_ceiling_1'',''light.bedroom_ceiling_2'',''light.bedroom_lamp_1'',''light.bedroom_lamp_2'']
+            | select(''is_state'',''on'') | list | count > 0 }}'
+        then:
+        - action: light.turn_off
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.bedroom_ceiling
+            - light.bedroom_lamps
+          data:
+            transition: 2
       - action: input_select.select_option
         target:
           entity_id: input_select.bedroom_scene_mode
