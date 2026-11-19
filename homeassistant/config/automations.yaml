@@ -5339,18 +5339,36 @@
         entity_id: fan.air_circulator
       data:
         percentage: 25
-  - alias: Fade bedroom lights off over 5 seconds - only if already on, no point commanding
-      an already-off light
-    if:
-    - condition: state
-      entity_id: light.bedroom
-      state: 'on'
-    then:
-    - action: light.turn_off
-      target:
-        entity_id: light.bedroom
-      data:
-        transition: 5
+  - alias: Fade bedroom bulbs off over 5 seconds - ALWAYS sent, never skipped because
+      HA shows them off (2026-11-19 - the bridge briefly reported off while the bulbs
+      were really at 2%, so a second Goodnight press skipped the off and they stayed
+      on all night)
+    action: light.turn_off
+    target:
+      entity_id:
+      - light.bedroom_ceiling_1
+      - light.bedroom_ceiling_2
+      - light.bedroom_lamp_1
+      - light.bedroom_lamp_2
+    data:
+      transition: 5
+  - alias: Re-check in 90 s (fire-and-forget) - the bridge only corrects a false off
+      on its next poll of each bulb; turns off any bulb still on. Big Bedroom buttons
+      never turn lights on, so this cannot undo a deliberate turn-on
+    action: script.turn_on
+    target:
+      entity_id: script.lights_off_recheck
+    data:
+      variables:
+        lights:
+        - light.bedroom_ceiling_1
+        - light.bedroom_ceiling_2
+        - light.bedroom_lamp_1
+        - light.bedroom_lamp_2
+        - light.bedroom_ceiling
+        - light.bedroom_lamps
+        wait_seconds: 90
+        room: Big Bedroom (Goodnight)
   - alias: Fade bathroom lights off over 10 seconds
     action: light.turn_off
     target:
@@ -5518,18 +5536,36 @@
         entity_id: fan.air_circulator
       data:
         percentage: 50
-  - alias: Fade bedroom lights off over 5 seconds - only if already on, no point commanding
-      an already-off light
-    if:
-    - condition: state
-      entity_id: light.bedroom
-      state: 'on'
-    then:
-    - action: light.turn_off
-      target:
-        entity_id: light.bedroom
-      data:
-        transition: 5
+  - alias: Fade bedroom bulbs off over 5 seconds - ALWAYS sent, never skipped because
+      HA shows them off (2026-11-19 - the bridge briefly reported off while the bulbs
+      were really at 2%, so a second Goodnight press skipped the off and they stayed
+      on all night)
+    action: light.turn_off
+    target:
+      entity_id:
+      - light.bedroom_ceiling_1
+      - light.bedroom_ceiling_2
+      - light.bedroom_lamp_1
+      - light.bedroom_lamp_2
+    data:
+      transition: 5
+  - alias: Re-check in 90 s (fire-and-forget) - the bridge only corrects a false off
+      on its next poll of each bulb; turns off any bulb still on. Big Bedroom buttons
+      never turn lights on, so this cannot undo a deliberate turn-on
+    action: script.turn_on
+    target:
+      entity_id: script.lights_off_recheck
+    data:
+      variables:
+        lights:
+        - light.bedroom_ceiling_1
+        - light.bedroom_ceiling_2
+        - light.bedroom_lamp_1
+        - light.bedroom_lamp_2
+        - light.bedroom_ceiling
+        - light.bedroom_lamps
+        wait_seconds: 90
+        room: Big Bedroom (Goodnight)
   - alias: Fade bathroom lights off over 10 seconds
     action: light.turn_off
     target:
@@ -7836,6 +7872,12 @@
     - conditions:
       - condition: trigger
         id: playing
+      - alias: Never change lights while asleep (2026-11-19 - the TV ignored Goodnight's
+          first power-off and bounced back to playing 2 s later; this branch set the
+          lights to 2% as Goodnight faded them off, and they stayed on all night)
+        condition: state
+        entity_id: input_boolean.big_bedroom_asleep
+        state: 'off'
       - condition: or
         conditions:
         - condition: state
