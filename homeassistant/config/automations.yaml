@@ -20379,3 +20379,76 @@
       entity_id: media_player.bedroom_big_big_bedroom_tv
   mode: single
   max_exceeded: silent
+- id: '1794000000001'
+  alias: 'Big Bedroom: Purifier Only During Sleep'
+  description: Added 2026-11-18. The bedroom purifier (auto mode) fooled the Big Bedroom
+    MSR-2 radar into false presence on 2026-11-18 evening (false detections every
+    1-3 min from shortly after it switched on at 7:01 PM, none while it was off), which
+    kept the lights on in an empty room. It now runs only while the room is asleep
+    - Big Bedroom sleep mode OR the in-bed flag on - and is off otherwise. The purifier
+    app schedule was removed so Home Assistant owns it. Turning on happens only when
+    sleep starts (a manual off during the night sticks); any time the room is not
+    asleep it is switched off, including if the app or someone turns it on.
+  triggers:
+  - trigger: state
+    entity_id:
+    - switch.al_sleep_mode_big_bedroom
+    - input_boolean.big_bedroom_asleep
+    to: 'on'
+    id: sleep_start
+  - trigger: state
+    entity_id:
+    - switch.al_sleep_mode_big_bedroom
+    - input_boolean.big_bedroom_asleep
+    to: 'off'
+    id: check
+  - alias: Turned on while awake (app schedule, button, Alexa)
+    trigger: state
+    entity_id: fan.bedroom_purifier
+    to: 'on'
+    for:
+      minutes: 1
+    id: check
+  - trigger: homeassistant
+    event: start
+    id: check
+  conditions: []
+  actions:
+  - variables:
+      sleeping: '{{ is_state(''switch.al_sleep_mode_big_bedroom'', ''on'') or is_state(''input_boolean.big_bedroom_asleep'',
+        ''on'') }}'
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: sleep_start
+      - condition: template
+        value_template: '{{ sleeping }}'
+      - condition: state
+        entity_id: fan.bedroom_purifier
+        state: 'off'
+      sequence:
+      - action: fan.turn_on
+        continue_on_error: true
+        target:
+          entity_id: fan.bedroom_purifier
+      - delay:
+          seconds: 3
+      - action: fan.set_preset_mode
+        continue_on_error: true
+        target:
+          entity_id: fan.bedroom_purifier
+        data:
+          preset_mode: auto
+    - conditions:
+      - condition: template
+        value_template: '{{ not sleeping }}'
+      - condition: state
+        entity_id: fan.bedroom_purifier
+        state: 'on'
+      sequence:
+      - action: fan.turn_off
+        continue_on_error: true
+        target:
+          entity_id: fan.bedroom_purifier
+  mode: queued
+  max: 5
