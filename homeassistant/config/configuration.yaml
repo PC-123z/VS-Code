@@ -473,27 +473,13 @@ template:
           {% set zones = ['binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy',
                           'binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy',
                           'binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy'] | select('is_state', 'on') | list | count > 0 %}
-          {# 2026-11-18: start = the Apollo radar's motion AND presence agreeing for 2 s
-             (binary_sensor.big_bedroom_sustained_movement). Ghosts (purifier, 23:01 blip)
-             were single 1.0-1.4 s moving flashes; real walk-ins run 2.5-14 s. The ecobee
-             remote sensor (binary_sensor.bedroom_motion) is NOT used - user doesn't trust it. #}
-          {% set start = is_state('binary_sensor.big_bedroom_sustained_movement', 'on') %}
+          {# 2026-11-19: start = the Apollo radar's moving target with a zone on (instant). Ghosts
+             (single ~1 s moving flashes) are handled by Smart Motion's 30 s movement check, which
+             quick-fades the lights off. The 2 s sustained-movement gate (11-18) made walk-ins too
+             slow. The ecobee remote sensor is NOT used - user doesn't trust it. #}
+          {% set start = is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target', 'on') %}
           {% set was = this.state if this is defined and this is not none else 'unknown' %}
           {{ is_state('input_boolean.big_bedroom_asleep', 'on') or (zones and (was != 'off' or start)) }}
-
-  # Big Bedroom movement that lasted 2 s while the radar also sees presence (2026-11-18).
-  # Start signal for Big Bedroom Sensor Group above: 1 s radar flashes no longer light the room.
-  - binary_sensor:
-      - name: "Big Bedroom Sustained Movement"
-        unique_id: big_bedroom_sustained_movement
-        device_class: motion
-        delay_on:
-          seconds: 2
-        state: >
-          {{ is_state('binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target', 'on')
-             and ['binary_sensor.apollo_msr_2_big_bedroom_radar_zone_1_occupancy',
-                  'binary_sensor.apollo_msr_2_big_bedroom_radar_zone_2_occupancy',
-                  'binary_sensor.apollo_msr_2_big_bedroom_radar_zone_3_occupancy'] | select('is_state', 'on') | list | count > 0 }}
 
   # Movement-to-start presence (2026-11-16). One per room; each room's "Sensor Group" helper
   # now has ONLY this sensor as its member, so every automation that follows the group
