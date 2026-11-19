@@ -1621,6 +1621,21 @@
           entity_id: light.kitchen
         data:
           transition: 2
+      - alias: Re-check in 60 s - send the off again to any bulb that missed it
+        action: script.turn_on
+        target:
+          entity_id: script.lights_off_recheck
+        data:
+          variables:
+            lights:
+              - light.kitchen_1_color
+              - light.kitchen_2_color
+              - light.kitchen_lightstrip
+              - light.hue_datura_top_1
+              - light.hue_datura_bottom_1
+            wait_seconds: 60
+            room_sensor: binary_sensor.kitchen_sensor_group
+            room: Kitchen
   mode: queued
   max: 10
 - id: '1775368699660'
@@ -3254,6 +3269,20 @@
       - action: light.turn_off
         target:
           entity_id: light.galaxy_projector
+      - alias: Re-check in 75 s - send the off again to any bulb that missed it
+        action: script.turn_on
+        target:
+          entity_id: script.lights_off_recheck
+        data:
+          variables:
+            lights:
+              - light.living_room_small_lamp
+              - light.living_room_1
+              - light.living_room_floor_lamp
+              - light.living_room_2
+            wait_seconds: 75
+            room_sensor: binary_sensor.living_room_sensor_group
+            room: Living Room
     - conditions:
       - condition: trigger
         id: cleared_night
@@ -3279,6 +3308,20 @@
       - action: light.turn_off
         target:
           entity_id: light.galaxy_projector
+      - alias: Re-check in 75 s - send the off again to any bulb that missed it
+        action: script.turn_on
+        target:
+          entity_id: script.lights_off_recheck
+        data:
+          variables:
+            lights:
+              - light.living_room_small_lamp
+              - light.living_room_1
+              - light.living_room_floor_lamp
+              - light.living_room_2
+            wait_seconds: 75
+            room_sensor: binary_sensor.living_room_sensor_group
+            room: Living Room
     - alias: Added 2026-10-11 - nobody present for 5 minutes outside the night window
         - turn off ONLY the galaxy projector (user preference); the room lights keep
         their 14.5-minute 'cleared' timing
@@ -3610,9 +3653,27 @@
           entity_id: light.dining_room_top
         data:
           transition: 30
-      - alias: Let Hue report the lights off before AL comes back
+      - alias: Let the 30 s fade finish before AL comes back (AL on during a fade takes
+          the bulbs back when the bridge reports them 'on' mid-fade, 2026-11-18)
         delay:
-          seconds: 3
+          seconds: 31
+      - alias: Wait for the bridge to report every dining bulb off
+        wait_template: '{{ [''light.dining_1'',''light.dining_2'',''light.dining_3'',''light.dining_4'',''light.dining_5'',''light.dining_6'',''light.dining_top_1'',''light.dining_top_2'',''light.dining_top_3''] | select(''is_state'',''on'') | list | count == 0 }}'
+        timeout:
+          seconds: 90
+        continue_on_timeout: true
+      - if:
+        - condition: template
+          value_template: '{{ not wait.completed }}'
+        then:
+        - action: light.turn_off
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.dining_room_bottom
+            - light.dining_room_top
+        - delay:
+            seconds: 5
       - alias: Only re-enable AL switches if room is still unoccupied
         condition: state
         entity_id: binary_sensor.dining_room_sensor_group
@@ -3689,6 +3750,25 @@
           entity_id: light.dining_room_top
         data:
           transition: 300
+      - alias: Re-check in 360 s - send the off again to any bulb that missed it
+        action: script.turn_on
+        target:
+          entity_id: script.lights_off_recheck
+        data:
+          variables:
+            lights:
+              - light.dining_1
+              - light.dining_2
+              - light.dining_3
+              - light.dining_4
+              - light.dining_5
+              - light.dining_6
+              - light.dining_top_1
+              - light.dining_top_2
+              - light.dining_top_3
+            wait_seconds: 360
+            room_sensor: binary_sensor.dining_room_sensor_group
+            room: Dining Room
     - conditions:
       - condition: trigger
         id: midnight_off
@@ -3720,6 +3800,25 @@
           entity_id: light.dining_room_top
         data:
           transition: 30
+      - alias: Re-check in 90 s - send the off again to any bulb that missed it
+        action: script.turn_on
+        target:
+          entity_id: script.lights_off_recheck
+        data:
+          variables:
+            lights:
+              - light.dining_1
+              - light.dining_2
+              - light.dining_3
+              - light.dining_4
+              - light.dining_5
+              - light.dining_6
+              - light.dining_top_1
+              - light.dining_top_2
+              - light.dining_top_3
+            wait_seconds: 90
+            room_sensor: binary_sensor.dining_room_sensor_group
+            room: Dining Room
     - conditions:
       - condition: trigger
         id: morning_transition
@@ -16335,6 +16434,27 @@
           transition: 300
       - delay:
           seconds: 305
+      - alias: Wait for the bridge to report the bulbs off before AL comes back - AL
+          re-enabled while the bridge still shows a fading bulb 'on' takes it back
+          and relights the room (2026-11-18)
+        wait_template: '{{ [''light.office_1'',''light.office_2'',''light.hue_white_lamp_1'',''light.ribbon'',''light.fluttershy''] | select(''is_state'',''on'') | list | count == 0 }}'
+        timeout:
+          seconds: 90
+        continue_on_timeout: true
+      - if:
+        - condition: template
+          value_template: '{{ not wait.completed }}'
+        then:
+        - action: light.turn_off
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.office
+            - light.hue_white_lamp_1
+            - light.ribbon
+            - light.fluttershy
+        - delay:
+            seconds: 5
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.bedroom2_fading_out
@@ -17499,6 +17619,25 @@
       - light.dining_room_top
     data:
       transition: 30
+  - alias: Re-check in 90 s - send the off again to any bulb that missed it
+    action: script.turn_on
+    target:
+      entity_id: script.lights_off_recheck
+    data:
+      variables:
+        lights:
+          - light.dining_1
+          - light.dining_2
+          - light.dining_3
+          - light.dining_4
+          - light.dining_5
+          - light.dining_6
+          - light.dining_top_1
+          - light.dining_top_2
+          - light.dining_top_3
+        wait_seconds: 90
+        room_sensor: binary_sensor.dining_room_sensor_group
+        room: Dining Room
   mode: single
 - id: '1792200000001'
   alias: 'Dining Room: Dimmer Scenes'
@@ -18223,9 +18362,26 @@
       - light.dining_room_top
     data:
       transition: 30
-  - alias: Let Hue report the lights off before AL comes back
+  - alias: Let the 30 s fade finish before AL comes back (2026-11-18)
     delay:
-      seconds: 3
+      seconds: 31
+  - alias: Wait for the bridge to report every dining bulb off
+    wait_template: '{{ [''light.dining_1'',''light.dining_2'',''light.dining_3'',''light.dining_4'',''light.dining_5'',''light.dining_6'',''light.dining_top_1'',''light.dining_top_2'',''light.dining_top_3''] | select(''is_state'',''on'') | list | count == 0 }}'
+    timeout:
+      seconds: 90
+    continue_on_timeout: true
+  - if:
+    - condition: template
+      value_template: '{{ not wait.completed }}'
+    then:
+    - action: light.turn_off
+      continue_on_error: true
+      target:
+        entity_id:
+        - light.dining_room_bottom
+        - light.dining_room_top
+    - delay:
+        seconds: 5
   - alias: Only re-enable AL if the room is still empty
     condition: state
     entity_id: binary_sensor.dining_room_sensor_group

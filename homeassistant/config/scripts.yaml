@@ -795,6 +795,16 @@ goodbye_routine_all_clear_arm_and_power_off:
         {{ ['light.indoor', 'light.hallway', 'light.galaxy_projector', 'light.garage_lights', 'light.kitchen_1_color', 'light.kitchen_2_color', 'light.hue_datura_top_1', 'light.hue_datura_bottom_1', 'light.dining_room_bottom', 'light.dining_room_top', 'light.ribbon', 'light.nano_sand_dune', 'light.fluttershy', 'light.office', 'light.office_1', 'light.office_2', 'light.hue_white_lamp_1', 'light.living_room', 'light.bathroom_main_lights', 'light.bathroom_shower', 'light.bathroom_back', 'light.showtime_light', 'light.bedroom', 'light.bedroom_2', 'light.bedroom_ceiling_1', 'light.bedroom_ceiling_2', 'light.bedroom_lamp_1', 'light.bedroom_lamp_2'] | select('is_state', 'on') | list }}
     action: light.turn_off
     data: {}
+  - alias: Second sweep a minute later - a bulb that missed the off shows up when the
+      bridge next polls it
+    action: script.turn_on
+    target:
+      entity_id: script.lights_off_recheck
+    data:
+      variables:
+        lights: ['light.indoor', 'light.hallway', 'light.galaxy_projector', 'light.garage_lights', 'light.kitchen_1_color', 'light.kitchen_2_color', 'light.hue_datura_top_1', 'light.hue_datura_bottom_1', 'light.dining_room_bottom', 'light.dining_room_top', 'light.ribbon', 'light.nano_sand_dune', 'light.fluttershy', 'light.office', 'light.office_1', 'light.office_2', 'light.hue_white_lamp_1', 'light.living_room', 'light.bathroom_main_lights', 'light.bathroom_shower', 'light.bathroom_back', 'light.showtime_light', 'light.bedroom', 'light.bedroom_2', 'light.bedroom_ceiling_1', 'light.bedroom_ceiling_2', 'light.bedroom_lamp_1', 'light.bedroom_lamp_2']
+        wait_seconds: 60
+        room: Goodbye
   mode: single
   icon: mdi:shield-lock
 goodbye_routine_abort_and_restore:
@@ -1529,3 +1539,65 @@ apex_notify:
     continue_on_error: true
   mode: queued
   max: 10
+lights_off_recheck:
+  alias: 'Lights: Off Re-check'
+  description: 'Added 2026-11-18. Fire-and-forget backstop after an empty-room turn-off.
+    Waits wait_seconds (the fade length plus about 60 s, because the Hue bridge only
+    corrects its optimistic off when it next polls each bulb), then turns off any of
+    the given lights still on - but only if room_sensor (optional) has stayed off
+    the whole time, so it never fights someone walking back in. Covers bulbs that
+    missed the off command (Kitchen 2026-11-16, Bathroom 2026-11-14) and anything that
+    took a fading bulb back. Start it with script.turn_on so the caller does not wait.'
+  mode: parallel
+  max: 20
+  fields:
+    lights:
+      description: Light entities to check (bulbs or groups)
+      required: true
+      selector:
+        entity:
+          domain: light
+          multiple: true
+    wait_seconds:
+      description: Seconds to wait before checking
+      default: 60
+      selector:
+        number:
+          min: 5
+          max: 3600
+    room_sensor:
+      description: Occupancy sensor that must stay off the whole wait (blank = no check)
+      default: ''
+      selector:
+        entity:
+          domain: binary_sensor
+    room:
+      description: Room name for the logbook entry
+      default: ''
+      selector:
+        text: {}
+  sequence:
+  - variables:
+      started: '{{ as_timestamp(now()) }}'
+      sensor: '{{ room_sensor | default('''', true) }}'
+      to_check: '{{ [lights] if lights is string else lights | list }}'
+  - delay:
+      seconds: '{{ wait_seconds | int(60) }}'
+  - variables:
+      still_empty: '{{ sensor == '''' or (is_state(sensor, ''off'') and as_timestamp(states[sensor].last_changed,
+        0) <= started | float(0)) }}'
+      still_on: '{{ to_check | select(''is_state'', ''on'') | list }}'
+  - condition: template
+    value_template: '{{ still_empty and still_on | count > 0 }}'
+  - action: light.turn_off
+    continue_on_error: true
+    target:
+      entity_id: '{{ still_on }}'
+    data:
+      transition: 1
+  - action: logbook.log
+    continue_on_error: true
+    data:
+      name: Lights Off Re-check
+      message: '{{ room }}: {{ still_on | join('', '') }} still on {{ wait_seconds }} s after the off - turned off again'
+
