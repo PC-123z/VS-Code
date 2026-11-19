@@ -691,9 +691,7 @@
   mode: single
 - id: '1748800000001'
   alias: 'Big Bedroom: Reset Override When Empty'
-  description: After 30 min empty, turns lights off, clears manual override, and re-enables
-    motion automation + AL so presence lighting resumes on next entry. Skipped while
-    asleep (Hue button 2/3/4) - only Good Morning re-arms the room then.
+  description: After 30 min empty, turns lights off, clears manual override, and re-enables motion automation + AL so presence lighting resumes on next entry. Skipped while asleep (Hue button 2/3/4) - only Good Morning re-arms the room then.
   triggers:
   - trigger: state
     entity_id: binary_sensor.big_bedroom_sensor_group
@@ -701,8 +699,7 @@
     for:
       minutes: 30
   conditions:
-  - alias: Skip if asleep - goodnight/bedtime pressed, lights stay off until Good
-      Morning
+  - alias: Skip if asleep - goodnight/bedtime pressed, lights stay off until Good Morning
     condition: state
     entity_id: input_boolean.big_bedroom_asleep
     state: 'off'
@@ -715,46 +712,13 @@
       entity_id: automation.big_bedroom_smart_motion_presence
       state: 'off'
   actions:
-  - alias: AL off for the fade (bridge mid-fade 'on' reports let AL take lights back,
-      2026-11-18); re-enabled below once the bulbs report off
-    action: switch.turn_off
-    target:
-      entity_id: switch.al_big_bedroom
-  - alias: Turn lights off first before re-enabling AL to prevent race condition
-    action: light.turn_off
-    target:
-      entity_id:
-      - light.nano_sand_dune
-      - light.bedroom_ceiling
-      - light.bedroom_lamps
+  - alias: 15 s fade via the shared safe fade (AL off, wait for bulbs + groups, AL back on)
+    action: script.big_bedroom_lights_off
+    continue_on_error: true
     data:
-      transition: 15
-  - alias: Wait for transition to complete before re-enabling AL
-    delay:
-      seconds: 16
-  - alias: Wait for the bridge to report every bulb off
-    wait_template: '{{ [''light.bedroom_ceiling_1'',''light.bedroom_ceiling_2'',''light.bedroom_lamp_1'',''light.bedroom_lamp_2''] | select(''is_state'',''on'') | list | count == 0 }}'
-    timeout:
-      seconds: 90
-    continue_on_timeout: true
-  - alias: Hue room groups lag their bulbs - sync them off so AL coming back doesn't relight them (2026-11-18 23:22)
-    if:
-    - condition: state
-      entity_id: binary_sensor.big_bedroom_sensor_group
-      state: 'off'
-    - condition: template
-      value_template: '{{ [''light.bedroom_ceiling'',''light.bedroom_lamps''] | select(''is_state'',''on'') | list | count > 0 }}'
-    then:
-    - action: light.turn_off
-      continue_on_error: true
-      target:
-        entity_id:
-        - light.bedroom_ceiling
-        - light.bedroom_lamps
-    - wait_template: '{{ [''light.bedroom_ceiling'',''light.bedroom_lamps''] | select(''is_state'',''on'') | list | count == 0 }}'
-      timeout:
-        seconds: 15
-      continue_on_timeout: true
+      lamps_fade: 15
+      ceiling_fade: 15
+      stay_off_unless: binary_sensor.big_bedroom_sensor_group
   - alias: Clear manual override boolean
     action: input_boolean.turn_off
     target:
@@ -2410,8 +2374,7 @@
   mode: single
 - id: '1775471409248'
   alias: '*Big Bedroom: Smart Motion & Presence'
-  description: Presence-based lighting with time-based Nanoleaf scenes and 30-minute
-    timeout.
+  description: 'Presence lighting for Big Bedroom. Detection (radar movement + presence) turns the lights on at once via script.big_bedroom_lights_on, then a blip check: movement under 2 s with none in the next 60 s = false trigger, 30 s fade. Empty 10 min = 8 min fade. All fades go through script.big_bedroom_lights_off. Restructured 2026-11-19.'
   triggers:
   - trigger: state
     entity_id:
@@ -2439,11 +2402,7 @@
     - conditions:
       - condition: trigger
         id: sleep_on
-      - alias: Skip if Bedtime/Goodnight button already marked the room asleep - this
-          branch is only for the global sleep-mode schedule kicking in while still
-          up and awake, not for the manual bedtime routine (which disables this automation
-          and enables the sleep switch within milliseconds of each other, close enough
-          to race this trigger before the disable takes hold)
+      - alias: Skip if Bedtime/Goodnight button already marked the room asleep - this branch is only for the global sleep-mode schedule kicking in while still up and awake, not for the manual bedtime routine (which disables this automation and enables the sleep switch within milliseconds of each other, close enough to race this trigger before the disable takes hold)
         condition: state
         entity_id: input_boolean.big_bedroom_asleep
         state: 'off'
@@ -2490,622 +2449,50 @@
         entity_id: input_boolean.big_bedroom_asleep
         state: 'off'
       sequence:
-      - variables:
-          bb_confirm_needed: true
-          bb_again: false
-      - alias: Turn on now; if no movement follows within 30 s, quick-off, then relight on the next movement (2026-11-19)
+      - alias: 'Detection: lights on immediately, then the blip check (2026-11-19). Confirmed if the first movement lasts 2 s or more movement comes within 60 s; otherwise a false trigger -> 30 s fade-off, and the next movement starts over. Uses movement, not presence: the radar holds presence ~30 s after any blip.'
         repeat:
           sequence:
           - variables:
               bb_again: false
-          - alias: AL back on - the fade-offs switch it off so the bridge's mid-fade 'on'
-              reports can't hand the lights back to AL (2026-11-18); skipped in sleep mode
-            if:
-            - condition: state
-              entity_id: switch.al_big_bedroom
-              state: 'off'
-            - condition: state
-              entity_id: switch.al_sleep_mode_big_bedroom
-              state: 'off'
-            then:
-            - action: switch.turn_on
-              target:
-                entity_id: switch.al_big_bedroom
-          - alias: Clear manual_control in case motion resumed mid ramp-down, before the
-              ramp-down's own clear step ran
-            action: adaptive_lighting.set_manual_control
-            data:
-              entity_id: switch.al_big_bedroom
-              lights:
-              - light.bedroom_ceiling
-              - light.bedroom_lamps
-              manual_control: false
-          - choose:
-            - conditions:
-              - condition: time
-                after: 07:00:00
-                before: '10:00:00'
-              sequence:
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_ceiling
-                data:
-                  transition: 5
-                alias: Ceilings first
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_ceiling
-                  transition: 5
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - alias: Hold 2s of presence before other lights fade in
-                wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
-                  }}'
-                timeout: 00:00:02
-                continue_on_timeout: true
-              - alias: Presence dropped - fade ceilings back off and skip lamps
-                if:
-                - condition: template
-                  value_template: '{{ wait.completed }}'
-                then:
-                - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
-                    reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
-                    branch turns AL back on
-                  action: switch.turn_off
-                  target:
-                    entity_id: switch.al_big_bedroom
-                - action: light.turn_off
-                  target:
-                    entity_id:
-                    - light.bedroom_ceiling
-                  data:
-                    transition: 300
-                - stop: Presence dropped before lamp stage
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_lamps
-                data:
-                  transition: 10
-                alias: Lamps fade in
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_lamps
-                  transition: 10
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - action: select.select_option
-                target:
-                  entity_id: select.nanoleaf_dynamic_scenes
-                data:
-                  option: Cocoa Beach
-              - action: light.turn_on
-                target:
-                  entity_id: light.nano_sand_dune
-                data:
-                  brightness_pct: 80
-                  transition: 10
-            - conditions:
-              - condition: time
-                after: '10:00:00'
-                before: '12:00:00'
-              sequence:
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_ceiling
-                data:
-                  transition: 5
-                alias: Ceilings first
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_ceiling
-                  transition: 5
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - alias: Hold 2s of presence before other lights fade in
-                wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
-                  }}'
-                timeout: 00:00:02
-                continue_on_timeout: true
-              - alias: Presence dropped - fade ceilings back off and skip lamps
-                if:
-                - condition: template
-                  value_template: '{{ wait.completed }}'
-                then:
-                - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
-                    reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
-                    branch turns AL back on
-                  action: switch.turn_off
-                  target:
-                    entity_id: switch.al_big_bedroom
-                - action: light.turn_off
-                  target:
-                    entity_id:
-                    - light.bedroom_ceiling
-                  data:
-                    transition: 300
-                - stop: Presence dropped before lamp stage
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_lamps
-                data:
-                  transition: 10
-                alias: Lamps fade in
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_lamps
-                  transition: 10
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - action: select.select_option
-                target:
-                  entity_id: select.nanoleaf_dynamic_scenes
-                data:
-                  option: Northern Lights
-              - action: light.turn_on
-                target:
-                  entity_id: light.nano_sand_dune
-                data:
-                  brightness_pct: 80
-                  transition: 10
-            - conditions:
-              - condition: time
-                after: '12:00:00'
-                before: '15:00:00'
-              sequence:
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_ceiling
-                data:
-                  transition: 5
-                alias: Ceilings first
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_ceiling
-                  transition: 5
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - alias: Hold 2s of presence before other lights fade in
-                wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
-                  }}'
-                timeout: 00:00:02
-                continue_on_timeout: true
-              - alias: Presence dropped - fade ceilings back off and skip lamps
-                if:
-                - condition: template
-                  value_template: '{{ wait.completed }}'
-                then:
-                - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
-                    reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
-                    branch turns AL back on
-                  action: switch.turn_off
-                  target:
-                    entity_id: switch.al_big_bedroom
-                - action: light.turn_off
-                  target:
-                    entity_id:
-                    - light.bedroom_ceiling
-                  data:
-                    transition: 300
-                - stop: Presence dropped before lamp stage
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_lamps
-                data:
-                  transition: 10
-                alias: Lamps fade in
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_lamps
-                  transition: 10
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - action: select.select_option
-                target:
-                  entity_id: select.nanoleaf_dynamic_scenes
-                data:
-                  option: Lightscape
-              - action: light.turn_on
-                target:
-                  entity_id: light.nano_sand_dune
-                data:
-                  brightness_pct: 70
-                  transition: 10
-            - conditions:
-              - condition: time
-                after: '15:00:00'
-                before: '18:00:00'
-              sequence:
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_ceiling
-                data:
-                  transition: 5
-                alias: Ceilings first
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_ceiling
-                  transition: 5
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - alias: Hold 2s of presence before other lights fade in
-                wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
-                  }}'
-                timeout: 00:00:02
-                continue_on_timeout: true
-              - alias: Presence dropped - fade ceilings back off and skip lamps
-                if:
-                - condition: template
-                  value_template: '{{ wait.completed }}'
-                then:
-                - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
-                    reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
-                    branch turns AL back on
-                  action: switch.turn_off
-                  target:
-                    entity_id: switch.al_big_bedroom
-                - action: light.turn_off
-                  target:
-                    entity_id:
-                    - light.bedroom_ceiling
-                  data:
-                    transition: 300
-                - stop: Presence dropped before lamp stage
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_lamps
-                data:
-                  transition: 10
-                alias: Lamps fade in
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_lamps
-                  transition: 10
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - action: select.select_option
-                target:
-                  entity_id: select.nanoleaf_dynamic_scenes
-                data:
-                  option: Jungle
-              - action: light.turn_on
-                target:
-                  entity_id: light.nano_sand_dune
-                data:
-                  brightness_pct: 70
-                  transition: 10
-            - conditions:
-              - condition: time
-                after: '18:00:00'
-                before: '20:00:00'
-              sequence:
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_ceiling
-                data:
-                  transition: 5
-                alias: Ceilings first
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_ceiling
-                  transition: 5
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - alias: Hold 2s of presence before other lights fade in
-                wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
-                  }}'
-                timeout: 00:00:02
-                continue_on_timeout: true
-              - alias: Presence dropped - fade ceilings back off and skip lamps
-                if:
-                - condition: template
-                  value_template: '{{ wait.completed }}'
-                then:
-                - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
-                    reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
-                    branch turns AL back on
-                  action: switch.turn_off
-                  target:
-                    entity_id: switch.al_big_bedroom
-                - action: light.turn_off
-                  target:
-                    entity_id:
-                    - light.bedroom_ceiling
-                  data:
-                    transition: 300
-                - stop: Presence dropped before lamp stage
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_lamps
-                data:
-                  transition: 10
-                alias: Lamps fade in
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_lamps
-                  transition: 10
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - action: select.select_option
-                target:
-                  entity_id: select.nanoleaf_dynamic_scenes
-                data:
-                  option: Sundown
-              - action: light.turn_on
-                target:
-                  entity_id: light.nano_sand_dune
-                data:
-                  brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
-                    | float(50) | round(0) }}'
-                  transition: 10
-            - conditions:
-              - condition: time
-                after: '20:00:00'
-                before: '22:00:00'
-              sequence:
-              - action: scene.turn_on
-                target:
-                  entity_id: scene.bedroom_starlight
-                data:
-                  transition: 5
-              - action: select.select_option
-                target:
-                  entity_id: select.nanoleaf_dynamic_scenes
-                data:
-                  option: Starlight
-              - action: light.turn_on
-                target:
-                  entity_id: light.nano_sand_dune
-                data:
-                  brightness_pct: 50
-                  transition: 5
-            - conditions:
-              - condition: time
-                after: '22:00:00'
-                before: '23:00:00'
-              sequence:
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_ceiling
-                data:
-                  transition: 0
-                alias: Ceilings first - instant, not the 10s fade lamps/Nanoleaf still
-                  use, so walking in doesn't mean waiting on the light
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_ceiling
-                  transition: 0
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - alias: Hold 2s of presence before other lights fade in
-                wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
-                  }}'
-                timeout: 00:00:02
-                continue_on_timeout: true
-              - alias: Presence dropped - fade ceilings back off and skip lamps
-                if:
-                - condition: template
-                  value_template: '{{ wait.completed }}'
-                then:
-                - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
-                    reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
-                    branch turns AL back on
-                  action: switch.turn_off
-                  target:
-                    entity_id: switch.al_big_bedroom
-                - action: light.turn_off
-                  target:
-                    entity_id:
-                    - light.bedroom_ceiling
-                  data:
-                    transition: 300
-                - stop: Presence dropped before lamp stage
-              - action: light.turn_on
-                target:
-                  entity_id:
-                  - light.bedroom_lamps
-                data:
-                  transition: 10
-                alias: Lamps fade in
-              - action: adaptive_lighting.apply
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_lamps
-                  transition: 10
-                  adapt_color: true
-                  adapt_brightness: true
-                  prefer_rgb_color: true
-              - action: select.select_option
-                target:
-                  entity_id: select.nanoleaf_dynamic_scenes
-                data:
-                  option: Sundown
-              - action: light.turn_on
-                target:
-                  entity_id: light.nano_sand_dune
-                data:
-                  brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
-                    | float(30) | round(0) }}'
-                  transition: 10
-            - conditions:
-              - condition: time
-                after: '23:00:00'
-                before: 07:00:00
-              sequence:
-              - choose:
-                - alias: Sleep mode already on - go straight to red to avoid white flash
-                  conditions:
-                  - condition: state
-                    entity_id: switch.al_sleep_mode_big_bedroom
-                    state: 'on'
-                  sequence:
-                  - action: light.turn_on
-                    target:
-                      entity_id: light.bedroom
-                    data:
-                      brightness_pct: 10
-                      rgb_color:
-                      - 255
-                      - 30
-                      - 0
-                      transition: 30
-                  - action: light.turn_on
-                    target:
-                      entity_id: light.nano_sand_dune
-                    data:
-                      brightness_pct: 10
-                      rgb_color:
-                      - 255
-                      - 30
-                      - 0
-                      transition: 30
-                default:
-                - action: light.turn_on
-                  target:
-                    entity_id:
-                    - light.bedroom_ceiling
-                  data:
-                    transition: 0
-                  alias: Ceilings first - instant, not the 10s fade lamps/Nanoleaf still
-                    use, so walking in doesn't mean waiting on the light
-                - action: adaptive_lighting.apply
-                  continue_on_error: true
-                  data:
-                    entity_id: switch.al_big_bedroom
-                    lights:
-                    - light.bedroom_ceiling
-                    transition: 0
-                    adapt_color: true
-                    adapt_brightness: true
-                    prefer_rgb_color: true
-                - alias: Hold 2s of presence before other lights fade in
-                  wait_template: '{{ is_state(''binary_sensor.big_bedroom_sensor_group'',''off'')
-                    }}'
-                  timeout: 00:00:02
-                  continue_on_timeout: true
-                - alias: Presence dropped - fade ceilings back off and skip lamps
-                  if:
-                  - condition: template
-                    value_template: '{{ wait.completed }}'
-                  then:
-                  - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
-                      reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
-                      branch turns AL back on
-                    action: switch.turn_off
-                    target:
-                      entity_id: switch.al_big_bedroom
-                  - action: light.turn_off
-                    target:
-                      entity_id:
-                      - light.bedroom_ceiling
-                    data:
-                      transition: 300
-                  - stop: Presence dropped before lamp stage
-                - action: light.turn_on
-                  target:
-                    entity_id:
-                    - light.bedroom_lamps
-                  data:
-                    transition: 10
-                  alias: Lamps fade in
-                - action: adaptive_lighting.apply
-                  continue_on_error: true
-                  data:
-                    entity_id: switch.al_big_bedroom
-                    lights:
-                    - light.bedroom_lamps
-                    transition: 10
-                    adapt_color: true
-                    adapt_brightness: true
-                    prefer_rgb_color: true
-                - action: select.select_option
-                  target:
-                    entity_id: select.nanoleaf_dynamic_scenes
-                  data:
-                    option: Sundown
-                - action: light.turn_on
-                  target:
-                    entity_id: light.nano_sand_dune
-                  data:
-                    brightness_pct: '{{ state_attr(''switch.al_big_bedroom'', ''brightness_pct'')
-                      | float(30) | round(0) }}'
-                    transition: 10
-          - alias: 30 s confirmation (2026-11-19) - first pass only. A real person keeps
-              moving; a radar ghost is a single ~1 s moving flash (23:01 2026-11-18, purifier ghosts)
+              bb_long_first: false
+              bb_more: false
+          - alias: Lights on NOW (runs in the background so the blip check starts at the same moment)
+            action: script.turn_on
+            target:
+              entity_id: script.big_bedroom_lights_on
+          - alias: Blip check 1 - does this first movement last 2 s?
+            wait_template: '{{ is_state(''binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target'', ''off'') }}'
+            timeout:
+              seconds: 2
+            continue_on_timeout: true
+          - variables:
+              bb_long_first: '{{ not wait.completed }}'
+          - alias: 'Blip check 2 - short flash: any new movement in the next 60 s?'
             if:
             - condition: template
-              value_template: '{{ bb_confirm_needed }}'
+              value_template: '{{ not bb_long_first }}'
             then:
-            - alias: Start looking 3 s after the trigger (a walk-in's first movement run lasts 2.5-14 s)
-              delay:
-                seconds: '{{ [0, 3 - (now() - trigger.to_state.last_changed).total_seconds()] | max | round(1) }}'
-            - alias: Any radar movement until 30 s after the trigger confirms a real person
-              wait_template: '{{ is_state(''binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target'', ''on'') }}'
+            - wait_for_trigger:
+              - trigger: state
+                entity_id: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
+                to: 'on'
               timeout:
-                seconds: '{{ [1, 30 - (now() - trigger.to_state.last_changed).total_seconds()] | max | round(1) }}'
+                seconds: 60
               continue_on_timeout: true
             - variables:
-                bb_confirm_needed: false
-            - alias: No movement - quick 15 s fade off, unless a dimmer/button took over or the room went to sleep
+                bb_more: '{{ wait.trigger is not none }}'
+          - if:
+            - condition: template
+              value_template: '{{ bb_long_first or bb_more }}'
+            then:
+            - action: logbook.log
+              data:
+                name: Big Bedroom
+                entity_id: automation.big_bedroom_smart_motion_presence
+                message: confirmed occupied ({{ 'first movement lasted 2 s' if bb_long_first else 'more movement within 60 s' }})
+            else:
+            - alias: False trigger - quick 30 s fade, unless a dimmer/button took over or the room went to sleep
               if:
-              - condition: template
-                value_template: '{{ not wait.completed }}'
               - condition: state
                 entity_id: input_boolean.big_bedroom_manual_override
                 state: 'off'
@@ -3113,75 +2500,16 @@
                 entity_id: input_boolean.big_bedroom_asleep
                 state: 'off'
               then:
-              - action: logbook.log
-                data:
-                  name: Big Bedroom
-                  message: no radar movement within 30 s of turning on - lights off (likely a radar ghost); next movement turns them back on
-                  entity_id: automation.big_bedroom_smart_motion_presence
-              - alias: AL off for the fade (bridge mid-fade 'on' reports, 2026-11-18)
-                action: switch.turn_off
+              - action: script.turn_on
                 target:
-                  entity_id: switch.al_big_bedroom
-              - action: light.turn_off
-                continue_on_error: true
-                target:
-                  entity_id:
-                  - light.bedroom_ceiling
-                  - light.bedroom_lamps
-                  - light.nano_sand_dune
+                  entity_id: script.big_bedroom_lights_off
                 data:
-                  transition: 15
-              - delay:
-                  seconds: 16
-              - alias: Wait for the bridge to report every bulb off
-                wait_template: '{{ [''light.bedroom_ceiling_1'',''light.bedroom_ceiling_2'',''light.bedroom_lamp_1'',''light.bedroom_lamp_2''] | select(''is_state'',''on'') | list | count == 0 }}'
-                timeout:
-                  seconds: 60
-                continue_on_timeout: true
-              - if:
-                - condition: template
-                  value_template: '{{ not wait.completed }}'
-                then:
-                - action: light.turn_off
-                  continue_on_error: true
-                  target:
-                    entity_id:
-                    - light.bedroom_ceiling
-                    - light.bedroom_lamps
-                - delay:
-                    seconds: 3
-              - alias: Hue room groups lag their bulbs - sync them off so AL coming back doesn't relight them
-                if:
-                - condition: template
-                  value_template: '{{ [''light.bedroom_ceiling'',''light.bedroom_lamps''] | select(''is_state'',''on'') | list | count > 0 }}'
-                then:
-                - action: light.turn_off
-                  continue_on_error: true
-                  target:
-                    entity_id:
-                    - light.bedroom_ceiling
-                    - light.bedroom_lamps
-                - wait_template: '{{ [''light.bedroom_ceiling'',''light.bedroom_lamps''] | select(''is_state'',''on'') | list | count == 0 }}'
-                  timeout:
-                    seconds: 15
-                  continue_on_timeout: true
-              - action: adaptive_lighting.set_manual_control
-                continue_on_error: true
-                data:
-                  entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_ceiling
-                  - light.bedroom_lamps
-                  manual_control: false
-              - if:
-                - condition: state
-                  entity_id: switch.al_sleep_mode_big_bedroom
-                  state: 'off'
-                then:
-                - action: switch.turn_on
-                  target:
-                    entity_id: switch.al_big_bedroom
-              - alias: Lights back on at the next radar movement while the radar still sees presence
+                  variables:
+                    lamps_fade: 30
+                    ceiling_fade: 30
+                    stay_off_unless: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
+                    reason: false trigger - movement under 2 s and none in the next 60 s
+              - alias: Next movement while the radar still sees presence = new detection (lights on + fresh check)
                 wait_for_trigger:
                 - trigger: state
                   entity_id: binary_sensor.apollo_msr_2_big_bedroom_radar_moving_target
@@ -3196,131 +2524,44 @@
                 continue_on_timeout: true
               - variables:
                   bb_again: '{{ wait.trigger is not none and wait.trigger.id == ''move'' and is_state(''binary_sensor.big_bedroom_sensor_group'', ''on'') }}'
-              - if:
-                - condition: template
-                  value_template: '{{ bb_again }}'
-                then:
-                - action: logbook.log
-                  data:
-                    name: Big Bedroom
-                    message: movement after the quick-off - lights back on
-                    entity_id: automation.big_bedroom_smart_motion_presence
           until:
           - condition: template
             value_template: '{{ not bb_again }}'
     - conditions:
       - condition: trigger
         id: stopped
-      - alias: Skip if override is active - overridden lights hold until the 30-min
-          reset
+      - alias: Skip if override is active - overridden lights hold until the 30-min reset
         condition: state
         entity_id: input_boolean.big_bedroom_manual_override
         state: 'off'
       sequence:
-      - alias: AL off for the whole fade - AL clears manual holds on turn_off, and the
-          bridge reports fading bulbs 'on' again 7-60 s in, so AL's 90 s adapt took them
-          back and left them on (8 of 8 fades 2026-11-18). Re-enabled below once the
-          bulbs report off; the detected branch turns it on if motion returns
-        action: switch.turn_off
-        target:
-          entity_id: switch.al_big_bedroom
-      - alias: Lamps off first
-        action: light.turn_off
-        target:
-          entity_id:
-          - light.nano_sand_dune
-          - light.bedroom_lamps
-        data:
-          transition: 60
-      - alias: Ceiling lights fade off over the next 8 minutes
-        action: light.turn_off
-        target:
-          entity_id:
-          - light.bedroom_ceiling
-        data:
-          transition: 480
-      - alias: Let the fade run (the bridge may report the bulbs 'on' mid-fade - harmless
-          with AL off)
-        delay:
-          seconds: 481
-      - alias: Wait for the bridge to report every bulb off (its poll lags the fade by
-          up to ~40 s)
-        wait_template: '{{ [''light.bedroom_ceiling_1'',''light.bedroom_ceiling_2'',''light.bedroom_lamp_1'',''light.bedroom_lamp_2''] | select(''is_state'',''on'') | list | count == 0 }}'
-        timeout:
-          seconds: 120
-        continue_on_timeout: true
-      - alias: Anything still on after that is really on - turn it off
+      - alias: 'Empty 10 min: lamps 60 s, ceiling 8 min, via the shared safe fade (skip the fade if everything is already off)'
         if:
         - condition: template
-          value_template: '{{ not wait.completed }}'
+          value_template: '{{ [''light.bedroom_ceiling_1'',''light.bedroom_ceiling_2'',''light.bedroom_lamp_1'',''light.bedroom_lamp_2'',''light.bedroom_ceiling'',''light.bedroom_lamps'',''light.nano_sand_dune''] | select(''is_state'',''on'') | list | count > 0 }}'
         then:
-        - action: light.turn_off
+        - action: script.big_bedroom_lights_off
           continue_on_error: true
-          target:
-            entity_id:
-            - light.bedroom_ceiling
-            - light.bedroom_lamps
-        - delay:
-            seconds: 5
-      - alias: Hue room groups lag their bulbs - sync them off so AL coming back doesn't relight them (2026-11-18 23:22)
-        if:
-        - condition: state
-          entity_id: binary_sensor.big_bedroom_sensor_group
-          state: 'off'
-        - condition: template
-          value_template: '{{ [''light.bedroom_ceiling'',''light.bedroom_lamps''] | select(''is_state'',''on'') | list | count > 0 }}'
-        then:
-        - action: light.turn_off
-          continue_on_error: true
-          target:
-            entity_id:
-            - light.bedroom_ceiling
-            - light.bedroom_lamps
-        - wait_template: '{{ [''light.bedroom_ceiling'',''light.bedroom_lamps''] | select(''is_state'',''on'') | list | count == 0 }}'
-          timeout:
-            seconds: 15
-          continue_on_timeout: true
-      - alias: Clear manual_control so AL can take over on next motion
-        action: adaptive_lighting.set_manual_control
-        data:
-          entity_id: switch.al_big_bedroom
-          lights:
-          - light.bedroom_ceiling
-          - light.bedroom_lamps
-          manual_control: false
-      - alias: Re-enable AL switches so they're ready for next motion
-        action: switch.turn_on
-        target:
-          entity_id:
-          - switch.al_big_bedroom
-          - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_color_big_bedroom_al
-          - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_brightness_big_bedroom_al
-      - alias: Safety net - re-check 2 min after the fade; turn off anything still
-          on if the room is still empty
-        delay:
-          seconds: 120
-      - if:
-        - condition: state
-          entity_id: binary_sensor.big_bedroom_sensor_group
-          state: 'off'
-        - condition: template
-          value_template: '{{ [''light.bedroom_ceiling_1'',''light.bedroom_ceiling_2'',''light.bedroom_lamp_1'',''light.bedroom_lamp_2'']
-            | select(''is_state'',''on'') | list | count > 0 }}'
-        then:
-        - action: light.turn_off
-          continue_on_error: true
-          target:
-            entity_id:
-            - light.bedroom_ceiling
-            - light.bedroom_lamps
           data:
-            transition: 2
-      - action: input_select.select_option
-        target:
-          entity_id: input_select.bedroom_scene_mode
-        data:
-          option: al
-        enabled: false
+            lamps_fade: 60
+            ceiling_fade: 480
+            stay_off_unless: binary_sensor.big_bedroom_sensor_group
+        else:
+        - alias: Already off (e.g. a false trigger) - just make sure AL is ready for the next entry
+          action: adaptive_lighting.set_manual_control
+          continue_on_error: true
+          data:
+            entity_id: switch.al_big_bedroom
+            lights:
+            - light.bedroom_ceiling
+            - light.bedroom_lamps
+            manual_control: false
+        - action: switch.turn_on
+          target:
+            entity_id:
+            - switch.al_big_bedroom
+            - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_color_big_bedroom_al
+            - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_brightness_big_bedroom_al
   mode: restart
 - id: '1775504917028'
   alias: 'Living Room: Smart Motion & Presence'
