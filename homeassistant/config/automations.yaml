@@ -715,16 +715,11 @@
       entity_id: automation.big_bedroom_smart_motion_presence
       state: 'off'
   actions:
-  - alias: Hold AL off the lights during the fade (AL interval relit fades 2026-11-17);
-      cleared by the last step
-    action: adaptive_lighting.set_manual_control
-    continue_on_error: true
-    data:
+  - alias: AL off for the fade (bridge mid-fade 'on' reports let AL take lights back,
+      2026-11-18); re-enabled below once the bulbs report off
+    action: switch.turn_off
+    target:
       entity_id: switch.al_big_bedroom
-      lights:
-      - light.bedroom_ceiling
-      - light.bedroom_lamps
-      manual_control: true
   - alias: Turn lights off first before re-enabling AL to prevent race condition
     action: light.turn_off
     target:
@@ -737,6 +732,11 @@
   - alias: Wait for transition to complete before re-enabling AL
     delay:
       seconds: 16
+  - alias: Wait for the bridge to report every bulb off
+    wait_template: '{{ [''light.bedroom_ceiling_1'',''light.bedroom_ceiling_2'',''light.bedroom_lamp_1'',''light.bedroom_lamp_2''] | select(''is_state'',''on'') | list | count == 0 }}'
+    timeout:
+      seconds: 90
+    continue_on_timeout: true
   - alias: Clear manual override boolean
     action: input_boolean.turn_off
     target:
@@ -2457,6 +2457,19 @@
         entity_id: input_boolean.big_bedroom_asleep
         state: 'off'
       sequence:
+      - alias: AL back on - the fade-offs switch it off so the bridge's mid-fade 'on'
+          reports can't hand the lights back to AL (2026-11-18); skipped in sleep mode
+        if:
+        - condition: state
+          entity_id: switch.al_big_bedroom
+          state: 'off'
+        - condition: state
+          entity_id: switch.al_sleep_mode_big_bedroom
+          state: 'off'
+        then:
+        - action: switch.turn_on
+          target:
+            entity_id: switch.al_big_bedroom
       - alias: Clear manual_control in case motion resumed mid ramp-down, before the
           ramp-down's own clear step ran
         action: adaptive_lighting.set_manual_control
@@ -2499,15 +2512,12 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
-            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
-                2026-11-17); detected branch clears this on next motion
-              action: adaptive_lighting.set_manual_control
-              continue_on_error: true
-              data:
+            - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
+                reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
+                branch turns AL back on
+              action: switch.turn_off
+              target:
                 entity_id: switch.al_big_bedroom
-                lights:
-                - light.bedroom_ceiling
-                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -2575,15 +2585,12 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
-            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
-                2026-11-17); detected branch clears this on next motion
-              action: adaptive_lighting.set_manual_control
-              continue_on_error: true
-              data:
+            - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
+                reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
+                branch turns AL back on
+              action: switch.turn_off
+              target:
                 entity_id: switch.al_big_bedroom
-                lights:
-                - light.bedroom_ceiling
-                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -2651,15 +2658,12 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
-            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
-                2026-11-17); detected branch clears this on next motion
-              action: adaptive_lighting.set_manual_control
-              continue_on_error: true
-              data:
+            - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
+                reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
+                branch turns AL back on
+              action: switch.turn_off
+              target:
                 entity_id: switch.al_big_bedroom
-                lights:
-                - light.bedroom_ceiling
-                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -2727,15 +2731,12 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
-            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
-                2026-11-17); detected branch clears this on next motion
-              action: adaptive_lighting.set_manual_control
-              continue_on_error: true
-              data:
+            - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
+                reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
+                branch turns AL back on
+              action: switch.turn_off
+              target:
                 entity_id: switch.al_big_bedroom
-                lights:
-                - light.bedroom_ceiling
-                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -2803,15 +2804,12 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
-            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
-                2026-11-17); detected branch clears this on next motion
-              action: adaptive_lighting.set_manual_control
-              continue_on_error: true
-              data:
+            - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
+                reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
+                branch turns AL back on
+              action: switch.turn_off
+              target:
                 entity_id: switch.al_big_bedroom
-                lights:
-                - light.bedroom_ceiling
-                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -2902,15 +2900,12 @@
             - condition: template
               value_template: '{{ wait.completed }}'
             then:
-            - alias: Hold AL off the ceiling during the fade (AL interval relit fades
-                2026-11-17); detected branch clears this on next motion
-              action: adaptive_lighting.set_manual_control
-              continue_on_error: true
-              data:
+            - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
+                reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
+                branch turns AL back on
+              action: switch.turn_off
+              target:
                 entity_id: switch.al_big_bedroom
-                lights:
-                - light.bedroom_ceiling
-                manual_control: true
             - action: light.turn_off
               target:
                 entity_id:
@@ -3008,15 +3003,12 @@
               - condition: template
                 value_template: '{{ wait.completed }}'
               then:
-              - alias: Hold AL off the ceiling during the fade (AL interval relit fades
-                  2026-11-17); detected branch clears this on next motion
-                action: adaptive_lighting.set_manual_control
-                continue_on_error: true
-                data:
+              - alias: AL off for the fade - AL clears manual holds on turn_off and the bridge
+                  reports fading bulbs 'on', so AL would take them back (2026-11-18); detected
+                  branch turns AL back on
+                action: switch.turn_off
+                target:
                   entity_id: switch.al_big_bedroom
-                  lights:
-                  - light.bedroom_ceiling
-                  manual_control: true
               - action: light.turn_off
                 target:
                   entity_id:
@@ -3062,17 +3054,13 @@
         entity_id: input_boolean.big_bedroom_manual_override
         state: 'off'
       sequence:
-      - alias: Hold AL off the lights during the fade - its 90s interval adapt relit
-          them mid-fade (2026-11-17 22:32); detected branch and the final step below
-          both clear this
-        action: adaptive_lighting.set_manual_control
-        continue_on_error: true
-        data:
+      - alias: AL off for the whole fade - AL clears manual holds on turn_off, and the
+          bridge reports fading bulbs 'on' again 7-60 s in, so AL's 90 s adapt took them
+          back and left them on (8 of 8 fades 2026-11-18). Re-enabled below once the
+          bulbs report off; the detected branch turns it on if motion returns
+        action: switch.turn_off
+        target:
           entity_id: switch.al_big_bedroom
-          lights:
-          - light.bedroom_ceiling
-          - light.bedroom_lamps
-          manual_control: true
       - alias: Lamps off first
         action: light.turn_off
         target:
@@ -3088,41 +3076,29 @@
           - light.bedroom_ceiling
         data:
           transition: 480
-      - variables:
-          fade_end: '{{ as_timestamp(now()) + 481 }}'
-      - alias: Catch Hue-side relights during the fade, then wait for it to finish -
-          the bulbs come back on 30 s-2 min after a long-transition off with no HA
-          command (8 of 8 fades on 2026-11-18); a short-transition off sticks
-        repeat:
-          while:
-          - condition: template
-            value_template: '{{ as_timestamp(now()) < fade_end | float(0) }}'
-          sequence:
-          - wait_for_trigger:
-            - trigger: state
-              entity_id:
-              - light.bedroom_ceiling_1
-              - light.bedroom_ceiling_2
-              - light.bedroom_lamp_1
-              - light.bedroom_lamp_2
-              to: 'on'
-            timeout:
-              seconds: '{{ [ (fade_end | float(0)) - as_timestamp(now()), 1 ] | max
-                | int }}'
-            continue_on_timeout: true
-          - if:
-            - condition: template
-              value_template: '{{ wait.trigger is not none }}'
-            - condition: state
-              entity_id: binary_sensor.big_bedroom_sensor_group
-              state: 'off'
-            then:
-            - action: light.turn_off
-              continue_on_error: true
-              target:
-                entity_id: '{{ wait.trigger.entity_id }}'
-              data:
-                transition: 2
+      - alias: Let the fade run (the bridge may report the bulbs 'on' mid-fade - harmless
+          with AL off)
+        delay:
+          seconds: 481
+      - alias: Wait for the bridge to report every bulb off (its poll lags the fade by
+          up to ~40 s)
+        wait_template: '{{ [''light.bedroom_ceiling_1'',''light.bedroom_ceiling_2'',''light.bedroom_lamp_1'',''light.bedroom_lamp_2''] | select(''is_state'',''on'') | list | count == 0 }}'
+        timeout:
+          seconds: 120
+        continue_on_timeout: true
+      - alias: Anything still on after that is really on - turn it off
+        if:
+        - condition: template
+          value_template: '{{ not wait.completed }}'
+        then:
+        - action: light.turn_off
+          continue_on_error: true
+          target:
+            entity_id:
+            - light.bedroom_ceiling
+            - light.bedroom_lamps
+        - delay:
+            seconds: 5
       - alias: Clear manual_control so AL can take over on next motion
         action: adaptive_lighting.set_manual_control
         data:
