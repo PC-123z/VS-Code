@@ -8903,16 +8903,17 @@
       current_hour: '{{ now().hour }}'
       is_quiet_hours: '{{ current_hour|int < 8 or current_hour|int >= 22 }}'
       kids_present: '{{ is_state("input_boolean.bedroom2_occupied", "on") }}'
-  - alias: Check if quiet hours (before 8 AM or after 10 PM) AND kids are actually here (bedroom2_occupied on) - added 2026-09-12 so quiet hours only silence music when there's someone in Bedroom 2 to be quiet for; otherwise music plays normally even late at night
+      living_room_tv_was_on: '{{ is_state("binary_sensor.living_room_tv_on", "on") }}'
+  - alias: Skip music if the Living Room TV is already on (added 2026-11-20 - user rule, TV on means NO music; at 6:16 PM someone came in through the garage during Armed Stay, keypad-disarmed, and Welcome Home started kitchen + Big Bedroom music over the TV, because the end-session automation only fires when the TV turns ON, not when it was already on) OR quiet hours (before 8 AM or after 10 PM) AND kids are actually here (bedroom2_occupied on) - added 2026-09-12 so quiet hours only silence music when there's someone in Bedroom 2 to be quiet for; otherwise music plays normally even late at night. welcome_home_active is never set on this branch, so no satellite room joins either.
     if:
     - condition: template
-      value_template: '{{ is_quiet_hours and kids_present }}'
+      value_template: '{{ living_room_tv_was_on or (is_quiet_hours and kids_present) }}'
     then:
-    - alias: Quiet hours with kids home - stay silent
+    - alias: TV on or quiet hours with kids home - stay silent
       action: notify.mobile_app_pc_iphone
       data:
         title: Welcome Home
-        message: Hallway lights on. Music skipped (quiet hours 10 PM – 8 AM, Bedroom 2 occupied).
+        message: "Hallway lights on. Music skipped ({{ 'Living Room TV is on' if living_room_tv_was_on else 'quiet hours 10 PM – 8 AM, Bedroom 2 occupied' }})."
     else:
     - alias: Before 10 PM - play appropriate music
       sequence:
