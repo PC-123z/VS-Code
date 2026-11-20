@@ -16243,7 +16243,7 @@
   mode: single
 - id: '1792600000002'
   alias: 'Kitchen TV: Off When Receiver Zone 2 Turns Off (if on HDMI 4)'
-  description: Added 2026-10-26 at the user's request. Companion to 1792600000001. When Zone 2 powers off and the kitchen TV is showing HDMI 4 (the Zone 2 feed), turn the TV off. If someone switched the TV to an app or another input, leave it alone. not_from unavailable/unknown so an integration reconnect doesn't fire it.
+  description: 'Added 2026-10-26 at the user''s request. Companion to 1792600000001. When Zone 2 powers off and the kitchen TV is showing HDMI 4 (the Zone 2 feed), turn the TV off. If someone switched the TV to an app or another input, leave it alone. not_from unavailable/unknown so an integration reconnect doesn''t fire it. 2026-11-20: the ''source is HDMI 4'' check never passed - this TV answers BRAVIA getPlayingContentInfo with Illegal State, so media_player.kitchen_tv source is always empty and the TV was never turned off. Now uses the Android TV Remote''s current_activity: HDMI inputs show as com.mediatek.tv.oneworld.tvcenter; YouTube/other apps are left alone.'
   triggers:
   - trigger: state
     entity_id: media_player.living_room_av_zone2
@@ -16255,11 +16255,11 @@
   - condition: state
     entity_id: remote.kitchen
     state: 'on'
-  - alias: Kitchen TV is on HDMI 4 (BRAVIA IP control source)
+  - alias: TV is on an input (HDMI view = tvcenter activity), not an app like YouTube - BRAVIA source attribute is always empty on this TV
     condition: state
-    entity_id: media_player.kitchen_tv
-    attribute: source
-    state: HDMI 4
+    entity_id: remote.kitchen
+    attribute: current_activity
+    state: com.mediatek.tv.oneworld.tvcenter
   actions:
   - action: remote.turn_off
     target:
