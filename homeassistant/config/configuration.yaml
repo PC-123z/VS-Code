@@ -217,6 +217,40 @@ template:
         unique_id: arrival_evidence_last_seen
         device_class: timestamp
         state: "{{ now().isoformat() }}"
+  # Paul arrival last seen (2026-11-20). Like Arrival Evidence Last Seen but WITHOUT the garage
+  # cover - anyone with a garage opener can move that. Stamped only when the arrival latch
+  # (input_boolean.arrival_recent) turns on, which only "Arrival Latch - Set" (1777484175033)
+  # does: car beacon away -> home (or back from 10+ min unavailable), person.paul
+  # not_home -> home, or Paul's iOS Shortcut webhook. A timestamp, not the latch itself,
+  # because the latch is wiped the instant the panel disarms. Welcome Home STAGE 2 requires
+  # this within 15 min when the alarm was in Armed Stay: on 2026-11-20 6:16 PM someone else
+  # came in through the garage during Stay, keypad-disarmed, and Welcome Home played music.
+  - trigger:
+      - trigger: state
+        entity_id: input_boolean.arrival_recent
+        from: "off"
+        to: "on"
+    sensor:
+      - name: Paul Arrival Last Seen
+        unique_id: paul_arrival_last_seen
+        device_class: timestamp
+        state: "{{ now().isoformat() }}"
+  # Last armed mode of the alarm panel (2026-11-20) - armed_home (Stay) / armed_away / armed_night.
+  # Kept through pending and disarmed so Welcome Home STAGE 2 knows, even on the keypad-code
+  # path (pending -> disarmed), whether the house was in Stay (someone home) or Away.
+  - trigger:
+      - trigger: state
+        entity_id: alarm_control_panel.3302_alarm
+        to:
+          - armed_home
+          - armed_away
+          - armed_night
+          - armed_vacation
+          - armed_custom_bypass
+    sensor:
+      - name: Alarm Last Armed Mode
+        unique_id: alarm_last_armed_mode
+        state: "{{ trigger.to_state.state }}"
   # Sensor Watchdog - activity tracker (2026-11-11). Remembers, across restarts, when each
   # presence signal last turned ON (ts) plus up to 3 earlier on-times at least 1 h apart
   # (hist), and when each sensor unit was last reset (resets, fed by the
