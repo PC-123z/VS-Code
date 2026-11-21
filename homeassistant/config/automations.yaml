@@ -2461,6 +2461,31 @@
         entity_id: input_boolean.big_bedroom_asleep
         state: 'off'
       sequence:
+      - alias: Were the lights already on before this detection? (2026-11-21) Lights
+          mid-fade (lights-off script running) count as off. Already-lit lights were
+          turned on by Good Morning, a button or an earlier real visit - never a false
+          trigger of this detection, so the blip check must not fade them (11-21 8:36
+          AM it faded the Good Morning lights after a 14 s still-in-bed sensor drop)
+        variables:
+          bb_was_lit: '{{ is_state(''script.big_bedroom_lights_off'', ''off'') and ([''light.bedroom_ceiling_1'',
+            ''light.bedroom_ceiling_2'', ''light.bedroom_lamp_1'', ''light.bedroom_lamp_2'']
+            | select(''is_state'', ''on'') | list | count > 0) }}'
+      - alias: Good Morning owns the lights while it runs - if they are already on,
+          leave them completely alone (no lights-on look, no blip check)
+        if:
+        - condition: state
+          entity_id: input_boolean.good_morning_active
+          state: 'on'
+        - condition: template
+          value_template: '{{ bb_was_lit }}'
+        then:
+        - action: logbook.log
+          data:
+            name: Big Bedroom
+            entity_id: automation.big_bedroom_smart_motion_presence
+            message: detection during Good Morning with the lights already on - left
+              them alone
+        - stop: Good Morning owns the lights
       - alias: 'Detection: lights on immediately, then the blip check (2026-11-19).
           Confirmed if the first movement lasts 2 s or more movement comes within
           60 s; otherwise a false trigger -> 30 s fade-off, and the next movement
@@ -2501,14 +2526,16 @@
                 bb_more: '{{ wait.trigger is not none }}'
           - if:
             - condition: template
-              value_template: '{{ bb_long_first or bb_more }}'
+              value_template: '{{ bb_long_first or bb_more or (bb_was_lit and repeat.first)
+                }}'
             then:
             - action: logbook.log
               data:
                 name: Big Bedroom
                 entity_id: automation.big_bedroom_smart_motion_presence
                 message: confirmed occupied ({{ 'first movement lasted 2 s' if bb_long_first
-                  else 'more movement within 60 s' }})
+                  else 'more movement within 60 s' if bb_more else 'lights were already
+                  on before this detection - not a false trigger' }})
             else:
             - alias: False trigger - quick 30 s fade, unless a dimmer/button took
                 over or the room went to sleep
@@ -8267,6 +8294,29 @@
         entity_id: input_boolean.bedroom2_occupied
         state: 'off'
       sequence:
+      - alias: Were the lights already on before this detection? (2026-11-21, same
+          fix as Big Bedroom) Lights mid-fade-out count as off. Already-lit lights
+          came from Good Morning, the Tap Dial or an earlier real visit, so the door
+          false-trigger revert below must not turn them off
+        variables:
+          b2_was_lit: '{{ is_state(''input_boolean.bedroom2_fading_out'', ''off'')
+            and ([''light.ribbon'', ''light.fluttershy'', ''light.office_1'', ''light.office_2'',
+            ''light.hue_white_lamp_1''] | select(''is_state'', ''on'') | list | count
+            > 0) }}'
+      - alias: Bedroom 2 Good Morning owns the lights while it runs - if they are
+          already on, leave them alone
+        if:
+        - condition: template
+          value_template: '{{ state_attr(''automation.bedroom_2_good_morning_routine'',
+            ''current'') | int(0) > 0 and b2_was_lit }}'
+        then:
+        - action: logbook.log
+          data:
+            name: Bedroom 2
+            entity_id: automation.office_bedroom_2_smart_motion_presence_2
+            message: detection during Good Morning with the lights already on - left
+              them alone
+        - stop: Bedroom 2 Good Morning owns the lights
       - alias: Motion returned during the 5 minute fade-out - cancel it by restoring
           the pre-fade lights, then the override check below keeps the tap's state
         if:
@@ -8479,6 +8529,9 @@
         - condition: template
           value_template: '{{ trigger.entity_id == ''binary_sensor.bedroom2_office_bedroom2_door_presence''
             }}'
+        - alias: Only if this detection is what turned the lights on (2026-11-21)
+          condition: template
+          value_template: '{{ not b2_was_lit }}'
         then:
         - delay:
             minutes: 5
