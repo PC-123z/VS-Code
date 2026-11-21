@@ -10366,6 +10366,15 @@
     - alias: Bedroom 2 sensor - join office speaker at a capped, ramped volume rather
         than whatever it was left at last
       conditions:
+      - alias: Session still active and not fading RIGHT NOW (added 2026-11-21) -
+          a queued run checks the automation conditions when it triggers, not when
+          it starts. A run queued behind a 20 s ramp joined the Big Bedroom to the
+          kitchen 9 s after the session ended (8:32 PM 11-20), leaving it stuck in
+          the kitchen group, so Fun Time later played in the empty kitchen
+        condition: template
+        value_template: '{{ is_state(''input_boolean.welcome_home_active'', ''on'')
+          and state_attr(''automation.welcome_home_auto_expire_after_30_minutes'',
+          ''current'') | int(0) == 0 }}'
       - alias: Room motion, or session just started with the room already occupied
         condition: template
         value_template: '{{ trigger.id == ''bedroom_2_motion'' or (trigger.id == ''session_start''
@@ -10419,6 +10428,15 @@
     - alias: Big bedroom sensor - join bedroom speaker at a capped, ramped volume
         rather than whatever it was left at last
       conditions:
+      - alias: Session still active and not fading RIGHT NOW (added 2026-11-21) -
+          a queued run checks the automation conditions when it triggers, not when
+          it starts. A run queued behind a 20 s ramp joined the Big Bedroom to the
+          kitchen 9 s after the session ended (8:32 PM 11-20), leaving it stuck in
+          the kitchen group, so Fun Time later played in the empty kitchen
+        condition: template
+        value_template: '{{ is_state(''input_boolean.welcome_home_active'', ''on'')
+          and state_attr(''automation.welcome_home_auto_expire_after_30_minutes'',
+          ''current'') | int(0) == 0 }}'
       - alias: Room motion, or session just started with the room already occupied
         condition: template
         value_template: '{{ trigger.id == ''big_bedroom_motion'' or (trigger.id ==
@@ -10471,6 +10489,15 @@
     - alias: Living room sensor - join the Yamaha receiver (via its Music Assistant
         player) at a capped, ramped volume rather than whatever it was left at last
       conditions:
+      - alias: Session still active and not fading RIGHT NOW (added 2026-11-21) -
+          a queued run checks the automation conditions when it triggers, not when
+          it starts. A run queued behind a 20 s ramp joined the Big Bedroom to the
+          kitchen 9 s after the session ended (8:32 PM 11-20), leaving it stuck in
+          the kitchen group, so Fun Time later played in the empty kitchen
+        condition: template
+        value_template: '{{ is_state(''input_boolean.welcome_home_active'', ''on'')
+          and state_attr(''automation.welcome_home_auto_expire_after_30_minutes'',
+          ''current'') | int(0) == 0 }}'
       - alias: Room motion, or session just started with the room already occupied
         condition: template
         value_template: '{{ trigger.id == ''living_room_motion'' or (trigger.id ==
@@ -20037,3 +20064,120 @@
           | list %}{% set nxt = t.index(state_attr(''media_player.office_2'', ''media_content_id''))
           + 1 %}{{ 0 if nxt >= (t | length - 20) else nxt }}'
   mode: restart
+- id: '1794200000001'
+  alias: 'Kitchen: Stop Music When Empty 5 Min'
+  description: 'Added 2026-11-21 at the user''s request ("music in kitchen should
+    clear a few min on room empty") after Fun Time music played in the empty kitchen
+    from 1:09 AM. Kitchen empty 5 min while the kitchen speaker plays (or it starts
+    playing with nobody there) -> fade 30 s and stop, then restore and unmute the
+    volume. Presence returning mid-fade restores the volume and keeps playing. When
+    the kitchen is a member of another room''s group it just leaves that group. Skips
+    while Welcome Home is active (the kitchen anchors that session and it has its
+    own empty-room fades/expiry) and when the kitchen leads a group (stopping the
+    leader would silence the other rooms).'
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    to: 'off'
+    for:
+      minutes: 5
+  - alias: Started playing with nobody in the kitchen
+    trigger: state
+    entity_id:
+    - media_player.kitchen_2
+    - media_player.kitchen
+    to: playing
+    for:
+      minutes: 5
+  conditions:
+  - condition: state
+    entity_id: binary_sensor.kitchen_sensor_group
+    state: 'off'
+    for:
+      minutes: 5
+  - condition: state
+    entity_id: input_boolean.welcome_home_active
+    state: 'off'
+  - alias: Kitchen speaker is actually playing
+    condition: template
+    value_template: '{{ is_state(''media_player.kitchen_2'', ''playing'') or is_state(''media_player.kitchen'',
+      ''playing'') }}'
+  actions:
+  - variables:
+      members: '{{ state_attr(''media_player.kitchen_2'', ''group_members'') | default([],
+        true) | list }}'
+      grouped: '{{ members | length > 1 }}'
+      leader: '{{ grouped and members[0] == ''media_player.kitchen_2'' }}'
+      vol: '{{ [state_attr(''media_player.kitchen_2'', ''volume_level'') | float(0.15),
+        0.10] | max | round(2) }}'
+  - choose:
+    - alias: Kitchen leads other rooms - leave it, stopping the leader silences them
+      conditions: '{{ leader }}'
+      sequence:
+      - action: logbook.log
+        data:
+          name: Kitchen empty music stop
+          message: skipped - the kitchen is leading {{ members | length - 1 }} other
+            speaker(s)
+          entity_id: media_player.kitchen_2
+    - alias: Kitchen is a member of another room's group - just leave the group
+      conditions: '{{ grouped }}'
+      sequence:
+      - action: script.stop_room_speaker_safely
+        data:
+          entity_id: media_player.kitchen_2
+    default:
+    - alias: Fade over 30 s (6 steps of 5 s), abort if someone comes back
+      repeat:
+        count: 6
+        sequence:
+        - action: media_player.volume_set
+          target:
+            entity_id: media_player.kitchen_2
+          data:
+            volume_level: '{{ (vol * (6 - repeat.index) / 6) | round(3) }}'
+        - wait_template: '{{ is_state(''binary_sensor.kitchen_sensor_group'', ''on'')
+            }}'
+          timeout:
+            seconds: 5
+          continue_on_timeout: true
+        - if:
+          - condition: template
+            value_template: '{{ wait.completed }}'
+          then:
+          - action: media_player.volume_set
+            target:
+              entity_id: media_player.kitchen_2
+            data:
+              volume_level: '{{ vol }}'
+          - stop: Someone came back into the kitchen - kept the music playing
+    - alias: Stop the kitchen (MA queue, then the Sonos itself if another app is
+        playing on it)
+      continue_on_error: true
+      action: media_player.media_stop
+      target:
+        entity_id: media_player.kitchen_2
+    - delay:
+        seconds: 3
+    - if:
+      - condition: state
+        entity_id: media_player.kitchen
+        state: playing
+      then:
+      - continue_on_error: true
+        action: media_player.media_pause
+        target:
+          entity_id: media_player.kitchen
+    - alias: Restore the volume and unmute (a fade to 0 leaves a Sonos muted)
+      action: media_player.volume_set
+      target:
+        entity_id: media_player.kitchen_2
+      data:
+        volume_level: '{{ vol }}'
+    - continue_on_error: true
+      action: media_player.volume_mute
+      target:
+        entity_id: media_player.kitchen_2
+      data:
+        is_volume_muted: false
+  mode: single

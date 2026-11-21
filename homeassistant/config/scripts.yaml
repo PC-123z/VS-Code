@@ -897,55 +897,55 @@ goodbye_routine_alexa:
   description: ''
 funtime_play_playlist:
   alias: Funtime - Play Playlist (with retry)
-  description: Shared by the Fun Button automations - sets bedroom volume, plays the
-    given Music Assistant media_id on media_player.bedroom_2, retries once if playback
-    doesn't start, and notifies if it still hasn't started after two tries.
+  description: 'Shared by the Fun Button automations - plays the given Music Assistant
+    media_id on media_player.bedroom_2 at 20%. Reworked 2026-11-21: a Welcome Home
+    join that ran after the session ended left the bedroom grouped under the kitchen,
+    so Music Assistant sent Fun Time to the EMPTY kitchen and every retry was refused
+    (MA allows one Spotify stream at a time). Now it always leaves any speaker group
+    first. If music still has not started it stops music in an empty kitchen (frees
+    the Spotify stream), leaves groups again and retries; last resort is the local
+    Kenny G album (no Spotify needed). Notifies with the real reason.'
   fields:
     media_id:
       description: Music Assistant media_id URI to play (e.g. spotify://playlist/...
         or ytmusic://playlist/...)
       example: spotify://playlist/0sXpI5zODRoKxKLBKlXwGS
   sequence:
+  - alias: Leave any speaker group first - a grouped speaker hands play commands
+      to the group leader, i.e. another room (2026-11-21 Fun Time played in the kitchen)
+    continue_on_error: true
+    action: media_player.unjoin
+    target:
+      entity_id: media_player.bedroom_2
+  - delay:
+      seconds: 2
   - alias: Set Sonos volume to 20%
     action: media_player.volume_set
     target:
       entity_id: media_player.bedroom_2
     data:
       volume_level: 0.2
-  - alias: Play playlist via Music Assistant (with retry)
-    repeat:
-      sequence:
-      - continue_on_error: true
-        action: music_assistant.play_media
-        target:
-          entity_id: media_player.bedroom_2
-        data:
-          media_id: '{{ media_id }}'
-          media_type: playlist
-          radio_mode: false
-      - continue_on_error: true
-        action: media_player.shuffle_set
-        target:
-          entity_id: media_player.bedroom_2
-        data:
-          shuffle: true
-      - alias: Give playback a few seconds to start
-        wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
-        timeout:
-          seconds: 8
-        continue_on_timeout: true
-      until:
-      - alias: Exit the loop once it is playing, or after two attempts. Must be an
-          until condition, not a stop action - stop would end the whole script run
-          and skip every step after this repeat.
-        condition: or
-        conditions:
-        - condition: state
-          entity_id: media_player.bedroom
-          state: playing
-        - condition: template
-          value_template: '{{ repeat.index >= 2 }}'
-  - alias: Notify if music still isn't playing after retry
+  - alias: Unmute - a fade to 0 elsewhere can leave the speaker muted
+    continue_on_error: true
+    action: media_player.volume_mute
+    target:
+      entity_id: media_player.bedroom_2
+    data:
+      is_volume_muted: false
+  - alias: Attempt 1
+    continue_on_error: true
+    action: music_assistant.play_media
+    target:
+      entity_id: media_player.bedroom_2
+    data:
+      media_id: '{{ media_id }}'
+      media_type: playlist
+      radio_mode: false
+  - wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
+    timeout:
+      seconds: 10
+    continue_on_timeout: true
+  - alias: Not playing - free the Spotify stream and retry
     if:
     - condition: not
       conditions:
@@ -953,11 +953,78 @@ funtime_play_playlist:
         entity_id: media_player.bedroom
         state: playing
     then:
-    - action: notify.mobile_app_pc_iphone
+    - alias: Stop music in an EMPTY kitchen (it holds the one Spotify stream); never
+        touches a kitchen someone is in
+      if:
+      - condition: state
+        entity_id: binary_sensor.kitchen_sensor_group
+        state: 'off'
+      - condition: state
+        entity_id: media_player.kitchen_2
+        state:
+        - playing
+        - paused
+        - buffering
+      then:
+      - action: script.stop_room_speaker_safely
+        data:
+          entity_id: media_player.kitchen_2
+      - delay:
+          seconds: 3
+    - continue_on_error: true
+      action: media_player.unjoin
+      target:
+        entity_id: media_player.bedroom_2
+    - delay:
+        seconds: 2
+    - alias: Attempt 2
+      continue_on_error: true
+      action: music_assistant.play_media
+      target:
+        entity_id: media_player.bedroom_2
       data:
-        title: Fun Button music didn't start
-        message: Bedroom Sonos didn't start playing after two tries - speaker may
-          be offline.
+        media_id: '{{ media_id }}'
+        media_type: playlist
+        radio_mode: false
+    - wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
+      timeout:
+        seconds: 15
+      continue_on_timeout: true
+  - alias: Last resort - local Kenny G album (no Spotify login or stream limit)
+    if:
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: media_player.bedroom
+        state: playing
+    then:
+    - continue_on_error: true
+      action: music_assistant.play_media
+      target:
+        entity_id: media_player.bedroom_2
+      data:
+        media_id: library://album/1525
+        media_type: album
+        radio_mode: false
+    - wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
+      timeout:
+        seconds: 15
+      continue_on_timeout: true
+    - continue_on_error: true
+      action: notify.mobile_app_pc_iphone
+      data:
+        title: Fun Button music
+        message: '{{ ''Spotify would not start in the Big Bedroom - playing the local
+          Kenny G backup instead.'' if is_state(''media_player.bedroom'', ''playing'')
+          else ''No music would start in the Big Bedroom, not even the local backup.
+          Check Music Assistant.'' }}'
+  - alias: Shuffle
+    continue_on_error: true
+    action: media_player.shuffle_set
+    target:
+      entity_id: media_player.bedroom_2
+    data:
+      shuffle: true
   mode: queued
   max: 3
   icon: mdi:playlist-music
