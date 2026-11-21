@@ -2255,3 +2255,67 @@ big_bedroom_lights_off:
         name: Big Bedroom
         entity_id: script.big_bedroom_lights_off
         message: 'safety net: a bulb was still on 2 min after the fade - turned off'
+bedroom2_all_lights_full:
+  alias: 'Bedroom 2: All Lights 100%'
+  description: Added 2026-11-20 for Tap Dial Button 1 press. Manual override on (AL off, manual_control set) so nothing dims it back until the room has been empty 25 min, then every Bedroom 2 light to 100% - ceilings 4000K, lamp (after dark only - daytime gate 1792300000001 would turn it off anyway), Nanoleafs Ribbon/Fluttershy and Showtime Light.
+  mode: restart
+  icon: mdi:lightbulb-on
+  sequence:
+  - alias: Override on - AL stays off and automations leave the lights alone until the room has been empty 25 minutes
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.bedroom2_manual_override
+  - alias: AL off so it can't fight the tap (sleep mode switch left alone - it defines night)
+    action: switch.turn_off
+    target:
+      entity_id:
+      - switch.adaptive_lighting_office
+      - switch.adaptive_lighting_adapt_color_office
+      - switch.adaptive_lighting_adapt_brightness_office
+  - action: adaptive_lighting.set_manual_control
+    continue_on_error: true
+    data:
+      entity_id: switch.adaptive_lighting_office
+      lights:
+      - light.office_1
+      - light.office_2
+      - light.hue_white_lamp_1
+      manual_control: true
+  - alias: Ceilings 100% neutral white
+    action: light.turn_on
+    continue_on_error: true
+    target:
+      entity_id:
+      - light.office_1
+      - light.office_2
+    data:
+      brightness_pct: 100
+      color_temp_kelvin: 4000
+      transition: 2
+  - alias: Bedroom 2 Lamp only after dark (sun below horizon) - 2026-10-20
+    if:
+    - condition: state
+      entity_id: sun.sun
+      state: below_horizon
+    then:
+    - action: light.turn_on
+      continue_on_error: true
+      target:
+        entity_id: light.hue_white_lamp_1
+      data:
+        brightness_pct: 100
+        transition: 2
+  - alias: Nanoleafs + Showtime 100% (one at a time so an offline panel doesn't block the rest)
+    repeat:
+      for_each:
+      - light.ribbon
+      - light.fluttershy
+      - light.showtime_light
+      sequence:
+      - action: light.turn_on
+        continue_on_error: true
+        target:
+          entity_id: '{{ repeat.item }}'
+        data:
+          brightness_pct: 100
+          transition: 2
