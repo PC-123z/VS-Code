@@ -2368,7 +2368,7 @@ bedroom2_all_lights_full:
       transition: 2
 bedroom2_wake_music_play:
   alias: Bedroom 2 wake music - play playlist from saved position
-  description: Starts the Good Morning playlist (same one Big Bedroom uses) on the Office speaker as ONE playlist item at input_number.bedroom2_gm_playlist_position, so each day resumes where the last ended. Falls back to the old wake album if the playlist does not start. Added 2026-11-21.
+  description: Starts the Good Morning playlist (same one Big Bedroom uses) on the Office speaker as ONE playlist item at input_number.bedroom2_gm_playlist_position, so each day resumes where the last ended. Falls back to the Spotify playlist Dance Pop Hits (upbeat pop, MA library 94) if the YouTube Music playlist does not start. Added 2026-11-21.
   mode: queued
   sequence:
   - continue_on_error: true
@@ -2403,7 +2403,7 @@ bedroom2_wake_music_play:
     timeout:
       seconds: 30
     continue_on_timeout: true
-  - alias: Backup - the old wake album if the playlist did not start
+  - alias: Backup - Spotify Dance Pop Hits if the playlist did not start
     if:
     - condition: template
       value_template: "{{ not is_state('media_player.office_2', 'playing') }}"
@@ -2412,7 +2412,6 @@ bedroom2_wake_music_play:
       action: script.ma_play_with_fallback
       data:
         player: media_player.office_2
-        media_id: ytmusic://album/MPREb_eRqlXW8MAYH
-        media_type: album
-        fallback_id: spotify--LXCMhnPg://album/4FBud2TTHOv79nmdQSe0RG
-        fallback_type: album
+        skip_primary: true
+        fallback_id: spotify--LXCMhnPg://playlist/37i9dQZF1DWZQaaqNMbbXa
+        fallback_type: playlist
