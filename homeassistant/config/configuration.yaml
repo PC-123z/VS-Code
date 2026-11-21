@@ -70,6 +70,16 @@ timer:
     duration: "00:45:00"
 
 input_number:
+  # Next unplayed track of the Bedroom 2 Good Morning playlist (2026-11-21). Kept current by
+  # automation "Bedroom 2 Good Morning - Track playlist position". Starts at 200 so the room
+  # does not begin on the same songs as Big Bedroom's helper.
+  bedroom2_gm_playlist_position:
+    name: "Bedroom 2 Good Morning Playlist Position"
+    min: 0
+    max: 5000
+    step: 1
+    initial: 200
+    mode: box
   bedroom2_scene_index:
     name: "Bedroom 2 Tap Scene Index"
     min: 0
@@ -778,6 +788,19 @@ rest_command:
     content_type: application/json
     payload: >-
       {"command": "player_queues/play_media", "args": {"queue_id": "RINCON_48A6B80529D101400",
+      "media": "ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H", "option": "replace",
+      "radio_mode": false{% if start_item | default('') | length > 0 %}, "start_item": "{{ start_item }}"{% endif %}}}
+
+  # Bedroom 2 (Office speaker) Good Morning: same playlist as Big Bedroom, started as ONE
+  # playlist item at a chosen track (2026-11-21). Never expand into per-track URIs.
+  ma_office_play_from:
+    url: http://192.168.70.155:8095/api
+    method: POST
+    headers:
+      Authorization: !secret music_assistant_api_bearer
+    content_type: application/json
+    payload: >-
+      {"command": "player_queues/play_media", "args": {"queue_id": "RINCON_48A6B8DFE73A01400",
       "media": "ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H", "option": "replace",
       "radio_mode": false{% if start_item | default('') | length > 0 %}, "start_item": "{{ start_item }}"{% endif %}}}
 

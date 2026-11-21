@@ -6154,15 +6154,9 @@
           entity_id: media_player.office_2
         data:
           volume_level: 0.05
-      - alias: Play wake album via Music Assistant
+      - alias: Play the wake playlist from today's saved position (resumes where yesterday ended)
         continue_on_error: true
-        action: script.ma_play_with_fallback
-        data:
-          player: media_player.office_2
-          media_id: ytmusic://album/MPREb_eRqlXW8MAYH
-          media_type: album
-          fallback_id: spotify--LXCMhnPg://album/4FBud2TTHOv79nmdQSe0RG
-          fallback_type: album
+        action: script.bedroom2_wake_music_play
       - delay:
           seconds: 15
       - alias: Get today's daily forecast (high/low/expected condition) for the announcements
@@ -6212,7 +6206,7 @@
           data:
             cache: false
             media_player_entity_id: media_player.office_2
-            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning Lily & Caylee! Today is {{ now().strftime(''%A, %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M %p'') }}. The current conditions are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
+            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning! Today is {{ now().strftime(''%A'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M %p'') }}. The current conditions are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
         - delay:
             seconds: 12
         - alias: Bump volume for second announcement
@@ -6228,7 +6222,7 @@
           data:
             cache: false
             media_player_entity_id: media_player.office_2
-            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} In case you missed it the first time, it seems you are really awake now. Good morning Lily & Caylee! Today is {{ now().strftime(''%A, %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M %p'') }}. The current conditions are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
+            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} In case you missed it the first time, it seems you are really awake now. Good morning! Today is {{ now().strftime(''%A'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M %p'') }}. The current conditions are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
         else:
         - alias: Ramp volume to 0.2
           repeat:
@@ -6293,7 +6287,7 @@
           data:
             cache: false
             media_player_entity_id: media_player.office_2
-            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning Lily & Caylee! Today is {{ now().strftime(''%A, %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M %p'') }}. The current conditions are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
+            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} Good morning! Today is {{ now().strftime(''%A'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M %p'') }}. The current conditions are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
         - alias: Wait for the announcement to finish and music to resume
           wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
           timeout:
@@ -6330,7 +6324,7 @@
           data:
             cache: false
             media_player_entity_id: media_player.office_2
-            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} In case you missed it the first time, it seems you are really awake now. Good morning Lily & Caylee! Today is {{ now().strftime(''%A, %B %-d'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M %p'') }}. The current conditions are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
+            message: '{% set fc = today_fc[''weather.forecast_home''][''forecast''] if (today_fc is defined and today_fc and ''weather.forecast_home'' in today_fc) else [] %} {% set f = fc[0] if fc else none %} In case you missed it the first time, it seems you are really awake now. Good morning! Today is {{ now().strftime(''%A'') }} and its going to be a great day! The time is {{ now().strftime(''%-I:%M %p'') }}. The current conditions are {{ states(''weather.forecast_home'') | replace(''-'', '' '') }}, with a temperature of {{ (state_attr(''weather.forecast_home'', ''temperature'') | float(0)) | round | int }} degrees. {% if f %}Today will be {{ f.condition | replace(''-'', '' '') }}, with a high of {{ (f.temperature | float(0)) | round | int }} and a low of {{ (f.templow | float(0)) | round | int }} degrees.{% endif %} Let''s go!!!!!'
         - alias: Wait for the announcement to finish and music to resume
           wait_template: '{{ is_state(''media_player.office_2'', ''playing'') }}'
           timeout:
@@ -6381,13 +6375,7 @@
                   state: 'on'
                 then:
                 - continue_on_error: true
-                  action: script.ma_play_with_fallback
-                  data:
-                    player: media_player.office_2
-                    media_id: ytmusic://album/MPREb_eRqlXW8MAYH
-                    media_type: album
-                    fallback_id: spotify--LXCMhnPg://album/4FBud2TTHOv79nmdQSe0RG
-                    fallback_type: album
+                  action: script.bedroom2_wake_music_play
               - alias: Self-heal - keep the Nanoleaf panels on for the full run. They were getting switched off mid-routine by the separate presence automation's own inactivity timeout, and they also drop offline (unavailable) on their own periodically - this re-asserts Cocoa Beach whenever they're not already on, recovering from either case.
                 if:
                 - condition: not
@@ -17583,3 +17571,37 @@
         tag: purifier_filter_empty
         url: /maintenance
   mode: single
+- id: '1795000000001'
+  alias: Bedroom 2 Good Morning - Track playlist position
+  description: Keeps input_number.bedroom2_gm_playlist_position at the next unplayed track of the Good Morning playlist, so tomorrow's Bedroom 2 run resumes where today left off. Runs on every Office track change while the Bedroom 2 Good Morning routine is running. Wraps to the top once fewer than 20 tracks remain. Added 2026-11-21, mirrors Big Bedroom's tracker.
+  triggers:
+  - trigger: state
+    entity_id: media_player.office_2
+    attribute: media_content_id
+  conditions:
+  - condition: template
+    value_template: "{{ (state_attr('automation.bedroom_2_good_morning_routine', 'current') | int(0)) > 0 }}"
+  - condition: state
+    entity_id: media_player.office_2
+    state: playing
+  actions:
+  - alias: Browse the playlist for its track order
+    continue_on_error: true
+    action: media_player.browse_media
+    target:
+      entity_id: media_player.office_2
+    data:
+      media_content_type: playlist
+      media_content_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
+    response_variable: b2_track_browse
+  - alias: Store the next position, only if the playing track is in the playlist
+    if:
+    - condition: template
+      value_template: "{{ b2_track_browse is defined and b2_track_browse and 'media_player.office_2' in b2_track_browse and state_attr('media_player.office_2', 'media_content_id') in (b2_track_browse['media_player.office_2'].children | map(attribute='media_content_id') | list) }}"
+    then:
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.bedroom2_gm_playlist_position
+      data:
+        value: "{% set t = b2_track_browse['media_player.office_2'].children | map(attribute='media_content_id') | list %}{% set nxt = t.index(state_attr('media_player.office_2', 'media_content_id')) + 1 %}{{ 0 if nxt >= (t | length - 20) else nxt }}"
+  mode: restart

@@ -2366,3 +2366,53 @@ bedroom2_all_lights_full:
     data:
       brightness_pct: 100
       transition: 2
+bedroom2_wake_music_play:
+  alias: Bedroom 2 wake music - play playlist from saved position
+  description: Starts the Good Morning playlist (same one Big Bedroom uses) on the Office speaker as ONE playlist item at input_number.bedroom2_gm_playlist_position, so each day resumes where the last ended. Falls back to the old wake album if the playlist does not start. Added 2026-11-21.
+  mode: queued
+  sequence:
+  - continue_on_error: true
+    action: media_player.shuffle_set
+    target:
+      entity_id: media_player.office_2
+    data:
+      shuffle: false
+  - continue_on_error: true
+    action: media_player.repeat_set
+    target:
+      entity_id: media_player.office_2
+    data:
+      repeat: all
+  - alias: Browse the playlist for its track order (listing only, never sent back to MA)
+    continue_on_error: true
+    action: media_player.browse_media
+    target:
+      entity_id: media_player.office_2
+    data:
+      media_content_type: playlist
+      media_content_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
+    response_variable: b2_browse
+  - variables:
+      b2_tracks: "{{ (b2_browse['media_player.office_2'].children | map(attribute='media_content_id') | list) if (b2_browse is defined and b2_browse and 'media_player.office_2' in b2_browse) else [] }}"
+      b2_start_uri: "{% set p = states('input_number.bedroom2_gm_playlist_position') | int(0) %}{% if b2_tracks | length > 0 %}{{ b2_tracks[p] if p < (b2_tracks | length) else b2_tracks[0] }}{% endif %}"
+  - continue_on_error: true
+    action: rest_command.ma_office_play_from
+    data:
+      start_item: '{{ b2_start_uri }}'
+  - wait_template: "{{ is_state('media_player.office_2', 'playing') or is_state('binary_sensor.ma_youtube_music_available', 'off') }}"
+    timeout:
+      seconds: 30
+    continue_on_timeout: true
+  - alias: Backup - the old wake album if the playlist did not start
+    if:
+    - condition: template
+      value_template: "{{ not is_state('media_player.office_2', 'playing') }}"
+    then:
+    - continue_on_error: true
+      action: script.ma_play_with_fallback
+      data:
+        player: media_player.office_2
+        media_id: ytmusic://album/MPREb_eRqlXW8MAYH
+        media_type: album
+        fallback_id: spotify--LXCMhnPg://album/4FBud2TTHOv79nmdQSe0RG
+        fallback_type: album
