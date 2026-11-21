@@ -2257,7 +2257,7 @@ big_bedroom_lights_off:
         message: 'safety net: a bulb was still on 2 min after the fade - turned off'
 bedroom2_all_lights_full:
   alias: 'Bedroom 2: All Lights 100%'
-  description: Added 2026-11-20 for Tap Dial Button 1 press. Manual override on (AL off, manual_control set) so nothing dims it back until the room has been empty 25 min, then every Bedroom 2 light to 100% - ceilings 4000K, lamp (after dark only - daytime gate 1792300000001 would turn it off anyway), Nanoleafs Ribbon/Fluttershy and Showtime Light.
+  description: Added 2026-11-20 for Tap Dial Button 1 press. Manual override on (AL off, manual_control set) so nothing dims it back until the room has been empty 25 min, then every Bedroom 2 light to 100% - ceilings 4000K, lamp (after dark only - daytime gate 1792300000001 would turn it off anyway), Showtime Light, then the Nanoleafs Ribbon/Fluttershy (outlets powered back on + 10 s boot wait if Bedtime cut them).
   mode: restart
   icon: mdi:lightbulb-on
   sequence:
@@ -2305,12 +2305,37 @@ bedroom2_all_lights_full:
       data:
         brightness_pct: 100
         transition: 2
-  - alias: Nanoleafs + Showtime 100% (one at a time so an offline panel doesn't block the rest)
+  - alias: Nanoleaf P115 outlets on if Bedtime cut them, then give the panels 10 s to boot (2026-11-20)
+    if:
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: switch.bedroom2_office_nano1
+        state: 'off'
+      - condition: state
+        entity_id: switch.nano2
+        state: 'off'
+    then:
+    - action: switch.turn_on
+      target:
+        entity_id:
+        - switch.bedroom2_office_nano1
+        - switch.nano2
+    - delay:
+        seconds: 10
+  - alias: If the panels haven't rejoined HA yet, wait up to 3 min more (continues the moment both are back). Measured 2026-11-14..20 after Good Morning's 06:15 power-on - panels take 65-120 s to show up again
+    wait_template: '{{ not is_state(''light.ribbon'',''unavailable'') and not is_state(''light.fluttershy'',''unavailable'') }}'
+    timeout:
+      seconds: 180
+    continue_on_timeout: true
+  - alias: Panels that just rejoined drop the first command (2026-11-20 Ribbon stuck at 26%) - give them 5 s to settle
+    delay:
+      seconds: 5
+  - alias: Nanoleafs 100% (one at a time so an offline panel doesn't block the other)
     repeat:
       for_each:
       - light.ribbon
       - light.fluttershy
-      - light.showtime_light
       sequence:
       - action: light.turn_on
         continue_on_error: true
@@ -2319,3 +2344,25 @@ bedroom2_all_lights_full:
         data:
           brightness_pct: 100
           transition: 2
+  - delay:
+      seconds: 5
+  - alias: Re-send to any panel that didn't reach full brightness
+    repeat:
+      for_each: >-
+        {% set ns = namespace(l=[]) %}{% for e in ['light.ribbon','light.fluttershy'] %}{% if not is_state(e,'unavailable') and (state_attr(e,'brightness') | int(0)) < 250 %}{% set ns.l = ns.l + [e] %}{% endif %}{% endfor %}{{ ns.l }}
+      sequence:
+      - action: light.turn_on
+        continue_on_error: true
+        target:
+          entity_id: '{{ repeat.item }}'
+        data:
+          brightness_pct: 100
+          transition: 2
+  - alias: Showtime Light 100% - last, its Elgato errors can end the run
+    action: light.turn_on
+    continue_on_error: true
+    target:
+      entity_id: light.showtime_light
+    data:
+      brightness_pct: 100
+      transition: 2
