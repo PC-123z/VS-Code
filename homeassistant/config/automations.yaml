@@ -19956,3 +19956,67 @@
       data:
         is_volume_muted: false
   mode: single
+- id: '1794300000001'
+  alias: 'Living Room TV: Off When Receiver Turns Off'
+  description: >-
+    Added 2026-11-22. Receiver off (remote or button) used to leave the Living Room TV
+    on. Deliberately conservative so it never interrupts viewing: receiver must STAY
+    off 60 s (not_from unavailable/unknown, so an integration blip never fires it);
+    the TV must be a real 'on' (never unavailable - the Android TV Remote drops out
+    for up to ~45 s now and then); TV on an input view (current_activity
+    com.sony.dtv.tvx, not an app/settings); PS5 off and Apple TV not playing (HDMI
+    passthrough could still be showing them); TV not turned on in the last 3 min.
+    Everything is re-checked right before the off, and the off is retried once if
+    the TV is still on. Companion to the PS5 rule 1749150000000.
+  triggers:
+  - trigger: state
+    entity_id: media_player.living_room_av
+    to: 'off'
+    not_from:
+    - unavailable
+    - unknown
+    for:
+      seconds: 60
+  conditions:
+  - condition: template
+    value_template: >-
+      {{ is_state('media_player.living_room_av', 'off')
+         and is_state('media_player.living_room_tv_2', 'on')
+         and is_state_attr('remote.living_room_tv', 'current_activity', 'com.sony.dtv.tvx')
+         and is_state('binary_sensor.ps5_living_room', 'off')
+         and not is_state('media_player.living_room', 'playing')
+         and (now() - states.media_player.living_room_tv_2.last_changed).total_seconds() > 180 }}
+  actions:
+  - delay:
+      seconds: 5
+  - condition: template
+    alias: Re-check right before acting
+    value_template: >-
+      {{ is_state('media_player.living_room_av', 'off')
+         and is_state('media_player.living_room_tv_2', 'on')
+         and is_state_attr('remote.living_room_tv', 'current_activity', 'com.sony.dtv.tvx')
+         and is_state('binary_sensor.ps5_living_room', 'off')
+         and not is_state('media_player.living_room', 'playing') }}
+  - action: logbook.log
+    data:
+      name: Living Room TV
+      message: turning off because the receiver has been off for 60 s
+      entity_id: media_player.living_room_tv_2
+  - action: media_player.turn_off
+    target:
+      entity_id: media_player.living_room_tv_2
+  - delay:
+      seconds: 20
+  - if:
+    - condition: state
+      entity_id: media_player.living_room_tv_2
+      state: 'on'
+    - condition: state
+      entity_id: media_player.living_room_av
+      state: 'off'
+    then:
+    - action: media_player.turn_off
+      target:
+        entity_id: media_player.living_room_tv_2
+  mode: single
+  max_exceeded: silent
