@@ -2482,3 +2482,78 @@ bedroom2_wake_music_play:
         skip_primary: true
         fallback_id: spotify--LXCMhnPg://playlist/37i9dQZF1DWZQaaqNMbbXa
         fallback_type: playlist
+big_bedroom_bright_override:
+  alias: Big Bedroom - Bright White Override (button hold)
+  description: 'Added 2026-11-21. Shared by the Pico button 1 HOLD and the Hue dimmer
+    button 1 HOLD: turns on the Big Bedroom manual override and sets every light
+    to 100% bright white (4000K). Adaptive Lighting and sleep mode go off, an in-flight
+    lights-off fade or Smart Motion run is cancelled, and the asleep flag clears.
+    TV Mode and Smart Motion stand down while the override is on. It ends after the
+    room is empty for 30 min (Reset Override When Empty), or with a Hue button 1 short
+    press (Restore AL).'
+  mode: restart
+  icon: mdi:lightbulb-on
+  sequence:
+  - alias: Cancel an in-flight lights-off fade
+    continue_on_error: true
+    action: script.turn_off
+    target:
+      entity_id: script.big_bedroom_lights_off
+  - alias: Cancel an in-flight Smart Motion run (blip-check fade / empty-room timer)
+    continue_on_error: true
+    action: automation.turn_off
+    target:
+      entity_id: automation.big_bedroom_smart_motion_presence
+    data:
+      stop_actions: true
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.big_bedroom_manual_override
+  - action: automation.turn_on
+    target:
+      entity_id: automation.big_bedroom_smart_motion_presence
+  - alias: Awake - clear the asleep flag
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.big_bedroom_asleep
+  - alias: AL and sleep mode off so they cannot fight the override
+    action: switch.turn_off
+    target:
+      entity_id:
+      - switch.al_big_bedroom
+      - switch.al_sleep_mode_big_bedroom
+      - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_color_big_bedroom_al
+      - switch.adaptive_lighting_big_bedroom_al_adaptive_lighting_adapt_brightness_big_bedroom_al
+  - continue_on_error: true
+    action: adaptive_lighting.set_manual_control
+    data:
+      entity_id: switch.al_big_bedroom
+      lights:
+      - light.bedroom_ceiling
+      - light.bedroom_lamps
+      manual_control: true
+  - alias: All Big Bedroom lights 100% bright white
+    action: light.turn_on
+    target:
+      entity_id:
+      - light.bedroom_ceiling_1
+      - light.bedroom_ceiling_2
+      - light.bedroom_lamp_1
+      - light.bedroom_lamp_2
+    data:
+      brightness_pct: 100
+      color_temp_kelvin: 4000
+      transition: 1
+  - continue_on_error: true
+    action: light.turn_on
+    target:
+      entity_id: light.nano_sand_dune
+    data:
+      brightness_pct: 100
+      color_temp_kelvin: 4000
+      transition: 1
+  - action: logbook.log
+    data:
+      name: Big Bedroom
+      entity_id: input_boolean.big_bedroom_manual_override
+      message: button hold - manual override on, lights 100% bright white
