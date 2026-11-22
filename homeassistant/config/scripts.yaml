@@ -2557,3 +2557,87 @@ big_bedroom_bright_override:
       name: Big Bedroom
       entity_id: input_boolean.big_bedroom_manual_override
       message: button hold - manual override on, lights 100% bright white
+light_soft_color_on:
+  alias: Light - Soft Colour On (no white flash)
+  description: 'Added 2026-11-22. A Hue bulb that is OFF and gets turned on with
+    a transition fades in from its LAST colour (e.g. yesterday''s bright white) to
+    the new one - 6:20 AM the living room flashed white before going dim red. This
+    first turns any off lights on instantly (transition 0) at 1% in the target colour,
+    then fades to the target brightness. Lights already on just get the normal fade.
+    Pass entity_id plus brightness_pct, transition and rgb_color OR color_temp_kelvin.
+    Hue rooms/zones are staged as one group command when the whole group is off.'
+  mode: parallel
+  max: 20
+  icon: mdi:lightbulb-on-outline
+  fields:
+    entity_id:
+      description: Light(s) or Hue room/zone
+    brightness_pct:
+      description: Target brightness
+    rgb_color:
+      description: Target colour [r, g, b]
+    color_temp_kelvin:
+      description: Target white temperature (instead of rgb_color)
+    transition:
+      description: Fade time in seconds after the instant 1% start
+  sequence:
+  - variables:
+      ids: '{{ [entity_id] if entity_id is string else entity_id | list }}'
+      use_rgb: '{{ rgb_color is defined and rgb_color is not none and rgb_color | list | length == 3 }}'
+      kelvin: '{{ color_temp_kelvin | default(0, true) | int(0) }}'
+      fade: '{{ transition | default(5, true) | float(5) }}'
+      bri: '{{ brightness_pct | default(100, true) | float(100) }}'
+      off_targets: "{% set ns = namespace(out=[]) %}{% for e in ids %}{% if is_state(e, 'off') %}{% set ns.out = ns.out + [e] %}{% else %}{% set ns.out = ns.out + (expand(e) | selectattr('state', 'eq', 'off') | map(attribute='entity_id') | list) %}{% endif %}{% endfor %}{{ ns.out | unique | list }}"
+  - alias: Off lights come on instantly at 1% in the target colour
+    if:
+    - condition: template
+      value_template: '{{ off_targets | length > 0 }}'
+    then:
+    - choose:
+      - conditions: '{{ use_rgb }}'
+        sequence:
+        - action: light.turn_on
+          target:
+            entity_id: '{{ off_targets }}'
+          data:
+            brightness_pct: 1
+            rgb_color: '{{ rgb_color | list }}'
+            transition: 0
+      - conditions: '{{ kelvin > 0 }}'
+        sequence:
+        - action: light.turn_on
+          target:
+            entity_id: '{{ off_targets }}'
+          data:
+            brightness_pct: 1
+            color_temp_kelvin: '{{ kelvin }}'
+            transition: 0
+    - delay:
+        milliseconds: 700
+  - alias: Fade to the target
+    choose:
+    - conditions: '{{ use_rgb }}'
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: '{{ ids }}'
+        data:
+          brightness_pct: '{{ bri }}'
+          rgb_color: '{{ rgb_color | list }}'
+          transition: '{{ fade }}'
+    - conditions: '{{ kelvin > 0 }}'
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: '{{ ids }}'
+        data:
+          brightness_pct: '{{ bri }}'
+          color_temp_kelvin: '{{ kelvin }}'
+          transition: '{{ fade }}'
+    default:
+    - action: light.turn_on
+      target:
+        entity_id: '{{ ids }}'
+      data:
+        brightness_pct: '{{ bri }}'
+        transition: '{{ fade }}'

@@ -2438,10 +2438,9 @@
       - action: switch.turn_off
         target:
           entity_id: switch.al_living_room
-      - action: light.turn_on
-        target:
-          entity_id: light.living_room
+      - action: script.light_soft_color_on
         data:
+          entity_id: light.living_room
           brightness_pct: 10
           rgb_color:
           - 255
@@ -2563,10 +2562,9 @@
       - action: switch.turn_off
         target:
           entity_id: switch.al_living_room
-      - action: light.turn_on
-        target:
-          entity_id: light.living_room
+      - action: script.light_soft_color_on
         data:
+          entity_id: light.living_room
           brightness_pct: 3
           rgb_color:
           - 200
@@ -2583,10 +2581,9 @@
       - action: switch.turn_off
         target:
           entity_id: switch.al_living_room
-      - action: light.turn_on
-        target:
-          entity_id: light.living_room
+      - action: script.light_soft_color_on
         data:
+          entity_id: light.living_room
           brightness_pct: 10
           rgb_color:
           - 255
@@ -2608,10 +2605,9 @@
           - action: switch.turn_off
             target:
               entity_id: switch.al_living_room
-          - action: light.turn_on
-            target:
-              entity_id: light.living_room
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.living_room
               brightness_pct: 10
               rgb_color:
               - 255
@@ -2655,10 +2651,9 @@
           - action: switch.turn_off
             target:
               entity_id: switch.al_living_room
-          - action: light.turn_on
-            target:
-              entity_id: light.living_room
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.living_room
               brightness_pct: 3
               rgb_color:
               - 200
@@ -2670,10 +2665,9 @@
           - action: switch.turn_off
             target:
               entity_id: switch.al_living_room
-          - action: light.turn_on
-            target:
-              entity_id: light.living_room
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.living_room
               brightness_pct: 10
               rgb_color:
               - 255
@@ -2770,20 +2764,18 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: light.turn_on
-        target:
-          entity_id: light.dining_room_bottom
+      - action: script.light_soft_color_on
         data:
+          entity_id: light.dining_room_bottom
           brightness_pct: 8
           rgb_color:
           - 255
           - 20
           - 0
           transition: 30
-      - action: light.turn_on
-        target:
-          entity_id: light.dining_room_top
+      - action: script.light_soft_color_on
         data:
+          entity_id: light.dining_room_top
           brightness_pct: 12
           rgb_color:
           - 255
@@ -3096,17 +3088,15 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: light.turn_on
-        target:
-          entity_id: light.dining_room_top
+      - action: script.light_soft_color_on
         data:
+          entity_id: light.dining_room_top
           brightness_pct: 20
           color_temp_kelvin: 3320
           transition: 60
-      - action: light.turn_on
-        target:
-          entity_id: light.dining_room_bottom
+      - action: script.light_soft_color_on
         data:
+          entity_id: light.dining_room_bottom
           brightness_pct: 20
           color_temp_kelvin: 2000
           transition: 60
@@ -3129,20 +3119,18 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: light.turn_on
-        target:
-          entity_id: light.dining_room_top
+      - action: script.light_soft_color_on
         data:
+          entity_id: light.dining_room_top
           rgb_color:
           - 64
           - 224
           - 208
           brightness_pct: 5
           transition: 60
-      - action: light.turn_on
-        target:
-          entity_id: light.dining_room_bottom
+      - action: script.light_soft_color_on
         data:
+          entity_id: light.dining_room_bottom
           rgb_color:
           - 76
           - 26
@@ -3168,20 +3156,18 @@
           entity_id:
           - switch.al_dining_room_bottom
           - switch.al_dining_room_top
-      - action: light.turn_on
-        target:
-          entity_id: light.dining_room_bottom
+      - action: script.light_soft_color_on
         data:
+          entity_id: light.dining_room_bottom
           brightness_pct: 8
           rgb_color:
           - 255
           - 20
           - 0
           transition: 60
-      - action: light.turn_on
-        target:
-          entity_id: light.dining_room_top
+      - action: script.light_soft_color_on
         data:
+          entity_id: light.dining_room_top
           brightness_pct: 12
           rgb_color:
           - 255
@@ -3210,17 +3196,15 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              entity_id: light.dining_room_bottom
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.dining_room_bottom
               brightness_pct: 2
               color_temp_kelvin: 2500
               transition: 5
-          - action: light.turn_on
-            target:
-              entity_id: light.dining_room_top
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.dining_room_top
               brightness_pct: 2
               color_temp_kelvin: 2500
               transition: 5
@@ -3239,20 +3223,18 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              entity_id: light.dining_room_bottom
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.dining_room_bottom
               brightness_pct: 8
               rgb_color:
               - 255
               - 20
               - 0
               transition: 5
-          - action: light.turn_on
-            target:
-              entity_id: light.dining_room_top
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.dining_room_top
               brightness_pct: 12
               rgb_color:
               - 255
@@ -3315,17 +3297,15 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              entity_id: light.dining_room_top
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.dining_room_top
               brightness_pct: 20
               color_temp_kelvin: 3320
               transition: 5
-          - action: light.turn_on
-            target:
-              entity_id: light.dining_room_bottom
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.dining_room_bottom
               brightness_pct: 20
               color_temp_kelvin: 2000
               transition: 5
@@ -3339,20 +3319,18 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              entity_id: light.dining_room_top
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.dining_room_top
               rgb_color:
               - 64
               - 224
               - 208
               brightness_pct: 5
               transition: 5
-          - action: light.turn_on
-            target:
-              entity_id: light.dining_room_bottom
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.dining_room_bottom
               rgb_color:
               - 76
               - 26
@@ -3369,20 +3347,18 @@
               entity_id:
               - switch.al_dining_room_bottom
               - switch.al_dining_room_top
-          - action: light.turn_on
-            target:
-              entity_id: light.dining_room_bottom
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.dining_room_bottom
               brightness_pct: 8
               rgb_color:
               - 255
               - 20
               - 0
               transition: 5
-          - action: light.turn_on
-            target:
-              entity_id: light.dining_room_top
+          - action: script.light_soft_color_on
             data:
+              entity_id: light.dining_room_top
               brightness_pct: 12
               rgb_color:
               - 255
