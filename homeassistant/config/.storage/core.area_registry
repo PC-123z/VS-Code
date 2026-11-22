@@ -133,6 +133,19 @@
         "temperature_entity_id": null,
         "created_at": "2026-03-01T18:16:30.842020+00:00",
         "modified_at": "2026-03-24T00:07:21.864542+00:00"
+      },
+      {
+        "aliases": [],
+        "floor_id": null,
+        "humidity_entity_id": null,
+        "icon": null,
+        "id": "unnamed_room",
+        "labels": [],
+        "name": "Unnamed Room",
+        "picture": null,
+        "temperature_entity_id": null,
+        "created_at": "2026-11-22T21:52:32.129603+00:00",
+        "modified_at": "2026-11-22T21:52:32.129611+00:00"
       }
     ]
   }
