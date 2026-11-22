@@ -20020,3 +20020,49 @@
         entity_id: media_player.living_room_tv_2
   mode: single
   max_exceeded: silent
+- id: '1794300000002'
+  alias: 'TV: Bravia IP Control Unavailable Alert'
+  description: >-
+    Added 2026-11-22. The Big Bedroom TV power-off (1793900000001) and the kitchen
+    Zone 2 input switch (1792600000001) depend on the Sony Bravia integration
+    entities. If the pre-shared key, TV network settings or integration break, those
+    automations fail silently and the TV stays on / on the wrong input. Alerts the
+    iPhone when either Bravia entity has been unavailable for 10 min (these entities
+    stayed available all week, so a real outage is rare), and sends one all-clear
+    when it recovers.
+  triggers:
+  - trigger: state
+    entity_id:
+    - media_player.bedroom_big_big_bedroom_tv
+    - media_player.kitchen_tv
+    to: unavailable
+    for:
+      minutes: 10
+    id: down
+  - trigger: state
+    entity_id:
+    - media_player.bedroom_big_big_bedroom_tv
+    - media_player.kitchen_tv
+    from: unavailable
+    id: up
+  conditions:
+  - condition: template
+    alias: Recovery only matters if we already alerted for this TV
+    value_template: >-
+      {{ trigger.id == 'down' or
+         (trigger.id == 'up' and as_timestamp(trigger.from_state.last_changed) <
+          (as_timestamp(now()) - 600)) }}
+  actions:
+  - action: notify.mobile_app_pc_iphone
+    data:
+      title: >-
+        {{ 'TV IP control back' if trigger.id == 'up' else 'TV IP control down' }}
+      message: >-
+        {% set n = 'Big Bedroom TV' if 'bedroom' in trigger.entity_id else 'Kitchen TV' %}
+        {% if trigger.id == 'up' %}{{ n }} Bravia IP control is available again.
+        {% else %}{{ n }} Bravia IP control has been unavailable for 10 min. Power-off
+        {{ 'from Apple Home / automations' if 'bedroom' in trigger.entity_id else 'and the Zone 2 input switch' }}
+        will not work until it is fixed (check the TV's network and the Sony Bravia
+        integration pre-shared key).{% endif %}
+  mode: queued
+  max: 4
