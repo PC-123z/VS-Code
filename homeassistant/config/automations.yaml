@@ -9837,6 +9837,41 @@
                   else %}library://album/1525{% endif %}'
                 fallback_type: '{{ ''playlist'' if current_hour|int == 20 else ''album''
                   }}'
+        - sequence:
+          - alias: Beam joins the stream the Kitchen is already playing (2026-11-23,
+              user request - Kitchen stays the anchor and music starts with no wait
+              on the Beam; the Beam slips into the playing stream on its own and
+              the volume-match automation 1794400000002 follows the Kitchen ramp).
+              Up to 4 tries 8 s apart, never blocks the music.
+            wait_template: '{{ is_state(''media_player.kitchen_2'', ''playing'') }}'
+            timeout:
+              seconds: 30
+            continue_on_timeout: true
+          - repeat:
+              count: 4
+              sequence:
+              - if:
+                - condition: template
+                  value_template: "{% set kg = state_attr('media_player.kitchen','group_members') | default([], true) | list %}{{ states('media_player.kitchen_beam') not in ['unavailable','unknown'] and 'media_player.kitchen_beam' not in kg }}"
+                then:
+                - variables:
+                    wh_k: "{{ state_attr('media_player.kitchen','volume_level') | float(0.05) }}"
+                    wh_leader: "{% set kg = state_attr('media_player.kitchen','group_members') | default([], true) | list %}{{ kg[0] if kg | length > 1 and kg[0] != 'media_player.kitchen_beam' else 'media_player.kitchen' }}"
+                - action: media_player.volume_set
+                  continue_on_error: true
+                  target:
+                    entity_id: media_player.kitchen_beam
+                  data:
+                    volume_level: "{{ 0 if wh_k <= 0 else ([0, [1, wh_k - states('input_number.kitchen_beam_volume_offset') | float(0)] | min] | max) | round(2) }}"
+                - action: media_player.join
+                  continue_on_error: true
+                  target:
+                    entity_id: '{{ wh_leader }}'
+                  data:
+                    group_members:
+                    - media_player.kitchen_beam
+              - delay:
+                  seconds: 8
       continue_on_error: true
   mode: single
   max_exceeded: silent
@@ -20129,6 +20164,7 @@
         | list | length > 1 }}'
       k_music: '{{ states(''media_player.kitchen_2'') in [''playing'', ''buffering''] and not (together and k_leader == ''media_player.kitchen_beam'' and
         beam_tv) }}'
+      wh_hold: '{{ is_state(''input_boolean.welcome_home_active'', ''on'') and states(''media_player.kitchen_2'') in [''playing'', ''buffering''] and not is_state(''media_player.kitchen_tv'', ''on'') }}'
   - choose:
     - alias: Grouped with the Beam leading, but the Beam has not been playing TV for over a minute and nothing else is playing - hand the lead back to the
         Kitchen (2026-11-22 night - judged from the Beam itself, NOT media_player.kitchen_tv, whose Bravia state lags and showed off while the TV was on)
@@ -20218,7 +20254,7 @@
         alone (never pull the Beam off the TV; the Sony's state lags 1-2 min, and its change re-runs this)
       conditions:
       - condition: template
-        value_template: '{{ beam_tv and not together and (ma_grouped or kg | length > 1) }}'
+        value_template: '{{ beam_tv and not together and not wh_hold and (ma_grouped or kg | length > 1) }}'
       sequence:
       - action: logbook.log
         data:
@@ -20230,7 +20266,7 @@
         Beam was pulled off the TV 3 times in a row = TV sound kept cutting out)
       conditions:
       - condition: template
-        value_template: '{{ beam_tv and not together }}'
+        value_template: '{{ beam_tv and not together and not wh_hold }}'
       sequence:
       - action: media_player.volume_set
         continue_on_error: true
