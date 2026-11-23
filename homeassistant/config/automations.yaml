@@ -6959,6 +6959,10 @@
     condition: state
     entity_id: input_boolean.big_bedroom_asleep
     state: 'off'
+  - alias: Skip while the kitchen TV is on (2026-11-23) - the TV wins; Keep Beam Grouped moves the Kitchen to the TV
+    condition: template
+    value_template: '{{ not (is_state(''media_player.kitchen_tv'', ''on'') and state_attr(''media_player.kitchen_beam'', ''source'') == ''TV'' and is_state(''media_player.kitchen_beam'',
+      ''playing'')) }}'
   actions:
   - variables:
       already_joined: "{{ state_attr('media_player.bedroom_2', 'group_members') is
@@ -7055,17 +7059,24 @@
         minutes: 5
     timeout:
       minutes: 60
-  - alias: Ungroup kitchen speaker
-    continue_on_error: true
-    action: media_player.unjoin
-    target:
-      entity_id: media_player.kitchen
-  - alias: Restore kitchen volume to pre-join level
-    action: media_player.volume_set
-    target:
-      entity_id: media_player.kitchen
-    data:
-      volume_level: '{{ kitchen_vol_before }}'
+  - alias: Ungroup and restore only if the Kitchen is still in the Good Morning group (2026-11-23) - if it left for the kitchen TV, unjoining here would
+      cut the TV sound
+    if:
+    - condition: template
+      value_template: '{{ ''media_player.kitchen'' in (state_attr(''media_player.bedroom'', ''group_members'') | default([], true)) or ''media_player.kitchen_2''
+        in (state_attr(''media_player.bedroom_2'', ''group_members'') | default([], true)) }}'
+    then:
+    - alias: Ungroup kitchen speaker
+      continue_on_error: true
+      action: media_player.unjoin
+      target:
+        entity_id: media_player.kitchen
+    - alias: Restore kitchen volume to pre-join level
+      action: media_player.volume_set
+      target:
+        entity_id: media_player.kitchen
+      data:
+        volume_level: '{{ kitchen_vol_before }}'
   mode: single
   max_exceeded: silent
 - id: '1776687030470'
@@ -20092,6 +20103,9 @@
     - media_player.kitchen_tv
     to: null
   - trigger: state
+    entity_id: sensor.kitchen_beam_audio_input_format
+    to: null
+  - trigger: state
     entity_id: media_player.kitchen_beam
     attribute: source
   - trigger: homeassistant
@@ -20147,7 +20161,61 @@
       - condition: template
         value_template: '{{ together }}'
       sequence: []
-    - alias: The Beam is playing TV sound on its own but the Kitchen is in a multi-room music group - leave both alone (never pull the Beam off the TV)
+    - alias: The TV is on (the Sony says on AND the Beam is playing TV sound) while the Kitchen is in another room's music group (Good Morning, Welcome
+        Home etc.) - the Kitchen leaves that music and joins the TV (2026-11-23 user request; the other rooms keep their music). Needs BOTH signals - the
+        Beam alone kept reporting TV all night with the TV off
+      conditions:
+      - condition: template
+        value_template: '{{ beam_tv and not together and is_state(''media_player.kitchen_tv'', ''on'') and states(''sensor.kitchen_beam_audio_input_format'')
+          not in [''No audio'', ''No input connected'', ''No input'', ''unavailable'', ''unknown''] and (ma_grouped or kg | length > 1) }}'
+      sequence:
+      - variables:
+          was_with: '{{ state_attr(k_leader, ''friendly_name'') if k_leader != ''media_player.kitchen'' else ''another room'' }}'
+      - action: media_player.unjoin
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen_2
+      - wait_template: '{{ state_attr(''media_player.kitchen'', ''group_members'') | default([], true) | list | length <= 1 }}'
+        timeout:
+          seconds: 10
+      - if:
+        - condition: template
+          value_template: '{{ state_attr(''media_player.kitchen'', ''group_members'') | default([], true) | list | length > 1 }}'
+        then:
+        - action: media_player.unjoin
+          continue_on_error: true
+          target:
+            entity_id: media_player.kitchen
+        - wait_template: '{{ state_attr(''media_player.kitchen'', ''group_members'') | default([], true) | list | length <= 1 }}'
+          timeout:
+            seconds: 10
+      - action: media_player.volume_set
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen
+        data:
+          volume_level: '{% set b = state_attr(''media_player.kitchen_beam'', ''volume_level'') | float(0.13) %}{{ 0 if b <= 0 else ([0, [1, b + states(''input_number.kitchen_beam_volume_offset'')
+            | float(0)] | min] | max) | round(2) }}'
+      - action: media_player.volume_mute
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen
+        data:
+          is_volume_muted: false
+      - action: media_player.join
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen_beam
+        data:
+          group_members:
+          - media_player.kitchen
+      - action: logbook.log
+        data:
+          name: Kitchen Beam
+          entity_id: media_player.kitchen_beam
+          message: Kitchen TV is on - the Kitchen left the {{ was_with }} music and joined the TV
+    - alias: The Beam reports TV sound on its own but the Sony does not confirm the TV is on, while the Kitchen is in a multi-room music group - leave both
+        alone (never pull the Beam off the TV; the Sony's state lags 1-2 min, and its change re-runs this)
       conditions:
       - condition: template
         value_template: '{{ beam_tv and not together and (ma_grouped or kg | length > 1) }}'
