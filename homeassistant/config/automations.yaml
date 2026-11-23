@@ -19877,10 +19877,16 @@
     condition: template
     value_template: '{{ is_state(''media_player.kitchen_2'', ''playing'') or is_state(''media_player.kitchen'',
       ''playing'') }}'
+  - alias: Not TV sound (2026-11-22) - the Kitchen Play:5s carry the Beam's TV audio
+      when the Beam leads their group; that is the TV, not music, so leave it alone
+    condition: template
+    value_template: '{{ not ((state_attr(''media_player.kitchen'', ''group_members'')
+      | default([], true) | first) == ''media_player.kitchen_beam'' and state_attr(''media_player.kitchen_beam'',
+      ''source'') == ''TV'') }}'
   actions:
   - variables:
       members: '{{ state_attr(''media_player.kitchen_2'', ''group_members'') | default([],
-        true) | list }}'
+        true) | reject(''in'', [''media_player.kitchen_beam_2'']) | list }}'
       grouped: '{{ members | length > 1 }}'
       leader: '{{ grouped and members[0] == ''media_player.kitchen_2'' }}'
       vol: '{{ [state_attr(''media_player.kitchen_2'', ''volume_level'') | float(0.15),
@@ -20066,3 +20072,201 @@
         integration pre-shared key).{% endif %}
   mode: queued
   max: 4
+- id: '1794400000001'
+  alias: 'Kitchen: Keep Beam Grouped With Kitchen'
+  description: Added 2026-11-22 at the user's request - the Kitchen Beam (media_player.kitchen_beam) is always in the same Sonos group as the Kitchen Play:5 pair
+    (media_player.kitchen). Native Sonos grouping, so the Beam's TV sound also reaches the Play:5s. Waits 15 s after any change so other automations finish their
+    own unjoin/join sequences first. Kitchen in another Sonos speaker's group (Good Morning) -> Beam joins that group too. Kitchen TV on and the Beam playing TV
+    -> Kitchen joins the Beam. Otherwise the Beam joins the Kitchen. When the TV is off and nothing plays, the Kitchen takes the lead back so Music Assistant's
+    Kitchen queue keeps working. The joiner first takes the leader's volume; Kitchen - Match Beam and Kitchen Volume keeps them equal after that.
+  triggers:
+  - trigger: state
+    entity_id:
+    - media_player.kitchen
+    - media_player.kitchen_beam
+    attribute: group_members
+  - trigger: state
+    entity_id:
+    - media_player.kitchen
+    - media_player.kitchen_beam
+    - media_player.kitchen_tv
+    to: null
+  - trigger: state
+    entity_id: media_player.kitchen_beam
+    attribute: source
+  - trigger: homeassistant
+    event: start
+  - trigger: time_pattern
+    minutes: /5
+  conditions:
+  - condition: template
+    value_template: '{{ states(''media_player.kitchen'') not in [''unavailable'', ''unknown''] and states(''media_player.kitchen_beam'') not in [''unavailable'',
+      ''unknown''] }}'
+  actions:
+  - alias: Settle - let whatever changed the group finish first
+    delay:
+      seconds: 15
+  - variables:
+      kg: '{{ state_attr(''media_player.kitchen'', ''group_members'') | default([], true) | list }}'
+      together: '{{ ''media_player.kitchen_beam'' in kg }}'
+      k_leader: '{{ kg[0] if kg | length > 0 else ''media_player.kitchen'' }}'
+      tv_on: '{{ is_state(''media_player.kitchen_tv'', ''on'') }}'
+      beam_tv: '{{ state_attr(''media_player.kitchen_beam'', ''source'') == ''TV'' and is_state(''media_player.kitchen_beam'', ''playing'') }}'
+      ma_grouped: '{{ state_attr(''media_player.kitchen_2'', ''group_members'') | default([], true) | reject(''in'', [''media_player.kitchen_beam_2''])
+        | list | length > 1 }}'
+      k_music: '{{ states(''media_player.kitchen_2'') in [''playing'', ''buffering''] and not (together and k_leader == ''media_player.kitchen_beam'' and
+        beam_tv) }}'
+  - choose:
+    - alias: Grouped with the Beam leading, but the TV is off and nothing is playing - hand the lead back to the Kitchen
+      conditions:
+      - condition: template
+        value_template: '{{ together and k_leader == ''media_player.kitchen_beam'' and not tv_on and not k_music and not ma_grouped }}'
+      sequence:
+      - action: media_player.unjoin
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen
+      - wait_template: '{{ ''media_player.kitchen_beam'' not in (state_attr(''media_player.kitchen'', ''group_members'') | default([], true)) }}'
+        timeout:
+          seconds: 10
+      - action: media_player.join
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen
+        data:
+          group_members:
+          - media_player.kitchen_beam
+      - action: logbook.log
+        data:
+          name: Kitchen Beam
+          entity_id: media_player.kitchen_beam
+          message: TV off and idle - regrouped with the Kitchen leading
+    - alias: Already together - nothing to do
+      conditions:
+      - condition: template
+        value_template: '{{ together }}'
+      sequence: []
+    - alias: The Kitchen is in another Sonos speaker's group (Good Morning etc.) - the Beam joins that group too
+      conditions:
+      - condition: template
+        value_template: '{{ kg | length > 1 and k_leader not in [''media_player.kitchen'', ''media_player.kitchen_beam''] }}'
+      sequence:
+      - action: media_player.volume_set
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen_beam
+        data:
+          volume_level: '{{ state_attr(''media_player.kitchen'', ''volume_level'') | float(0.13) }}'
+      - action: media_player.join
+        continue_on_error: true
+        target:
+          entity_id: '{{ k_leader }}'
+        data:
+          group_members:
+          - media_player.kitchen_beam
+      - action: logbook.log
+        data:
+          name: Kitchen Beam
+          entity_id: media_player.kitchen_beam
+          message: joined {{ state_attr(k_leader, 'friendly_name') }} because the Kitchen is in its group
+    - alias: Kitchen TV is on and the Beam is playing it - the Kitchen joins the Beam so the TV sound plays on all three
+      conditions:
+      - condition: template
+        value_template: '{{ tv_on and beam_tv and not ma_grouped }}'
+      sequence:
+      - action: media_player.volume_set
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen
+        data:
+          volume_level: '{{ state_attr(''media_player.kitchen_beam'', ''volume_level'') | float(0.13) }}'
+      - action: media_player.join
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen_beam
+        data:
+          group_members:
+          - media_player.kitchen
+      - action: logbook.log
+        data:
+          name: Kitchen Beam
+          entity_id: media_player.kitchen_beam
+          message: Kitchen joined the Beam for TV sound
+    default:
+    - action: media_player.volume_set
+      continue_on_error: true
+      target:
+        entity_id: media_player.kitchen_beam
+      data:
+        volume_level: '{{ state_attr(''media_player.kitchen'', ''volume_level'') | float(0.13) }}'
+    - action: media_player.join
+      continue_on_error: true
+      target:
+        entity_id: media_player.kitchen
+      data:
+        group_members:
+        - media_player.kitchen_beam
+    - action: logbook.log
+      data:
+        name: Kitchen Beam
+        entity_id: media_player.kitchen_beam
+        message: rejoined the Kitchen
+  mode: queued
+  max: 2
+  max_exceeded: silent
+- id: '1794400000002'
+  alias: 'Kitchen: Match Beam and Kitchen Volume'
+  description: Added 2026-11-22 at the user's request - the Kitchen Beam and the Kitchen Play:5 pair always have the same volume and mute, two-way. Whichever one
+    changes, the other is set to match. A trigger is ignored if its value is already stale (the speaker has moved on since), and nothing is sent when they already
+    match, so the two can't bounce changes back and forth.
+  triggers:
+  - trigger: state
+    entity_id:
+    - media_player.kitchen
+    - media_player.kitchen_beam
+    attribute: volume_level
+    id: volume
+  - trigger: state
+    entity_id:
+    - media_player.kitchen
+    - media_player.kitchen_beam
+    attribute: is_volume_muted
+    id: mute
+  conditions:
+  - condition: template
+    value_template: '{{ states(''media_player.kitchen'') not in [''unavailable'', ''unknown''] and states(''media_player.kitchen_beam'') not in [''unavailable'',
+      ''unknown''] }}'
+  actions:
+  - variables:
+      src: '{{ trigger.entity_id }}'
+      dst: '{{ ''media_player.kitchen_beam'' if src == ''media_player.kitchen'' else ''media_player.kitchen'' }}'
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: volume
+      - alias: Still the source's current volume, and the other speaker differs
+        condition: template
+        value_template: '{% set v = trigger.to_state.attributes.volume_level %}{{ v is number and state_attr(src, ''volume_level'') == v and ((state_attr(dst,
+          ''volume_level'') | float(-1)) - v) | abs > 0.004 }}'
+      sequence:
+      - action: media_player.volume_set
+        continue_on_error: true
+        target:
+          entity_id: '{{ dst }}'
+        data:
+          volume_level: '{{ trigger.to_state.attributes.volume_level }}'
+    - conditions:
+      - condition: trigger
+        id: mute
+      - condition: template
+        value_template: '{% set m = trigger.to_state.attributes.is_volume_muted %}{{ m in [true, false] and state_attr(src, ''is_volume_muted'') == m and
+          state_attr(dst, ''is_volume_muted'') != m }}'
+      sequence:
+      - action: media_player.volume_mute
+        continue_on_error: true
+        target:
+          entity_id: '{{ dst }}'
+        data:
+          is_volume_muted: '{{ trigger.to_state.attributes.is_volume_muted }}'
+  mode: queued
+  max: 10

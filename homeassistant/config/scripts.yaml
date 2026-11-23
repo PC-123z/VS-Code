@@ -1207,7 +1207,8 @@ stop_room_speaker_safely:
     if:
     - condition: template
       value_template: '{{ (state_attr(entity_id, ''group_members'') | default([],
-        true) | length) > 1 }}'
+        true) | reject(''in'', [''media_player.kitchen_beam'', ''media_player.kitchen_beam_2''])
+        | list | length) > 1 }}'
     then:
     - continue_on_error: true
       action: media_player.unjoin
@@ -1221,7 +1222,8 @@ stop_room_speaker_safely:
       if:
       - condition: template
         value_template: '{{ is_state(entity_id, ''playing'') and (state_attr(entity_id,
-          ''group_members'') | default([], true) | length) <= 1 }}'
+          ''group_members'') | default([], true) | reject(''in'', [''media_player.kitchen_beam'',
+          ''media_player.kitchen_beam_2'']) | list | length) <= 1 }}'
       then:
       - continue_on_error: true
         action: media_player.media_stop
