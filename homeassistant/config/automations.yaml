@@ -20078,7 +20078,7 @@
     (media_player.kitchen). Native Sonos grouping, so the Beam's TV sound also reaches the Play:5s. Waits 15 s after any change so other automations finish their
     own unjoin/join sequences first. Kitchen in another Sonos speaker's group (Good Morning) -> Beam joins that group too. Kitchen TV on and the Beam playing TV
     -> Kitchen joins the Beam. Otherwise the Beam joins the Kitchen. When the TV is off and nothing plays, the Kitchen takes the lead back so Music Assistant's
-    Kitchen queue keeps working. The joiner first takes the leader's volume; Kitchen - Match Beam and Kitchen Volume keeps them equal after that.
+    Kitchen queue keeps working. The joiner first takes the leader's volume (plus the Kitchen offset, input_number.kitchen_beam_volume_offset); Kitchen - Match Beam and Kitchen Volume keeps them in step after that.
   triggers:
   - trigger: state
     entity_id:
@@ -20156,7 +20156,7 @@
         target:
           entity_id: media_player.kitchen_beam
         data:
-          volume_level: '{{ state_attr(''media_player.kitchen'', ''volume_level'') | float(0.13) }}'
+          volume_level: '{% set k = state_attr(''media_player.kitchen'', ''volume_level'') | float(0.13) %}{{ 0 if k <= 0 else ([0, [1, k - states(''input_number.kitchen_beam_volume_offset'') | float(0)] | min] | max) | round(2) }}'
       - action: media_player.join
         continue_on_error: true
         target:
@@ -20179,7 +20179,7 @@
         target:
           entity_id: media_player.kitchen
         data:
-          volume_level: '{{ state_attr(''media_player.kitchen_beam'', ''volume_level'') | float(0.13) }}'
+          volume_level: '{% set b = state_attr(''media_player.kitchen_beam'', ''volume_level'') | float(0.13) %}{{ 0 if b <= 0 else ([0, [1, b + states(''input_number.kitchen_beam_volume_offset'') | float(0)] | min] | max) | round(2) }}'
       - action: media_player.join
         continue_on_error: true
         target:
@@ -20198,7 +20198,7 @@
       target:
         entity_id: media_player.kitchen_beam
       data:
-        volume_level: '{{ state_attr(''media_player.kitchen'', ''volume_level'') | float(0.13) }}'
+        volume_level: '{% set k = state_attr(''media_player.kitchen'', ''volume_level'') | float(0.13) %}{{ 0 if k <= 0 else ([0, [1, k - states(''input_number.kitchen_beam_volume_offset'') | float(0)] | min] | max) | round(2) }}'
     - action: media_player.join
       continue_on_error: true
       target:
@@ -20216,9 +20216,10 @@
   max_exceeded: silent
 - id: '1794400000002'
   alias: 'Kitchen: Match Beam and Kitchen Volume'
-  description: Added 2026-11-22 at the user's request - the Kitchen Beam and the Kitchen Play:5 pair always have the same volume and mute, two-way. Whichever one
-    changes, the other is set to match. A trigger is ignored if its value is already stale (the speaker has moved on since), and nothing is sent when they already
-    match, so the two can't bounce changes back and forth.
+  description: Added 2026-11-22 at the user's request - the Kitchen Beam and the Kitchen Play:5 pair move together, two-way, volume and mute. The Kitchen
+    runs input_number.kitchen_beam_volume_offset louder than the Beam (2026-11-22 the user found the Beam a little louder at equal volume; positive = Kitchen
+    louder). Kitchen = Beam + offset, Beam = Kitchen - offset, clamped 0-1, and 0 always maps to 0. Nothing is sent when the pair is already in step (either
+    direction counts, so clamping near 0 can't bounce), and a trigger whose value is already stale is ignored.
   triggers:
   - trigger: state
     entity_id:
@@ -20232,29 +20233,40 @@
     - media_player.kitchen_beam
     attribute: is_volume_muted
     id: mute
+  - trigger: state
+    entity_id: input_number.kitchen_beam_volume_offset
+    id: offset
   conditions:
   - condition: template
     value_template: '{{ states(''media_player.kitchen'') not in [''unavailable'', ''unknown''] and states(''media_player.kitchen_beam'') not in [''unavailable'',
       ''unknown''] }}'
   actions:
   - variables:
-      src: '{{ trigger.entity_id }}'
+      src: '{{ ''media_player.kitchen_beam'' if trigger.id == ''offset'' else trigger.entity_id }}'
       dst: '{{ ''media_player.kitchen_beam'' if src == ''media_player.kitchen'' else ''media_player.kitchen'' }}'
+      ofs: '{{ states(''input_number.kitchen_beam_volume_offset'') | float(0) }}'
+      k: '{{ state_attr(''media_player.kitchen'', ''volume_level'') | float(-1) }}'
+      b: '{{ state_attr(''media_player.kitchen_beam'', ''volume_level'') | float(-1) }}'
+      k_from_b: '{{ 0 if b <= 0 else ([0, [1, b + ofs] | min] | max) | round(2) }}'
+      b_from_k: '{{ 0 if k <= 0 else ([0, [1, k - ofs] | min] | max) | round(2) }}'
+      in_step: '{{ (b - b_from_k) | abs <= 0.004 or (k - k_from_b) | abs <= 0.004 }}'
   - choose:
     - conditions:
       - condition: trigger
-        id: volume
-      - alias: Still the source's current volume, and the other speaker differs
+        id:
+        - volume
+        - offset
+      - alias: Both readable, the trigger is not stale, and the pair is out of step
         condition: template
-        value_template: '{% set v = trigger.to_state.attributes.volume_level %}{{ v is number and state_attr(src, ''volume_level'') == v and ((state_attr(dst,
-          ''volume_level'') | float(-1)) - v) | abs > 0.004 }}'
+        value_template: '{{ k >= 0 and b >= 0 and not in_step and (trigger.id == ''offset'' or state_attr(src, ''volume_level'') == trigger.to_state.attributes.volume_level)
+          and (trigger.id == ''volume'' or (k - k_from_b) | abs > 0.004) }}'
       sequence:
       - action: media_player.volume_set
         continue_on_error: true
         target:
           entity_id: '{{ dst }}'
         data:
-          volume_level: '{{ trigger.to_state.attributes.volume_level }}'
+          volume_level: '{{ b_from_k if dst == ''media_player.kitchen_beam'' else k_from_b }}'
     - conditions:
       - condition: trigger
         id: mute

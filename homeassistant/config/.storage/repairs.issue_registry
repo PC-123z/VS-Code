@@ -75,6 +75,14 @@
         "domain": "homeassistant",
         "is_persistent": false,
         "issue_id": "config_entry_reauth_alexa_media_01KWB126HVY7XT65ZYWQK9Q43N"
+      },
+      {
+        "config_entry_id": null,
+        "created": "2026-11-23T04:12:18.902571+00:00",
+        "dismissed_version": null,
+        "domain": "automation",
+        "is_persistent": false,
+        "issue_id": "automation.kitchen_match_beam_and_kitchen_volume_validation_failed_schema"
       }
     ]
   }
