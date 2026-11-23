@@ -20076,8 +20076,8 @@
   alias: 'Kitchen: Keep Beam Grouped With Kitchen'
   description: Added 2026-11-22 at the user's request - the Kitchen Beam (media_player.kitchen_beam) is always in the same Sonos group as the Kitchen Play:5 pair
     (media_player.kitchen). Native Sonos grouping, so the Beam's TV sound also reaches the Play:5s. Waits 15 s after any change so other automations finish their
-    own unjoin/join sequences first. Kitchen in another Sonos speaker's group (Good Morning) -> Beam joins that group too. Kitchen TV on and the Beam playing TV
-    -> Kitchen joins the Beam. Otherwise the Beam joins the Kitchen. When the TV is off and nothing plays, the Kitchen takes the lead back so Music Assistant's
+    own unjoin/join sequences first. Kitchen in another Sonos speaker's group (Good Morning) -> Beam joins that group too. Beam playing TV sound on its own
+    -> Kitchen joins the Beam (TV wins, judged from the Beam; never pulls the Beam off the TV). Otherwise the Beam joins the Kitchen. When the TV is off and nothing plays, the Kitchen takes the lead back so Music Assistant's
     Kitchen queue keeps working. The joiner first takes the leader's volume (plus the Kitchen offset, input_number.kitchen_beam_volume_offset); Kitchen - Match Beam and Kitchen Volume keeps them in step after that.
   triggers:
   - trigger: state
@@ -20110,17 +20110,18 @@
       kg: '{{ state_attr(''media_player.kitchen'', ''group_members'') | default([], true) | list }}'
       together: '{{ ''media_player.kitchen_beam'' in kg }}'
       k_leader: '{{ kg[0] if kg | length > 0 else ''media_player.kitchen'' }}'
-      tv_on: '{{ is_state(''media_player.kitchen_tv'', ''on'') }}'
       beam_tv: '{{ state_attr(''media_player.kitchen_beam'', ''source'') == ''TV'' and is_state(''media_player.kitchen_beam'', ''playing'') }}'
       ma_grouped: '{{ state_attr(''media_player.kitchen_2'', ''group_members'') | default([], true) | reject(''in'', [''media_player.kitchen_beam_2''])
         | list | length > 1 }}'
       k_music: '{{ states(''media_player.kitchen_2'') in [''playing'', ''buffering''] and not (together and k_leader == ''media_player.kitchen_beam'' and
         beam_tv) }}'
   - choose:
-    - alias: Grouped with the Beam leading, but the TV is off and nothing is playing - hand the lead back to the Kitchen
+    - alias: Grouped with the Beam leading, but the Beam has not been playing TV for over a minute and nothing else is playing - hand the lead back to the
+        Kitchen (2026-11-22 night - judged from the Beam itself, NOT media_player.kitchen_tv, whose Bravia state lags and showed off while the TV was on)
       conditions:
       - condition: template
-        value_template: '{{ together and k_leader == ''media_player.kitchen_beam'' and not tv_on and not k_music and not ma_grouped }}'
+        value_template: '{{ together and k_leader == ''media_player.kitchen_beam'' and not beam_tv and (as_timestamp(now()) - as_timestamp(states.media_player.kitchen_beam.last_changed,
+          0)) > 60 and not k_music and not ma_grouped }}'
       sequence:
       - action: media_player.unjoin
         continue_on_error: true
@@ -20140,12 +20141,47 @@
         data:
           name: Kitchen Beam
           entity_id: media_player.kitchen_beam
-          message: TV off and idle - regrouped with the Kitchen leading
+          message: TV sound stopped - regrouped with the Kitchen leading
     - alias: Already together - nothing to do
       conditions:
       - condition: template
         value_template: '{{ together }}'
       sequence: []
+    - alias: The Beam is playing TV sound on its own but the Kitchen is in a multi-room music group - leave both alone (never pull the Beam off the TV)
+      conditions:
+      - condition: template
+        value_template: '{{ beam_tv and not together and (ma_grouped or kg | length > 1) }}'
+      sequence:
+      - action: logbook.log
+        data:
+          name: Kitchen Beam
+          entity_id: media_player.kitchen_beam
+          message: Beam is playing TV while the Kitchen is in another group - left both alone
+    - alias: The Beam is playing TV sound on its own (Sonos TV autoplay took it out of the group) - the Kitchen joins the Beam so the TV plays on all
+        three. Judged from the Beam, not media_player.kitchen_tv (2026-11-22 the Bravia state lagged ~1-2 min and showed off while the TV was on, so the
+        Beam was pulled off the TV 3 times in a row = TV sound kept cutting out)
+      conditions:
+      - condition: template
+        value_template: '{{ beam_tv and not together }}'
+      sequence:
+      - action: media_player.volume_set
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen
+        data:
+          volume_level: '{% set b = state_attr(''media_player.kitchen_beam'', ''volume_level'') | float(0.13) %}{{ 0 if b <= 0 else ([0, [1, b + states(''input_number.kitchen_beam_volume_offset'') | float(0)] | min] | max) | round(2) }}'
+      - action: media_player.join
+        continue_on_error: true
+        target:
+          entity_id: media_player.kitchen_beam
+        data:
+          group_members:
+          - media_player.kitchen
+      - action: logbook.log
+        data:
+          name: Kitchen Beam
+          entity_id: media_player.kitchen_beam
+          message: Kitchen joined the Beam for TV sound
     - alias: The Kitchen is in another Sonos speaker's group (Good Morning etc.) - the Beam joins that group too
       conditions:
       - condition: template
@@ -20169,29 +20205,6 @@
           name: Kitchen Beam
           entity_id: media_player.kitchen_beam
           message: joined {{ state_attr(k_leader, 'friendly_name') }} because the Kitchen is in its group
-    - alias: Kitchen TV is on and the Beam is playing it - the Kitchen joins the Beam so the TV sound plays on all three
-      conditions:
-      - condition: template
-        value_template: '{{ tv_on and beam_tv and not ma_grouped }}'
-      sequence:
-      - action: media_player.volume_set
-        continue_on_error: true
-        target:
-          entity_id: media_player.kitchen
-        data:
-          volume_level: '{% set b = state_attr(''media_player.kitchen_beam'', ''volume_level'') | float(0.13) %}{{ 0 if b <= 0 else ([0, [1, b + states(''input_number.kitchen_beam_volume_offset'') | float(0)] | min] | max) | round(2) }}'
-      - action: media_player.join
-        continue_on_error: true
-        target:
-          entity_id: media_player.kitchen_beam
-        data:
-          group_members:
-          - media_player.kitchen
-      - action: logbook.log
-        data:
-          name: Kitchen Beam
-          entity_id: media_player.kitchen_beam
-          message: Kitchen joined the Beam for TV sound
     default:
     - action: media_player.volume_set
       continue_on_error: true
