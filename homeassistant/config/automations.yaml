@@ -10485,6 +10485,15 @@
     condition: state
     entity_id: input_boolean.living_room_manual_override
     state: 'off'
+  - alias: 2026-11-24 receiver Zone 2 not in use - Zone 2 feeds the kitchen TV (PS5 /
+      Apple TV), so someone is watching in the kitchen and the living room must not
+      be shut down
+    condition: state
+    entity_id: media_player.living_room_av_zone2
+    state:
+    - 'off'
+    - unavailable
+    - unknown
   actions:
   - alias: Color warning only if the living room lights are on (at night Smart Motion
       already turned them off at 5 min - do not relight an empty room)
