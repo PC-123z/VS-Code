@@ -6187,13 +6187,9 @@
     album, TTS on motion, fans off. Music until presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: 06:30:00
+    at: 04:30:00
     weekday:
-    - mon
-    - tue
     - wed
-    - thu
-    - fri
   - trigger: time
     at: 09:30:00
     weekday:
