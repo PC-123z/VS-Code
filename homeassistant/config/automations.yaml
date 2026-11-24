@@ -10664,11 +10664,7 @@
   - trigger: time
     at: 07:40:00
     weekday:
-    - mon
     - tue
-    - wed
-    - thu
-    - fri
     enabled: true
   - trigger: time
     at: 08:15:00
