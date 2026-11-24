@@ -1874,6 +1874,15 @@
     - binary_sensor.bathroom_bathroom_presence_sensor_moving_target
     to: 'on'
     id: detected
+  - alias: 2026-11-24 radar presence held 20 s counts even with no movement or Hue motion
+      (still-only presence at 16:03/16:08 lit nothing because the edge-triggered guard
+      failed once and was never re-checked)
+    trigger: state
+    entity_id: binary_sensor.bathroom_bathroom_presence_sensor_presence
+    to: 'on'
+    for:
+      seconds: 20
+    id: detected
   - trigger: state
     entity_id: binary_sensor.bathroom_sensor_group
     to: 'off'
@@ -1902,6 +1911,7 @@
           about one such false start a day. Radar still counts once the room is lit.
         condition: template
         value_template: "{{ trigger.entity_id == 'binary_sensor.bathroom_motion'\n
+          \  or (trigger.for is defined and trigger.for is not none)\n
           \  or is_state('binary_sensor.bathroom_motion', 'on')\n   or is_state('binary_sensor.bathroom_bathroom_presence_sensor_moving_target',
           'on')\n   or is_state('light.bathroom', 'on') }}"
       - alias: Someone is here - stop any fade-out in progress
