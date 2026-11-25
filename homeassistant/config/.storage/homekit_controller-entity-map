@@ -761,7 +761,7 @@
                       "pr"
                     ],
                     "format": "int",
-                    "value": 33817,
+                    "value": 36122,
                     "unit": "seconds",
                     "minValue": -1,
                     "maxValue": 86400,
@@ -827,7 +827,7 @@
                       "pr"
                     ],
                     "format": "int",
-                    "value": 33816,
+                    "value": 36121,
                     "unit": "seconds",
                     "minValue": -1,
                     "maxValue": 86400,
