@@ -1265,12 +1265,14 @@ ma_play_with_fallback:
       description: Backup media type
     skip_primary:
       description: True when the caller already tried its own primary
+    primary_local:
+      description: True when the primary is a local NAS item (tried even while Spotify is down)
   sequence:
   - variables:
       primary_uri: '{{ media_id | default('''') | string }}'
       try_primary: '{{ primary_uri != '''' and not (skip_primary | default(false)
-        | bool) and (is_state(''binary_sensor.ma_youtube_music_available'', ''on'')
-        or not primary_uri.startswith(''ytmusic://'')) }}'
+        | bool) and (is_state(''binary_sensor.ma_spotify_available'', ''on'')
+        or (primary_local | default(false) | bool)) }}'
   - if:
     - condition: template
       value_template: '{{ try_primary }}'
@@ -2463,8 +2465,14 @@ bedroom2_wake_music_play:
         repeat: all
 gm_spotify_start:
   alias: Good Morning - Spotify playlist (first room plays, second room joins)
-  description: 'Added 2026-11-24 (YouTube Music kept failing). Plays the Spotify Good Morning playlist (MA library 56) on `player`. Big Bedroom (media_player.bedroom_2) is the leader: it starts the stream. Any other room waits (up to 120 s, only while good_morning_active is on) for the leader to be playing and then JOINS it, so both rooms share one Spotify stream (MA allows only one). If nothing is playing to join, or Spotify will not start, ma_play_with_fallback falls back to the local NAS album (library 1525). Never starts its own stream on a player that already joined (a grouped member redirects commands to its leader and would wipe the queue).'
-  mode: parallel
+  description: >-
+    Rewritten 2026-11-25. Plays the Spotify Good Morning playlist (MA library 56, shuffled) on `player`.
+    Whichever room starts first LEADS (input_text.gm_stream_leader records it, valid 3 h while it is
+    playing); a room that starts later JOINS the leader, so there is only ever one Spotify stream.
+    Runs queue (mode queued) so two rooms starting together cannot both lead. If Spotify will not
+    start, or another room's sleep sound already holds the one stream, the local NAS album 1525 plays
+    instead. A grouped member never starts its own stream (its commands redirect to the leader).
+  mode: queued
   max: 6
   fields:
     player:
@@ -2473,41 +2481,35 @@ gm_spotify_start:
       description: Volume to re-apply after joining (joining can restore an old volume)
   sequence:
   - variables:
-      leader: media_player.bedroom_2
       p: '{{ player }}'
-      am_leader: '{{ player == "media_player.bedroom_2" }}'
-  - alias: Leader - free the single Spotify stream first. Bedroom 2's overnight sleep
-      music is a Spotify stream and MA refuses a second one, so stop it when Bedroom
-      2 is in its wake cycle (the Bedroom 2 routine then joins this stream).
+      room_a: media_player.bedroom_2
+      room_b: media_player.office_2
+  - variables:
+      other: '{{ room_b if p == room_a else room_a }}'
+      rec: '{{ states("input_text.gm_stream_leader") }}'
+      rec_age: '{{ (now() - states.input_text.gm_stream_leader.last_changed).total_seconds() | int(99999) }}'
+  - variables:
+      leader_ok: '{{ rec in [room_a, room_b] and rec != p and rec_age < 10800 and is_state(rec, "playing") }}'
+      already: '{{ rec in [room_a, room_b] and rec != p and p in (state_attr(rec, "group_members") or []) and is_state(rec, "playing") }}'
+  - alias: Already part of the leader's stream - nothing to do
     if:
     - condition: template
-      value_template: '{{ am_leader and is_state("media_player.office_2", "playing") and is_state("input_boolean.bedroom2_occupied", "on") }}'
+      value_template: '{{ already }}'
     then:
-    - action: script.bedroom2_music_stop
-    - delay:
-        seconds: 2
-  - alias: Second room - wait for the first room's stream to be up
+    - stop: Already in the Good Morning stream
+  - alias: A room is already leading - join its stream
     if:
     - condition: template
-      value_template: '{{ not am_leader and is_state("input_boolean.good_morning_active", "on") and not is_state(leader, "playing") }}'
-    then:
-    - wait_template: '{{ is_state(leader, "playing") }}'
-      timeout:
-        seconds: 120
-      continue_on_timeout: true
-  - alias: Second room - join the leader's stream
-    if:
-    - condition: template
-      value_template: '{{ not am_leader and is_state(leader, "playing") }}'
+      value_template: '{{ leader_ok }}'
     then:
     - continue_on_error: true
       action: media_player.join
       target:
-        entity_id: media_player.bedroom_2
+        entity_id: '{{ rec }}'
       data:
         group_members:
         - '{{ p }}'
-    - wait_template: '{{ p in (state_attr(leader, "group_members") or []) }}'
+    - wait_template: '{{ p in (state_attr(rec, "group_members") or []) }}'
       timeout:
         seconds: 10
       continue_on_timeout: true
@@ -2526,12 +2528,51 @@ gm_spotify_start:
       timeout:
         seconds: 10
       continue_on_timeout: true
-  - alias: Not playing and not joined - start own stream (Spotify, then local NAS album)
+  - alias: Nobody to join - this room leads with its own stream
     if:
     - condition: template
-      value_template: '{{ not is_state(p, "playing") and not (p in (state_attr(leader, "group_members") or []) and p != leader) }}'
+      value_template: '{{ not leader_ok and not already }}'
     then:
-    - continue_on_error: true
+    - alias: Leave any group first so this room has its own queue (a member redirects commands to its leader)
+      if:
+      - condition: template
+        value_template: '{{ p in (state_attr(other, "group_members") or []) }}'
+      then:
+      - continue_on_error: true
+        action: media_player.unjoin
+        target:
+          entity_id: '{{ p }}'
+      - delay:
+          seconds: 2
+    - alias: Let the other room go if it was only a member of this room's old group
+      if:
+      - condition: template
+        value_template: '{{ other in (state_attr(p, "group_members") or []) }}'
+      then:
+      - continue_on_error: true
+        action: media_player.unjoin
+        target:
+          entity_id: '{{ other }}'
+      - delay:
+          seconds: 2
+    - alias: Bedroom 2's own overnight sleep music holds the one Spotify stream - stop it when Bedroom 2 is in its wake cycle
+      if:
+      - condition: template
+        value_template: '{{ p == room_a and is_state(room_b, "playing") and is_state("input_boolean.bedroom2_occupied", "on") }}'
+      then:
+      - continue_on_error: true
+        action: media_player.media_stop
+        target:
+          entity_id: '{{ room_b }}'
+      - delay:
+          seconds: 2
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.gm_stream_leader
+      data:
+        value: '{{ p }}'
+    - alias: Play (Spotify first, local NAS album 1525 if Spotify fails or another room holds the one stream)
+      continue_on_error: true
       action: script.ma_play_with_fallback
       data:
         player: '{{ p }}'
@@ -2539,25 +2580,32 @@ gm_spotify_start:
         media_type: playlist
         fallback_id: library://album/1525
         fallback_type: album
+        skip_primary: '{{ is_state(other, "playing") }}'
+    - alias: Shuffle on, repeat all (own stream only)
+      if:
+      - condition: template
+        value_template: '{{ (state_attr(p, "group_members") or []) | length <= 1 }}'
+      then:
+      - continue_on_error: true
+        action: media_player.shuffle_set
+        target:
+          entity_id: '{{ p }}'
+        data:
+          shuffle: true
+      - continue_on_error: true
+        action: media_player.repeat_set
+        target:
+          entity_id: '{{ p }}'
+        data:
+          repeat: all
 bedroom2_music_stop:
-  alias: Bedroom 2 - stop music (leave the Big Bedroom group first)
-  description: 'Added 2026-11-24. When Bedroom 2 joined the Big Bedroom stream, media_stop on office_2 would be redirected to the leader and stop Big Bedroom too. Unjoin first so only this room stops.'
+  alias: Bedroom 2 - stop music (leave the shared stream first, hand off if needed)
+  description: 'Rewritten 2026-11-25: delegates to script.gm_music_stop for media_player.office_2.'
   mode: queued
   sequence:
-  - if:
-    - condition: template
-      value_template: '{{ "media_player.office_2" in (state_attr("media_player.bedroom_2", "group_members") or []) }}'
-    then:
-    - continue_on_error: true
-      action: media_player.unjoin
-      target:
-        entity_id: media_player.office_2
-    - delay:
-        seconds: 2
-  - continue_on_error: true
-    action: media_player.media_stop
-    target:
-      entity_id: media_player.office_2
+  - action: script.gm_music_stop
+    data:
+      player: media_player.office_2
 big_bedroom_bright_override:
   alias: Big Bedroom - Bright White Override (button hold)
   description: 'Added 2026-11-21. Shared by the Pico button 1 HOLD and the Hue dimmer
@@ -2717,3 +2765,165 @@ light_soft_color_on:
       data:
         brightness_pct: '{{ bri }}'
         transition: '{{ fade }}'
+gm_music_stop:
+  alias: Good Morning - stop a room's music without killing the other room's
+  description: >-
+    Added 2026-11-25. Both rooms share one Spotify stream, so a plain media_stop on the member stops
+    the leader too, and stopping the leader ends the member's music. A member unjoins first, then
+    stops. A leader that still has a room listening HANDS OFF: the other room unjoins and restarts
+    the playlist as the new leader (a short gap). good_morning_expected_pause is raised so neither
+    room's "music stopped from the speaker" automation reads the hand-off as a manual stop.
+  mode: queued
+  max: 10
+  fields:
+    player:
+      description: Music Assistant media_player to stop
+  sequence:
+  - variables:
+      p: '{{ player }}'
+      room_a: media_player.bedroom_2
+      room_b: media_player.office_2
+  - variables:
+      other: '{{ room_b if p == room_a else room_a }}'
+      rec: '{{ states("input_text.gm_stream_leader") }}'
+  - variables:
+      is_member: '{{ p in (state_attr(other, "group_members") or []) and p != other }}'
+      has_member: '{{ other in (state_attr(p, "group_members") or []) }}'
+      other_wants: '{{ (other == room_a and is_state("input_boolean.good_morning_active", "on")) or (other == room_b and is_state("input_boolean.bedroom2_occupied", "on")) }}'
+  - choose:
+    - alias: This room is only a member - leave the group, then stop just this room
+      conditions:
+      - condition: template
+        value_template: '{{ is_member }}'
+      sequence:
+      - continue_on_error: true
+        action: media_player.unjoin
+        target:
+          entity_id: '{{ p }}'
+      - delay:
+          seconds: 2
+      - continue_on_error: true
+        action: media_player.media_stop
+        target:
+          entity_id: '{{ p }}'
+    - alias: Leader with the other room still listening - hand the stream to the other room
+      conditions:
+      - condition: template
+        value_template: '{{ has_member and other_wants and rec == p }}'
+      sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.good_morning_expected_pause
+      - continue_on_error: true
+        action: media_player.unjoin
+        target:
+          entity_id: '{{ other }}'
+      - delay:
+          seconds: 2
+      - continue_on_error: true
+        action: media_player.media_stop
+        target:
+          entity_id: '{{ p }}'
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.gm_stream_leader
+        data:
+          value: ''
+      - continue_on_error: true
+        action: script.gm_spotify_start
+        data:
+          player: '{{ other }}'
+          volume: '{{ state_attr(other, "volume_level") }}'
+      - delay:
+          seconds: 15
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.good_morning_expected_pause
+    default:
+    - continue_on_error: true
+      action: media_player.media_stop
+      target:
+        entity_id: '{{ p }}'
+    - if:
+      - condition: template
+        value_template: '{{ rec == p }}'
+      then:
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.gm_stream_leader
+        data:
+          value: ''
+ma_play_or_join:
+  alias: Music Assistant - play (Spotify, then NAS) or join an already-playing room
+  description: >-
+    Added 2026-11-25. For sleep/bedtime sounds. If one of `others` is already playing, `player`
+    joins that stream (Spotify allows one stream, so rooms share it). Otherwise `player` starts the
+    Spotify item, falling back to the NAS item (script.ma_play_with_fallback), then shuffles.
+  mode: queued
+  max: 10
+  fields:
+    player:
+      description: Music Assistant media_player entity
+    others:
+      description: List of other room players to join if one is playing
+    media_id:
+      description: Spotify (or library) URI
+    media_type:
+      description: Media type
+    fallback_id:
+      description: NAS URI used when Spotify is down or busy
+    fallback_type:
+      description: Fallback media type
+  sequence:
+  - variables:
+      p: '{{ player }}'
+      target: '{{ (others | default([], true) | reject("eq", player) | select("is_state", "playing") | list | first) if (others | default([], true) | reject("eq", player) | select("is_state", "playing") | list) else "" }}'
+  - alias: Another room is playing - join it
+    if:
+    - condition: template
+      value_template: '{{ target != "" }}'
+    then:
+    - alias: Already in that group
+      if:
+      - condition: template
+        value_template: '{{ p in (state_attr(target, "group_members") or []) }}'
+      then:
+      - stop: Already joined
+    - continue_on_error: true
+      action: media_player.join
+      target:
+        entity_id: '{{ target }}'
+      data:
+        group_members:
+        - '{{ p }}'
+    - wait_template: '{{ p in (state_attr(target, "group_members") or []) }}'
+      timeout:
+        seconds: 10
+      continue_on_timeout: true
+    - alias: Joined - done
+      if:
+      - condition: template
+        value_template: '{{ p in (state_attr(target, "group_members") or []) }}'
+      then:
+      - stop: Joined the playing room
+  - alias: Nobody to join (or the join failed) - own stream
+    action: script.ma_play_with_fallback
+    data:
+      player: '{{ p }}'
+      media_id: '{{ media_id }}'
+      media_type: '{{ media_type }}'
+      fallback_id: '{{ fallback_id }}'
+      fallback_type: '{{ fallback_type }}'
+  - alias: Shuffle on, repeat all
+    continue_on_error: true
+    action: media_player.shuffle_set
+    target:
+      entity_id: '{{ p }}'
+    data:
+      shuffle: true
+  - continue_on_error: true
+    action: media_player.repeat_set
+    target:
+      entity_id: '{{ p }}'
+    data:
+      repeat: all
