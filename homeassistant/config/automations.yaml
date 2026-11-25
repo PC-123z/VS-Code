@@ -51,7 +51,8 @@
     entity_id: input_boolean.good_morning_expected_pause
     state: 'off'
   actions:
-  - alias: Stop the music player explicitly (2026-11-25 - leaves the shared stream first, hands off to Bedroom 2 if it is still listening)
+  - alias: Stop the music player explicitly (2026-11-25 - leaves the shared stream
+      first, hands off to Bedroom 2 if it is still listening)
     action: script.gm_music_stop
     data:
       player: media_player.bedroom_2
@@ -1874,9 +1875,9 @@
     - binary_sensor.bathroom_bathroom_presence_sensor_moving_target
     to: 'on'
     id: detected
-  - alias: 2026-11-24 radar presence held 20 s counts even with no movement or Hue motion
-      (still-only presence at 16:03/16:08 lit nothing because the edge-triggered guard
-      failed once and was never re-checked)
+  - alias: 2026-11-24 radar presence held 20 s counts even with no movement or Hue
+      motion (still-only presence at 16:03/16:08 lit nothing because the edge-triggered
+      guard failed once and was never re-checked)
     trigger: state
     entity_id: binary_sensor.bathroom_bathroom_presence_sensor_presence
     to: 'on'
@@ -1911,8 +1912,8 @@
           about one such false start a day. Radar still counts once the room is lit.
         condition: template
         value_template: "{{ trigger.entity_id == 'binary_sensor.bathroom_motion'\n
-          \  or (trigger.for is defined and trigger.for is not none)\n
-          \  or is_state('binary_sensor.bathroom_motion', 'on')\n   or is_state('binary_sensor.bathroom_bathroom_presence_sensor_moving_target',
+          \  or (trigger.for is defined and trigger.for is not none)\n   or is_state('binary_sensor.bathroom_motion',
+          'on')\n   or is_state('binary_sensor.bathroom_bathroom_presence_sensor_moving_target',
           'on')\n   or is_state('light.bathroom', 'on') }}"
       - alias: Someone is here - stop any fade-out in progress
         action: script.turn_off
@@ -6205,9 +6206,13 @@
     album, TTS on motion, fans off. Music until presence clears or 7:30am.
   triggers:
   - trigger: time
-    at: 04:30:00
+    at: 06:30:00
     weekday:
+    - mon
+    - tue
     - wed
+    - thu
+    - fri
   - trigger: time
     at: 09:30:00
     weekday:
@@ -9605,28 +9610,27 @@
                   volume_level: "{{ [0.02 + (repeat.index * ((0.15 - 0.02) / 5)),\n
                     \   0.15] | min | round(3) }}"
         - sequence:
-          - alias: >-
-              Play this hour's music in the Kitchen (the anchor - rooms with presence
-              join it, Spotify allows one stream). Rewritten 2026-11-25: Spotify first,
-              local NAS if Spotify is down or fails, always shuffled (YouTube Music retired).
-              6-12 Coffee & Jazz, 12-15 Afternoon Jazz, 15-20 Sax Reggae (NAS Dean Fraser),
-              20-21 Piano Guys, 21-23 Slow Saxophone Jazz, 23-6 Sleepy Jazz Saxophone
-              (NAS Kenny G).
+          - alias: 'Play this hour''s music in the Kitchen (the anchor - rooms with
+              presence join it, Spotify allows one stream). Rewritten 2026-11-25:
+              Spotify first, local NAS if Spotify is down or fails, always shuffled
+              (YouTube Music retired). 6-12 Coffee & Jazz, 12-15 Afternoon Jazz, 15-20
+              Sax Reggae (NAS Dean Fraser), 20-21 Piano Guys, 21-23 Slow Saxophone
+              Jazz, 23-6 Sleepy Jazz Saxophone (NAS Kenny G).'
             continue_on_error: true
             action: script.ma_play_with_fallback
             data:
               player: media_player.kitchen_2
-              media_id: >-
-                {% set h = current_hour|int %}{% if 6 <= h < 12 %}spotify--LXCMhnPg://album/1dQDdZKvdJ5gNhUF56S8Qu{%
+              media_id: '{% set h = current_hour|int %}{% if 6 <= h < 12 %}spotify--LXCMhnPg://album/1dQDdZKvdJ5gNhUF56S8Qu{%
                 elif 12 <= h < 15 %}spotify--LXCMhnPg://album/5OcK9W8oa6cIJi6gSovkot{%
                 elif 15 <= h < 20 %}spotify--LXCMhnPg://playlist/0dI5x95BpLF3HHooqzQxWw{%
                 elif h == 20 %}spotify--LXCMhnPg://playlist/7jeLTMiA3idI2JnPqBhyWL{%
                 elif 21 <= h < 23 %}spotify--LXCMhnPg://playlist/42f0DVx4eQnNl4HAR3r0bJ{%
-                else %}spotify--LXCMhnPg://playlist/23xe49pSWJc4kFraoTv2sY{% endif %}
-              media_type: >-
-                {{ 'album' if 6 <= current_hour|int < 15 else 'playlist' }}
-              fallback_id: >-
-                {{ 'library://album/1248' if 15 <= current_hour|int < 20 else 'library://album/1525' }}
+                else %}spotify--LXCMhnPg://playlist/23xe49pSWJc4kFraoTv2sY{% endif
+                %}'
+              media_type: '{{ ''album'' if 6 <= current_hour|int < 15 else ''playlist''
+                }}'
+              fallback_id: '{{ ''library://album/1248'' if 15 <= current_hour|int
+                < 20 else ''library://album/1525'' }}'
               fallback_type: album
           - alias: Shuffle on, repeat all (variety, and the queue never runs dry)
             continue_on_error: true
@@ -10276,9 +10280,9 @@
     condition: state
     entity_id: input_boolean.living_room_manual_override
     state: 'off'
-  - alias: 2026-11-24 receiver Zone 2 not in use - Zone 2 feeds the kitchen TV (PS5 /
-      Apple TV), so someone is watching in the kitchen and the living room must not
-      be shut down
+  - alias: 2026-11-24 receiver Zone 2 not in use - Zone 2 feeds the kitchen TV (PS5
+      / Apple TV), so someone is watching in the kitchen and the living room must
+      not be shut down
     condition: state
     entity_id: media_player.living_room_av_zone2
     state:
@@ -10468,9 +10472,13 @@
     tail, bathroom speaker grouping on motion, and 60-min hard cap from routine start.
   triggers:
   - trigger: time
-    at: 04:30:00
+    at: 06:55:00
     weekday:
+    - mon
+    - tue
     - wed
+    - thu
+    - fri
     enabled: true
   - trigger: time
     at: 08:15:00
@@ -10482,10 +10490,11 @@
     - fri
     enabled: false
   - trigger: time
-    at: 08:30:00
+    at: 09:30:00
     weekday:
+    - sun
     - sat
-    enabled: false
+    enabled: true
   conditions: []
   actions:
   - alias: Mark routine as active
@@ -10866,8 +10875,8 @@
                     entity_id: media_player.bedroom_2
                   data:
                     shuffle: true
-                - alias: Re-queue the Spotify playlist (2026-11-24; local NAS album if
-                    it will not start)
+                - alias: Re-queue the Spotify playlist (2026-11-24; local NAS album
+                    if it will not start)
                   continue_on_error: true
                   action: script.gm_spotify_start
                   data:
@@ -18181,10 +18190,11 @@
   mode: single
 - id: '1793100000001'
   alias: Music Assistant - Spotify down alert
-  description: Rewritten 2026-11-25 (was the YouTube Music alert; YouTube Music is retired). Spotify is the primary
-    music source, with local NAS music as the backup (script.ma_play_with_fallback). Warns
-    10 minutes after Spotify goes down and again at 8 PM while it stays down, so it can
-    be fixed before bedtime and wake routines need it. Routines play the NAS backups meanwhile.
+  description: Rewritten 2026-11-25 (was the YouTube Music alert; YouTube Music is
+    retired). Spotify is the primary music source, with local NAS music as the backup
+    (script.ma_play_with_fallback). Warns 10 minutes after Spotify goes down and again
+    at 8 PM while it stays down, so it can be fixed before bedtime and wake routines
+    need it. Routines play the NAS backups meanwhile.
   triggers:
   - trigger: state
     entity_id: binary_sensor.ma_spotify_available
@@ -18209,8 +18219,9 @@
     data:
       title: Spotify is down
       message: '{{ ''Music Assistant is not responding.'' if is_state(''binary_sensor.ma_spotify_available'',
-        ''unavailable'') else ''Music Assistant cannot reach Spotify (login or connection problem). Check Music Assistant under Settings, Providers, Spotify.'' }}
-        Routines are playing the local NAS music until then.'
+        ''unavailable'') else ''Music Assistant cannot reach Spotify (login or connection
+        problem). Check Music Assistant under Settings, Providers, Spotify.'' }} Routines
+        are playing the local NAS music until then.'
       data:
         tag: ma_spotify_down
   mode: single
