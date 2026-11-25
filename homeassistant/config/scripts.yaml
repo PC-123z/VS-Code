@@ -2751,11 +2751,11 @@ light_soft_color_on:
 gm_music_stop:
   alias: Good Morning - stop a room's music without killing the other room's
   description: >-
-    Added 2026-11-25. Both rooms share one Spotify stream, so a plain media_stop on the member stops
-    the leader too, and stopping the leader ends the member's music. A member unjoins first, then
-    stops. A leader that still has a room listening HANDS OFF: the other room unjoins and restarts
-    the playlist as the new leader (a short gap). good_morning_expected_pause is raised so neither
-    room's "music stopped from the speaker" automation reads the hand-off as a manual stop.
+    Rewritten 2026-11-25 after a live test. Both rooms share one Spotify stream (a Sonos group),
+    and group_members lists BOTH rooms for leader and member alike, so a plain media_stop on either
+    would stop the whole group. A grouped room therefore unjoins first, then stops only itself;
+    the remaining room keeps playing with no gap (verified live, including when the leader leaves).
+    The leader record moves to the room that keeps playing.
   mode: queued
   max: 10
   fields:
@@ -2769,73 +2769,32 @@ gm_music_stop:
   - variables:
       other: '{{ room_b if p == room_a else room_a }}'
       rec: '{{ states("input_text.gm_stream_leader") }}'
-  - variables:
-      is_member: '{{ p in (state_attr(other, "group_members") or []) and p != other }}'
-      has_member: '{{ other in (state_attr(p, "group_members") or []) }}'
-      other_wants: '{{ (other == room_a and is_state("input_boolean.good_morning_active", "on")) or (other == room_b and is_state("input_boolean.bedroom2_occupied", "on")) }}'
-  - choose:
-    - alias: This room is only a member - leave the group, then stop just this room
-      conditions:
-      - condition: template
-        value_template: '{{ is_member }}'
-      sequence:
-      - continue_on_error: true
-        action: media_player.unjoin
-        target:
-          entity_id: '{{ p }}'
-      - delay:
-          seconds: 2
-      - continue_on_error: true
-        action: media_player.media_stop
-        target:
-          entity_id: '{{ p }}'
-    - alias: Leader with the other room still listening - hand the stream to the other room
-      conditions:
-      - condition: template
-        value_template: '{{ has_member and other_wants and rec == p }}'
-      sequence:
-      - action: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.good_morning_expected_pause
-      - continue_on_error: true
-        action: media_player.unjoin
-        target:
-          entity_id: '{{ other }}'
-      - delay:
-          seconds: 2
-      - continue_on_error: true
-        action: media_player.media_stop
-        target:
-          entity_id: '{{ p }}'
-      - action: input_text.set_value
-        target:
-          entity_id: input_text.gm_stream_leader
-        data:
-          value: ''
-      - continue_on_error: true
-        action: script.gm_spotify_start
-        data:
-          player: '{{ other }}'
-          volume: '{{ state_attr(other, "volume_level") }}'
-      - delay:
-          seconds: 15
-      - action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.good_morning_expected_pause
-    default:
+      grouped: '{{ p in (state_attr(other, "group_members") or []) and is_state(other, "playing") }}'
+  - alias: Grouped - leave the group first so only this room stops
+    if:
+    - condition: template
+      value_template: '{{ grouped }}'
+    then:
     - continue_on_error: true
-      action: media_player.media_stop
+      action: media_player.unjoin
       target:
         entity_id: '{{ p }}'
-    - if:
-      - condition: template
-        value_template: '{{ rec == p }}'
-      then:
-      - action: input_text.set_value
-        target:
-          entity_id: input_text.gm_stream_leader
-        data:
-          value: ''
+    - delay:
+        seconds: 2
+  - continue_on_error: true
+    action: media_player.media_stop
+    target:
+      entity_id: '{{ p }}'
+  - alias: The leader record follows the room that keeps playing
+    if:
+    - condition: template
+      value_template: '{{ rec == p }}'
+    then:
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.gm_stream_leader
+      data:
+        value: '{{ other if grouped else "" }}'
 ma_play_or_join:
   alias: Music Assistant - play (Spotify, then NAS) or join an already-playing room
   description: >-
