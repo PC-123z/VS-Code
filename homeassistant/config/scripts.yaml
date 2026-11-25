@@ -2476,6 +2476,16 @@ gm_spotify_start:
       leader: media_player.bedroom_2
       p: '{{ player }}'
       am_leader: '{{ player == "media_player.bedroom_2" }}'
+  - alias: Leader - free the single Spotify stream first. Bedroom 2's overnight sleep
+      music is a Spotify stream and MA refuses a second one, so stop it when Bedroom
+      2 is in its wake cycle (the Bedroom 2 routine then joins this stream).
+    if:
+    - condition: template
+      value_template: '{{ am_leader and is_state("media_player.office_2", "playing") and is_state("input_boolean.bedroom2_occupied", "on") }}'
+    then:
+    - action: script.bedroom2_music_stop
+    - delay:
+        seconds: 2
   - alias: Second room - wait for the first room's stream to be up
     if:
     - condition: template
