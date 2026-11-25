@@ -9613,21 +9613,21 @@
           - alias: 'Play this hour''s music in the Kitchen (the anchor - rooms with
               presence join it, Spotify allows one stream). Rewritten 2026-11-25:
               Spotify first, local NAS if Spotify is down or fails, always shuffled
-              (YouTube Music retired). 6-12 Coffee & Jazz, 12-15 Afternoon Jazz, 15-20
-              Sax Reggae (NAS Dean Fraser), 20-21 Piano Guys, 21-23 Slow Saxophone
+              (YouTube Music retired). 6-12 Coffee & Jazz, 12-15 Jazz Chill (235 instrumentals), 15-20
+              Reggae Saxophone Hits (115) (NAS Dean Fraser), 20-21 Piano Guys, 21-23 Slow Saxophone
               Jazz, 23-6 Sleepy Jazz Saxophone (NAS Kenny G).'
             continue_on_error: true
             action: script.ma_play_with_fallback
             data:
               player: media_player.kitchen_2
               media_id: '{% set h = current_hour|int %}{% if 6 <= h < 12 %}spotify--LXCMhnPg://album/1dQDdZKvdJ5gNhUF56S8Qu{%
-                elif 12 <= h < 15 %}spotify--LXCMhnPg://album/5OcK9W8oa6cIJi6gSovkot{%
-                elif 15 <= h < 20 %}spotify--LXCMhnPg://playlist/0dI5x95BpLF3HHooqzQxWw{%
+                elif 12 <= h < 15 %}spotify--LXCMhnPg://playlist/2atS3A4oYT7VXnLwoHrSTn{%
+                elif 15 <= h < 20 %}spotify--LXCMhnPg://playlist/1bCcyU9EBp2XjQ9JyGtZuP{%
                 elif h == 20 %}spotify--LXCMhnPg://playlist/7jeLTMiA3idI2JnPqBhyWL{%
                 elif 21 <= h < 23 %}spotify--LXCMhnPg://playlist/42f0DVx4eQnNl4HAR3r0bJ{%
                 else %}spotify--LXCMhnPg://playlist/23xe49pSWJc4kFraoTv2sY{% endif
                 %}'
-              media_type: '{{ ''album'' if 6 <= current_hour|int < 15 else ''playlist''
+              media_type: '{{ ''album'' if 6 <= current_hour|int < 12 else ''playlist''
                 }}'
               fallback_id: '{{ ''library://album/1248'' if 15 <= current_hour|int
                 < 20 else ''library://album/1525'' }}'
