@@ -51,10 +51,10 @@
     entity_id: input_boolean.good_morning_expected_pause
     state: 'off'
   actions:
-  - alias: Stop the music player explicitly
-    action: media_player.media_stop
-    target:
-      entity_id: media_player.bedroom_2
+  - alias: Stop the music player explicitly (2026-11-25 - leaves the shared stream first, hands off to Bedroom 2 if it is still listening)
+    action: script.gm_music_stop
+    data:
+      player: media_player.bedroom_2
     continue_on_error: true
   - alias: End this run of the Good Morning routine
     action: input_boolean.turn_off
@@ -227,10 +227,10 @@
         action: script.ma_play_with_fallback
         data:
           player: media_player.bedroom_2
-          media_id: ytmusic://playlist/VLPLRbcUrcJVEmVVwV-e_kcAxzDRowsLhtIN
+          media_id: library://playlist/94
           media_type: playlist
-          fallback_id: library://playlist/94
-          fallback_type: playlist
+          fallback_id: library://album/1248
+          fallback_type: album
       - alias: Shuffle nap wake up playlist
         continue_on_error: true
         action: media_player.shuffle_set
@@ -4271,13 +4271,15 @@
         data:
           shuffle: true
       - continue_on_error: true
-        action: script.ma_play_with_fallback
+        action: script.ma_play_or_join
         data:
           player: media_player.bedroom_2
-          media_id: ytmusic://playlist/VLPLOS9HJPmm92-46p6EL6vUxfuZ6AGVDkRG
+          media_id: spotify--LXCMhnPg://playlist/0RHsdwnhb6qesAieMOHKG4
           media_type: playlist
-          fallback_id: spotify--LXCMhnPg://playlist/0RHsdwnhb6qesAieMOHKG4
-          fallback_type: playlist
+          fallback_id: library://album/967
+          fallback_type: album
+          others:
+          - media_player.office_2
       - alias: Give playback a few seconds to start
         wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
         timeout:
@@ -4607,13 +4609,15 @@
         data:
           shuffle: true
       - continue_on_error: true
-        action: script.ma_play_with_fallback
+        action: script.ma_play_or_join
         data:
           player: media_player.bedroom_2
-          media_id: ytmusic://playlist/VLPLQ_PIlf6OzqIeQygYMd8DccQ3XnJlSGcG
+          media_id: library://playlist/64
           media_type: playlist
-          fallback_id: library://playlist/64
-          fallback_type: playlist
+          fallback_id: library://album/967
+          fallback_type: album
+          others:
+          - media_player.office_2
       - alias: Give playback a few seconds to start
         wait_template: '{{ is_state(''media_player.bedroom'', ''playing'') }}'
         timeout:
@@ -5590,13 +5594,15 @@
         repeat:
           sequence:
           - continue_on_error: true
-            action: script.ma_play_with_fallback
+            action: script.ma_play_or_join
             data:
               player: media_player.office_2
-              media_id: ytmusic://album/MPREb_A9AHzoUYd7b
-              media_type: album
-              fallback_id: spotify--LXCMhnPg://album/0JLN7JryQ2T7lBEYIrSQF1
+              media_id: library://playlist/64
+              media_type: playlist
+              fallback_id: library://album/967
               fallback_type: album
+              others:
+              - media_player.bedroom_2
           - continue_on_error: true
             action: media_player.shuffle_set
             target:
@@ -5703,13 +5709,15 @@
         repeat:
           sequence:
           - continue_on_error: true
-            action: script.ma_play_with_fallback
+            action: script.ma_play_or_join
             data:
               player: media_player.office_2
-              media_id: ytmusic://album/MPREb_A9AHzoUYd7b
-              media_type: album
-              fallback_id: spotify--LXCMhnPg://album/0JLN7JryQ2T7lBEYIrSQF1
+              media_id: library://playlist/64
+              media_type: playlist
+              fallback_id: library://album/967
               fallback_type: album
+              others:
+              - media_player.bedroom_2
           - continue_on_error: true
             action: media_player.shuffle_set
             target:
@@ -6866,6 +6874,10 @@
   - alias: Not during a greeting
     condition: state
     entity_id: input_boolean.bedroom2_announcement_pending
+    state: 'off'
+  - alias: Not during a Good Morning hand-off between the two rooms (2026-11-25)
+    condition: state
+    entity_id: input_boolean.good_morning_expected_pause
     state: 'off'
   actions:
   - alias: Stop the music player explicitly so Music Assistant can't resume it
@@ -10866,13 +10878,6 @@
           entity_id: media_player.bedroom
         data:
           volume_level: 0.05
-      - alias: Shuffle off - the playlist plays in the curator's order
-        continue_on_error: true
-        action: media_player.shuffle_set
-        target:
-          entity_id: media_player.bedroom_2
-        data:
-          shuffle: false
       - alias: Repeat all and Autoplay on - a normal playlist queue with hundreds
           of items behind the playing track, so the queue never runs dry
         continue_on_error: true
@@ -10983,9 +10988,9 @@
           then:
           - alias: Stop playback so the playlist does not carry on after a cancel
             continue_on_error: true
-            action: media_player.media_stop
-            target:
-              entity_id: media_player.bedroom_2
+            action: script.gm_music_stop
+            data:
+              player: media_player.bedroom_2
           - alias: Clear the queue so nothing can restart after a cancel
             continue_on_error: true
             action: media_player.clear_playlist
@@ -11065,13 +11070,13 @@
                   entity_id: input_boolean.good_morning_active
                   state: 'on'
                 then:
-                - alias: Shuffle off before re-queueing, never after
+                - alias: Shuffle on before re-queueing (2026-11-25, variety)
                   continue_on_error: true
                   action: media_player.shuffle_set
                   target:
                     entity_id: media_player.bedroom_2
                   data:
-                    shuffle: false
+                    shuffle: true
                 - alias: Re-queue the Spotify playlist (2026-11-24; local NAS album if
                     it will not start)
                   continue_on_error: true
@@ -11133,9 +11138,9 @@
                     below - added 2026-09-28 after a read-timeout on this exact loop
                     killed the whole occupancy branch for the rest of a session
                   continue_on_error: true
-                  action: media_player.media_stop
-                  target:
-                    entity_id: media_player.bedroom
+                  action: script.gm_music_stop
+                  data:
+                    player: media_player.bedroom_2
                 - continue_on_error: true
                   action: media_player.unjoin
                   target:
@@ -11372,9 +11377,9 @@
           state: 'on'
         then:
         - continue_on_error: true
-          action: media_player.media_stop
-          target:
-            entity_id: media_player.bedroom_2
+          action: script.gm_music_stop
+          data:
+            player: media_player.bedroom_2
         - continue_on_error: true
           action: media_player.unjoin
           target:
@@ -15580,14 +15585,16 @@
                   entity_id: media_player.office_2
                 data:
                   shuffle: true
-              - action: script.ma_play_with_fallback
+              - action: script.ma_play_or_join
                 continue_on_error: true
                 data:
                   player: media_player.office_2
-                  media_id: ytmusic://playlist/VLPLOS9HJPmm92-46p6EL6vUxfuZ6AGVDkRG
+                  media_id: spotify--LXCMhnPg://playlist/0RHsdwnhb6qesAieMOHKG4
                   media_type: playlist
-                  fallback_id: spotify--LXCMhnPg://playlist/0RHsdwnhb6qesAieMOHKG4
-                  fallback_type: playlist
+                  fallback_id: library://album/967
+                  fallback_type: album
+                  others:
+                  - media_player.bedroom_2
               - wait_template: '{{ is_state(''media_player.office_2'', ''playing'')
                   }}'
                 timeout:
@@ -15688,14 +15695,16 @@
                 entity_id: media_player.office_2
               data:
                 shuffle: true
-            - action: script.ma_play_with_fallback
+            - action: script.ma_play_or_join
               continue_on_error: true
               data:
                 player: media_player.office_2
-                media_id: ytmusic://album/MPREb_A9AHzoUYd7b
-                media_type: album
-                fallback_id: spotify--LXCMhnPg://album/0JLN7JryQ2T7lBEYIrSQF1
+                media_id: library://playlist/64
+                media_type: playlist
+                fallback_id: library://album/967
                 fallback_type: album
+                others:
+                - media_player.bedroom_2
             - wait_template: '{{ is_state(''media_player.office_2'', ''playing'')
                 }}'
               timeout:

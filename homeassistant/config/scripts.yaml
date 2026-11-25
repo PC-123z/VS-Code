@@ -2446,23 +2446,6 @@ bedroom2_wake_music_play:
     data:
       player: media_player.office_2
       volume: 0.05
-  - alias: Standalone only - a grouped member would redirect these to the leader
-    if:
-    - condition: template
-      value_template: '{{ (state_attr("media_player.office_2", "group_members") or []) | length <= 1 }}'
-    then:
-    - continue_on_error: true
-      action: media_player.shuffle_set
-      target:
-        entity_id: media_player.office_2
-      data:
-        shuffle: false
-    - continue_on_error: true
-      action: media_player.repeat_set
-      target:
-        entity_id: media_player.office_2
-      data:
-        repeat: all
 gm_spotify_start:
   alias: Good Morning - Spotify playlist (first room plays, second room joins)
   description: >-
