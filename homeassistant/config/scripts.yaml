@@ -2436,54 +2436,118 @@ bedroom2_all_lights_full:
       brightness_pct: 100
       transition: 2
 bedroom2_wake_music_play:
-  alias: Bedroom 2 wake music - play playlist from saved position
-  description: Starts the Good Morning playlist (same one Big Bedroom uses) on the Office speaker as ONE playlist item at input_number.bedroom2_gm_playlist_position, so each day resumes where the last ended. Falls back to the Spotify playlist Dance Pop Hits (upbeat pop, MA library 94) if the YouTube Music playlist does not start. Added 2026-11-21.
+  alias: Bedroom 2 wake music - Spotify (joins Big Bedroom's stream)
+  description: 'Rewritten 2026-11-24: plays the Spotify Good Morning playlist via script.gm_spotify_start - joins the Big Bedroom stream when that routine is playing, else starts its own; local NAS album if Spotify fails. Replaces the YouTube Music saved-position flow (added 2026-11-21).'
   mode: queued
   sequence:
-  - continue_on_error: true
-    action: media_player.shuffle_set
-    target:
-      entity_id: media_player.office_2
+  - action: script.gm_spotify_start
     data:
-      shuffle: false
-  - continue_on_error: true
-    action: media_player.repeat_set
-    target:
-      entity_id: media_player.office_2
-    data:
-      repeat: all
-  - alias: Browse the playlist for its track order (listing only, never sent back to MA)
-    continue_on_error: true
-    action: media_player.browse_media
-    target:
-      entity_id: media_player.office_2
-    data:
-      media_content_type: playlist
-      media_content_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
-    response_variable: b2_browse
-  - variables:
-      b2_tracks: "{{ (b2_browse['media_player.office_2'].children | map(attribute='media_content_id') | list) if (b2_browse is defined and b2_browse and 'media_player.office_2' in b2_browse) else [] }}"
-      b2_start_uri: "{% set p = states('input_number.bedroom2_gm_playlist_position') | int(0) %}{% if b2_tracks | length > 0 %}{{ b2_tracks[p] if p < (b2_tracks | length) else b2_tracks[0] }}{% endif %}"
-  - continue_on_error: true
-    action: rest_command.ma_office_play_from
-    data:
-      start_item: '{{ b2_start_uri }}'
-  - wait_template: "{{ is_state('media_player.office_2', 'playing') or is_state('binary_sensor.ma_youtube_music_available', 'off') }}"
-    timeout:
-      seconds: 30
-    continue_on_timeout: true
-  - alias: Backup - Spotify Dance Pop Hits if the playlist did not start
+      player: media_player.office_2
+      volume: 0.05
+  - alias: Standalone only - a grouped member would redirect these to the leader
     if:
     - condition: template
-      value_template: "{{ not is_state('media_player.office_2', 'playing') }}"
+      value_template: '{{ (state_attr("media_player.office_2", "group_members") or []) | length <= 1 }}'
+    then:
+    - continue_on_error: true
+      action: media_player.shuffle_set
+      target:
+        entity_id: media_player.office_2
+      data:
+        shuffle: false
+    - continue_on_error: true
+      action: media_player.repeat_set
+      target:
+        entity_id: media_player.office_2
+      data:
+        repeat: all
+gm_spotify_start:
+  alias: Good Morning - Spotify playlist (first room plays, second room joins)
+  description: 'Added 2026-11-24 (YouTube Music kept failing). Plays the Spotify Good Morning playlist (MA library 56) on `player`. Big Bedroom (media_player.bedroom_2) is the leader: it starts the stream. Any other room waits (up to 120 s, only while good_morning_active is on) for the leader to be playing and then JOINS it, so both rooms share one Spotify stream (MA allows only one). If nothing is playing to join, or Spotify will not start, ma_play_with_fallback falls back to the local NAS album (library 1525). Never starts its own stream on a player that already joined (a grouped member redirects commands to its leader and would wipe the queue).'
+  mode: parallel
+  max: 6
+  fields:
+    player:
+      description: Music Assistant media_player to play on
+    volume:
+      description: Volume to re-apply after joining (joining can restore an old volume)
+  sequence:
+  - variables:
+      leader: media_player.bedroom_2
+      p: '{{ player }}'
+      am_leader: '{{ player == "media_player.bedroom_2" }}'
+  - alias: Second room - wait for the first room's stream to be up
+    if:
+    - condition: template
+      value_template: '{{ not am_leader and is_state("input_boolean.good_morning_active", "on") and not is_state(leader, "playing") }}'
+    then:
+    - wait_template: '{{ is_state(leader, "playing") }}'
+      timeout:
+        seconds: 120
+      continue_on_timeout: true
+  - alias: Second room - join the leader's stream
+    if:
+    - condition: template
+      value_template: '{{ not am_leader and is_state(leader, "playing") }}'
+    then:
+    - continue_on_error: true
+      action: media_player.join
+      target:
+        entity_id: media_player.bedroom_2
+      data:
+        group_members:
+        - '{{ p }}'
+    - wait_template: '{{ p in (state_attr(leader, "group_members") or []) }}'
+      timeout:
+        seconds: 10
+      continue_on_timeout: true
+    - alias: Re-apply the low volume after joining
+      if:
+      - condition: template
+        value_template: '{{ volume is defined and volume is not none }}'
+      then:
+      - continue_on_error: true
+        action: media_player.volume_set
+        target:
+          entity_id: '{{ p }}'
+        data:
+          volume_level: '{{ volume }}'
+    - wait_template: '{{ is_state(p, "playing") }}'
+      timeout:
+        seconds: 10
+      continue_on_timeout: true
+  - alias: Not playing and not joined - start own stream (Spotify, then local NAS album)
+    if:
+    - condition: template
+      value_template: '{{ not is_state(p, "playing") and not (p in (state_attr(leader, "group_members") or []) and p != leader) }}'
     then:
     - continue_on_error: true
       action: script.ma_play_with_fallback
       data:
-        player: media_player.office_2
-        skip_primary: true
-        fallback_id: spotify--LXCMhnPg://playlist/37i9dQZF1DWZQaaqNMbbXa
-        fallback_type: playlist
+        player: '{{ p }}'
+        media_id: library://playlist/56
+        media_type: playlist
+        fallback_id: library://album/1525
+        fallback_type: album
+bedroom2_music_stop:
+  alias: Bedroom 2 - stop music (leave the Big Bedroom group first)
+  description: 'Added 2026-11-24. When Bedroom 2 joined the Big Bedroom stream, media_stop on office_2 would be redirected to the leader and stop Big Bedroom too. Unjoin first so only this room stops.'
+  mode: queued
+  sequence:
+  - if:
+    - condition: template
+      value_template: '{{ "media_player.office_2" in (state_attr("media_player.bedroom_2", "group_members") or []) }}'
+    then:
+    - continue_on_error: true
+      action: media_player.unjoin
+      target:
+        entity_id: media_player.office_2
+    - delay:
+        seconds: 2
+  - continue_on_error: true
+    action: media_player.media_stop
+    target:
+      entity_id: media_player.office_2
 big_bedroom_bright_override:
   alias: Big Bedroom - Bright White Override (button hold)
   description: 'Added 2026-11-21. Shared by the Pico button 1 HOLD and the Hue dimmer

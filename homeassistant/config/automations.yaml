@@ -6486,9 +6486,7 @@
           - condition: template
             value_template: '{{ wait.completed == false }}'
           then:
-          - action: media_player.media_stop
-            target:
-              entity_id: media_player.office_2
+          - action: script.bedroom2_music_stop
           - action: input_boolean.turn_off
             target:
               entity_id: input_boolean.bedroom2_occupied
@@ -6743,9 +6741,7 @@
                     data:
                       volume_level: 0.2
                   else:
-                  - action: media_player.media_stop
-                    target:
-                      entity_id: media_player.office_2
+                  - action: script.bedroom2_music_stop
                   - action: input_boolean.turn_off
                     target:
                       entity_id: input_boolean.bedroom2_occupied
@@ -6755,9 +6751,7 @@
                     target:
                       entity_id: automation.office_bedroom_2_smart_motion_presence_2
                   - stop: Room cleared - routine complete
-        - action: media_player.media_stop
-          target:
-            entity_id: media_player.office_2
+        - action: script.bedroom2_music_stop
         - action: input_boolean.turn_off
           target:
             entity_id: input_boolean.bedroom2_occupied
@@ -6814,9 +6808,7 @@
         delay:
           minutes: 60
       - continue_on_error: true
-        action: media_player.media_stop
-        target:
-          entity_id: media_player.office_2
+        action: script.bedroom2_music_stop
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.bedroom2_occupied
@@ -6878,9 +6870,7 @@
   actions:
   - alias: Stop the music player explicitly so Music Assistant can't resume it
     continue_on_error: true
-    action: media_player.media_stop
-    target:
-      entity_id: media_player.office_2
+    action: script.bedroom2_music_stop
   - alias: End the run - the occupancy loop exits on this flag and hands lighting
       back to Smart Presence
     action: input_boolean.turn_off
@@ -10895,55 +10885,13 @@
         action: rest_command.ma_bedroom_autoplay
         data:
           enabled: true
-      - alias: Browse the playlist to get the track list in the curator's order (a
-          listing only, it is never sent back to Music Assistant)
+      - alias: Spotify Good Morning playlist via script.gm_spotify_start (2026-11-24,
+          replaces the YouTube Music saved-position start). Big Bedroom is the leader;
+          Bedroom 2 joins this stream. Local NAS album if Spotify fails.
         continue_on_error: true
-        action: media_player.browse_media
-        target:
-          entity_id: media_player.bedroom_2
+        action: script.gm_spotify_start
         data:
-          media_content_type: playlist
-          media_content_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
-        response_variable: gm_browse
-      - alias: Pick today's start track from the position helper. The helper holds
-          the next unplayed track (the tracker automation advances it as tracks start).
-          Falls back to the top if it is past the end or the browse failed.
-        variables:
-          gm_tracks: '{{ (gm_browse[''media_player.bedroom_2''].children | map(attribute=''media_content_id'')
-            | list) if (gm_browse is defined and gm_browse and ''media_player.bedroom_2''
-            in gm_browse) else [] }}'
-          gm_start_uri: '{% set p = states(''input_number.good_morning_playlist_position'')
-            | int(0) %}{% if gm_tracks | length > 0 %}{{ gm_tracks[p] if p < (gm_tracks
-            | length) else gm_tracks[0] }}{% endif %}'
-      - alias: Start the playlist as ONE playlist item at that track. Never expand
-          it into per-track URIs - on 2026-09-19 sending all 769 URIs hung the call
-          and nothing played.
-        continue_on_error: true
-        action: rest_command.ma_bedroom_play_from
-        data:
-          start_item: '{{ gm_start_uri }}'
-      - alias: Wait for the playlist to actually start (no point waiting if YouTube
-          Music is known to be down)
-        wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'') or is_state(''binary_sensor.ma_youtube_music_available'',
-          ''off'') }}'
-        timeout:
-          seconds: 30
-        continue_on_timeout: true
-      - alias: Backup music - same-named Spotify playlist (library 56) when the YouTube
-          Music playlist did not start. Added 2026-11-06 after an expired cookie left
-          the speaker silent.
-        if:
-        - condition: template
-          value_template: '{{ not is_state(''media_player.bedroom_2'', ''playing'')
-            }}'
-        then:
-        - continue_on_error: true
-          action: script.ma_play_with_fallback
-          data:
-            player: media_player.bedroom_2
-            skip_primary: true
-            fallback_id: library://playlist/56
-            fallback_type: playlist
+          player: media_player.bedroom_2
       - delay:
           seconds: 3
       - alias: Ensure playback is not paused after unjoin
@@ -11124,48 +11072,12 @@
                     entity_id: media_player.bedroom_2
                   data:
                     shuffle: false
-                - alias: Browse the playlist for the track list so the re-queue resumes
-                    at the saved position (the tracker keeps it at the next unplayed
-                    track)
+                - alias: Re-queue the Spotify playlist (2026-11-24; local NAS album if
+                    it will not start)
                   continue_on_error: true
-                  action: media_player.browse_media
-                  target:
-                    entity_id: media_player.bedroom_2
+                  action: script.gm_spotify_start
                   data:
-                    media_content_type: playlist
-                    media_content_id: ytmusic://playlist/VLPL44SaGMZ1acgMgT2P73ksWuLK77Dh3X8H
-                  response_variable: gm_heal_browse
-                - alias: Re-queue as ONE playlist item starting at the saved position
-                  continue_on_error: true
-                  action: rest_command.ma_bedroom_play_from
-                  data:
-                    start_item: '{% set t = (gm_heal_browse[''media_player.bedroom_2''].children
-                      | map(attribute=''media_content_id'') | list) if (gm_heal_browse
-                      is defined and gm_heal_browse and ''media_player.bedroom_2''
-                      in gm_heal_browse) else [] %}{% set p = states(''input_number.good_morning_playlist_position'')
-                      | int(0) %}{% if t | length > 0 %}{{ t[p] if p < (t | length)
-                      else t[0] }}{% endif %}'
-                - alias: Give the re-queue a moment, unless YouTube Music is known
-                    to be down
-                  wait_template: '{{ is_state(''media_player.bedroom_2'', ''playing'')
-                    or is_state(''binary_sensor.ma_youtube_music_available'', ''off'')
-                    }}'
-                  timeout:
-                    seconds: 20
-                  continue_on_timeout: true
-                - alias: Backup music if the re-queue did not start (2026-11-06)
-                  if:
-                  - condition: template
-                    value_template: '{{ not is_state(''media_player.bedroom_2'', ''playing'')
-                      }}'
-                  then:
-                  - continue_on_error: true
-                    action: script.ma_play_with_fallback
-                    data:
-                      player: media_player.bedroom_2
-                      skip_primary: true
-                      fallback_id: library://playlist/56
-                      fallback_type: playlist
+                    player: media_player.bedroom_2
               - alias: Hold the volume - continue_on_error added 2026-09-28, a transient
                   Sonos network read-timeout on this call threw an unhandled exception
                   that killed the entire occupancy-driven music loop for the rest
