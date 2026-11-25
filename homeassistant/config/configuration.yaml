@@ -761,6 +761,13 @@ rest:
         device_class: connectivity
         value_template: >-
           {{ value_json | selectattr('domain', 'eq', 'ytmusic') | selectattr('available', 'eq', true) | list | count > 0 }}
+      # Added 2026-11-25. Spotify is now the primary music source (YouTube Music retired),
+      # so this drives script.ma_play_with_fallback and the "Spotify is down" phone alert.
+      - name: "MA Spotify Available"
+        unique_id: ma_spotify_available
+        device_class: connectivity
+        value_template: >-
+          {{ value_json | selectattr('domain', 'eq', 'spotify') | selectattr('available', 'eq', true) | list | count > 0 }}
 
 # Music Assistant JSON-RPC API. The HA integration exposes no service for the
 # queue's Autoplay ("Don't stop the music") toggle, which the Good Morning routine
