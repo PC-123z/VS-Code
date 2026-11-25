@@ -4274,7 +4274,7 @@
         action: script.ma_play_or_join
         data:
           player: media_player.bedroom_2
-          media_id: spotify--LXCMhnPg://playlist/0RHsdwnhb6qesAieMOHKG4
+          media_id: spotify--LXCMhnPg://playlist/2g12iEeRtAGWuHGcLZGL8X
           media_type: playlist
           fallback_id: library://album/967
           fallback_type: album
@@ -15331,7 +15331,7 @@
                 continue_on_error: true
                 data:
                   player: media_player.office_2
-                  media_id: spotify--LXCMhnPg://playlist/0RHsdwnhb6qesAieMOHKG4
+                  media_id: spotify--LXCMhnPg://playlist/2g12iEeRtAGWuHGcLZGL8X
                   media_type: playlist
                   fallback_id: library://album/967
                   fallback_type: album
